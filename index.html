@@ -587,6 +587,9 @@ html { scroll-behavior: smooth; }
       <div class="flex items-center gap-2 overflow-x-auto pt-5 pb-2 no-scrollbar" id="category-filters"></div>
       <div class="hidden items-center gap-2 overflow-x-auto pb-3 no-scrollbar" id="subcategory-filters"></div>
 
+      <!-- Sección iPhone: solo aparece si el administrador la encendió y se eligió la categoría iPhone -->
+      <div id="iphone-banner" class="hidden mt-3 mb-4 sm:mb-5 rounded-2xl border border-sky-500/25 bg-sky-500/[0.06] p-3 sm:p-4 text-[12px] sm:text-sm text-zinc-300"></div>
+
       <!-- Original vs Selección: explicación corta que además filtra -->
       <div id="origin-box" class="mt-3 mb-4 sm:mb-5 rounded-2xl border border-white/[0.06] bg-zinc-900/40 p-2.5 sm:p-4">
         <div class="grid grid-cols-2 gap-2 sm:gap-3 text-[11px] sm:text-xs">
@@ -761,7 +764,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v5.3</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v5.5</span>
           </div>
         </div>
 
@@ -820,6 +823,7 @@ html { scroll-behavior: smooth; }
                 <span id="gallery-warranty" class="text-xs font-bold text-white"></span>
               </div>
               <div id="gallery-warranty-note" class="text-[11px] text-zinc-400 leading-snug"></div>
+              <div id="gallery-iphone" class="hidden pt-1.5 mt-1 border-t border-zinc-800/80 space-y-1.5 font-sans"></div>
               <div class="flex items-center justify-between">
                 <span class="text-xs text-zinc-400">Disponibilidad:</span>
                 <span id="gallery-stock-status" class="text-xs font-bold"></span>
@@ -1438,6 +1442,7 @@ html { scroll-behavior: smooth; }
         STAFF_USERS: '/api/staff-users',       // GET / POST / PUT / DELETE (solo admin)
         SUPPLIERS: '/api/suppliers',           // GET (admin y logística)
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
+        IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
         INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
@@ -1520,6 +1525,72 @@ html { scroll-behavior: smooth; }
       renderProducts();
       updateCartUI();
       updateCheckoutTotalPreview();
+    }
+
+    // ---- Sección iPhone (sellados y usados) ----
+    // Mientras el administrador no la encienda, el servidor no manda ni los equipos ni los textos:
+    // acá solo se dibuja lo que llega.
+    const IPHONE_CAT = 'iphone', IPHONE_SEALED = 'iphone-sellados', IPHONE_USED = 'iphone-usados';
+    let IPHONE_CFG = { enabled: false };
+    const isIphoneProd = p => !!p && (p.category === IPHONE_CAT || p.subcategory === IPHONE_SEALED || p.subcategory === IPHONE_USED);
+    const isUsedIphone = p => !!p && p.subcategory === IPHONE_USED;
+    function textBlock(t) { return escapeHtml(t).replace(/\n/g, '<br>'); }
+    async function loadIphoneConfig() {
+      if (!isBackendConnected()) return;
+      const res = await apiRequest('IPHONE');
+      if (!res || typeof res !== 'object' || res.error) return;
+      if (res.enabled !== true) { IPHONE_CFG = { enabled: false }; renderIphoneBanner(); return; }
+      const texts = {};
+      Object.keys(res.texts || {}).forEach(k => { texts[k] = cleanText(res.texts[k], 1500); });
+      IPHONE_CFG = {
+        enabled: true, showSealed: res.showSealed === true, showUsed: res.showUsed === true,
+        reserveHours: Number(res.reserveHours) || 24, texts,
+        grades: (Array.isArray(res.grades) ? res.grades : []).slice(0, 5).map(g => ({ key: cleanText(g.key, 2), name: cleanText(g.name, 24), desc: cleanText(g.desc, 140) })),
+        checklist: (Array.isArray(res.checklist) ? res.checklist : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean)
+      };
+      renderIphoneBanner();
+      renderProducts();
+    }
+    function iphoneOpenLegal(closeGallery) { if (closeGallery) closeProductGallery(); openLegal('iphone'); }
+    function iphoneGrade(key, cfg) { return ((cfg || IPHONE_CFG).grades || []).find(g => g.key === key) || null; }
+    function renderIphoneBanner() {
+      const box = document.getElementById('iphone-banner');
+      const origin = document.getElementById('origin-box');
+      const on = IPHONE_CFG.enabled === true && currentCategory === IPHONE_CAT;
+      if (origin) origin.classList.toggle('hidden', on);
+      if (!box) return;
+      box.classList.toggle('hidden', !on);
+      box.innerHTML = on ? iphoneBannerHtml(IPHONE_CFG, currentSubcategory) : '';
+    }
+    // El mismo cartel se usa en la tienda y en la vista previa del panel.
+    function iphoneBannerHtml(cfg, sub, preview) {
+      const t = cfg.texts || {};
+      const detail = sub === IPHONE_SEALED ? t.sealed : sub === IPHONE_USED ? t.used : [t.sealed, t.used].filter(Boolean).join('\n');
+      const chip = (icon, txt) => `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-zinc-900/70 border border-zinc-800 text-[11px] text-zinc-200"><span>${icon}</span>${escapeHtml(txt)}</span>`;
+      return `
+        <div class="font-bold text-white text-sm sm:text-base">📱 iPhone</div>
+        ${t.intro ? `<p class="mt-1 leading-snug">${textBlock(t.intro)}</p>` : ''}
+        ${detail ? `<p class="mt-2 text-zinc-400 leading-snug text-[11px] sm:text-xs">${textBlock(detail)}</p>` : ''}
+        <div class="mt-2.5 flex flex-wrap gap-1.5">${chip('🛡️', 'Garantía PlugShop')}${chip('↩️', '10 días para arrepentirte')}${chip('🔖', 'Reserva por ' + (cfg.reserveHours || 24) + ' h')}</div>
+        <button type="button" ${preview ? 'tabindex="-1"' : 'onclick="iphoneOpenLegal(false)"'} class="mt-2.5 text-[11px] sm:text-xs text-brand-orange hover:underline font-semibold">Ver condiciones completas de iPhone</button>`;
+    }
+    // Datos propios del iPhone en la ficha del producto (estado, batería, controles, accesorios).
+    function renderGalleryIphone(prod, boxEl, cfg, preview) {
+      const box = boxEl || document.getElementById('gallery-iphone');
+      if (!box) return;
+      if (!isIphoneProd(prod)) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const row = (k, v) => `<div class="flex items-start justify-between gap-3 text-xs"><span class="text-zinc-400 shrink-0">${k}</span><span class="text-white font-semibold text-right">${v}</span></div>`;
+      const used = isUsedIphone(prod);
+      const g = used ? iphoneGrade(prod.grade, cfg) : null;
+      let h = row('Condición', used ? '♻️ Usado, revisado' : '📦 Nuevo, sellado');
+      if (used && g) h += row('Estado', escapeHtml(`${g.name}`)) + (g.desc ? `<div class="text-[11px] text-zinc-400 leading-snug">${escapeHtml(g.desc)}</div>` : '');
+      if (used && prod.battery) h += row('Batería', '🔋 ' + escapeHtml(String(prod.battery)) + '%');
+      if (prod.accessories) h += row(used ? 'Incluye' : 'Trae', escapeHtml(prod.accessories));
+      if (used && prod.checks.length) h += `<div class="text-[11px] text-zinc-400 leading-snug"><span class="text-zinc-300 font-semibold">Revisado:</span> ${prod.checks.map(escapeHtml).join(' · ')}.</div>`;
+      if (prod.reserved) h += `<div class="text-[11px] text-amber-300 font-semibold">🔖 Este equipo está reservado. Si la reserva se libera, vuelve a estar disponible.</div>`;
+      h += `<div class="text-[11px] text-zinc-500 leading-snug">Podés ver las condiciones en <button type="button" ${preview ? 'tabindex="-1"' : 'onclick="iphoneOpenLegal(true)"'} class="text-brand-orange hover:underline font-semibold">Condiciones iPhone</button>.</div>`;
+      box.innerHTML = h;
+      box.classList.remove('hidden');
     }
 
     // ---- Categorías y subcategorías (un nivel de subcategoría) ----
@@ -1610,6 +1681,9 @@ html { scroll-behavior: smooth; }
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
+        grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
+        accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
+        warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
         stockByColor: (p.stockByColor && typeof p.stockByColor === 'object' && !Array.isArray(p.stockByColor))
           ? Object.fromEntries(Object.entries(p.stockByColor).slice(0, 20).map(([k, v]) => [cleanText(k, 30), Math.floor(num(v))]))
           : undefined
@@ -1954,6 +2028,8 @@ html { scroll-behavior: smooth; }
       renderProducts();
     }
 
+
+
     // ==========================================
     // 3. CATALOG RENDERING & COLOR GALERY
     // ==========================================
@@ -1974,6 +2050,7 @@ html { scroll-behavior: smooth; }
       sb.innerHTML = subs.length ? sp(currentSubcategory === 'all', 'data-sub="all"', 'Todas') + subs.map(c => sp(currentSubcategory === c.id, `data-sub="${escapeHtml(c.id)}"`, c.name)).join('') : '';
       sb.classList.toggle('hidden', !subs.length);
       sb.classList.toggle('flex', !!subs.length);
+      renderIphoneBanner();
     }
     function selectCategory(id) { currentCategory = id; currentSubcategory = 'all'; renderCategoryPills(); renderProducts(); }
     function selectSubcategory(id) { currentSubcategory = id; renderCategoryPills(); renderProducts(); }
@@ -2124,12 +2201,18 @@ html { scroll-behavior: smooth; }
           stockLabel = `<span class="text-[11px] text-rose-400 font-bold">Sin stock</span>`;
           buttonDisabled = true;
           buttonClass = 'px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-zinc-800 text-zinc-600 font-bold text-xs cursor-not-allowed';
+        } else if (product.reserved) {
+          stockLabel = `<span class="text-[11px] text-amber-300 font-bold">🔖 Reservado</span>`;
         } else if (product.stock <= 3) {
           stockLabel = `<span class="text-[11px] text-brand-amber font-semibold">¡Últimas ${product.stock}!</span>`;
         }
 
         const months = warrantyMonths(product.warranty);
-        const kind = isOriginal ? 'Original' : 'Selección';
+        let kind = isOriginal ? 'Original' : 'Selección';
+        if (isIphoneProd(product)) {
+          const gr = isUsedIphone(product) ? iphoneGrade(product.grade) : null;
+          kind = isUsedIphone(product) ? ('Usado' + (gr ? ' · ' + gr.name : '') + (product.battery ? ' · 🔋' + product.battery + '%' : '')) : 'Sellado';
+        }
         const colorsTxt = colorsList.length > 1 ? `<span class="hidden sm:inline"> · ${colorsList.length} colores</span>` : '';
 
         return `
@@ -2193,7 +2276,9 @@ html { scroll-behavior: smooth; }
 
       const isOrig = prod.type === 'original';
       const typeBadge = document.getElementById('detail-modal-type-badge');
-      typeBadge.innerHTML = isOrig
+      typeBadge.innerHTML = isIphoneProd(prod)
+        ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-800 font-code">📱 ${isUsedIphone(prod) ? 'iPhone usado' : 'iPhone sellado'}</span>`
+        : isOrig
         ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800 font-code">🏅 Original</span>`
         : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800 font-code">⚡ PlugShop Selección</span>`;
 
@@ -2202,7 +2287,12 @@ html { scroll-behavior: smooth; }
       document.getElementById('gallery-specs').textContent = prod.specs;
       document.getElementById('gallery-warranty').textContent = prod.warranty;
       const wNote = document.getElementById('gallery-warranty-note');
-      if (wNote) wNote.textContent = isOrig ? 'Garantía oficial de la marca. Se cuenta desde que lo recibís.' : 'Garantía directa de PlugShop. Se cuenta desde que lo recibís.';
+      if (wNote) {
+        const by = prod.warrantyBy || (isOrig ? 'marca' : 'tienda');
+        wNote.textContent = isIphoneProd(prod) ? 'Garantía de PlugShop (no es la garantía oficial de Apple). Se cuenta desde que lo recibís.'
+          : by === 'marca' ? 'Garantía oficial de la marca. Se cuenta desde que lo recibís.' : 'Garantía directa de PlugShop. Se cuenta desde que lo recibís.';
+      }
+      renderGalleryIphone(prod);
 
       const discountPct = STORE_SETTINGS.transferDiscountPct || 10;
       const transferPrice = Math.round(prod.price * (1 - (discountPct / 100)));
@@ -2252,7 +2342,13 @@ html { scroll-behavior: smooth; }
       const addBtn = document.getElementById('gallery-add-btn');
 
       const colorStock = stockOf(prod, activeGallerySelectedColor);
-      if (colorStock === 0) {
+      if (prod.reserved && colorStock > 0) {
+        stockStatusEl.textContent = 'Reservado por otra persona';
+        stockStatusEl.className = 'text-xs font-bold text-amber-300 font-code';
+        addBtn.disabled = true;
+        addBtn.className = 'w-full py-3.5 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-xs cursor-not-allowed flex items-center justify-center gap-2';
+        addBtn.innerHTML = '<span>🔖 Reservado</span>';
+      } else if (colorStock === 0) {
         stockStatusEl.textContent = prod.stock > 0 ? 'Agotado en este color: probá con otro' : 'Agotado temporalmente';
         stockStatusEl.className = 'text-xs font-bold text-rose-400 font-code';
         addBtn.disabled = true;
@@ -2336,13 +2432,17 @@ html { scroll-behavior: smooth; }
       actualizado: '7 de octubre de 2026'
     };
 
-    const LEGAL_TABS = [
+    const LEGAL_TABS_BASE = [
       ['terminos', 'Términos y Condiciones'],
       ['garantia', 'Garantía'],
       ['envios', 'Envíos y Cambios'],
       ['arrepentimiento', 'Arrepentimiento'],
       ['privacidad', 'Privacidad']
     ];
+    // La pestaña iPhone solo existe si la sección está encendida.
+    function legalTabs() {
+      return IPHONE_CFG.enabled === true ? LEGAL_TABS_BASE.slice(0, 4).concat([['iphone', 'iPhone']], LEGAL_TABS_BASE.slice(4)) : LEGAL_TABS_BASE;
+    }
 
     function legalSec(titulo, cuerpo) {
       return '<h4 class="text-white font-bold text-sm mt-5 mb-1.5">' + titulo + '</h4><div class="space-y-2 text-zinc-300">' + cuerpo + '</div>';
@@ -2372,7 +2472,7 @@ html { scroll-behavior: smooth; }
       }
       if (id === 'garantia') {
         return legalVendedor() +
-          legalSec('Cobertura', '<p>Todos los productos nuevos tienen garantía legal de al menos 6 meses (Ley 24.240). Cada producto indica su garantía en la ficha: <strong class="text-zinc-100">Garantía Oficial</strong> (respaldada por la marca) o <strong class="text-zinc-100">Garantía Directa Plug</strong> (la gestionamos nosotros). Si la ficha indica un plazo mayor al legal, rige el mayor.</p>') +
+          legalSec('Cobertura', '<p>Todos los productos nuevos tienen garantía legal de al menos 6 meses (Ley 24.240). Cada producto indica en su ficha el plazo (6 o 12 meses; los equipos usados pueden tener 3 meses) y quién la da: <strong class="text-zinc-100">Garantía Oficial</strong> (respaldada por la marca) o <strong class="text-zinc-100">Garantía PlugShop</strong> (la gestionamos nosotros). Si la ficha indica un plazo mayor al legal, rige el mayor.</p>') +
           legalSec('Qué cubre', '<p>Fallas de fabricación o de funcionamiento que no se deban al uso. La garantía se cuenta desde la fecha de entrega.</p>') +
           legalSec('Qué no cubre', '<ul class="list-disc pl-5 space-y-1"><li>Golpes, caídas, aplastamiento o roturas de pantalla.</li><li>Daños por líquidos o humedad.</li><li>Reparaciones o aperturas hechas por terceros no autorizados.</li><li>Uso con cargadores o accesorios no compatibles.</li><li>Desgaste normal (baterías con el uso, cables, fundas).</li></ul>') +
           legalSec('Cómo hacer un reclamo', '<ol class="list-decimal pl-5 space-y-1"><li>Escribinos por WhatsApp con tu número de pedido y una descripción de la falla (con fotos o video si es posible).</li><li>Evaluamos el caso y te indicamos cómo traer o enviar el producto.</li><li>Si la falla está cubierta, lo reparamos o lo cambiamos sin costo para vos. Si no se puede reparar, corresponde el cambio por otro igual o la devolución del dinero, según lo que la ley disponga.</li></ol><p>Conservá la caja y los accesorios originales. Podés ver el estado de tu garantía en <em>Seguimiento &amp; Mi Cuenta</em>.</p>') +
@@ -2409,6 +2509,19 @@ html { scroll-behavior: smooth; }
             '<div id="rev-result" class="hidden text-xs"></div>' +
           '</form>' + legalDefensa();
       }
+      if (id === 'iphone') {
+        const t = IPHONE_CFG.texts || {};
+        const g = (IPHONE_CFG.grades || []).map(x => '<li><strong class="text-zinc-100">' + escapeHtml(x.name) + ':</strong> ' + escapeHtml(x.desc) + '</li>').join('');
+        const chk = (IPHONE_CFG.checklist || []).map(escapeHtml).join(', ');
+        return legalVendedor() +
+          (t.sealed ? legalSec('Equipos sellados', '<p>' + textBlock(t.sealed) + '</p>') : '') +
+          (t.used ? legalSec('Equipos usados', '<p>' + textBlock(t.used) + '</p>' + (g ? '<ul class="list-disc pl-5 space-y-1">' + g + '</ul>' : '') + (chk ? '<p>Antes de venderlo controlamos: ' + chk + '.</p>' : '')) : '') +
+          (t.warranty ? legalSec('Garantía', '<p>' + textBlock(t.warranty) + '</p>') : '') +
+          (t.returns ? legalSec('Arrepentimiento y devoluciones', '<p>' + textBlock(t.returns) + '</p>') : '') +
+          (t.reserve ? legalSec('Reservas', '<p>' + textBlock(t.reserve) + '</p>') : '') +
+          (t.delivery ? legalSec('Entrega', '<p>' + textBlock(t.delivery) + '</p>') : '') +
+          legalDefensa();
+      }
       return '';
     }
 
@@ -2418,9 +2531,9 @@ html { scroll-behavior: smooth; }
     }
 
     function renderLegal(id) {
-      const tab = LEGAL_TABS.find(t => t[0] === id) || LEGAL_TABS[0];
+      const tab = legalTabs().find(t => t[0] === id) || legalTabs()[0];
       document.getElementById('legal-title').textContent = tab[1];
-      document.getElementById('legal-tabs').innerHTML = LEGAL_TABS.map(t =>
+      document.getElementById('legal-tabs').innerHTML = legalTabs().map(t =>
         '<button type="button" onclick="renderLegal(\'' + t[0] + '\')" class="shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold border ' +
         (t[0] === tab[0] ? 'bg-brand-orange/15 border-brand-orange text-brand-amber' : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white') + '">' + t[1] + '</button>'
       ).join('');
@@ -4546,6 +4659,7 @@ html { scroll-behavior: smooth; }
       applyStoreWhatsappLinks();
       applyBankDisplay();
       loadSettingsFromServer();
+      loadIphoneConfig();
 
       function checkTrackingHash() {
         const hash = window.location.hash;
