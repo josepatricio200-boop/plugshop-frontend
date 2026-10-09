@@ -853,7 +853,7 @@ html { scroll-behavior: smooth; }
                   <div>
                     <label class="block mb-1 text-zinc-400">Línea de Calidad *</label>
                     <select id="new-prod-type" onchange="autoFillWarrantyDefault(this.value)" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange">
-                      <option value="original">🏅 100% Original</option>
+                      <option value="original">🏅 Original</option>
                       <option value="seleccion">⚡ PlugShop Selección</option>
                     </select>
                   </div>
@@ -1121,7 +1121,7 @@ html { scroll-behavior: smooth; }
                   <label class="block text-xs font-semibold text-zinc-200" for="engine-bias">Cuando dos productos sirven igual, ¿cuál mostrar primero?</label>
                   <select id="engine-bias" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-brand-orange">
                     <option value="equilibrado">Equilibrado (lo que mejor coincide)</option>
-                    <option value="economico">Priorizar PLUG Selección (más económico)</option>
+                    <option value="economico">Priorizar PlugShop Selección (más económico)</option>
                     <option value="original">Priorizar Originales (marca y garantía oficial)</option>
                   </select>
                   <button onclick="saveAdvisorBias()" class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold transition-all text-sm">Guardar</button>
@@ -1458,6 +1458,12 @@ html { scroll-behavior: smooth; }
                 </div>
 
                 <div>
+                  <label class="block mb-1 text-zinc-300 font-semibold">Zona de la tienda</label>
+                  <input type="text" id="setting-zone" maxlength="40" placeholder="Tucumán" class="w-64 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                  <span class="block text-[10px] text-zinc-500 mt-1">Es el lugar que nombra la tienda en sus textos ("Stock real en Tucumán"). Si algún día enviás a otras provincias, podés poner "Tucumán y Salta" o "Argentina". No cambia las zonas ni los costos de envío del carrito.</span>
+                </div>
+
+                <div>
                   <label class="block mb-1 text-zinc-300 font-semibold">Marcas de la tira del inicio</label>
                   <textarea id="setting-brands" rows="2" maxlength="600" placeholder="JBL, Samsung, Xiaomi, Apple..." class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange"></textarea>
                   <span class="block text-[10px] text-zinc-500 mt-1">Separalas con coma. Se muestran en ese orden en la página principal. Si lo dejás vacío, se usan las marcas de tus productos. Después tocá "Guardar Cambios".</span>
@@ -1771,12 +1777,19 @@ html { scroll-behavior: smooth; }
       if (a) a.textContent = STORE_SETTINGS.bankAlias;
       const c = document.getElementById('cbu-display-text');
       if (c) c.textContent = STORE_SETTINGS.bankCbu;
+      applyStoreZone();
+    }
+    // La zona que nombra la tienda ("Stock real en ..."): sale de Ajustes.
+    function storeZoneName() { return (typeof STORE_SETTINGS.storeZone === 'string' && STORE_SETTINGS.storeZone.trim()) || 'Tucumán'; }
+    function applyStoreZone() {
+      const z = storeZoneName();
+      document.querySelectorAll('[data-zone]').forEach(el => { el.textContent = z; });
     }
     async function loadSettingsFromServer() {
       if (!isBackendConnected()) return;
       const res = await apiRequest('SETTINGS');
       if (!res || typeof res !== 'object' || res.error) return;
-      ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
+      ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias', 'storeZone'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
@@ -2090,7 +2103,8 @@ html { scroll-behavior: smooth; }
       bankCbu: '3840200500000011487511',
       transferDiscountPct: 10,
       advisorBias: 'equilibrado',
-      featuredBrands: DEFAULT_BRANDS
+      featuredBrands: DEFAULT_BRANDS,
+      storeZone: 'Tucumán'
     };
 
     const DEFAULT_ORDERS = [
@@ -3491,6 +3505,8 @@ html { scroll-behavior: smooth; }
       const aliasInput = document.getElementById('setting-alias');
       const cbuInput = document.getElementById('setting-cbu');
       const brandsInput = document.getElementById('setting-brands');
+      const zoneInput = document.getElementById('setting-zone');
+      if (zoneInput && document.activeElement !== zoneInput) zoneInput.value = storeZoneName();
 
       if (brandsInput && document.activeElement !== brandsInput) brandsInput.value = typeof STORE_SETTINGS.featuredBrands === 'string' ? STORE_SETTINGS.featuredBrands : DEFAULT_BRANDS;
       if (discountInput) discountInput.value = STORE_SETTINGS.transferDiscountPct || 10;
@@ -4621,7 +4637,8 @@ html { scroll-behavior: smooth; }
         whatsappNumber: val('setting-whatsapp-num'),
         bankAlias: val('setting-alias'),
         bankCbu: val('setting-cbu'),
-        featuredBrands: val('setting-brands')
+        featuredBrands: val('setting-brands'),
+        storeZone: val('setting-zone')
       };
       const indicator = document.getElementById('settings-saved-indicator');
       const showMsg = (text, ok) => {
@@ -5037,7 +5054,7 @@ html { scroll-behavior: smooth; }
         if (Math.abs(d) >= 1) reasons.push(d < 0 ? `${advMoney(-d)} más barato que la opción 1.` : `${advMoney(d)} más que la opción 1.`);
       }
       if (Number(p.stock) > 0 && Number(p.stock) <= 3) reasons.push(`Quedan solo ${p.stock}.`);
-      reasons.push(p.type === 'original' ? 'Original con garantía oficial.' : 'PLUG Selección: calidad probada y mejor precio.');
+      reasons.push(p.type === 'original' ? 'Original con garantía oficial.' : 'PlugShop Selección: calidad probada y mejor precio.');
       if (p.featured) reasons.push('Destacado de la tienda.');
       return { prod: p, role, n, icon, label, eff: x.eff, score: Math.round(x.score * 10) / 10, fit: x.fit || null, matched: x.matched.slice(), reasons: reasons.slice(0, 4) };
     }

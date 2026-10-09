@@ -12,7 +12,7 @@
   <link rel="icon" type="image/png" href="/icon-192.png">
   <title>PLUGSHOP — Tecnología Premium & Stock Inmediato</title>
   <meta name="robots" content="noindex, nofollow" />
-  <meta name="description" content="Tecnología premium con stock local real en Tucumán y Yerba Buena. Originales y PlugShop Selección garantizados.">
+  <meta name="description" content="Tecnología con stock real en Tucumán. Originales y PlugShop Selección, con garantía y 10% OFF por transferencia.">
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -399,17 +399,17 @@ html { scroll-behavior: smooth; }
 
   <!-- Top Announcement Bar -->
   <aside class="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-b border-white/[0.06] text-xs py-2 px-4 text-center text-zinc-300">
-    <div class="max-w-7xl mx-auto flex items-center justify-center gap-4 flex-wrap text-[11px] sm:text-xs">
-      <span class="inline-flex items-center gap-1.5 font-medium">
+    <div class="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4 sm:flex-wrap text-[11px] sm:text-xs">
+      <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-        Entregas en el día en Yerba Buena y San Miguel de Tucumán
+        <span class="sm:hidden">Entrega en el día</span><span class="hidden sm:inline">Entregas en el día en <span data-zone>Tucumán</span></span>
+      </span>
+      <span class="text-zinc-600">|</span>
+      <span class="inline-flex items-center gap-1 text-brand-amber font-semibold whitespace-nowrap">
+        🔥 <span data-disc>10</span>% OFF <span class="sm:hidden">transferencia</span><span class="hidden sm:inline">abonando por Transferencia Directa</span>
       </span>
       <span class="text-zinc-600 hidden md:inline">|</span>
-      <span class="inline-flex items-center gap-1 text-brand-amber font-semibold font-code">
-        🔥 <span data-disc>10</span>% OFF abonando por Transferencia Directa
-      </span>
-      <span class="text-zinc-600 hidden md:inline">|</span>
-      <a data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" class="text-zinc-300 hover:text-white flex items-center gap-1 transition-colors">
+      <a data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" class="hidden sm:flex text-zinc-300 hover:text-white items-center gap-1 transition-colors">
         WhatsApp Directo ↗
       </a>
     </div>
@@ -442,7 +442,7 @@ html { scroll-behavior: smooth; }
           <span class="font-extrabold text-xl tracking-tight leading-none text-white">
             PLUG<span class="text-brand-orange">SHOP</span>
           </span>
-          <span class="hidden min-[430px]:block text-[10px] tracking-widest uppercase font-semibold text-zinc-400 mt-1">Tech & Gadgets · Tucumán</span>
+          <span class="hidden min-[430px]:block text-[10px] tracking-widest uppercase font-semibold text-zinc-400 mt-1">Tech & Gadgets</span>
         </div>
       </a>
 
@@ -469,7 +469,7 @@ html { scroll-behavior: smooth; }
             <span class="w-2 h-2 rounded-full bg-brand-amber"></span>
             Asesor PLUG
           </a>
-          <a href="#beneficios" class="hover:text-white transition-colors">Garantía Directa</a>
+          <a href="#beneficios" class="hover:text-white transition-colors">Beneficios</a>
         </nav>
 
         <!-- Campanita de avisos -->
@@ -505,30 +505,30 @@ html { scroll-behavior: smooth; }
   </header>
 
   <!-- Hero Section -->
-  <section id="inicio" class="relative pt-12 pb-20 overflow-hidden border-b border-white/[0.05]">
+  <section id="inicio" class="relative pt-6 pb-10 sm:pt-12 sm:pb-20 overflow-hidden border-b border-white/[0.05]">
     <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] bg-brand-orange/15 blur-[120px] rounded-full pointer-events-none"></div>
 
     <div class="max-w-7xl 2xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 items-center">
         
         <!-- Left: Headline & Actions -->
-        <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
-          <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] text-xs text-zinc-300">
+        <div class="lg:col-span-7 space-y-3 sm:space-y-6 text-center lg:text-left">
+          <div class="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] text-xs text-zinc-300">
             <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
-            Tecnología con garantía directa en Tucumán
+            Tecnología en <span data-zone>Tucumán</span>
           </div>
 
-          <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
+          <h1 class="text-[1.9rem] sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
             La tecnología que querés, <span class="grad-text bg-gradient-to-r from-amber-300 via-brand-orange to-orange-600 bg-clip-text text-transparent">sin vueltas.</span>
           </h1>
 
-          <p class="text-zinc-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+          <p class="text-zinc-400 text-sm sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
             Precios claros, stock real y garantía directa. Elegí lo que te gusta, pagá fácil y listo.
           </p>
 
-          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-            <a href="#asistente" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-bold text-sm shadow-[0_10px_25px_rgba(255,98,0,0.3)] hover:opacity-95 transition-all text-center flex items-center justify-center gap-2">
-              <svg class="w-4 h-4 text-black" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-1 sm:pt-2">
+            <a href="#asistente" class="w-full sm:w-auto px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-bold text-sm shadow-[0_10px_25px_rgba(255,98,0,0.3)] hover:opacity-95 transition-all text-center flex items-center justify-center gap-2">
+              <span class="text-base leading-none" aria-hidden="true">🤔</span>
               ¿No sabés cuál elegir?
             </a>
           </div>
@@ -543,33 +543,33 @@ html { scroll-behavior: smooth; }
       </div>
 
       <!-- Marcas (sale del catálogo real) -->
-      <div id="brand-strip" class="hidden mt-14 pt-6 border-t border-white/[0.08]" aria-label="Marcas disponibles">
-        <div class="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-semibold text-center mb-4">Marcas que encontrás acá</div>
+      <div id="brand-strip" class="hidden mt-8 sm:mt-14 pt-4 sm:pt-6 border-t border-white/[0.08]" aria-label="Marcas disponibles">
+        <div class="text-[11px] uppercase tracking-[0.2em] text-zinc-500 font-semibold text-center mb-3 sm:mb-4">Marcas que encontrás acá</div>
         <div class="brand-marquee overflow-hidden"><div id="brand-track" class="brand-track flex items-center gap-12 w-max"></div></div>
       </div>
     </div>
   </section>
 
   <!-- Categorías grandes (salen de las categorías y productos reales) -->
-  <section id="categorias" class="hidden pt-14 scroll-mt-20">
+  <section id="categorias" class="hidden pt-8 sm:pt-14 scroll-mt-20">
     <div class="max-w-7xl 2xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-end justify-between gap-4 mb-5">
         <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Comprá por categoría</h2>
       </div>
-      <div id="category-tiles" class="grid gap-3 sm:gap-4" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
+      <div id="category-tiles" class="grid gap-3 sm:gap-4" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))"></div>
     </div>
   </section>
 
   <!-- Catalog Section -->
-  <section id="catalogo" class="py-20 scroll-mt-16">
+  <section id="catalogo" class="py-10 sm:py-20 scroll-mt-16">
     <div class="max-w-7xl 2xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
       
       <!-- Section Title & Controls -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/[0.06]">
         <div>
-          <span class="text-brand-orange font-bold text-xs tracking-wider uppercase font-code">Stock real en Tucumán</span>
+          <span class="text-brand-orange font-bold text-xs tracking-wider uppercase font-code">Stock real en <span data-zone>Tucumán</span></span>
           <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Elegí lo tuyo</h2>
-          <p class="text-zinc-400 text-sm mt-1">Todos los artículos incluyen garantía verificada, colores a elección y <span data-disc>10</span>% OFF por transferencia.</p>
+          <p class="text-zinc-400 text-sm mt-1">Tocá un producto para ver las fotos y elegir el color.</p>
         </div>
 
         <!-- Sort Select -->
@@ -583,28 +583,28 @@ html { scroll-behavior: smooth; }
         </div>
       </div>
 
-      <!-- Category Filter Pills -->
-      <div class="flex items-center gap-2.5 overflow-x-auto pt-6 pb-3 no-scrollbar" id="category-filters"></div>
-      <div class="hidden items-center gap-2 overflow-x-auto pb-4 no-scrollbar" id="subcategory-filters"></div>
+      <!-- Filtros chicos (la entrada principal son las categorías grandes de arriba) -->
+      <div class="flex items-center gap-2 overflow-x-auto pt-5 pb-2 no-scrollbar" id="category-filters"></div>
+      <div class="hidden items-center gap-2 overflow-x-auto pb-3 no-scrollbar" id="subcategory-filters"></div>
 
-      <!-- Origin Selection Switch -->
-      <div class="flex flex-wrap items-center gap-2 pb-6 text-xs border-b border-white/[0.04]">
-        <span class="text-zinc-500 font-medium text-[11px] mr-1">Garantía & Origen:</span>
-        <button onclick="setTypeFilter('all')" id="type-pill-all" class="type-pill active px-3 py-1.5 rounded-lg font-semibold transition-all bg-brand-orange/20 border border-brand-orange text-brand-orange">
-          Todos
-        </button>
-        <button onclick="setTypeFilter('original')" id="type-pill-original" class="type-pill px-3 py-1.5 rounded-lg font-semibold transition-all bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
-          🏅 100% Originales
-        </button>
-        <button onclick="setTypeFilter('seleccion')" id="type-pill-seleccion" class="type-pill px-3 py-1.5 rounded-lg font-semibold transition-all bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-          ⚡ PlugShop Selección
-        </button>
+      <!-- Original vs Selección: explicación corta que además filtra -->
+      <div id="origin-box" class="mt-3 mb-4 sm:mb-5 rounded-2xl border border-white/[0.06] bg-zinc-900/40 p-2.5 sm:p-4">
+        <div class="grid grid-cols-2 gap-2 sm:gap-3 text-[11px] sm:text-xs">
+          <button type="button" onclick="setTypeFilter(currentType === 'original' ? 'all' : 'original')" id="type-pill-original" aria-pressed="false" class="type-pill text-left rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-cyan-500/50 p-2.5 sm:p-3 transition-all">
+            <div class="font-bold text-white flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-cyan-400"></span>🏅 Originales</div>
+            <div class="text-zinc-400 mt-1 leading-snug">De la marca, con <strong class="text-zinc-200">garantía oficial</strong>.</div>
+          </button>
+          <button type="button" onclick="setTypeFilter(currentType === 'seleccion' ? 'all' : 'seleccion')" id="type-pill-seleccion" aria-pressed="false" class="type-pill text-left rounded-xl border border-zinc-800 bg-zinc-900/60 hover:border-amber-500/50 p-2.5 sm:p-3 transition-all">
+            <div class="font-bold text-white flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400"></span>⚡ PlugShop Selección</div>
+            <div class="text-zinc-400 mt-1 leading-snug">Alternativa probada, con <strong class="text-zinc-200">garantía directa de PlugShop</strong>.</div>
+          </button>
+        </div>
+        <p class="text-[10px] sm:text-[11px] text-zinc-500 mt-2 leading-snug">El plazo está en cada producto (ej. “12 meses”) y se cuenta desde que lo recibís. <button type="button" onclick="openLegal('garantia')" class="text-brand-orange hover:underline font-semibold">Ver qué cubre</button></p>
+        <button type="button" id="type-pill-all" onclick="setTypeFilter('all')" class="hidden mt-2 text-[11px] text-zinc-300 hover:text-white underline">Ver todos (Originales y Selección)</button>
       </div>
 
       <!-- Products Grid -->
-      <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-6 pt-6"></div>
+      <div id="products-grid" class="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-6 pt-6"></div>
 
     </div>
   </section>
@@ -624,7 +624,7 @@ html { scroll-behavior: smooth; }
         </li>
         <li class="step-item relative flex md:flex-col items-center md:text-center gap-4 md:gap-3 px-2 md:px-6">
           <span class="step-num shrink-0 w-12 h-12 rounded-2xl bg-brand-orange text-black font-black text-lg flex items-center justify-center">3</span>
-          <div><div class="font-bold text-white">Pagá y recibilo</div><p class="text-xs text-zinc-400 mt-1 leading-relaxed"><span data-disc>10</span>% OFF por transferencia, o efectivo al recibir. Lo llevamos a tu casa o lo retirás.</p></div>
+          <div><div class="font-bold text-white">Pagá y recibilo</div><p class="text-xs text-zinc-400 mt-1 leading-relaxed">Transferencia o efectivo al recibir. Lo llevamos a tu casa o lo retirás.</p></div>
         </li>
       </ol>
     </div>
@@ -636,12 +636,10 @@ html { scroll-behavior: smooth; }
       
       <div class="bg-gradient-to-b from-zinc-900 to-black rounded-2xl border border-white/[0.08] p-6 sm:p-8">
         <div class="flex items-start gap-4">
-          <div class="w-12 h-12 rounded-xl bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-brand-orange text-xl shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3"/><circle cx="12" cy="2.6" r="0.9" fill="currentColor"/><rect x="4.5" y="6.5" width="15" height="11" rx="3.2"/><circle cx="9.3" cy="11.8" r="1.4" fill="currentColor" stroke="none"/><circle cx="14.7" cy="11.8" r="1.4" fill="currentColor" stroke="none"/><path d="M9.5 15h5"/><path d="M2.5 11v3M21.5 11v3"/><path d="M8.5 17.5V20h7v-2.5"/></svg>
-          </div>
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-amber to-brand-orange flex items-center justify-center shrink-0 text-2xl leading-none shadow-[0_6px_18px_rgba(255,98,0,0.35)]" aria-hidden="true">🤔</div>
           <div class="flex-1">
             <h2 class="text-xl font-bold text-white">Asesor PLUG</h2>
-            <p class="text-zinc-400 text-xs sm:text-sm mt-1">Contame qué buscás y cuánto querés gastar. Te comparo 2 o 3 opciones de la tienda —Original oficial vs. PLUG Selección— y te explico por qué te conviene cada una.</p>
+            <p class="text-zinc-400 text-xs sm:text-sm mt-1">Contame qué buscás y cuánto querés gastar. Te comparo 2 o 3 opciones de la tienda (Original y PlugShop Selección) y te explico cuál te conviene.</p>
 
             <div class="mt-4 flex flex-col sm:flex-row gap-3">
               <input
@@ -690,9 +688,9 @@ html { scroll-behavior: smooth; }
           <div class="w-10 h-10 rounded-xl bg-brand-orange/15 text-brand-orange flex items-center justify-center text-lg font-bold font-code">
             01
           </div>
-          <h3 class="text-base font-bold text-white">Stock Local Real</h3>
+          <h3 class="text-base font-bold text-white">Stock propio</h3>
           <p class="text-xs text-zinc-400 leading-relaxed">
-            Sin intermediarios ni demoras. Todos los productos exhibidos están físicamente listos para ser retirados o enviados hoy mismo en Tucumán y Yerba Buena.
+            Sin intermediarios ni demoras: lo que ves lo tenemos acá, listo para retirar o enviar hoy mismo.
           </p>
         </div>
 
@@ -700,9 +698,9 @@ html { scroll-behavior: smooth; }
           <div class="w-10 h-10 rounded-xl bg-brand-amber/15 text-brand-amber flex items-center justify-center text-lg font-bold font-code">
             02
           </div>
-          <h3 class="text-base font-bold text-white">Garantía Directa en Tucumán</h3>
+          <h3 class="text-base font-bold text-white">Garantía directa</h3>
           <p class="text-xs text-zinc-400 leading-relaxed">
-            Ante cualquier desperfecto de fábrica, gestionás el recambio directo con nosotros sin mandar encomiendas a Buenos Aires ni esperar semanas.
+            Si hay una falla de fábrica, lo resolvés directo con nosotros en <span data-zone>Tucumán</span>, sin mandar encomiendas ni esperar semanas.
           </p>
         </div>
 
@@ -710,9 +708,9 @@ html { scroll-behavior: smooth; }
           <div class="w-10 h-10 rounded-xl bg-emerald-400/15 text-emerald-400 flex items-center justify-center text-lg font-bold font-code">
             03
           </div>
-          <h3 class="text-base font-bold text-white">Incentivo por Transferencia</h3>
+          <h3 class="text-base font-bold text-white">Ahorrá <span data-disc>10</span>% por transferencia</h3>
           <p class="text-xs text-zinc-400 leading-relaxed">
-            Ahorrá un <span data-disc>10</span>% abonando por transferencia directa a nuestro Alias/CVU o pagá el precio de lista en efectivo al cadete al recibir la caja sellada.
+            Transferí a nuestro alias y te descontamos el <span data-disc>10</span>%. Si preferís efectivo, pagás el precio de lista al recibir la caja sellada.
           </p>
         </div>
 
@@ -740,13 +738,13 @@ html { scroll-behavior: smooth; }
             <span class="font-extrabold text-white text-lg tracking-tight">PLUG<span class="text-brand-orange">SHOP</span></span>
           </div>
           <p class="text-xs text-zinc-400 leading-relaxed">
-            Plataforma de tecnología sin vueltas. San Miguel de Tucumán y Yerba Buena.
+            Tecnología sin vueltas en <span data-zone>Tucumán</span>.
           </p>
         </div>
 
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">Navegación</div>
-          <div><a href="#catalogo" class="text-zinc-400 hover:text-white transition-colors">Todos los productos</a></div>
+          <div><a href="#catalogo" class="text-zinc-400 hover:text-white transition-colors">Productos</a></div>
           <div><a href="#asistente" class="text-zinc-400 hover:text-white transition-colors">Asesor PLUG</a></div>
           <div><button type="button" onclick="openLegal('garantia')" class="text-zinc-400 hover:text-white transition-colors">Términos de Garantía</button></div>
           <div><button onclick="openCustomerModal()" class="text-zinc-400 hover:text-brand-amber transition-colors">Seguimiento & Mi Cuenta</button></div>
@@ -763,7 +761,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP. Tucumán, Argentina. <span class="opacity-60">· v5</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v5.3</span>
           </div>
         </div>
 
@@ -821,6 +819,7 @@ html { scroll-behavior: smooth; }
                 <span class="text-xs text-zinc-400">Garantía:</span>
                 <span id="gallery-warranty" class="text-xs font-bold text-white"></span>
               </div>
+              <div id="gallery-warranty-note" class="text-[11px] text-zinc-400 leading-snug"></div>
               <div class="flex items-center justify-between">
                 <span class="text-xs text-zinc-400">Disponibilidad:</span>
                 <span id="gallery-stock-status" class="text-xs font-bold"></span>
@@ -965,7 +964,7 @@ html { scroll-behavior: smooth; }
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <h4 class="font-bold text-white text-xs uppercase tracking-wider">Historial de Compras & Garantías</h4>
-            <span class="text-[11px] text-zinc-400">Entrega rápida en Tucumán</span>
+            <span class="text-[11px] text-zinc-400">Entrega rápida en <span data-zone>Tucumán</span></span>
           </div>
           
           <div id="customer-orders-list" class="space-y-3"></div>
@@ -1380,7 +1379,7 @@ html { scroll-behavior: smooth; }
     <div class="grid grid-cols-4 h-16">
       <a href="#inicio" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">🏠</span>Inicio</a>
       <a href="#catalogo" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">🛍️</span>Productos</a>
-      <a href="#asistente" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">✨</span>Asesor</a>
+      <a href="#asistente" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">🤔</span>Asesor</a>
       <button type="button" onclick="openCartDrawer()" class="mbar-item relative flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">🛒</span>Carrito<span id="mbar-cart-count" class="hidden absolute top-1.5 left-1/2 ml-2 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-orange text-black text-[10px] font-black items-center justify-center">0</span></button>
     </div>
   </nav>
@@ -1500,12 +1499,19 @@ html { scroll-behavior: smooth; }
       if (a) a.textContent = STORE_SETTINGS.bankAlias;
       const c = document.getElementById('cbu-display-text');
       if (c) c.textContent = STORE_SETTINGS.bankCbu;
+      applyStoreZone();
+    }
+    // La zona que nombra la tienda ("Stock real en ..."): sale de Ajustes.
+    function storeZoneName() { return (typeof STORE_SETTINGS.storeZone === 'string' && STORE_SETTINGS.storeZone.trim()) || 'Tucumán'; }
+    function applyStoreZone() {
+      const z = storeZoneName();
+      document.querySelectorAll('[data-zone]').forEach(el => { el.textContent = z; });
     }
     async function loadSettingsFromServer() {
       if (!isBackendConnected()) return;
       const res = await apiRequest('SETTINGS');
       if (!res || typeof res !== 'object' || res.error) return;
-      ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
+      ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias', 'storeZone'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
@@ -1770,7 +1776,8 @@ html { scroll-behavior: smooth; }
       bankCbu: '3840200500000011487511',
       transferDiscountPct: 10,
       advisorBias: 'equilibrado',
-      featuredBrands: DEFAULT_BRANDS
+      featuredBrands: DEFAULT_BRANDS,
+      storeZone: 'Tucumán'
     };
 
     const DEFAULT_ORDERS = [
@@ -1933,15 +1940,17 @@ html { scroll-behavior: smooth; }
 
     function setTypeFilter(type) {
       currentType = type;
-      ['all', 'original', 'seleccion'].forEach(t => {
+      ['original', 'seleccion'].forEach(t => {
         const btn = document.getElementById(`type-pill-${t}`);
         if (!btn) return;
-        if (t === type) {
-          btn.className = 'type-pill active px-3 py-1.5 rounded-lg font-semibold transition-all bg-brand-orange/20 border border-brand-orange text-brand-orange';
-        } else {
-          btn.className = 'type-pill px-3 py-1.5 rounded-lg font-semibold transition-all bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white flex items-center gap-1.5';
-        }
+        const on = t === type;
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.classList.toggle('active', on);
+        btn.classList.toggle('ring-2', on);
+        btn.classList.toggle(t === 'original' ? 'ring-cyan-400' : 'ring-amber-400', on);
       });
+      const all = document.getElementById('type-pill-all');
+      if (all) all.classList.toggle('hidden', type === 'all');
       renderProducts();
     }
 
@@ -1954,8 +1963,8 @@ html { scroll-behavior: smooth; }
       const box = document.getElementById('category-filters');
       if (!box) return;
       if (currentCategory !== 'all' && !topCats().some(c => c.id === currentCategory)) { currentCategory = 'all'; currentSubcategory = 'all'; }
-      const pill = (on, attr, label) => `<button ${attr} class="cat-pill px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${on ? 'active bg-white text-black' : 'bg-zinc-900 text-zinc-300 hover:text-white border border-zinc-800'}">${escapeHtml(label)}</button>`;
-      box.innerHTML = pill(currentCategory === 'all', 'data-cat="all"', 'Todos los productos') +
+      const pill = (on, attr, label) => `<button ${attr} class="cat-pill px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${on ? 'active bg-white text-black' : 'bg-zinc-900/70 text-zinc-400 hover:text-white border border-zinc-800'}">${escapeHtml(label)}</button>`;
+      box.innerHTML = pill(currentCategory === 'all', 'data-cat="all"', 'Todos') +
         topCats().map(c => pill(currentCategory === c.id, `data-cat="${escapeHtml(c.id)}"`, (c.icon ? c.icon + ' ' : '') + c.name)).join('');
       const sb = document.getElementById('subcategory-filters');
       if (!sb) return;
@@ -1992,18 +2001,18 @@ html { scroll-behavior: smooth; }
       const colors = (chosen.colors || []).slice(0, 4);
       box.innerHTML = `
         <div class="absolute -inset-1 bg-gradient-to-r from-brand-amber/20 to-brand-orange/30 rounded-3xl blur-2xl opacity-70"></div>
-        <div class="relative bg-zinc-900/90 border border-white/[0.12] rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
-          <div class="flex items-center justify-between mb-5">
+        <div class="relative bg-zinc-900/90 border border-white/[0.12] rounded-3xl p-4 sm:p-8 backdrop-blur-xl shadow-2xl">
+          <div class="flex items-center justify-between mb-3 sm:mb-5">
             <span class="px-2.5 py-1 rounded-md bg-brand-orange/15 text-brand-orange font-bold text-[11px] tracking-wider uppercase border border-brand-orange/30">${escapeHtml(label)}</span>
             <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Stock disponible</span>
           </div>
-          <div onclick="openProductGallery(${Number(chosen.id)})" class="relative h-56 rounded-2xl bg-gradient-to-b from-zinc-800/40 to-black/60 border border-white/[0.06] flex items-center justify-center p-4 mb-5 overflow-hidden group cursor-pointer" title="Ver fotos y colores">
-            ${renderVisualElement(visual, 'w-full h-full object-contain transition-transform duration-300 group-hover:scale-105', 'text-8xl')}
+          <div onclick="openProductGallery(${Number(chosen.id)})" class="relative h-36 sm:h-56 rounded-2xl bg-gradient-to-b from-zinc-800/40 to-black/60 border border-white/[0.06] flex items-center justify-center p-3 sm:p-4 mb-3 sm:mb-5 overflow-hidden group cursor-pointer" title="Ver fotos y colores">
+            ${renderVisualElement(visual, 'w-full h-full object-contain transition-transform duration-300 group-hover:scale-105', 'text-6xl sm:text-8xl')}
           </div>
-          <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">${escapeHtml(chosen.brand)} · ${chosen.type === 'original' ? '100% Original' : 'PLUG Selección'}</div>
-          <h2 class="text-xl font-bold text-white mt-0.5">${escapeHtml(chosen.name)}</h2>
+          <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">${escapeHtml(chosen.brand)} · ${chosen.type === 'original' ? 'Original' : 'PlugShop Selección'}</div>
+          <h2 class="text-lg sm:text-xl font-bold text-white mt-0.5">${escapeHtml(chosen.name)}</h2>
           ${colors.length ? `<div class="flex flex-wrap items-center gap-1.5 mt-2"><span class="text-[11px] text-zinc-400">Colores:</span>${colors.map(c => `<span class="text-[11px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">${escapeHtml(c)}</span>`).join('')}</div>` : ''}
-          <div class="flex items-end justify-between gap-3 pt-4">
+          <div class="flex items-end justify-between gap-3 pt-3 sm:pt-4">
             <div>
               <div class="flex items-baseline gap-2">
                 <span class="text-2xl sm:text-3xl font-black text-white font-code">${formatARS(eff)}</span>
@@ -2065,6 +2074,12 @@ html { scroll-behavior: smooth; }
       if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    // "Garantía Oficial 12 meses" -> "12 meses" (para la tarjeta; el texto completo está en la ficha).
+    function warrantyMonths(w) {
+      const m = String(w || '').match(/(\d+)\s*(mes(?:es)?|año(?:s)?)/i);
+      return m ? `${m[1]} ${/^a/i.test(m[2]) ? (m[1] === '1' ? 'año' : 'años') : (m[1] === '1' ? 'mes' : 'meses')}` : '';
+    }
+
     function renderProducts() {
       PRODUCTS = PRODUCTS.map(sanitizeProduct);
       renderHeroFeatured();
@@ -2104,51 +2119,52 @@ html { scroll-behavior: smooth; }
         // Solo se avisa el stock cuando importa (poco o nada).
         let stockLabel = '';
         let buttonDisabled = false;
-        let buttonClass = 'px-3.5 py-2.5 rounded-xl bg-white hover:bg-brand-orange text-black font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-md';
+        let buttonClass = 'px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-white hover:bg-brand-orange text-black font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-md';
         if (product.stock === 0) {
           stockLabel = `<span class="text-[11px] text-rose-400 font-bold">Sin stock</span>`;
           buttonDisabled = true;
-          buttonClass = 'px-3.5 py-2.5 rounded-xl bg-zinc-800 text-zinc-600 font-bold text-xs cursor-not-allowed';
+          buttonClass = 'px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-zinc-800 text-zinc-600 font-bold text-xs cursor-not-allowed';
         } else if (product.stock <= 3) {
           stockLabel = `<span class="text-[11px] text-brand-amber font-semibold">¡Últimas ${product.stock}!</span>`;
         }
 
-        const meta = [isOriginal ? '100% Original' : 'Plug Selección', product.warranty || 'Garantía asegurada'];
-        if (colorsList.length > 1) meta.push(colorsList.length + ' colores');
+        const months = warrantyMonths(product.warranty);
+        const kind = isOriginal ? 'Original' : 'Selección';
+        const colorsTxt = colorsList.length > 1 ? `<span class="hidden sm:inline"> · ${colorsList.length} colores</span>` : '';
 
         return `
         <article class="group relative flex flex-col bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-brand-orange/50 rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
-          <div onclick="openProductGallery(${product.id})" class="relative h-48 sm:h-52 bg-gradient-to-b from-zinc-800/30 to-black/40 flex items-center justify-center overflow-hidden cursor-pointer group/img" title="Ver fotos y colores">
-            ${product.featured ? '<span class="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-md bg-brand-orange text-black text-[10px] font-black tracking-wide">★ DESTACADO</span>' : ''}
-            ${offPct(product) ? `<span class="absolute top-3 right-3 z-10 px-2 py-0.5 rounded-md bg-rose-500 text-white text-[11px] font-black">-${offPct(product)}%</span>` : ''}
-            ${renderVisualElement(primaryVisual, 'w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105', 'text-6xl group-hover/img:scale-110 transition-transform duration-300')}
+          <div onclick="openProductGallery(${product.id})" class="relative h-36 sm:h-48 bg-gradient-to-b from-zinc-800/30 to-black/40 flex items-center justify-center overflow-hidden cursor-pointer group/img" title="Ver fotos y colores">
+            ${product.featured ? '<span class="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 px-1.5 sm:px-2 py-0.5 rounded-md bg-brand-orange text-black text-[9px] sm:text-[10px] font-black tracking-wide">★ DESTACADO</span>' : ''}
+            ${offPct(product) ? `<span class="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 px-1.5 sm:px-2 py-0.5 rounded-md bg-rose-500 text-white text-[10px] sm:text-[11px] font-black">-${offPct(product)}%</span>` : ''}
+            ${renderVisualElement(primaryVisual, 'w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105', 'text-5xl sm:text-6xl group-hover/img:scale-110 transition-transform duration-300')}
           </div>
 
-          <div class="p-4 sm:p-5 flex flex-col flex-1">
-            <div class="text-[11px] uppercase tracking-wider text-zinc-500 font-semibold">${escapeHtml(product.brand)}</div>
-            <h3 onclick="openProductGallery(${product.id})" class="mt-0.5 text-[15px] font-bold text-white leading-snug group-hover:text-brand-amber transition-colors cursor-pointer line-clamp-2">
+          <div class="p-2.5 sm:p-5 flex flex-col flex-1">
+            <div class="text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-500 font-semibold truncate">${escapeHtml(product.brand)}</div>
+            <h3 onclick="openProductGallery(${product.id})" class="mt-0.5 text-[13px] sm:text-[15px] font-bold text-white leading-snug group-hover:text-brand-amber transition-colors cursor-pointer line-clamp-2">
               ${escapeHtml(product.name)}
             </h3>
-            <div class="mt-1.5 flex items-center gap-1.5 text-[11px] text-zinc-400">
+            <div class="mt-1 sm:mt-1.5 flex items-center gap-1.5 text-[10px] sm:text-[11px] text-zinc-400">
               <span class="w-1.5 h-1.5 rounded-full shrink-0 ${isOriginal ? 'bg-cyan-400' : 'bg-amber-400'}"></span>
-              <span class="truncate">${meta.map(escapeHtml).join(' · ')}</span>
+              <span class="truncate">${escapeHtml(kind)}${months ? ' · ' + escapeHtml(months) + '<span class="hidden sm:inline"> de garantía</span>' : ''}${colorsTxt}</span>
             </div>
-            ${stockLabel ? `<div class="mt-1.5">${stockLabel}</div>` : ''}
+            ${stockLabel ? `<div class="mt-1">${stockLabel}</div>` : ''}
 
-            <div class="mt-auto pt-4">
-              ${offPct(product) ? `<div class="text-[11px] text-rose-300 line-through font-semibold">Antes ${formatARS(product.compareAtPrice)}</div>` : ''}
-              <div class="flex items-baseline gap-2 flex-wrap">
-                <span class="text-xl font-black text-white leading-none">${formatARS(transferPrice)}</span>
-                <span class="text-[11px] text-zinc-500 line-through">${formatARS(product.price)}</span>
+            <div class="mt-auto pt-2.5 sm:pt-4">
+              ${offPct(product) ? `<div class="text-[10px] sm:text-[11px] text-rose-300 line-through font-semibold">Antes ${formatARS(product.compareAtPrice)}</div>` : ''}
+              <div class="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
+                <span class="text-base sm:text-xl font-black text-white leading-none">${formatARS(transferPrice)}</span>
+                <span class="text-[10px] sm:text-[11px] text-zinc-500 line-through">${formatARS(product.price)}</span>
               </div>
-              <div class="mt-1 text-[11px] text-emerald-400 font-medium">${discountPct}% OFF por transferencia</div>
+              <div class="mt-1 text-[10px] sm:text-[11px] text-emerald-400 font-medium">${discountPct}% OFF <span class="hidden sm:inline">por </span>transferencia</div>
               <button
                 ${buttonDisabled ? 'disabled' : `onclick="openProductGallery(${product.id})"`}
-                class="${buttonClass} w-full justify-center mt-3"
+                class="${buttonClass} w-full justify-center mt-2 sm:mt-3"
                 title="${buttonDisabled ? 'Sin stock disponible' : 'Elegir color y comprar'}"
               >
-                <span>${buttonDisabled ? 'Sin stock' : 'Elegir color'}</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                <span>${buttonDisabled ? 'Sin stock' : 'Elegir<span class="hidden sm:inline"> color</span>'}</span>
+                <svg class="w-3.5 h-3.5 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
               </button>
             </div>
           </div>
@@ -2178,13 +2194,15 @@ html { scroll-behavior: smooth; }
       const isOrig = prod.type === 'original';
       const typeBadge = document.getElementById('detail-modal-type-badge');
       typeBadge.innerHTML = isOrig
-        ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800 font-code">🏅 100% Original</span>`
-        : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800 font-code">⚡ Plug Selección</span>`;
+        ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800 font-code">🏅 Original</span>`
+        : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800 font-code">⚡ PlugShop Selección</span>`;
 
       document.getElementById('detail-modal-brand').textContent = prod.brand;
       document.getElementById('gallery-title').textContent = prod.name;
       document.getElementById('gallery-specs').textContent = prod.specs;
       document.getElementById('gallery-warranty').textContent = prod.warranty;
+      const wNote = document.getElementById('gallery-warranty-note');
+      if (wNote) wNote.textContent = isOrig ? 'Garantía oficial de la marca. Se cuenta desde que lo recibís.' : 'Garantía directa de PlugShop. Se cuenta desde que lo recibís.';
 
       const discountPct = STORE_SETTINGS.transferDiscountPct || 10;
       const transferPrice = Math.round(prod.price * (1 - (discountPct / 100)));
@@ -4309,7 +4327,7 @@ html { scroll-behavior: smooth; }
         if (Math.abs(d) >= 1) reasons.push(d < 0 ? `${advMoney(-d)} más barato que la opción 1.` : `${advMoney(d)} más que la opción 1.`);
       }
       if (Number(p.stock) > 0 && Number(p.stock) <= 3) reasons.push(`Quedan solo ${p.stock}.`);
-      reasons.push(p.type === 'original' ? 'Original con garantía oficial.' : 'PLUG Selección: calidad probada y mejor precio.');
+      reasons.push(p.type === 'original' ? 'Original con garantía oficial.' : 'PlugShop Selección: calidad probada y mejor precio.');
       if (p.featured) reasons.push('Destacado de la tienda.');
       return { prod: p, role, n, icon, label, eff: x.eff, score: Math.round(x.score * 10) / 10, fit: x.fit || null, matched: x.matched.slice(), reasons: reasons.slice(0, 4) };
     }
@@ -4399,7 +4417,7 @@ html { scroll-behavior: smooth; }
             <tbody>
               ${row('Precio de lista', o => escapeHtml(formatARS(o.prod.price)))}
               ${row('Con transferencia', o => `<strong class="text-emerald-400">${escapeHtml(formatARS(o.eff))}</strong>`)}
-              ${row('Tipo', o => o.prod.type === 'original' ? '🏅 Original oficial' : '⚡ PLUG Selección')}
+              ${row('Tipo', o => o.prod.type === 'original' ? '🏅 Original oficial' : '⚡ PlugShop Selección')}
               ${row('Garantía', o => escapeHtml(o.prod.warranty || '—'))}
               ${row('Colores', o => escapeHtml((o.prod.colors || ['Único']).join(', ')))}
               ${row('Stock', o => Number(o.prod.stock) > 0 ? escapeHtml(String(o.prod.stock)) + ' un.' : 'Agotado')}
