@@ -386,6 +386,13 @@ html[data-theme="light"] .admin-tab-btn.text-brand-orange { color: #c2410c !impo
 html[data-theme="light"] .logo-badge { background-color: #08080a !important; border-color: rgba(255,98,0,.55) !important; }
 html[data-theme="light"] .logo-badge.text-brand-orange { color: #ff6200 !important; }
 html[data-theme="light"] .grad-text { background-image: linear-gradient(90deg,#c2410c,#ea580c 55%,#b45309) !important; }
+/* Paso "Cómo comprar": línea conectora entre pasos (solo pantallas medianas y grandes) */
+@media (min-width: 768px) { .step-item:not(:last-child)::after { content: ""; position: absolute; top: 24px; left: calc(50% + 40px); right: calc(-50% + 40px); border-top: 2px dashed rgba(255,255,255,.14); } }
+html[data-theme="light"] .step-item:not(:last-child)::after { border-top-color: rgba(0,0,0,.18); }
+/* Barra inferior del celular: ítem activo al tocar */
+.mbar-item:active { background: rgba(255,98,0,.12); }
+html { scroll-behavior: smooth; }
+@media (max-width: 767px) { body { padding-bottom: 64px; } }
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
