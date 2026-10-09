@@ -1455,6 +1455,7 @@ html[data-theme="light"] .grad-text { background-image: linear-gradient(90deg,#c
       const res = await apiRequest('SETTINGS');
       if (!res || typeof res !== 'object' || res.error) return;
       ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
+      if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
       applyStoreWhatsappLinks();
@@ -1709,6 +1710,7 @@ html[data-theme="light"] .grad-text { background-image: linear-gradient(90deg,#c
       }
     ];
 
+    const DEFAULT_BRANDS = 'JBL, Soundcore, Zealot, Hoco, Baseus, Foneng, Samsung, Poco, Xiaomi, iPhone';
     const DEFAULT_SETTINGS = {
       shippingCost: 2500,
       freeShippingThreshold: 150000,
@@ -1716,7 +1718,8 @@ html[data-theme="light"] .grad-text { background-image: linear-gradient(90deg,#c
       bankAlias: 'PlugShop.store.ar',
       bankCbu: '3840200500000011487511',
       transferDiscountPct: 10,
-      advisorBias: 'equilibrado'
+      advisorBias: 'equilibrado',
+      featuredBrands: DEFAULT_BRANDS
     };
 
     const DEFAULT_ORDERS = [
@@ -1963,17 +1966,25 @@ html[data-theme="light"] .grad-text { background-image: linear-gradient(90deg,#c
       box.classList.remove('hidden');
     }
 
-    // Franja de marcas del inicio: salen de los productos reales (activos y con stock).
-    // Si todavía no hay productos, la franja no se muestra. Son nombres, no logos.
+    // Franja de marcas del inicio. La lista la define el dueño en Ajustes (campo
+    // "Marcas de la tira"). Si la deja vacía, se usan las marcas de los productos
+    // reales (activos y con stock). Son nombres, no logos.
+    function brandStripList() {
+      const raw = typeof STORE_SETTINGS.featuredBrands === 'string' ? STORE_SETTINGS.featuredBrands : DEFAULT_BRANDS;
+      const seen = new Map();
+      String(raw).split(/[,;\n]+/).map(x => x.trim()).filter(Boolean).forEach(b => { const k = advFold(b).trim(); if (k && !seen.has(k)) seen.set(k, b); });
+      if (!seen.size) {
+        PRODUCTS.filter(p => p.active !== false && Number(p.stock) > 0 && String(p.brand || '').trim()).forEach(p => {
+          const k = advFold(p.brand).trim(); if (!seen.has(k)) seen.set(k, p.brand.trim());
+        });
+        return [...seen.values()].sort((a, b) => a.localeCompare(b, 'es'));
+      }
+      return [...seen.values()];
+    }
     function renderBrandStrip() {
       const strip = document.getElementById('brand-strip'), track = document.getElementById('brand-track');
       if (!strip || !track) return;
-      const seen = new Map();
-      PRODUCTS.filter(p => p.active !== false && Number(p.stock) > 0 && String(p.brand || '').trim()).forEach(p => {
-        const key = advFold(p.brand).trim();
-        if (!seen.has(key)) seen.set(key, p.brand.trim());
-      });
-      const brands = [...seen.values()].sort((a, b) => a.localeCompare(b, 'es'));
+      const brands = brandStripList();
       if (!brands.length) { strip.classList.add('hidden'); track.innerHTML = ''; return; }
       const item = b => `<span class="text-2xl sm:text-3xl font-black tracking-tight text-zinc-600 hover:text-white transition-colors select-none whitespace-nowrap">${escapeHtml(b)}</span>`;
       // Se repite la lista para que el recorrido no tenga saltos.
