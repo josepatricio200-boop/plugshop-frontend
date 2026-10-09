@@ -857,7 +857,10 @@
                 <h3 class="text-lg font-bold text-white">Cola de Pedidos & Despachos en Tucumán</h3>
                 <p class="text-xs text-zinc-400">Monitoreá las compras coordinadas por WhatsApp, colores elegidos, cobro y cadetería.</p>
               </div>
+              <button id="btn-scan-handover" onclick="openScanModal('handover', '')" class="self-start px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold">📲 Entregar: escanear QR del cliente</button>
             </div>
+
+            <div id="refunds-card" class="hidden p-4 rounded-xl bg-amber-950/30 border border-amber-700/50 space-y-3 text-xs"></div>
 
             <div class="flex flex-col sm:flex-row gap-2 text-xs">
               <input type="search" id="orders-search" oninput="renderOrdersTable()" placeholder="🔍 Buscar por nº de pedido, nombre o teléfono" aria-label="Buscar pedidos" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange font-code" />
@@ -1206,6 +1209,7 @@
               </span>
             </div>
             <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">PS-902</strong> · Despacho local Tucumán & YB</p>
+            <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
           </div>
         </div>
         <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
@@ -1270,7 +1274,7 @@
           <div class="sm:col-span-5 flex flex-col items-center justify-center text-center p-3 bg-white rounded-xl shadow-lg space-y-2">
             <div id="track-qr-container" class="w-40 h-40 flex items-center justify-center"></div>
             <div class="text-[10px] font-bold text-black uppercase tracking-wider font-code">
-              Escanear para Validar Entrega
+              Link de seguimiento de tu pedido
             </div>
             <div id="track-qr-code-text" class="text-[9px] text-zinc-600 font-code">
               PLUGSHOP-AUTH-PS902
@@ -2121,12 +2125,23 @@
       return was > now && now > 0 ? Math.round((1 - now / was) * 100) : 0;
     }
 
+    // QR generado en el propio navegador (nunca se manda un número de pedido ni un código a un sitio externo).
+    function localQrUrl(text, cell) {
+      try {
+        if (typeof qrcode === 'function') {
+          const qr = qrcode(0, 'M');
+          qr.addData(String(text));
+          qr.make();
+          return qr.createDataURL(cell || 4, 2);
+        }
+      } catch (e) { /* sin librería de QR: se muestra un recuadro */ }
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="#fff"/><text x="30" y="34" font-size="10" text-anchor="middle" fill="#000">QR</text></svg>');
+    }
     function getQrCodeUrl(orderId) {
-      const targetUrl = window.location.origin + window.location.pathname + '#track=' + encodeURIComponent(orderId);
-      return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(targetUrl)}&margin=6`;
+      return localQrUrl(window.location.origin + window.location.pathname + '#track=' + encodeURIComponent(orderId), 4);
     }
 
-    function openOrderTrackingModal(orderId) {
+    async function openOrderTrackingModal(orderId) {
       // orderId puede venir del hash de la URL (#track=...), es decir de
       // afuera de la app: se sanitiza acá para evitar inyección de HTML
       // antes de usarlo en cualquier lado.
@@ -2134,7 +2149,16 @@
       if (!orderId) return;
 
       let order = ADMIN_ORDERS.find(o => o.id.toUpperCase() === orderId.toUpperCase());
-      
+
+      // Link de seguimiento abierto en otro celular: se pide al servidor la vista pública
+      // (estado y productos, sin teléfono ni dirección).
+      if (!order && isBackendConnected()) {
+        const pv = await apiRequest('ORDERS', {}, '/' + encodeURIComponent(orderId));
+        if (!pv) { alert('No pudimos conectar con el servidor para buscar el pedido. Probá de nuevo en un momento.'); return; }
+        if (pv.success === false || !pv.id) { alert('No encontramos ese pedido. Revisá el número (ej. PS-AB12CD34).'); return; }
+        order = { id: pv.id, customer: pv.customer, address: '', items: pv.items, deliveryType: pv.deliveryType, paymentMethod: pv.paymentMethod, total: pv.total, status: pv.status };
+      }
+
       if (!order) {
         order = {
           id: orderId,
@@ -2152,7 +2176,7 @@
       }
 
       document.getElementById('track-modal-order-id').textContent = order.id;
-      document.getElementById('track-modal-address').textContent = order.address || 'Yerba Buena / San Miguel de Tucumán';
+      document.getElementById('track-modal-address').textContent = order.address || 'El domicilio que indicaste al comprar';
       document.getElementById('track-modal-items').textContent = order.items;
       document.getElementById('track-modal-total').textContent = formatARS(order.total);
       document.getElementById('track-modal-payment').textContent = order.paymentMethod || 'Transferencia (10% OFF)';
@@ -2678,8 +2702,9 @@
     function buildSalesReport(orders, since) {
       const r = { orders: 0, revenue: 0, discounts: 0, cost: 0, profit: 0, avgTicket: 0, estimated: false, products: {}, categories: {}, payments: {} };
       (orders || []).filter(o => o.status !== 'Cancelado' && (!since || (o.createdAt || 0) >= since)).forEach(o => {
-        const total = Number(o.total) || 0;
-        const ship = Number(o.shippingCost) || 0;
+        const refunded = o.refund ? Math.min(Number(o.total) || 0, Number(o.refund.amount) || 0) : 0; // plata devuelta al cliente (reclamos con reembolso)
+        const total = (Number(o.total) || 0) - refunded;
+        const ship = refunded ? 0 : (Number(o.shippingCost) || 0);
         const { lines, estimated } = reportLines(o);
         if (estimated) r.estimated = true;
         let cost = 0;
@@ -2767,7 +2792,50 @@
         return true;
       });
     }
+    // ---- Reintegros: plata que hay que devolverle al cliente por transferencia ----
+    function renderRefundsCard() {
+      const box = document.getElementById('refunds-card');
+      if (!box) return;
+      const canPay = ['admin', 'vendedor'].includes(currentStaffSession.role);
+      const pending = canPay ? ADMIN_ORDERS.filter(o => o.refund && o.refund.status === 'pendiente') : [];
+      box.classList.toggle('hidden', !pending.length);
+      if (!pending.length) { box.innerHTML = ''; return; }
+      const total = pending.reduce((a, o) => a + (o.refund.amount || 0), 0);
+      box.innerHTML = `
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <div class="font-bold text-amber-200 text-sm">💸 Reintegros pendientes (${pending.length}) · ${formatARS(total)}</div>
+          <div class="text-[11px] text-amber-300/80">Transferí a la misma cuenta con la que pagó el cliente. Plazo: 48 hs hábiles.</div>
+        </div>
+        ${pending.map(o => {
+          const hrs = Math.round((Date.now() - (o.refund.requestedAt || Date.now())) / 3600000);
+          return `<div class="p-3 rounded-lg bg-zinc-950 border ${hrs >= 36 ? 'border-rose-700' : 'border-zinc-800'} flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <div class="font-bold text-white">${escapeHtml(o.id)} · ${escapeHtml(o.customer)} · <span class="text-brand-amber">${formatARS(o.refund.amount)}</span></div>
+              <div class="text-[11px] text-zinc-400">WhatsApp ${escapeHtml(o.phone)} · ${escapeHtml(o.refund.reason || '')} · hace ${hrs} h${hrs >= 36 ? ' <span class="text-rose-400 font-bold">¡urgente!</span>' : ''}</div>
+            </div>
+            <button onclick="markRefundDone('${o.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold">Marcar devuelto</button>
+          </div>`;
+        }).join('')}`;
+    }
+    async function markRefundDone(orderId) {
+      const order = ADMIN_ORDERS.find(o => o.id === orderId);
+      if (!order || !order.refund) return;
+      const ref = prompt(`Ya le transferiste ${formatARS(order.refund.amount)} a ${order.customer}?\nEscribí el número de operación de esa transferencia (lo ve el cliente):`, '');
+      if (ref === null) return;
+      if (!isBackendConnected() || !currentStaffSession.token) {
+        order.refund = { ...order.refund, status: 'devuelto', doneAt: Date.now(), ref: String(ref).trim().slice(0, 60), by: currentStaffSession.name || 'Equipo' };
+        saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
+        renderOrdersTable();
+        return;
+      }
+      const res = await apiRequest('ORDERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ ref }) }, '/' + encodeURIComponent(orderId) + '/refund');
+      if (!res || res.success === false) { alert((res && res.error) || 'No se pudo marcar el reintegro.'); return; }
+      Object.assign(order, res.order);
+      renderOrdersTable();
+    }
+
     function renderOrdersTable() {
+      renderRefundsCard();
       const ordersTable = document.getElementById('admin-orders-table-body');
       if (!ordersTable) return;
       const list = filteredAdminOrders();
@@ -2813,10 +2881,12 @@
             </select>
             ${(o.isBancarizado && o.paid === false && o.status !== 'Cancelado') ? `<div class="text-[10px] mt-1 ${(o.proof || o.hasProof) ? 'text-sky-400' : 'text-amber-400'}">${(o.proof || o.hasProof) ? '🧾 Comprobante recibido' : '⏳ Sin comprobante'}</div>` : (o.paid ? '<div class="text-[10px] mt-1 text-emerald-400">✓ Pago confirmado</div>' : '')}
             ${o.dispatchLog ? `<div class="text-[10px] mt-1 text-sky-400">📦 Salida escaneada ${escapeHtml(new Date(o.dispatchLog.at).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}))} · ${escapeHtml(o.dispatchLog.by)}</div>` : ''}
-            ${o.deliveryLog ? `<div class="text-[10px] mt-1 text-emerald-400">✓ Recepción confirmada por el cliente</div>` : ''}
+            ${o.deliveryLog ? `<div class="text-[10px] mt-1 text-emerald-400">✓ ${o.deliveryLog.method === 'qr' ? 'Entregado con el QR del cliente · ' + escapeHtml(o.deliveryLog.by || '') : (o.deliveryLog.method === 'manual' ? 'Entrega marcada a mano' : 'Recepción confirmada por el cliente')}</div>` : ''}
+            ${o.refund ? `<div class="text-[10px] mt-1 font-bold ${o.refund.status === 'pendiente' ? 'text-amber-400' : 'text-emerald-400'}">${o.refund.status === 'pendiente' ? '💸 Reintegro pendiente ' : '✓ Reintegro devuelto '}${formatARS(o.refund.amount)}${o.refund.ref ? ' · op. ' + escapeHtml(o.refund.ref) : ''}</div>` : ''}
           </td>
           <td class="py-3 px-4 text-right space-x-1 font-sans">
             ${(o.status === 'En preparación' && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role)) ? `<button onclick="openScanModal('dispatch', '${o.id}')" class="px-2 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📷 Salida</button>` : ''}
+            ${(o.status === 'Despachado' && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role)) ? `<button onclick="openScanModal('handover', '${o.id}')" class="px-2 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📲 Entregar</button>` : ''}
             ${(o.status !== 'Cancelado' && ['admin', 'vendedor'].includes(currentStaffSession.role)) ? `<button onclick="openPackageLabel('${o.id}')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">🏷️ Etiqueta</button>` : ''}
             ${(o.proof || o.hasProof) ? `<button onclick="openProofModal('${o.id}')" class="px-2 py-1 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[11px] font-semibold">🧾 Comprobante</button>` : ''}
             <button onclick="openOrderTrackingModal('${o.id}')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-brand-amber text-[11px] font-bold transition-colors font-code" title="Ver Radar y QR">
@@ -3185,7 +3255,7 @@
       alert(`Caja cerrada. ${diffMsg}`);
       renderCashRegister();
     }
-    setInterval(() => { if (document.visibilityState === 'visible') loadNotifications(); }, 60000);
+    setInterval(() => { if (document.visibilityState === 'visible' && typeof loadNotifications === 'function') loadNotifications(); }, 60000);
 
     // ==========================================
     // CADENA DE CUSTODIA: ETIQUETA + DOBLE ESCANEO
@@ -3262,22 +3332,24 @@
       // Ojo: en modo conectado el pedido de un cliente puede NO estar en
       // ADMIN_ORDERS (ese cliente no inició sesión como staff), así que acá
       // no se busca el objeto completo — solo hace falta el ID para mostrarlo.
-      if (mode === 'dispatch' && !(isAdminAuthenticated && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role))) {
-        alert('Solo el equipo puede registrar la salida de un paquete.');
+      if ((mode === 'dispatch' || mode === 'handover') && !(isAdminAuthenticated && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role))) {
+        alert('Solo el equipo puede registrar la salida o la entrega de un paquete.');
         return;
       }
       closeScanModal();
       scanState.mode = mode; scanState.orderId = orderId;
       const isDelivery = mode === 'delivery';
+      const isHandover = mode === 'handover';
       const wrap = document.createElement('div');
       wrap.id = 'scan-modal';
       wrap.className = 'fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4';
       wrap.innerHTML = `
         <div class="w-full max-w-sm max-h-[92vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-2xl p-4 space-y-3">
-          <div class="text-sm font-bold text-white">${isDelivery ? '📷 Confirmar recepción' : '📷 Registrar salida del paquete'} · #${escapeHtml(orderId)}</div>
-          <p class="text-xs text-zinc-300">${isDelivery ? 'Escaneá el QR de la etiqueta del paquete que tenés en la mano, o escribí el código que figura debajo del QR.' : 'Escaneá la etiqueta del paquete antes de salir, o escribí el código que figura debajo del QR.'}</p>
+          <div class="text-sm font-bold text-white">${isHandover ? '📲 Entregar paquete' : (isDelivery ? '📷 Confirmar recepción' : '📷 Registrar salida del paquete')}${orderId ? ' · #' + escapeHtml(orderId) : ''}</div>
+          <p class="text-xs text-zinc-300">${isHandover ? 'Pedile al cliente que abra "Mostrar código de entrega" en su celular y escaneá ese QR (o una captura). Si no se puede escanear, escribí el número de pedido y los 6 números.' : (isDelivery ? 'Escaneá el QR de la etiqueta del paquete que tenés en la mano, o escribí el código que figura debajo del QR.' : 'Escaneá la etiqueta del paquete antes de salir, o escribí el código que figura debajo del QR.')}</p>
           <video id="scan-video" playsinline muted class="hidden w-full rounded-lg bg-black"></video>
-          <input id="scan-code" type="text" autocomplete="off" placeholder="Código de la etiqueta (ej. K7M2-9PQX)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white uppercase tracking-widest text-center focus:outline-none focus:border-brand-orange" />
+          ${isHandover ? `<input id="scan-order" type="text" autocomplete="off" value="${escapeHtml(orderId || '')}" placeholder="N° de pedido (ej. PS-AB12CD34)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white uppercase text-center focus:outline-none focus:border-brand-orange" />` : ''}
+          <input id="scan-code" type="text" autocomplete="off" ${isHandover ? 'inputmode="numeric"' : ''} placeholder="${isHandover ? 'Los 6 números del cliente (o lo que lee el QR)' : 'Código de la etiqueta (ej. K7M2-9PQX)'}" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white uppercase tracking-widest text-center focus:outline-none focus:border-brand-orange" />
           ${isDelivery ? '<input id="scan-phone4" type="text" inputmode="numeric" maxlength="4" placeholder="Últimos 4 dígitos de tu WhatsApp" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white text-center focus:outline-none focus:border-brand-orange" />' : ''}
           <div id="scan-msg" class="text-[11px] font-semibold"></div>
           <div class="grid grid-cols-2 gap-2 text-xs font-bold">
@@ -3318,7 +3390,45 @@
       }).catch(() => setScanMsg('No pudimos abrir la cámara: escribí el código de la etiqueta.', false));
     }
 
+    // Entrega con el QR del cliente: el equipo escanea "PSD|pedido|código" y el servidor pasa el pedido a Entregado.
+    async function submitHandover() {
+      const now = Date.now();
+      if (now < scanState.lockedUntil) { setScanMsg(`Demasiados intentos. Esperá ${Math.ceil((scanState.lockedUntil - now) / 1000)}s.`, false); return; }
+      const raw = (document.getElementById('scan-code').value || '').trim();
+      let orderId = ((document.getElementById('scan-order') || {}).value || scanState.orderId || '').trim().toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+      let code = raw;
+      if (/^PSD\|/i.test(raw)) {
+        const parts = raw.split('|');
+        orderId = String(parts[1] || '').toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+        code = parts[2] || '';
+        const box = document.getElementById('scan-order'); if (box) box.value = orderId;
+      } else if (/^PLUG\|/i.test(raw)) {
+        setScanMsg('Ese es el QR de la ETIQUETA del paquete. Para entregar, escaneá el QR que muestra el cliente en su celular.', false);
+        return;
+      }
+      code = String(code).replace(/\D/g, '');
+      if (!orderId) { setScanMsg('Escribí el número de pedido o escaneá el QR del cliente.', false); return; }
+      if (code.length !== 6) { setScanMsg('El código del cliente tiene 6 números.', false); return; }
+      if (!isBackendConnected() || !currentStaffSession.token) { setScanMsg('Para entregar con QR tenés que estar conectado al servidor.', false); return; }
+      const res = await apiRequest('ORDERS', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + currentStaffSession.token },
+        body: JSON.stringify({ code })
+      }, '/' + encodeURIComponent(orderId) + '/scan/handover');
+      if (!res || res.success === false) {
+        if (res && res.error) setScanMsg(res.error, false);
+        else setScanMsg('No se pudo procesar. Revisá la conexión.', false);
+        return;
+      }
+      const local = ADMIN_ORDERS.find(o => o.id === orderId);
+      if (local && res.order) Object.assign(local, res.order);
+      closeScanModal();
+      refreshAdminUI();
+      alert('✓ Entrega registrada. El pedido ' + orderId + ' figura como entregado.');
+    }
+
     async function submitScan() {
+      if (scanState.mode === 'handover') return submitHandover();
       const now = Date.now();
       if (now < scanState.lockedUntil) { setScanMsg(`Demasiados intentos. Esperá ${Math.ceil((scanState.lockedUntil - now) / 1000)}s.`, false); return; }
 
@@ -3493,6 +3603,9 @@
         }
         Object.assign(order, res.order);
         refreshAdminUI();
+        if (res.order && res.order.refund && res.order.refund.status === 'pendiente' && newStatus === 'Cancelado') {
+          alert(`El cliente ya había pagado: quedó un REINTEGRO PENDIENTE de ${formatARS(res.order.refund.amount)}. Transferíselo a la misma cuenta (48 hs hábiles) y después tocá "Marcar devuelto" en la tarjeta amarilla de Pedidos.`);
+        }
         return;
       }
 

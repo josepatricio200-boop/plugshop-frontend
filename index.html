@@ -631,7 +631,36 @@
       </div>
 
       <div class="p-6 overflow-y-auto space-y-6 text-xs">
-        <div id="cust-register-card" class="p-4 rounded-xl bg-zinc-900 border border-brand-orange/30 space-y-3">
+        <div id="cust-access-card" class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span class="font-bold text-white text-xs">Entrá con tu WhatsApp y tu número de pedido</span>
+            <span id="cust-status-badge" class="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-400 font-code">Modo Seguro</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">Por tu seguridad, tus pedidos solo se ven si ponés las dos cosas. El número de pedido (ej. PS-AB12CD34) lo ves en la pantalla de seguimiento que te mostramos al comprar y en los avisos de la campanita 🔔.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input type="tel" id="cust-phone-input" inputmode="tel" autocomplete="off" placeholder="Tu WhatsApp (ej. 381 555 1234)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') submitCustomerAccess()" />
+            <input type="text" id="cust-order-input" autocomplete="off" autocapitalize="characters" placeholder="N° de pedido (ej. PS-AB12CD34)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white uppercase focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') submitCustomerAccess()" />
+          </div>
+          <label class="flex items-start gap-2 text-[11px] text-zinc-300 cursor-pointer">
+            <input type="checkbox" id="cust-remember" class="mt-0.5" />
+            <span>Recordarme en este celular <span class="text-zinc-500">(no lo marques si el celular o la compu es de otra persona)</span></span>
+          </label>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="cust-access-btn" onclick="submitCustomerAccess()" class="px-4 py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold transition-all">Ver mis pedidos</button>
+            <button id="cust-access-cancel" onclick="hideAddOrderForm()" class="hidden px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold">Cancelar</button>
+          </div>
+          <div id="cust-access-error" class="hidden text-rose-400 text-[11px] font-semibold"></div>
+        </div>
+
+        <div id="cust-session-bar" class="hidden p-3 rounded-xl bg-emerald-950/30 border border-emerald-800/50 flex items-center justify-between gap-2 flex-wrap">
+          <span class="text-emerald-300 font-semibold text-[11px]">✓ Cuenta abierta<span id="cust-session-note" class="text-zinc-400 font-normal"></span></span>
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="showAddOrderForm()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">+ Agregar otro pedido</button>
+            <button onclick="customerLogout()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-300 text-[11px] font-semibold">Salir / No soy yo</button>
+          </div>
+        </div>
+
+        <div id="cust-register-card" class="hidden p-4 rounded-xl bg-zinc-900 border border-brand-orange/30 space-y-3">
           <div id="cust-register-form" class="space-y-3">
             <div class="font-bold text-white text-xs">Registrate y comprá más rápido</div>
             <p class="text-[11px] text-zinc-400">Guardamos tu nombre y WhatsApp en este celular para completar el pedido solos. Sin contraseñas.</p>
@@ -699,6 +728,7 @@
               </span>
             </div>
             <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">PS-902</strong> · Despacho local Tucumán & YB</p>
+            <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
           </div>
         </div>
         <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
@@ -763,7 +793,7 @@
           <div class="sm:col-span-5 flex flex-col items-center justify-center text-center p-3 bg-white rounded-xl shadow-lg space-y-2">
             <div id="track-qr-container" class="w-40 h-40 flex items-center justify-center"></div>
             <div class="text-[10px] font-bold text-black uppercase tracking-wider font-code">
-              Escanear para Validar Entrega
+              Link de seguimiento de tu pedido
             </div>
             <div id="track-qr-code-text" class="text-[9px] text-zinc-600 font-code">
               PLUGSHOP-AUTH-PS902
@@ -889,11 +919,11 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block mb-1 text-zinc-400">Nombre completo *</label>
-              <input type="text" id="chk-name" value="Juan González" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input type="text" id="chk-name" placeholder="Tu nombre y apellido" autocomplete="name" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
             </div>
             <div>
               <label class="block mb-1 text-zinc-400">WhatsApp de contacto *</label>
-              <input type="text" id="chk-phone" value="381 555 1234" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input type="text" id="chk-phone" inputmode="tel" placeholder="Ej. 381 555 1234" autocomplete="tel" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
             </div>
           </div>
           <div>
@@ -1992,7 +2022,7 @@
       }
       if (id === 'arrepentimiento') {
         return legalVendedor() +
-          legalSec('Tu derecho', '<p>Si compraste en este sitio, podés revocar la compra dentro de los <strong class="text-zinc-100">10 días corridos</strong> desde que recibiste el producto (Ley 24.240, art. 34). No tenés que dar explicaciones y no pagás nada por devolverlo: los costos de devolución corren por nuestra cuenta.</p><p>El producto debe estar sin uso, con su caja y accesorios. Te reintegramos el dinero por el mismo medio de pago que usaste.</p>') +
+          legalSec('Tu derecho', '<p>Si compraste en este sitio, podés revocar la compra dentro de los <strong class="text-zinc-100">10 días corridos</strong> desde que recibiste el producto (Ley 24.240, art. 34). No tenés que dar explicaciones y no pagás nada por devolverlo: los costos de devolución corren por nuestra cuenta.</p><p>El producto debe estar sin uso, con su caja y accesorios. Te reintegramos el dinero por el mismo medio de pago que usaste: si pagaste por transferencia, te lo devolvemos a la misma cuenta, con todo lo que pagaste (envío incluido), dentro de las 48 horas hábiles de recibida la devolución (o de tu pedido, si todavía no te lo entregamos).</p>') +
           '<form id="rev-form" class="mt-5 space-y-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800" onsubmit="submitRevocation(event)">' +
             '<div class="font-bold text-white text-sm">Botón de arrepentimiento</div>' +
             '<label class="block text-zinc-400 text-xs">Número de pedido *<input id="rev-order" required maxlength="30" autocomplete="off" class="mt-1 w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white font-code" placeholder="Ej: PS-1042" /></label>' +
@@ -2064,8 +2094,6 @@
           res.textContent = (r && r.error) || 'No pudimos registrar tu arrepentimiento. Revisá tu conexión o escribinos por WhatsApp.';
           return;
         }
-        rememberNotifPhone(phone);
-        loadNotifications();
         res.className = 'text-xs text-emerald-300 space-y-1';
         res.innerHTML = '';
         const p1 = document.createElement('p');
@@ -2091,13 +2119,15 @@
     }
 
     function openCustomerModal() {
-      renderRegisterCard();
-      const profile = loadStorage(PROFILE_KEY, null);
-      const defaultPhone = (profile && profile.phone) || document.getElementById('chk-phone').value.trim() || '';
-      document.getElementById('cust-phone-input').value = defaultPhone;
-      lookupCustomerOrders();
+      // Mi Cuenta NUNCA se completa sola: sin pase verificado pide WhatsApp + número de pedido.
+      addingOrder = false;
+      const ph = document.getElementById('cust-phone-input'), od = document.getElementById('cust-order-input');
+      if (ph) ph.value = '';
+      if (od) od.value = '';
+      accessError('');
       document.getElementById('customer-modal').classList.remove('hidden');
       document.getElementById('customer-modal').classList.add('flex');
+      lookupCustomerOrders();
     }
 
     function closeCustomerModal() {
@@ -2105,9 +2135,20 @@
       document.getElementById('customer-modal').classList.remove('flex');
     }
 
+    // QR generado en el propio navegador (nunca se manda un número de pedido ni un código a un sitio externo).
+    function localQrUrl(text, cell) {
+      try {
+        if (typeof qrcode === 'function') {
+          const qr = qrcode(0, 'M');
+          qr.addData(String(text));
+          qr.make();
+          return qr.createDataURL(cell || 4, 2);
+        }
+      } catch (e) { /* sin librería de QR: se muestra un recuadro */ }
+      return 'data:image/svg+xml;utf8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60"><rect width="60" height="60" fill="#fff"/><text x="30" y="34" font-size="10" text-anchor="middle" fill="#000">QR</text></svg>');
+    }
     function getQrCodeUrl(orderId) {
-      const targetUrl = window.location.origin + window.location.pathname + '#track=' + encodeURIComponent(orderId);
-      return `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(targetUrl)}&margin=6`;
+      return localQrUrl(window.location.origin + window.location.pathname + '#track=' + encodeURIComponent(orderId), 4);
     }
 
     function promptQuickTracking() {
@@ -2117,7 +2158,7 @@
       openOrderTrackingModal(cleanId);
     }
 
-    function openOrderTrackingModal(orderId) {
+    async function openOrderTrackingModal(orderId) {
       // orderId puede venir del hash de la URL (#track=...), es decir de
       // afuera de la app: se sanitiza acá para evitar inyección de HTML
       // antes de usarlo en cualquier lado.
@@ -2125,7 +2166,16 @@
       if (!orderId) return;
 
       let order = ADMIN_ORDERS.find(o => o.id.toUpperCase() === orderId.toUpperCase());
-      
+
+      // Link de seguimiento abierto en otro celular: se pide al servidor la vista pública
+      // (estado y productos, sin teléfono ni dirección).
+      if (!order && isBackendConnected()) {
+        const pv = await apiRequest('ORDERS', {}, '/' + encodeURIComponent(orderId));
+        if (!pv) { alert('No pudimos conectar con el servidor para buscar el pedido. Probá de nuevo en un momento.'); return; }
+        if (pv.success === false || !pv.id) { alert('No encontramos ese pedido. Revisá el número (ej. PS-AB12CD34).'); return; }
+        order = { id: pv.id, customer: pv.customer, address: '', items: pv.items, deliveryType: pv.deliveryType, paymentMethod: pv.paymentMethod, total: pv.total, status: pv.status };
+      }
+
       if (!order) {
         order = {
           id: orderId,
@@ -2143,7 +2193,7 @@
       }
 
       document.getElementById('track-modal-order-id').textContent = order.id;
-      document.getElementById('track-modal-address').textContent = order.address || 'Yerba Buena / San Miguel de Tucumán';
+      document.getElementById('track-modal-address').textContent = order.address || 'El domicilio que indicaste al comprar';
       document.getElementById('track-modal-items').textContent = order.items;
       document.getElementById('track-modal-total').textContent = formatARS(order.total);
       document.getElementById('track-modal-payment').textContent = order.paymentMethod || 'Transferencia (10% OFF)';
@@ -2232,86 +2282,195 @@
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
+    // ---- Pase (billetera) del cliente: demuestra que este navegador verificó WhatsApp + n° de pedido ----
+    const WALLET_KEY = 'PLUGSHOP_WALLET';
+    let walletToken = '';
+    let walletRemembered = false;
+    let localOwnedIds = [];
+    let addingOrder = false;
+    let myOrders = [];
+
+    function walletInit() {
+      walletToken = ''; walletRemembered = false;
+      try { localStorage.removeItem(NOTIF_PHONE_KEY); } catch (e) { /* versión vieja: ya no se guarda el teléfono suelto */ }
+      try { const t = sessionStorage.getItem(WALLET_KEY); if (t) { walletToken = t; return; } } catch (e) {}
+      const st = loadStorage(WALLET_KEY, null);
+      if (st && typeof st.t === 'string' && st.t && (!st.exp || st.exp > Date.now())) { walletToken = st.t; walletRemembered = true; }
+    }
+    function walletSet(token, remember) {
+      walletToken = token;
+      if (remember) walletRemembered = true;
+      if (walletRemembered) {
+        saveStorage(WALLET_KEY, { t: token, exp: Date.now() + 90 * 86400000 });
+        try { sessionStorage.removeItem(WALLET_KEY); } catch (e) {}
+      } else {
+        try { sessionStorage.setItem(WALLET_KEY, token); } catch (e) { /* sin sessionStorage: queda solo en memoria */ }
+      }
+    }
+    function walletHeaders() { return walletToken && walletToken !== 'local' ? { Authorization: 'Bearer ' + walletToken } : {}; }
+    function walletClear() {
+      walletToken = ''; walletRemembered = false; localOwnedIds = [];
+      try { sessionStorage.removeItem(WALLET_KEY); } catch (e) {}
+      try { localStorage.removeItem(WALLET_KEY); } catch (e) {}
+    }
+
+    function accessError(msg) {
+      const el = document.getElementById('cust-access-error');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.classList.toggle('hidden', !msg);
+    }
+    function renderCustomerShell() {
+      const show = !walletToken || addingOrder;
+      const set = (id, hidden) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', hidden); };
+      set('cust-access-card', !show);
+      set('cust-access-cancel', !(walletToken && addingOrder));
+      set('cust-session-bar', !walletToken);
+      const note = document.getElementById('cust-session-note');
+      if (note) note.textContent = walletRemembered ? ' · te recordamos en este celular' : ' · se cierra cuando cerrás el navegador';
+      renderRegisterCard();
+    }
+    function showAddOrderForm() {
+      addingOrder = true;
+      renderCustomerShell();
+      const ph = document.getElementById('cust-phone-input'); if (ph) ph.focus();
+    }
+    function hideAddOrderForm() {
+      addingOrder = false;
+      accessError('');
+      renderCustomerShell();
+    }
+    function customerLogout() {
+      walletClear();
+      myOrders = []; myClaims = []; addingOrder = false;
+      notifState = { items: [], announcements: notifState.announcements };
+      // "No soy yo": también se borra lo que el celular recordaba de la persona.
+      try { localStorage.removeItem(PROFILE_KEY); } catch (e) {}
+      ['chk-name', 'chk-phone'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      updateNotifBadge();
+      renderCustomerShell();
+      renderMyClaims();
+      renderMyOrders();
+    }
+
+    async function submitCustomerAccess() {
+      const phone = (document.getElementById('cust-phone-input').value || '').trim();
+      const orderId = (document.getElementById('cust-order-input').value || '').trim().toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+      const remember = !!(document.getElementById('cust-remember') || {}).checked;
+      accessError('');
+      if (!isValidArPhone(phone)) { accessError('Escribí tu WhatsApp completo, con característica (ej. 381 555 1234).'); return; }
+      if (!orderId) { accessError('Escribí tu número de pedido (ej. PS-AB12CD34).'); return; }
+      const btn = document.getElementById('cust-access-btn');
+      if (btn) btn.disabled = true;
+      let ok = false;
+      if (isBackendConnected()) {
+        const res = await apiRequest('ORDERS', { method: 'POST', headers: walletHeaders(), body: JSON.stringify({ phone, orderId }) }, '/access');
+        if (!res) accessError('No pudimos conectar con el servidor. Si recién se despierta puede tardar un minuto: probá de nuevo.');
+        else if (res.success === false || !res.wallet) accessError(res.error || 'No pudimos verificar el pedido.');
+        else { walletSet(res.wallet, remember); myOrders = Array.isArray(res.orders) ? res.orders : []; ok = true; }
+      } else {
+        const o = ADMIN_ORDERS.find(x => x.id.toUpperCase() === orderId && samePhone(x.phone, phone));
+        if (!o) accessError('No encontramos ese pedido con ese WhatsApp. Revisá el número de pedido (ej. PS-AB12CD34).');
+        else { localOwnedIds.push(o.id); walletToken = 'local'; ok = true; }
+      }
+      if (btn) btn.disabled = false;
+      if (!ok) return;
+      // El teléfono no queda escrito en la pantalla.
+      document.getElementById('cust-phone-input').value = '';
+      document.getElementById('cust-order-input').value = '';
+      addingOrder = false;
+      renderCustomerShell();
+      loadNotifications();
+      await loadMyClaims();
+      renderMyOrders();
+    }
+
+    // Refresca "Mis pedidos" con el pase (la usan también las acciones: subir comprobante, cancelar, etc.)
     async function lookupCustomerOrders() {
-      const rawInput = document.getElementById('cust-phone-input').value.trim();
-      const cleanInput = rawInput.replace(/\D/g, '');
+      renderCustomerShell();
+      if (!walletToken) { myOrders = []; myClaims = []; renderMyClaims(); renderMyOrders(); return; }
+      if (isBackendConnected()) {
+        const res = await apiRequest('ORDERS', { headers: walletHeaders() }, '/mine');
+        if (res && !Array.isArray(res) && res.code === 'wallet') {
+          customerLogout();
+          accessError('Tu sesión venció. Ingresá de nuevo con tu WhatsApp y tu número de pedido.');
+          return;
+        }
+        if (!Array.isArray(res)) {
+          const box = document.getElementById('customer-orders-list');
+          if (box && !myOrders.length) box.innerHTML = '<div class="p-6 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center text-xs text-zinc-400">No pudimos cargar tus pedidos ahora. Probá de nuevo en un momento.</div>';
+          return;
+        }
+        myOrders = res;
+      } else {
+        myOrders = ADMIN_ORDERS.filter(o => localOwnedIds.includes(o.id));
+      }
+      loadMyClaims();
+      renderMyOrders();
+    }
+
+    function refundHtml(order) {
+      const r = order.refund;
+      if (!r) return '';
+      if (r.status === 'devuelto') {
+        const d = r.doneAt ? new Date(r.doneAt).toLocaleDateString('es-AR') : '';
+        return `<div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-[11px] text-emerald-300">✅ <strong>Te devolvimos ${formatARS(r.amount)}</strong>${d ? ' el ' + escapeHtml(d) : ''}${r.ref ? ' · Operación ' + escapeHtml(r.ref) : ''}. Puede tardar un rato en verse en tu banco.</div>`;
+      }
+      return `<div class="p-3 rounded-lg bg-amber-950/40 border border-amber-800/60 text-[11px] text-amber-200 space-y-1">
+        <div>💸 <strong>Reintegro en proceso: ${formatARS(r.amount)}</strong></div>
+        <div class="text-amber-300/90">Te lo devolvemos por transferencia a la misma cuenta con la que pagaste, dentro de las 48 hs hábiles. Incluye lo que pagaste de envío. No tenés que hacer nada más.</div>
+        <a href="https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent('Hola PLUGSHOP! Consulto por el reintegro del pedido ' + order.id)}" target="_blank" rel="noopener noreferrer" class="inline-block text-emerald-400 font-semibold hover:underline">Consultar por WhatsApp ↗</a>
+      </div>`;
+    }
+
+    function renderMyOrders() {
       const container = document.getElementById('customer-orders-list');
       const badge = document.getElementById('cust-status-badge');
-
-      if (!isValidArPhone(rawInput)) {
-        badge.textContent = 'Ingrese un número válido';
-        badge.className = 'px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-400 font-code';
+      if (!container) return;
+      if (!walletToken) {
+        if (badge) { badge.textContent = 'Modo Seguro'; badge.className = 'px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-400 font-code'; }
         container.innerHTML = `
-          <div class="p-8 rounded-xl bg-zinc-900/40 border border-zinc-800 text-center space-y-2">
-            <div class="text-2xl">📱</div>
-            <p class="text-xs text-zinc-400 font-sans">Escribí tu WhatsApp completo (con característica, ej. 381 555 1234) para consultar tus pedidos y garantías activas.</p>
-          </div>
-        `;
+          <div class="p-6 rounded-xl bg-zinc-900/40 border border-zinc-800 text-center space-y-3">
+            <div class="text-2xl">🔐</div>
+            <p class="text-xs text-zinc-300 leading-relaxed">Tus pedidos están protegidos. Poné tu WhatsApp y tu número de pedido para verlos.</p>
+            <button onclick="window.open('https://wa.me/' + STORE_SETTINGS.whatsappNumber + '?text=' + encodeURIComponent('Hola PLUGSHOP! No encuentro el número de mi pedido.'), '_blank')" class="text-[11px] text-emerald-400 font-semibold hover:underline">¿No encontrás tu número de pedido? Escribinos por WhatsApp ↗</button>
+          </div>`;
         return;
       }
-
-      rememberNotifPhone(rawInput);
-      loadMyClaims(rawInput);
-      let userOrders;
-      if (isBackendConnected()) {
-        loadNotifications();
-        const res = await apiRequest('ORDERS', {}, '/lookup?phone=' + encodeURIComponent(rawInput));
-        userOrders = Array.isArray(res) ? res : [];
-      } else {
-        userOrders = ADMIN_ORDERS.filter(o => samePhone(o.phone, rawInput));
-      }
-
-      if (userOrders.length === 0) {
-        badge.textContent = '0 pedidos encontrados';
-        badge.className = 'px-2 py-0.5 rounded text-[10px] bg-amber-950 text-amber-400 border border-amber-800 font-code';
-        container.innerHTML = `
-          <div class="p-6 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center space-y-3 font-sans">
-            <div class="text-3xl">🔍</div>
-            <div class="text-sm font-bold text-white">No encontramos pedidos registrados con este número</div>
-            <p class="text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed">
-              Si compraste recientemente o tu pedido fue registrado con otro teléfono, nuestro equipo de soporte puede ayudarte a localizarlo al instante.
-            </p>
-            <div class="pt-1">
-              <button onclick="window.open('https://wa.me/' + STORE_SETTINGS.whatsappNumber + '?text=' + encodeURIComponent('Hola PLUGSHOP! Quiero consultar el estado de mi pedido realizado con el teléfono ' + rawInput), '_blank')" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs inline-flex items-center gap-1.5 transition-all">
-                <span>Consultar por WhatsApp ↗</span>
-              </button>
-            </div>
-          </div>
-        `;
+      if (!myOrders.length) {
+        if (badge) { badge.textContent = '0 pedidos'; badge.className = 'px-2 py-0.5 rounded text-[10px] bg-amber-950 text-amber-400 border border-amber-800 font-code'; }
+        container.innerHTML = '<div class="p-6 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center text-xs text-zinc-400">Todavía no hay pedidos en esta cuenta. Tocá "+ Agregar otro pedido".</div>';
         return;
       }
+      if (badge) { badge.textContent = `${myOrders.length} pedido(s)`; badge.className = 'px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-code'; }
 
-      badge.textContent = `${userOrders.length} orden(es) registrada(s)`;
-      badge.className = 'px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-code';
-
-      container.innerHTML = userOrders.map(order => `
+      container.innerHTML = myOrders.map(order => `
         <div class="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div class="flex items-center gap-2">
-              <button onclick="openOrderTrackingModal('${order.id}')" class="w-8 h-8 rounded-lg bg-white p-1 hover:scale-105 transition-transform shrink-0" title="Ver código QR y tracking">
+              <button onclick="openOrderTrackingModal('${order.id}')" class="w-8 h-8 rounded-lg bg-white p-1 hover:scale-105 transition-transform shrink-0" title="Ver seguimiento">
                 <img src="${getQrCodeUrl(order.id)}" alt="QR" class="w-full h-full object-contain" />
               </button>
               <div>
-                <div class="font-bold text-white text-sm flex items-center gap-2">
-                  <span>Orden #${order.id}</span>
-                  <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-code font-bold">QR ACTIVO</span>
-                </div>
-                <div class="text-[11px] text-zinc-400 font-code">${order.time || order.date || ''} · Entrega: <strong class="text-zinc-300">${order.deliveryType}</strong></div>
+                <div class="font-bold text-white text-sm">Orden #${escapeHtml(order.id)}</div>
+                <div class="text-[11px] text-zinc-400 font-code">${escapeHtml(order.time || order.date || '')} · Entrega: <strong class="text-zinc-300">${escapeHtml(order.deliveryType || '')}</strong></div>
               </div>
             </div>
             <span class="px-2.5 py-1 rounded-md text-[11px] font-bold font-code ${getStatusBadgeClass(order.status)}">
-              ${order.status}
+              ${escapeHtml(order.status)}
             </span>
           </div>
 
-          <div class="p-3 rounded-lg bg-zinc-950 border border-zinc-800/80 flex items-center justify-between">
+          <div class="p-3 rounded-lg bg-zinc-950 border border-zinc-800/80 flex items-center justify-between gap-2">
             <div>
               <div class="text-xs text-white font-medium">${escapeHtml(order.items)}</div>
-              <div class="text-[10px] text-emerald-400 font-code">Total: ${formatARS(order.total)} (${order.paymentMethod || 'Efectivo / Transferencia'})</div>
+              <div class="text-[10px] text-emerald-400 font-code">Total: ${formatARS(order.total)} (${escapeHtml(order.paymentMethod || 'Efectivo / Transferencia')})</div>
             </div>
-            <span class="text-xs text-zinc-500 font-medium">${escapeHtml(order.address)}</span>
+            <span class="text-xs text-zinc-500 font-medium text-right">${escapeHtml(order.address || '')}</span>
           </div>
 
+          ${order.status === 'Cancelado' && order.cancelReason ? `<div class="text-[11px] text-zinc-400">Motivo de la cancelación: ${escapeHtml(order.cancelReason)}</div>` : ''}
+          ${refundHtml(order)}
           ${customerOrderActionsHtml(order)}
 
           <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-zinc-800/60">
@@ -2752,6 +2911,7 @@
       if (isBackendConnected()) {
         const res = await apiRequest('ORDERS', {
           method: 'POST',
+          headers: walletHeaders(),
           body: JSON.stringify({
             customer: name, phone, address: `${zoneLabel} (${address})`,
             deliveryType: isRetiro ? 'Punto de Retiro Coordinado' : zoneLabel,
@@ -2766,7 +2926,9 @@
           return;
         }
         serverOrder = res.order;
-        rememberNotifPhone(phone);
+        // El servidor entrega un pase para ESTE pedido: así el cliente lo ve en Mi Cuenta
+        // sin volver a escribir nada (se borra al cerrar el navegador, salvo que elija "Recordarme").
+        if (res.wallet) walletSet(res.wallet, false);
         loadNotifications();
         orderNumber = serverOrder.id;
         grandTotal = serverOrder.total;
@@ -2886,13 +3048,16 @@
 
     function renderRegisterCard() {
       const profile = loadStorage(PROFILE_KEY, null);
+      const card = document.getElementById('cust-register-card');
+      // La tarjeta de registro (y el teléfono guardado) solo se ven con la cuenta ya verificada.
+      if (card) card.classList.toggle('hidden', !walletToken);
       const form = document.getElementById('cust-register-form');
       const done = document.getElementById('cust-register-done');
       if (!form || !done) return;
       form.classList.toggle('hidden', !!profile);
       done.classList.toggle('hidden', !profile);
       if (profile) {
-        document.getElementById('cust-register-done-text').textContent = `✓ Registrado como ${profile.name} (${profile.phone})`;
+        document.getElementById('cust-register-done-text').textContent = walletToken ? `✓ Registrado como ${profile.name} (${profile.phone})` : '';
         applyProfileToCheckout();
       }
     }
@@ -2927,8 +3092,6 @@
         apiRequest('CUSTOMERS', { method: 'POST', body: JSON.stringify({ name, phone }) }, '/register');
       }
       renderRegisterCard();
-      document.getElementById('cust-phone-input').value = phone;
-      lookupCustomerOrders();
     }
 
     function clearCustomerProfile() {
@@ -2958,12 +3121,11 @@
     }
     async function submitClaim(ev) {
       ev.preventDefault();
-      const phone = document.getElementById('cust-phone-input').value.trim();
       const res = document.getElementById('claim-result');
       res.classList.remove('hidden');
       const btn = document.getElementById('claim-submit');
       btn.disabled = true;
-      const r = await apiRequest('CLAIMS', { method: 'POST', body: JSON.stringify({ type: 'garantia', orderId: claimOrderId, phone, reason: document.getElementById('claim-reason').value.trim(), product: document.getElementById('claim-product').value.trim() }) });
+      const r = await apiRequest('CLAIMS', { method: 'POST', headers: walletHeaders(), body: JSON.stringify({ type: 'garantia', orderId: claimOrderId, reason: document.getElementById('claim-reason').value.trim(), product: document.getElementById('claim-product').value.trim() }) });
       if (!r || r.success === false || !r.claim) {
         btn.disabled = false;
         res.className = 'text-xs text-red-400';
@@ -2973,13 +3135,14 @@
       res.className = 'text-xs text-emerald-300';
       res.textContent = 'Listo. Tu número de reclamo es ' + r.claim.id + '. Te avisamos en la campanita y lo ves en Mi Cuenta.';
       loadNotifications();
-      loadMyClaims(phone);
+      loadMyClaims();
     }
-    async function loadMyClaims(phone) {
-      if (!isBackendConnected() || !isValidArPhone(phone)) { myClaims = []; renderMyClaims(); return; }
-      const res = await apiRequest('CLAIMS', {}, '/lookup?phone=' + encodeURIComponent(phone));
+    async function loadMyClaims() {
+      if (!isBackendConnected() || !walletToken || walletToken === 'local') { myClaims = []; renderMyClaims(); renderMyOrders(); return; }
+      const res = await apiRequest('CLAIMS', { headers: walletHeaders() }, '/mine');
       myClaims = Array.isArray(res) ? res : [];
       renderMyClaims();
+      renderMyOrders();
     }
     function renderMyClaims() {
       const box = document.getElementById('customer-claims-list');
@@ -3000,14 +3163,6 @@
     const NOTIF_SEEN_KEY = 'PLUGSHOP_SEEN_ANN';
     let notifState = { items: [], announcements: [] };
 
-    function getNotifPhone() {
-      const profile = loadStorage(PROFILE_KEY, null);
-      const p = (profile && profile.phone) || loadStorage(NOTIF_PHONE_KEY, '') || '';
-      return isValidArPhone(p) ? p : '';
-    }
-    function rememberNotifPhone(phone) {
-      if (isValidArPhone(phone)) saveStorage(NOTIF_PHONE_KEY, phone);
-    }
     function seenAnnouncements() { const v = loadStorage(NOTIF_SEEN_KEY, []); return Array.isArray(v) ? v : []; }
     function notifUnreadCount() {
       const seen = seenAnnouncements();
@@ -3032,8 +3187,7 @@
     }
     async function loadNotifications() {
       if (!isBackendConnected()) return;
-      const phone = getNotifPhone();
-      const res = await apiRequest('NOTIFICATIONS', {}, phone ? '?phone=' + encodeURIComponent(phone) : '');
+      const res = await apiRequest('NOTIFICATIONS', { headers: walletHeaders() });
       if (!res || !Array.isArray(res.items)) return;
       notifState = { items: res.items, announcements: Array.isArray(res.announcements) ? res.announcements : [] };
       updateNotifBadge();
@@ -3051,24 +3205,16 @@
           <div class="text-[10px] text-zinc-500 mt-1.5 font-code">${escapeHtml(meta)}</div>
         </div>`;
       let html = '';
-      if (!getNotifPhone()) {
+      if (!walletToken) {
         html += `<div class="p-3 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-2">
-          <p class="text-zinc-300">Poné tu WhatsApp para ver el estado de tus pedidos acá.</p>
-          <div class="flex gap-2"><input id="notif-phone-input" type="tel" inputmode="tel" placeholder="381 555 1234" class="flex-1 min-w-0 bg-zinc-950 border border-zinc-800 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-brand-orange" />
-          <button onclick="saveNotifPhoneFromPanel()" class="px-3 py-2 rounded-lg bg-brand-orange text-black font-bold">Ver</button></div>
-          <p id="notif-phone-error" class="hidden text-rose-400 text-[11px]">Revisá el número: con característica, sin 0 ni 15.</p>
+          <p class="text-zinc-300">Para ver el estado de tus pedidos entrá a Mi Cuenta con tu WhatsApp y tu número de pedido.</p>
+          <button onclick="closeNotifPanel(); openCustomerModal()" class="px-3 py-2 rounded-lg bg-brand-orange text-black font-bold">Entrar a Mi Cuenta</button>
         </div>`;
       }
       html += notifState.announcements.map(a => card('', a.title, a.body, 'Novedad · ' + notifTimeAgo(a.at), !seen.includes(a.id))).join('');
       html += notifState.items.map(n => card('', n.title, n.body, `Pedido ${n.orderId} · ${notifTimeAgo(n.at)}`, !n.read)).join('');
-      if (getNotifPhone() && !notifState.items.length && !notifState.announcements.length) html += '<p class="text-zinc-500 text-center py-6">Todavía no tenés avisos.</p>';
+      if (walletToken && !notifState.items.length && !notifState.announcements.length) html += '<p class="text-zinc-500 text-center py-6">Todavía no tenés avisos.</p>';
       body.innerHTML = html;
-    }
-    function saveNotifPhoneFromPanel() {
-      const v = (document.getElementById('notif-phone-input') || {}).value || '';
-      if (!isValidArPhone(v)) { document.getElementById('notif-phone-error').classList.remove('hidden'); return; }
-      rememberNotifPhone(v);
-      loadNotifications().then(renderNotifications);
     }
     async function toggleNotifPanel() {
       const panel = document.getElementById('notif-panel');
@@ -3079,9 +3225,8 @@
       await loadNotifications();
       renderNotifications();
       // marcar como leído (el aviso sigue resaltado hasta cerrar el panel)
-      const phone = getNotifPhone();
-      if (notifState.items.some(n => !n.read) && phone && isBackendConnected()) {
-        apiRequest('NOTIFICATIONS', { method: 'POST', body: JSON.stringify({ phone }) }, '/read');
+      if (notifState.items.some(n => !n.read) && walletToken && isBackendConnected()) {
+        apiRequest('NOTIFICATIONS', { method: 'POST', headers: walletHeaders(), body: '{}' }, '/read');
       }
       saveStorage(NOTIF_SEEN_KEY, notifState.announcements.map(a => a.id));
       notifState.items = notifState.items.map(n => ({ ...n, read: true }));
@@ -3092,7 +3237,7 @@
       if (!panel) return;
       panel.classList.add('hidden'); panel.classList.remove('flex');
     }
-    setInterval(() => { if (document.visibilityState === 'visible') loadNotifications(); }, 60000);
+    setInterval(() => { if (document.visibilityState === 'visible' && typeof loadNotifications === 'function') loadNotifications(); }, 60000);
 
     // ==========================================
     // CADENA DE CUSTODIA: ETIQUETA + DOBLE ESCANEO
@@ -3131,22 +3276,24 @@
       // Ojo: en modo conectado el pedido de un cliente puede NO estar en
       // ADMIN_ORDERS (ese cliente no inició sesión como staff), así que acá
       // no se busca el objeto completo — solo hace falta el ID para mostrarlo.
-      if (mode === 'dispatch' && !(isAdminAuthenticated && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role))) {
-        alert('Solo el equipo puede registrar la salida de un paquete.');
+      if ((mode === 'dispatch' || mode === 'handover') && !(isAdminAuthenticated && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role))) {
+        alert('Solo el equipo puede registrar la salida o la entrega de un paquete.');
         return;
       }
       closeScanModal();
       scanState.mode = mode; scanState.orderId = orderId;
       const isDelivery = mode === 'delivery';
+      const isHandover = mode === 'handover';
       const wrap = document.createElement('div');
       wrap.id = 'scan-modal';
       wrap.className = 'fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4';
       wrap.innerHTML = `
         <div class="w-full max-w-sm max-h-[92vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-2xl p-4 space-y-3">
-          <div class="text-sm font-bold text-white">${isDelivery ? '📷 Confirmar recepción' : '📷 Registrar salida del paquete'} · #${escapeHtml(orderId)}</div>
-          <p class="text-xs text-zinc-300">${isDelivery ? 'Escaneá el QR de la etiqueta del paquete que tenés en la mano, o escribí el código que figura debajo del QR.' : 'Escaneá la etiqueta del paquete antes de salir, o escribí el código que figura debajo del QR.'}</p>
+          <div class="text-sm font-bold text-white">${isHandover ? '📲 Entregar paquete' : (isDelivery ? '📷 Confirmar recepción' : '📷 Registrar salida del paquete')}${orderId ? ' · #' + escapeHtml(orderId) : ''}</div>
+          <p class="text-xs text-zinc-300">${isHandover ? 'Pedile al cliente que abra "Mostrar código de entrega" en su celular y escaneá ese QR (o una captura). Si no se puede escanear, escribí el número de pedido y los 6 números.' : (isDelivery ? 'Escaneá el QR de la etiqueta del paquete que tenés en la mano, o escribí el código que figura debajo del QR.' : 'Escaneá la etiqueta del paquete antes de salir, o escribí el código que figura debajo del QR.')}</p>
           <video id="scan-video" playsinline muted class="hidden w-full rounded-lg bg-black"></video>
-          <input id="scan-code" type="text" autocomplete="off" placeholder="Código de la etiqueta (ej. K7M2-9PQX)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white uppercase tracking-widest text-center focus:outline-none focus:border-brand-orange" />
+          ${isHandover ? `<input id="scan-order" type="text" autocomplete="off" value="${escapeHtml(orderId || '')}" placeholder="N° de pedido (ej. PS-AB12CD34)" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white uppercase text-center focus:outline-none focus:border-brand-orange" />` : ''}
+          <input id="scan-code" type="text" autocomplete="off" ${isHandover ? 'inputmode="numeric"' : ''} placeholder="${isHandover ? 'Los 6 números del cliente (o lo que lee el QR)' : 'Código de la etiqueta (ej. K7M2-9PQX)'}" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white uppercase tracking-widest text-center focus:outline-none focus:border-brand-orange" />
           ${isDelivery ? '<input id="scan-phone4" type="text" inputmode="numeric" maxlength="4" placeholder="Últimos 4 dígitos de tu WhatsApp" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-sm text-white text-center focus:outline-none focus:border-brand-orange" />' : ''}
           <div id="scan-msg" class="text-[11px] font-semibold"></div>
           <div class="grid grid-cols-2 gap-2 text-xs font-bold">
@@ -3187,7 +3334,44 @@
       }).catch(() => setScanMsg('No pudimos abrir la cámara: escribí el código de la etiqueta.', false));
     }
 
+    // Entrega con el QR del cliente: el equipo escanea "PSD|pedido|código" y el servidor pasa el pedido a Entregado.
+    async function submitHandover() {
+      const now = Date.now();
+      if (now < scanState.lockedUntil) { setScanMsg(`Demasiados intentos. Esperá ${Math.ceil((scanState.lockedUntil - now) / 1000)}s.`, false); return; }
+      const raw = (document.getElementById('scan-code').value || '').trim();
+      let orderId = ((document.getElementById('scan-order') || {}).value || scanState.orderId || '').trim().toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+      let code = raw;
+      if (/^PSD\|/i.test(raw)) {
+        const parts = raw.split('|');
+        orderId = String(parts[1] || '').toUpperCase().replace(/[^A-Z0-9\-]/g, '');
+        code = parts[2] || '';
+        const box = document.getElementById('scan-order'); if (box) box.value = orderId;
+      } else if (/^PLUG\|/i.test(raw)) {
+        setScanMsg('Ese es el QR de la ETIQUETA del paquete. Para entregar, escaneá el QR que muestra el cliente en su celular.', false);
+        return;
+      }
+      code = String(code).replace(/\D/g, '');
+      if (!orderId) { setScanMsg('Escribí el número de pedido o escaneá el QR del cliente.', false); return; }
+      if (code.length !== 6) { setScanMsg('El código del cliente tiene 6 números.', false); return; }
+      if (!isBackendConnected() || !currentStaffSession.token) { setScanMsg('Para entregar con QR tenés que estar conectado al servidor.', false); return; }
+      const res = await apiRequest('ORDERS', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + currentStaffSession.token },
+        body: JSON.stringify({ code })
+      }, '/' + encodeURIComponent(orderId) + '/scan/handover');
+      if (!res || res.success === false) {
+        if (res && res.error) setScanMsg(res.error, false);
+        else setScanMsg('No se pudo procesar. Revisá la conexión.', false);
+        return;
+      }
+      const local = ADMIN_ORDERS.find(o => o.id === orderId);
+      if (local && res.order) Object.assign(local, res.order);
+      closeScanModal();
+      alert('✓ Entrega registrada. El pedido ' + orderId + ' figura como entregado.');
+    }
+
     async function submitScan() {
+      if (scanState.mode === 'handover') return submitHandover();
       const now = Date.now();
       if (now < scanState.lockedUntil) { setScanMsg(`Demasiados intentos. Esperá ${Math.ceil((scanState.lockedUntil - now) / 1000)}s.`, false); return; }
 
@@ -3298,25 +3482,69 @@
         html += '<span class="text-[11px] text-sky-400 font-semibold">🧾 Comprobante recibido, lo estamos verificando</span>';
       }
       if (order.status === 'Despachado') {
+        const openArr = (typeof myClaims !== 'undefined' ? myClaims : []).find(c => c.orderId === id && c.type === 'arrepentimiento' && ['Recibido', 'En revisión', 'Aprobado'].includes(c.status));
         html += `
-          <button onclick="openScanModal('delivery', '${id}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold">📷 Confirmar recepción (escanear paquete)</button>
-          <span class="text-[11px] text-amber-400 basis-full">⚠️ Confirmá SOLO cuando tengas el paquete en la mano. Nadie de PLUGSHOP te va a pedir confirmarlo antes por WhatsApp.</span>`;
+          <button onclick="openDeliveryQr('${id}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold">📲 Mostrar código de entrega (QR)</button>
+          <span class="text-[11px] text-amber-400 basis-full">⚠️ Mostrale el código al repartidor SOLO cuando tengas el paquete en la mano. Con eso el pedido queda como entregado. Nadie de PLUGSHOP te lo va a pedir por WhatsApp.</span>
+          ${openArr
+            ? `<span class="text-[11px] text-sky-300 font-semibold basis-full">↩️ Pediste el arrepentimiento (${escapeHtml(openArr.id)}). Si llega el repartidor, no aceptes el paquete. Te avisamos por la campanita.</span>`
+            : `<button onclick="cancelShippedOrder('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-400 text-xs font-semibold">✕ Cancelar / No lo quiero</button>`}
+          <button onclick="openScanModal('delivery', '${id}')" class="text-[11px] text-zinc-500 hover:text-zinc-300 underline">Confirmar con el código de la etiqueta del paquete</button>`;
       }
       if (unpaidStates.includes(order.status)) {
         html += `<button onclick="cancelOrderByCustomer('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-400 text-xs font-semibold">✕ Cancelar pedido</button>`;
       } else if (order.status === 'En preparación') {
-        html += `<button onclick="requestCancelWhatsApp('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold">Solicitar cancelación por WhatsApp</button>`;
+        html += `<button onclick="cancelOrderByCustomer('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-400 text-xs font-semibold">✕ Cancelar pedido (te devolvemos todo)</button>`;
       }
       return html ? `<div class="flex flex-wrap items-center gap-2">${html}</div>` : '';
     }
 
+    // QR que el cliente le muestra al repartidor: al escanearlo, el pedido pasa solo a "Entregado".
+    function openDeliveryQr(orderId) {
+      const o = myOrders.find(x => x.id === orderId);
+      if (!o || !o.deliveryCode) { alert('Todavía no hay código de entrega para este pedido. Actualizá Mi Cuenta e intentá de nuevo.'); return; }
+      const code = String(o.deliveryCode);
+      document.getElementById('delivery-qr-modal')?.remove();
+      const wrap = document.createElement('div');
+      wrap.id = 'delivery-qr-modal';
+      wrap.className = 'fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4';
+      wrap.innerHTML = `
+        <div class="w-full max-w-xs bg-zinc-950 border border-white/[0.15] rounded-2xl p-4 space-y-3 text-center">
+          <div class="text-sm font-bold text-white">Código de entrega · #${escapeHtml(o.id)}</div>
+          <div class="bg-white rounded-xl p-3 space-y-1">
+            <img src="${localQrUrl('PSD|' + o.id + '|' + code, 6)}" alt="QR de entrega" class="w-56 h-56 mx-auto" style="image-rendering:pixelated" />
+            <div class="font-mono text-2xl font-black tracking-[0.3em] text-black">${escapeHtml(code.slice(0, 3) + ' ' + code.slice(3))}</div>
+          </div>
+          <p class="text-[11px] text-zinc-300">El repartidor escanea este QR (o te pide los 6 números) y el pedido queda <strong>entregado</strong>. Subí el brillo de la pantalla.</p>
+          <p class="text-[11px] text-amber-400">⚠️ Mostralo SOLO cuando tengas el paquete en la mano.</p>
+          <button onclick="document.getElementById('delivery-qr-modal').remove()" class="w-full py-2.5 rounded-xl bg-zinc-800 text-zinc-200 text-xs font-bold">Cerrar</button>
+        </div>`;
+      document.body.appendChild(wrap);
+    }
+
+    // Pedido ya despachado: se pide el arrepentimiento (Ley 24.240 art. 34) y se coordina la devolución.
+    async function cancelShippedOrder(orderId) {
+      if (!confirm(`Tu pedido #${orderId} ya salió. Si no lo querés, pedimos el arrepentimiento: no aceptes el paquete (o devolvelo) y te reintegramos TODO lo que pagaste, envío incluido, sin costo para vos. ¿Pedir el arrepentimiento?`)) return;
+      const res = await apiRequest('CLAIMS', { method: 'POST', headers: walletHeaders(), body: JSON.stringify({ type: 'arrepentimiento', orderId, reason: 'Cancelación con el pedido en camino' }) });
+      if (!res || res.success === false || !res.claim) { alert((res && res.error) || 'No pudimos registrar el pedido de arrepentimiento. Escribinos por WhatsApp.'); return; }
+      alert('Listo. Tu número de reclamo es ' + res.claim.id + '. Te respondemos dentro de las 24 hs y seguís todo desde Mi Cuenta y la campanita.');
+      loadNotifications();
+      lookupCustomerOrders();
+    }
+
     async function cancelOrderByCustomer(orderId) {
       if (isBackendConnected()) {
-        if (!confirm(`¿Cancelar el pedido #${orderId}? Los productos vuelven al stock.`)) return;
-        const phone = document.getElementById('cust-phone-input').value.trim();
-        const res = await apiRequest('ORDERS', { method: 'POST', body: JSON.stringify({ phone }) }, '/' + orderId + '/cancel');
-        if (!res || res.success === false) { alert((res && res.error) || 'No se pudo cancelar el pedido.'); return; }
+        const cur = myOrders.find(o => o.id === orderId);
+        const paid = cur && cur.status === 'En preparación';
+        const msg = paid
+          ? `¿Cancelar el pedido #${orderId}? Como ya pagaste, te devolvemos ${formatARS(cur.total)} (todo, con el envío) por transferencia a la misma cuenta, dentro de las 48 hs hábiles.`
+          : `¿Cancelar el pedido #${orderId}? Los productos vuelven al stock.`;
+        if (!confirm(msg)) return;
+        const res = await apiRequest('ORDERS', { method: 'POST', headers: walletHeaders(), body: '{}' }, '/' + orderId + '/cancel');
+        if (!res || res.success === false) { alert((res && res.error) || 'No se pudo cancelar el pedido.'); if (res && res.code === 'despachado') lookupCustomerOrders(); return; }
+        loadNotifications();
         lookupCustomerOrders();
+        if (res.order && res.order.refund) alert('Pedido cancelado. Te devolvemos ' + formatARS(res.order.refund.amount) + ' por transferencia, dentro de las 48 hs hábiles. Lo seguís desde Mi Cuenta.');
         return;
       }
       const order = ADMIN_ORDERS.find(o => o.id === orderId);
@@ -3326,11 +3554,6 @@
       order.status = 'Cancelado';
       saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
       lookupCustomerOrders();
-    }
-
-    function requestCancelWhatsApp(orderId) {
-      const msg = `Hola PLUGSHOP! Quiero cancelar mi pedido *#${orderId}*. Ya está en preparación, ¿cómo lo coordinamos?`;
-      window.open(`https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     // Achica la foto del comprobante antes de guardarla, para no llenar
@@ -3352,8 +3575,7 @@
           const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
 
           if (isBackendConnected()) {
-            const phone = document.getElementById('cust-phone-input').value.trim();
-            const res = await apiRequest('ORDERS', { method: 'POST', body: JSON.stringify({ phone, image: dataUrl }) }, '/' + orderId + '/proof');
+            const res = await apiRequest('ORDERS', { method: 'POST', headers: walletHeaders(), body: JSON.stringify({ image: dataUrl }) }, '/' + orderId + '/proof');
             if (!res || res.success === false) { alert((res && res.error) || 'No se pudo subir el comprobante.'); return; }
             lookupCustomerOrders();
             alert('¡Listo! Recibimos tu comprobante. Lo verificamos y te avisamos por WhatsApp.');
@@ -3545,6 +3767,7 @@
     // INITIALIZATION
     // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
+      walletInit();
       renderCategoryPills();
       renderProducts();
       updateCartUI();
