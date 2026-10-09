@@ -2,7 +2,14 @@
 <html lang="es" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#09090b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PLUGSHOP">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/icon-192.png">
   <title>PLUGSHOP — Tecnología Premium & Stock Inmediato</title>
   <meta name="robots" content="noindex, nofollow" />
   <meta name="description" content="Tecnología premium con stock local real en Tucumán y Yerba Buena. Originales y PlugShop Selección garantizados.">
@@ -96,7 +103,7 @@
       </span>
       <span class="text-zinc-600 hidden md:inline">|</span>
       <span class="inline-flex items-center gap-1 text-brand-amber font-semibold font-code">
-        🔥 10% OFF abonando por Transferencia Directa
+        🔥 <span data-disc>10</span>% OFF abonando por Transferencia Directa
       </span>
       <span class="text-zinc-600 hidden md:inline">|</span>
       <a data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" class="text-zinc-300 hover:text-white flex items-center gap-1 transition-colors">
@@ -154,7 +161,7 @@
       <!-- Nav Links, Account & Cart -->
       <div class="flex items-center gap-2 sm:gap-3">
         <nav class="hidden lg:flex items-center gap-6 text-sm font-medium text-zinc-300">
-          <a href="#catalogo" class="hover:text-white transition-colors">Catálogo</a>
+          <a href="#catalogo" class="hover:text-white transition-colors">Productos</a>
           <a href="#asistente" class="hover:text-white transition-colors flex items-center gap-1.5">
             <span class="w-2 h-2 rounded-full bg-brand-amber"></span>
             Asesor PLUG
@@ -215,11 +222,11 @@
 
           <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
             <a href="#catalogo" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-bold text-sm shadow-[0_10px_25px_rgba(255,98,0,0.3)] hover:opacity-95 transition-all text-center">
-              Explorar Catálogo 2026
+              Ver los productos
             </a>
             <a href="#asistente" class="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-zinc-900 border border-zinc-700/80 text-zinc-200 font-semibold text-sm hover:bg-zinc-800 transition-all text-center flex items-center justify-center gap-2">
               <svg class="w-4 h-4 text-brand-amber" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              Ayuda para elegir
+              ¿No sabés cuál elegir?
             </a>
           </div>
 
@@ -234,130 +241,18 @@
               <div class="text-[11px] text-zinc-400">Directa sin intermediarios</div>
             </div>
             <div>
-              <div class="text-emerald-400 font-bold text-base font-code">10% OFF Transferencia</div>
+              <div class="text-emerald-400 font-bold text-base font-code"><span data-disc>10</span>% OFF Transferencia</div>
               <div class="text-[11px] text-zinc-400">Descuento directo al Alias / CVU</div>
             </div>
           </div>
         </div>
 
-        <!-- Right: Glass Showcase Card -->
+        <!-- Right: producto destacado (se arma con el catálogo real) -->
         <div class="lg:col-span-5 flex justify-center">
-          <div class="relative w-full max-w-md">
-            <div class="absolute -inset-1 bg-gradient-to-r from-brand-amber/20 to-brand-orange/30 rounded-3xl blur-2xl opacity-70"></div>
-            
-            <div class="relative bg-zinc-900/90 border border-white/[0.12] rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
-              <div class="flex items-center justify-between mb-6">
-                <span class="px-2.5 py-1 rounded-md bg-brand-orange/15 text-brand-orange font-bold text-[11px] tracking-wider uppercase border border-brand-orange/30">
-                  DESTACADO DE LA SEMANA
-                </span>
-                <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Stock Disponible
-                </span>
-              </div>
-
-              <div onclick="openProductGallery(1)" class="relative h-56 rounded-2xl bg-gradient-to-b from-zinc-800/40 to-black/60 border border-white/[0.06] flex items-center justify-center p-6 mb-6 overflow-hidden group cursor-pointer" title="Ver galería y fotos">
-                <div class="text-8xl drop-shadow-[0_15px_30px_rgba(0,0,0,0.8)] transition-transform duration-300 group-hover:scale-110">
-                  🎧
-                </div>
-                <div class="absolute top-4 left-4 bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg text-[10px] text-zinc-300 font-code font-medium shadow-lg">
-                  ANC 40dB Híbrido
-                </div>
-                <div class="absolute bottom-4 right-4 bg-black/80 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-lg text-[10px] text-brand-amber font-code font-medium shadow-lg">
-                  Batería 50 horas
-                </div>
-                <div class="absolute inset-0 bg-brand-orange/15 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-xs font-bold text-white backdrop-blur-[2px]">
-                  🔍 Ver fotos y colores
-                </div>
-              </div>
-
-              <div class="space-y-4">
-                <div>
-                  <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">Audio Hi-Res · Sonix</div>
-                  <h2 class="text-xl font-bold text-white mt-0.5">Auricular Inalámbrico Pro X1</h2>
-                  <div class="flex items-center gap-1.5 mt-2">
-                    <span class="text-[10px] text-zinc-400">Colores:</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">Negro Mate</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">Blanco Glaciar</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">Azul Marino</span>
-                  </div>
-                </div>
-
-                <div class="flex items-baseline justify-between pt-1">
-                  <div>
-                    <div class="flex items-baseline gap-2">
-                      <span class="text-2xl sm:text-3xl font-black text-white font-code">$107.910</span>
-                      <span class="text-xs text-zinc-500 line-through font-semibold font-code">$119.900</span>
-                    </div>
-                    <span class="block text-[11px] text-emerald-400 font-medium">Con 10% OFF por Transferencia</span>
-                  </div>
-                  <button onclick="openProductGallery(1)" class="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-md">
-                    <span>Elegir Color</span>
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          <div id="hero-featured" class="relative w-full max-w-md hidden"></div>
         </div>
 
       </div>
-    </div>
-  </section>
-
-  <!-- Assistant Section with Multi-Option Interactive Comparison -->
-  <section id="asistente" class="py-16 bg-zinc-950/60 border-b border-white/[0.05]">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6">
-      
-      <div class="bg-gradient-to-b from-zinc-900 to-black rounded-2xl border border-white/[0.08] p-6 sm:p-8">
-        <div class="flex items-start gap-4">
-          <div class="w-12 h-12 rounded-xl bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-brand-orange text-xl shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3"/><circle cx="12" cy="2.6" r="0.9" fill="currentColor"/><rect x="4.5" y="6.5" width="15" height="11" rx="3.2"/><circle cx="9.3" cy="11.8" r="1.4" fill="currentColor" stroke="none"/><circle cx="14.7" cy="11.8" r="1.4" fill="currentColor" stroke="none"/><path d="M9.5 15h5"/><path d="M2.5 11v3M21.5 11v3"/><path d="M8.5 17.5V20h7v-2.5"/></svg>
-          </div>
-          <div class="flex-1">
-            <h2 class="text-xl font-bold text-white">Asesor PLUG</h2>
-            <p class="text-zinc-400 text-xs sm:text-sm mt-1">¿Qué estás buscando hoy? Escribí tus necesidades o presupuesto. El Smart Engine te compara alternativas: la opción 100% Original oficial vs. nuestra mejor alternativa Selección.</p>
-            
-            <div class="mt-4 flex flex-col sm:flex-row gap-3">
-              <input 
-                type="text" 
-                id="advisor-input" 
-                placeholder="Ejemplo: 'auriculares para estudiar y llamadas' o 'smartwatch deportivo'" 
-                class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand-orange transition-all"
-                onkeydown="if(event.key==='Enter') document.getElementById('advisor-btn').click()"
-              />
-              <button id="advisor-btn" class="px-6 py-3 rounded-xl bg-brand-orange text-black font-bold text-sm hover:bg-orange-500 transition-all shrink-0">
-                Comparar Recomendaciones
-              </button>
-            </div>
-
-            <!-- Quick Chips -->
-            <div class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-zinc-800/80 text-xs">
-              <span class="text-zinc-400 self-center text-[11px]">Sugerencias rápidas:</span>
-              <button onclick="quickAdvise('audio')" class="px-3 py-1 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 transition-colors">🎧 Audio con buena batería</button>
-              <button onclick="quickAdvise('gaming')" class="px-3 py-1 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 transition-colors">⌨️ Setup Gaming</button>
-              <button onclick="quickAdvise('wearables')" class="px-3 py-1 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 transition-colors">⌚ Reloj inteligente</button>
-              <button onclick="quickAdvise('home')" class="px-3 py-1 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 transition-colors">⚡ Carga rápida & Setup</button>
-            </div>
-
-            <!-- Multi-Product Recommendation Container -->
-            <div id="advisor-result" class="hidden mt-6 space-y-3.5">
-              <div class="flex items-center justify-between flex-wrap gap-2 pb-1 border-b border-zinc-800/80">
-                <span class="text-xs font-bold uppercase tracking-wider text-brand-amber flex items-center gap-1.5 font-code">
-                  <span>RECOMENDACIONES COMPARATIVAS SMART ENGINE</span>
-                  <span id="advisor-results-count" class="text-[10px] text-zinc-400 font-normal"></span>
-                </span>
-                <span class="text-[11px] text-zinc-400">💡 Hacé clic en cualquier tarjeta para elegir color y ver fotos</span>
-              </div>
-
-              <!-- Injected dynamic grid with comparison cards -->
-              <div id="advisor-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
     </div>
   </section>
 
@@ -368,9 +263,9 @@
       <!-- Section Title & Controls -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-white/[0.06]">
         <div>
-          <span class="text-brand-orange font-bold text-xs tracking-wider uppercase font-code">Stock en Tiempo Real 2026</span>
-          <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Catálogo de Productos</h2>
-          <p class="text-zinc-400 text-sm mt-1">Todos los artículos incluyen garantía verificada, colores a elección y 10% OFF por transferencia.</p>
+          <span class="text-brand-orange font-bold text-xs tracking-wider uppercase font-code">Stock real en Tucumán</span>
+          <h2 class="text-3xl font-extrabold text-white tracking-tight mt-1">Elegí lo tuyo</h2>
+          <p class="text-zinc-400 text-sm mt-1">Todos los artículos incluyen garantía verificada, colores a elección y <span data-disc>10</span>% OFF por transferencia.</p>
         </div>
 
         <!-- Sort Select -->
@@ -410,6 +305,57 @@
     </div>
   </section>
 
+  <!-- Assistant Section with Multi-Option Interactive Comparison -->
+  <section id="asistente" class="py-16 bg-zinc-950/60 border-b border-white/[0.05]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      
+      <div class="bg-gradient-to-b from-zinc-900 to-black rounded-2xl border border-white/[0.08] p-6 sm:p-8">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-xl bg-brand-orange/10 border border-brand-orange/30 flex items-center justify-center text-brand-orange text-xl shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3"/><circle cx="12" cy="2.6" r="0.9" fill="currentColor"/><rect x="4.5" y="6.5" width="15" height="11" rx="3.2"/><circle cx="9.3" cy="11.8" r="1.4" fill="currentColor" stroke="none"/><circle cx="14.7" cy="11.8" r="1.4" fill="currentColor" stroke="none"/><path d="M9.5 15h5"/><path d="M2.5 11v3M21.5 11v3"/><path d="M8.5 17.5V20h7v-2.5"/></svg>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-xl font-bold text-white">Asesor PLUG</h2>
+            <p class="text-zinc-400 text-xs sm:text-sm mt-1">Contame qué buscás y cuánto querés gastar. Te comparo 2 o 3 opciones de la tienda —Original oficial vs. PLUG Selección— y te explico por qué te conviene cada una.</p>
+
+            <div class="mt-4 flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                id="advisor-input"
+                maxlength="120"
+                placeholder="Ej: auriculares para correr hasta 50 mil · tengo 70 mil, ¿qué me conviene?"
+                class="flex-1 bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-brand-orange transition-all"
+                onkeydown="if(event.key==='Enter') document.getElementById('advisor-btn').click()"
+              />
+              <button id="advisor-btn" class="px-6 py-3 rounded-xl bg-brand-orange text-black font-bold text-sm hover:bg-orange-500 transition-all shrink-0">
+                Recomendame
+              </button>
+            </div>
+
+            <!-- Sugerencias rápidas (se arman con las categorías reales) -->
+            <div id="advisor-chips" class="flex flex-wrap gap-2 mt-4 pt-3 border-t border-zinc-800/80 text-xs"></div>
+
+            <!-- Multi-Product Recommendation Container -->
+            <div id="advisor-result" class="hidden mt-6 space-y-3.5">
+              <div class="flex items-center justify-between flex-wrap gap-2 pb-1 border-b border-zinc-800/80">
+                <span class="text-xs font-bold uppercase tracking-wider text-brand-amber flex items-center gap-1.5 font-code">
+                  <span>TU RECOMENDACIÓN</span>
+                  <span id="advisor-results-count" class="text-[10px] text-zinc-400 font-normal"></span>
+                </span>
+                <span class="text-[11px] text-zinc-400">💡 Tocá una tarjeta para elegir color y ver fotos</span>
+              </div>
+
+              <!-- Injected dynamic grid with comparison cards -->
+              <div id="advisor-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
   <!-- Benefits Section -->
   <section id="beneficios" class="py-16 bg-zinc-950/70 border-t border-b border-white/[0.06]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -441,7 +387,7 @@
           </div>
           <h3 class="text-base font-bold text-white">Incentivo por Transferencia</h3>
           <p class="text-xs text-zinc-400 leading-relaxed">
-            Ahorrá un 10% abonando por transferencia directa a nuestro Alias/CVU o pagá el precio de lista en efectivo al cadete al recibir la caja sellada.
+            Ahorrá un <span data-disc>10</span>% abonando por transferencia directa a nuestro Alias/CVU o pagá el precio de lista en efectivo al cadete al recibir la caja sellada.
           </p>
         </div>
 
@@ -475,7 +421,7 @@
 
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">Navegación</div>
-          <div><a href="#catalogo" class="text-zinc-400 hover:text-white transition-colors">Catálogo de Productos</a></div>
+          <div><a href="#catalogo" class="text-zinc-400 hover:text-white transition-colors">Todos los productos</a></div>
           <div><a href="#asistente" class="text-zinc-400 hover:text-white transition-colors">Asesor PLUG</a></div>
           <div><button type="button" onclick="openLegal('garantia')" class="text-zinc-400 hover:text-white transition-colors">Términos de Garantía</button></div>
           <div><button onclick="openCustomerModal()" class="text-zinc-400 hover:text-brand-amber transition-colors">Seguimiento & Mi Cuenta</button></div>
@@ -885,7 +831,7 @@
         </div>
         <div class="flex justify-between text-emerald-400 font-code">
           <span>Incentivo por Transferencia:</span>
-          <span class="font-bold">Hasta 10% OFF</span>
+          <span class="font-bold">Hasta <span data-disc>10</span>% OFF</span>
         </div>
         <div class="flex justify-between text-sm font-bold text-white pt-2 border-t border-zinc-800/60">
           <span>Total Estimado</span>
@@ -989,7 +935,7 @@
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <span class="font-bold text-white text-sm">3. Método de Pago</span>
-            <span class="text-[11px] text-emerald-400 font-bold font-code">10% OFF VÍA TRANSFERENCIA</span>
+            <span class="text-[11px] text-emerald-400 font-bold font-code"><span data-disc>10</span>% OFF VÍA TRANSFERENCIA</span>
           </div>
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1150,12 +1096,13 @@
         AUTH_STAFF: '/api/auth/staff',        // POST { username, pin } -> { token, role, name }
         PRODUCTS: '/api/products',             // GET / PUT
         ORDERS: '/api/orders',                 // GET / POST
-        CUSTOMERS: '/api/customers',           // GET / POST
+        CUSTOMERS: '/api/customers',           // GET / POST / PUT/DELETE /:telefono (editar y borrar la ficha)
         STAFF_USERS: '/api/staff-users',       // GET / POST / PUT / DELETE (solo admin)
         SUPPLIERS: '/api/suppliers',           // GET (admin y logística)
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
+        INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
         BACKUP: '/api/backup',                 // GET (solo admin): copia de seguridad completa
         AUDIT: '/api/audit',                   // GET (solo admin): registro de quién cambió qué
         CLAIMS: '/api/claims',                 // POST (cliente: garantía/arrepentimiento) / GET /lookup?phone= / GET y PATCH /:id (equipo)
@@ -1209,6 +1156,7 @@
     // descuento). Lo que se carga en Ajustes del panel llega así a todos los
     // clientes. Si el servidor no responde, quedan los valores guardados.
     function applyBankDisplay() {
+      document.querySelectorAll('[data-disc]').forEach(el => { el.textContent = String(STORE_SETTINGS.transferDiscountPct || 10); });
       const a = document.getElementById('alias-display-text');
       if (a) a.textContent = STORE_SETTINGS.bankAlias;
       const c = document.getElementById('cbu-display-text');
@@ -1218,7 +1166,7 @@
       if (!isBackendConnected()) return;
       const res = await apiRequest('SETTINGS');
       if (!res || typeof res !== 'object' || res.error) return;
-      ['whatsappNumber', 'bankAlias', 'bankCbu'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
+      ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
       applyStoreWhatsappLinks();
@@ -1312,7 +1260,7 @@
       return {
         ...p,
         name: cleanText(p.name, 120), brand: cleanText(p.brand, 60), category: cleanText(p.category, 40), subcategory: cleanText(p.subcategory, 40), active: p.active !== false,
-        specs: cleanText(p.specs, 300), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
+        specs: cleanText(p.specs, 300), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
@@ -1479,7 +1427,8 @@
       whatsappNumber: '5493816993305',
       bankAlias: 'PlugShop.store.ar',
       bankCbu: '3840200500000011487511',
-      transferDiscountPct: 10
+      transferDiscountPct: 10,
+      advisorBias: 'equilibrado'
     };
 
     const DEFAULT_ORDERS = [
@@ -1659,6 +1608,7 @@
     // ==========================================
     // ---- Filtros de categoría de la tienda ----
     function renderCategoryPills() {
+      renderAdvisorChips();
       const box = document.getElementById('category-filters');
       if (!box) return;
       if (currentCategory !== 'all' && !topCats().some(c => c.id === currentCategory)) { currentCategory = 'all'; currentSubcategory = 'all'; }
@@ -1683,8 +1633,51 @@
       return was > now && now > 0 ? Math.round((1 - now / was) * 100) : 0;
     }
 
+    // Producto destacado del inicio: sale del catálogo real (nada fijo en el HTML).
+    // Primero un producto marcado como destacado; si no hay, el de mayor oferta; si no, el de más stock.
+    function renderHeroFeatured() {
+      const box = document.getElementById('hero-featured');
+      if (!box) return;
+      const live = PRODUCTS.filter(p => p.active !== false && Number(p.stock) > 0 && Number(p.price) > 0);
+      const pick = live.filter(p => p.featured)[0] || live.slice().sort((a, b) => offPct(b) - offPct(a))[0] || null;
+      const chosen = pick && (pick.featured || offPct(pick) > 0) ? pick : live.slice().sort((a, b) => Number(b.stock) - Number(a.stock))[0];
+      if (!chosen) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const disc = STORE_SETTINGS.transferDiscountPct || 10;
+      const eff = Math.round(chosen.price * (1 - disc / 100));
+      const off = offPct(chosen);
+      const label = chosen.featured ? 'DESTACADO' : (off > 0 ? `OFERTA −${off}%` : 'DISPONIBLE YA');
+      const visual = (chosen.photos && chosen.photos[0]) ? chosen.photos[0] : '📦';
+      const colors = (chosen.colors || []).slice(0, 4);
+      box.innerHTML = `
+        <div class="absolute -inset-1 bg-gradient-to-r from-brand-amber/20 to-brand-orange/30 rounded-3xl blur-2xl opacity-70"></div>
+        <div class="relative bg-zinc-900/90 border border-white/[0.12] rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
+          <div class="flex items-center justify-between mb-5">
+            <span class="px-2.5 py-1 rounded-md bg-brand-orange/15 text-brand-orange font-bold text-[11px] tracking-wider uppercase border border-brand-orange/30">${escapeHtml(label)}</span>
+            <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Stock disponible</span>
+          </div>
+          <div onclick="openProductGallery(${Number(chosen.id)})" class="relative h-56 rounded-2xl bg-gradient-to-b from-zinc-800/40 to-black/60 border border-white/[0.06] flex items-center justify-center p-4 mb-5 overflow-hidden group cursor-pointer" title="Ver fotos y colores">
+            ${renderVisualElement(visual, 'w-full h-full object-contain transition-transform duration-300 group-hover:scale-105', 'text-8xl')}
+          </div>
+          <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">${escapeHtml(chosen.brand)} · ${chosen.type === 'original' ? '100% Original' : 'PLUG Selección'}</div>
+          <h2 class="text-xl font-bold text-white mt-0.5">${escapeHtml(chosen.name)}</h2>
+          ${colors.length ? `<div class="flex flex-wrap items-center gap-1.5 mt-2"><span class="text-[11px] text-zinc-400">Colores:</span>${colors.map(c => `<span class="text-[11px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">${escapeHtml(c)}</span>`).join('')}</div>` : ''}
+          <div class="flex items-end justify-between gap-3 pt-4">
+            <div>
+              <div class="flex items-baseline gap-2">
+                <span class="text-2xl sm:text-3xl font-black text-white font-code">${formatARS(eff)}</span>
+                <span class="text-xs text-zinc-500 line-through font-semibold font-code">${formatARS(chosen.price)}</span>
+              </div>
+              <span class="block text-[11px] text-emerald-400 font-medium">Con ${escapeHtml(String(disc))}% OFF por transferencia</span>
+            </div>
+            <button onclick="openProductGallery(${Number(chosen.id)})" class="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-md shrink-0"><span>Elegir color</span></button>
+          </div>
+        </div>`;
+      box.classList.remove('hidden');
+    }
+
     function renderProducts() {
       PRODUCTS = PRODUCTS.map(sanitizeProduct);
+      renderHeroFeatured();
       const grid = document.getElementById('products-grid');
       
       let filtered = PRODUCTS.filter(p => {
@@ -1703,7 +1696,7 @@
         grid.innerHTML = `
           <div class="col-span-full py-16 text-center text-zinc-500 font-code text-xs">
             <p class="text-base font-medium font-sans">No se encontraron productos con esos términos o filtros.</p>
-            <button onclick="resetFilters()" class="mt-3 text-xs text-brand-orange hover:underline font-semibold font-sans">Ver todo el catálogo</button>
+            <button onclick="resetFilters()" class="mt-3 text-xs text-brand-orange hover:underline font-semibold font-sans">Ver todos los productos</button>
           </div>
         `;
         return;
@@ -1806,9 +1799,18 @@
       `}).join('');
     }
 
+    // Cuenta (sin datos personales) qué productos se miran, una vez por visita y producto.
+    const viewedProducts = new Set();
+    function trackProductView(id) {
+      if (!isBackendConnected() || viewedProducts.has(id)) return;
+      viewedProducts.add(id);
+      apiRequest('INSIGHTS', { method: 'POST', body: JSON.stringify({ productId: id }) }, '/view');
+    }
+
     function openProductGallery(productId) {
       const prod = PRODUCTS.find(p => p.id === productId);
       if (!prod) return;
+      trackProductView(productId);
 
       activeGalleryProduct = prod;
       activeGalleryPhotoIndex = 0;
@@ -1822,7 +1824,7 @@
         ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800 font-code">🏅 100% Original</span>`
         : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800 font-code">⚡ Plug Selección</span>`;
 
-      document.getElementById('detail-modal-brand').textContent = prod.brand + ' · Catálogo Oficial';
+      document.getElementById('detail-modal-brand').textContent = prod.brand;
       document.getElementById('gallery-title').textContent = prod.name;
       document.getElementById('gallery-specs').textContent = prod.specs;
       document.getElementById('gallery-warranty').textContent = prod.warranty;
@@ -2583,7 +2585,7 @@
           <div class="h-full flex flex-col items-center justify-center text-center text-zinc-500 py-12">
             <div class="text-4xl mb-3">🛒</div>
             <p class="text-sm font-medium text-zinc-400">Tu carrito está vacío</p>
-            <p class="text-xs text-zinc-600 mt-1">Elegí productos del catálogo para comenzar.</p>
+            <p class="text-xs text-zinc-600 mt-1">Elegí productos para comenzar.</p>
           </div>
         `;
       } else {
@@ -3597,170 +3599,560 @@
     }
 
     // ==========================================
-    // 10. MULTI-OPTION SMART ENGINE ADVISOR
+    // 10. ASESOR PLUG (motor de recomendación)
     // ==========================================
-    function adviseProduct(text) {
-      const query = text.toLowerCase().trim();
-      const discPct = STORE_SETTINGS.transferDiscountPct || 10;
+    // Cómo funciona (todo se calcula en el navegador con el catálogo real):
+    //  1. Entiende el presupuesto ("70 mil", "70k", "$70.000", "hasta 50k", "entre 30 y 50 mil").
+    //  2. Entiende qué busca: palabras del producto (nombre, marca, categoría, specs,
+    //     palabras clave), sinónimos ("audífonos" = "auriculares") y usos ("para correr").
+    //  3. Puntúa solo productos activos y con stock, y los compara: la mejor opción, la
+    //     alternativa del otro tipo (Original vs. Selección) y la más económica o la más completa.
+    //  4. Si solo dice cuánto tiene ("tengo 70 mil"), arma combos que entran en ese monto.
+    //  5. Cada opción trae el MOTIVO de por qué se recomienda. Nada es aleatorio.
+    const ADV_STOP = new Set(('para con sin una uno unos unas del los las que quiero busco necesito algo por favor hola tengo como cual cuales ' +
+      'esta este estos estas muy bien algun alguna ver mostrame recomendame recomendas recomendar sugerime sugeris dame quisiera queria ' +
+      'estoy buscando me mi tu si no ni un el la de en y o a al lo se es son hay unos gastar gasto plata pesos peso presupuesto ' +
+      'hasta menos maximo maxima tope entre desde minimo alrededor aproximadamente mas pasar pase').split(' '));
 
-      const scored = PRODUCTS.map(prod => {
-        let score = 0;
-        const pName = prod.name.toLowerCase();
-        const pBrand = prod.brand.toLowerCase();
-        const pCat = prod.category.toLowerCase();
-        const pSpecs = prod.specs.toLowerCase();
+    // Grupos de palabras equivalentes (ya sin tildes).
+    const ADV_SYN = [
+      ['auricular', 'audifono', 'headphone', 'headset', 'earbud', 'airpod', 'manoslibres'],
+      ['parlante', 'bocina', 'speaker', 'altavoz'],
+      ['reloj', 'smartwatch', 'watch', 'smartband', 'pulsera', 'band'],
+      ['cargador', 'charger', 'cargar', 'adaptador', 'fuente'],
+      ['powerbank', 'bank', 'bateria externa'],
+      ['teclado', 'keyboard'],
+      ['mouse', 'raton'],
+      ['gamer', 'gaming', 'juego', 'jugar', 'gamers'],
+      ['microfono', 'mic'],
+      ['inalambrico', 'wireless', 'bluetooth', 'sinfil'],
+      ['luz', 'lampara', 'led', 'foco', 'luminaria'],
+      ['sumergible', 'waterproof', 'agua', 'resistente', 'ip67', 'ip68', 'ip65'],
+      ['cancelacion', 'anc', 'ruido']
+    ];
+    // Usos: si el cliente dice esto, también sirven productos con estas palabras (peso bajo).
+    const ADV_USES = {
+      estudiar: ['microfono', 'cancelacion', 'ruido', 'auricular', 'comodo'],
+      estudio: ['microfono', 'cancelacion', 'ruido', 'auricular'],
+      trabajar: ['microfono', 'cancelacion', 'auricular', 'teclado', 'mouse'],
+      trabajo: ['microfono', 'cancelacion', 'auricular', 'teclado', 'mouse'],
+      oficina: ['microfono', 'teclado', 'mouse', 'cargador'],
+      llamadas: ['microfono', 'cancelacion', 'auricular'],
+      reuniones: ['microfono', 'cancelacion', 'auricular'],
+      correr: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular', 'gps'],
+      running: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular', 'gps'],
+      gym: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular'],
+      gimnasio: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular'],
+      deporte: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular'],
+      deportivo: ['sport', 'sumergible', 'resistente'],
+      entrenar: ['deportivo', 'sport', 'sumergible', 'reloj', 'auricular'],
+      viaje: ['cargador', 'powerbank', 'cancelacion', 'auricular', 'bateria'],
+      viajar: ['cargador', 'powerbank', 'cancelacion', 'auricular', 'bateria'],
+      auto: ['cargador', 'cable', 'soporte']
+    };
+    // Palabras que no describen el producto sino qué prioriza el cliente.
+    const ADV_MODS = {
+      cheap: ['barato', 'barata', 'baratos', 'economico', 'economica', 'accesible', 'convenientes', 'conveniente'],
+      original: ['original', 'originales', 'oficial', 'marca'],
+      seleccion: ['seleccion'],
+      best: ['mejor', 'premium', 'calidad', 'top', 'completo', 'completa'],
+      gift: ['regalo', 'regalar', 'regalarle', 'obsequio']
+    };
 
-        if (query.includes('reloj') || query.includes('smartwatch') || query.includes('wearable') || query.includes('deporte') || query.includes('pasos') || query.includes('salud')) {
-          if (pCat === 'wearables') score += 15;
-        }
-        if (query.includes('auricular') || query.includes('audio') || query.includes('sonido') || query.includes('musica') || query.includes('parlante') || query.includes('estudiar') || query.includes('llamada')) {
-          if (pCat === 'audio') score += 15;
-        }
-        if (query.includes('gaming') || query.includes('juego') || query.includes('teclado') || query.includes('mouse') || query.includes('setup') || query.includes('rgb')) {
-          if (pCat === 'gaming') score += 15;
-        }
-        if (query.includes('cargador') || query.includes('cable') || query.includes('carga') || query.includes('bateria') || query.includes('luz') || query.includes('lampara') || query.includes('home')) {
-          if (pCat === 'home') score += 15;
-        }
+    const advFold = s => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    // Formas de una palabra para comparar singular/plural: cables, cable; mouses, mouse; relojes, reloj.
+    function advForms(w) {
+      const f = [w];
+      if (w.length > 3 && w.endsWith('s')) f.push(w.slice(0, -1));
+      if (w.length > 4 && w.endsWith('es')) f.push(w.slice(0, -2));
+      return f;
+    }
+    function advWords(s) { return advFold(s).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean); }
+    function advWordSet(s) { const set = new Set(); advWords(s).forEach(w => advForms(w).forEach(x => set.add(x))); return set; }
 
-        const tokens = query.split(/\s+/).filter(t => t.length > 2);
-        tokens.forEach(tok => {
-          if (pName.includes(tok)) score += 10;
-          if (pSpecs.includes(tok)) score += 6;
-          if (pBrand.includes(tok)) score += 8;
+    // ---- Presupuesto ----
+    // Devuelve { min, max, text } o null. "text" es el pedazo de la frase que habla de plata
+    // (se saca de la búsqueda para que "70 mil" no se tome como palabra de producto).
+    // No confunde especificaciones: "bluetooth 5.3", "45w", "10000 mah", "pantalla 4k".
+    function parseBudget(raw) {
+      const s = advFold(raw).replace(/\s+/g, ' ');
+      // Rangos: "entre 30 y 50 mil", "de 30 a 50 mil", "entre 30.000 y 50.000". El primero hereda "mil".
+      const rr = s.match(/(entre|de|desde)\s*\$?(\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?)\s*(mil|k|lucas?)?\s*(?:y|a|-|hasta)\s*\$?(\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?)\s*(mil|k|lucas?|palos?)?(?![a-z])/);
+      if (rr) {
+        const val = (d, u) => { const n = /^\d{1,3}([.,]\d{3})+$/.test(d) ? Number(d.replace(/[.,]/g, '')) : Number(d.replace(',', '.')); return Math.round(n * (/^(mil|k|luca|lucas)$/.test(u || '') ? 1000 : /^palos?$/.test(u || '') ? 1000000 : 1)); };
+        let lo = val(rr[2], rr[3]), hi = val(rr[4], rr[5]);
+        if (!rr[3] && rr[5] && lo < 1000) lo = val(rr[2], rr[5]);
+        if (lo >= 1000 && hi >= 1000) {
+          const st = rr.index, en = rr.index + rr[0].length;
+          return { min: Math.min(lo, hi), max: Math.max(lo, hi), text: s.slice(st, en), start: st, end: en, folded: s };
+        }
+      }
+      const UNITS_SPEC = /^(mah|w|watts?|hz|gb|tb|mb|mp|mm|cm|hs|horas?|h|db|pulgadas?|v|a|ma|x)\b/;
+      const num = '\\$?\\s*(\\d{1,3}(?:[.,]\\d{3})+|\\d+(?:[.,]\\d+)?)(?:\\s*(mil|k|lucas?|palos?|millon(?:es)?)(?![a-z]))?';
+      const re = new RegExp(num, 'g');
+      const found = [];
+      let m;
+      while ((m = re.exec(s))) {
+        const full = m[0];
+        const hasDollar = full.trim().startsWith('$');
+        let digits = m[1], unit = m[2] || '';
+        const after = s.slice(m.index + full.length).trim();
+        const before = s.slice(0, m.index);
+        let value;
+        if (/^\d{1,3}([.,]\d{3})+$/.test(digits)) value = Number(digits.replace(/[.,]/g, ''));
+        else value = Number(digits.replace(',', '.'));
+        if (!Number.isFinite(value) || value <= 0) continue;
+        let mult = 1;
+        if (/^(mil|k|luca|lucas)$/.test(unit)) mult = 1000;
+        else if (/^(palo|palos|millon|millones)$/.test(unit)) mult = 1000000;
+        // "k" pegada a 4 u 8 sin $ es resolución (4k, 8k), no plata.
+        if (unit === 'k' && !hasDollar && (value === 4 || value === 8)) continue;
+        // Medidas y especificaciones técnicas.
+        if (!unit && UNITS_SPEC.test(after)) continue;
+        if (!unit && /(bluetooth|bt|usb|version|v|ip|wifi|hdmi|tipo|c|type|serie|gen|pro|x)\s*$/.test(before) && value < 1000) continue;
+        value = Math.round(value * mult);
+        // Sin "mil/k/$": solo se toma si parece plata (>= 1000).
+        if (!unit && !hasDollar && value < 1000) continue;
+        if (value < 1000) continue;
+        found.push({ value, start: m.index, end: m.index + full.length, unit, hasDollar });
+      }
+      if (!found.length) return null;
+
+      // Rango: "entre 30 y 50 mil", "de 30 a 50 mil": el primero hereda "mil" si no lo trae.
+      let min = 0, max = 0, spanStart, spanEnd;
+      const first = found[0], second = found[1];
+      if (second) {
+        const between = s.slice(first.end, second.start);
+        const pre = s.slice(Math.max(0, first.start - 12), first.start);
+        if (/^\s*(y|a|-|hasta|o)\s*$/.test(between) && /(entre|de|desde)\s*$/.test(pre)) {
+          let lo = first.value, hi = second.value;
+          if (!first.unit && !first.hasDollar && second.unit && lo < 1000) lo *= 1000;
+          min = Math.min(lo, hi); max = Math.max(lo, hi);
+          spanStart = Math.max(0, first.start - (pre.match(/(entre|de|desde)\s*$/)[0].length)); spanEnd = second.end;
+        }
+      }
+      if (!max) {
+        const pre = s.slice(Math.max(0, first.start - 30), first.start);
+        const isMin = /(desde|mas de|minimo|arriba de|no menos de)\s*$/.test(pre);
+        if (isMin) min = first.value; else max = first.value;
+        const lead = pre.match(/(hasta|menos de|maximo|no mas de|tope de|tope|no pase de|por debajo de|alrededor de|aproximadamente|desde|mas de|minimo|arriba de|no menos de|presupuesto de|presupuesto|tengo|gasto|gastar|con)\s*$/);
+        spanStart = first.start - (lead ? lead[0].length : 0); spanEnd = first.end;
+      }
+      return { min, max, text: s.slice(spanStart, spanEnd), start: spanStart, end: spanEnd, folded: s };
+    }
+
+    // ---- Interpretación de la frase ----
+    function advParse(raw) {
+      const budget = parseBudget(raw);
+      let s = advFold(raw).replace(/\s+/g, ' ');
+      if (budget) s = (s.slice(0, budget.start) + ' ' + s.slice(budget.end));
+      const words = advWords(s).filter(w => !ADV_STOP.has(w) && !/^\d+$/.test(w) && w.length > 1);
+      const mods = { cheap: false, original: false, seleccion: false, best: false, gift: false };
+      const terms = []; // { label, forms:[{w, weight}] }
+      const seen = new Set();
+      words.forEach(w => {
+        let isMod = false;
+        for (const k of Object.keys(ADV_MODS)) {
+          if (ADV_MODS[k].some(x => advForms(w).includes(x) || x === w)) { mods[k] = true; isMod = true; }
+        }
+        if (isMod || seen.has(w)) return;
+        seen.add(w);
+        const forms = [];
+        const add = (x, weight) => { if (!forms.some(f => f.w === x)) forms.push({ w: x, weight, use: weight < 0.5 }); };
+        advForms(w).forEach(x => add(x, 1));
+        ADV_SYN.forEach(g => { if (advForms(w).some(x => g.includes(x))) g.forEach(x => advForms(x).forEach(y => add(y, 0.6))); });
+        const use = advForms(w).map(x => ADV_USES[x]).find(Boolean) || null;
+        if (use) use.forEach(x => advForms(x).forEach(y => add(y, 0.3)));
+        terms.push({ label: w, forms });
+      });
+      return { budget, terms, mods, words };
+    }
+
+    // Texto buscable de un producto, separado por campo.
+    function advProductFields(p, catLabelFn) {
+      const catName = id => advFold(String(catLabelFn(id) || '').replace(/[^\p{L}\p{N}\s]/gu, ' '));
+      return {
+        name: advWordSet(p.name), keywords: advWordSet(p.keywords), brand: advWordSet(p.brand),
+        cat: advWordSet(catName(p.category) + ' ' + catName(p.subcategory)),
+        specs: advWordSet(p.specs), colors: advWordSet((p.colors || []).join(' '))
+      };
+    }
+    const ADV_FIELD_W = { name: 10, keywords: 9, brand: 8, cat: 6, specs: 5, colors: 3 };
+
+    // Núcleo del asesor. Devuelve un objeto "consejo" con todo lo necesario para mostrarlo.
+    //   products: lista de productos; opts: { discPct, bias, catLabel, topCats, freeShipAt }
+    function advisorBuild(text, products, opts) {
+      opts = opts || {};
+      const discPct = Number(opts.discPct) >= 0 ? Number(opts.discPct) : 10;
+      const bias = opts.bias || 'equilibrado';
+      const catLabel = opts.catLabel || (id => id);
+      const q = advParse(text);
+      const out = { query: String(text || '').trim(), budget: q.budget ? { min: q.budget.min, max: q.budget.max } : null, terms: q.terms.map(t => t.label), kind: 'options', options: [], combos: [], ranking: [], note: '', soldOut: [], suggestions: [] };
+      const hasTerms = q.terms.length > 0;
+      const hasMods = q.mods.cheap || q.mods.original || q.mods.seleccion || q.mods.best || q.mods.gift;
+      if (!hasTerms && !q.budget && !hasMods) { out.kind = 'hint'; return out; }
+
+      const transfer = p => Math.round(p.price * (1 - discPct / 100));
+      const active = (products || []).filter(p => p && p.active !== false && Number(p.price) > 0);
+      const inStock = active.filter(p => Number(p.stock) > 0);
+
+      // 1) Puntaje de relevancia
+      const scored = inStock.map(p => {
+        const f = advProductFields(p, catLabel);
+        let rel = 0; const matched = [];
+        q.terms.forEach(t => {
+          // Palabra pedida y sinónimos: cuenta la mejor coincidencia. Un "uso" (estudiar, correr)
+          // implica varias características: cada una que tenga el producto suma un poco.
+          let best = 0, useSum = 0;
+          for (const form of t.forms) {
+            let fb = 0;
+            for (const fld of Object.keys(ADV_FIELD_W)) if (f[fld].has(form.w)) fb = Math.max(fb, ADV_FIELD_W[fld] * form.weight);
+            if (form.use) useSum += fb; else best = Math.max(best, fb);
+          }
+          const tot = best + Math.min(useSum, 12);
+          if (tot > 0) { rel += tot; if (!matched.includes(t.label)) matched.push(t.label); }
         });
+        return { p, rel, matched, eff: transfer(p), score: rel };
+      });
+      const maxRel = Math.max(0, ...scored.map(x => x.rel));
+      const prices = scored.map(x => x.p.price);
+      const maxPrice = Math.max(1, ...prices);
 
-        if (prod.stock > 0) score += 2;
-        return { prod, score };
+      scored.forEach(x => {
+        let s = x.rel;
+        if (hasTerms && maxRel > 0) s += 0; // la relevancia manda
+        if (x.p.featured) s += 3;
+        if (bias === 'economico' && x.p.type === 'seleccion') s += 4;
+        if (bias === 'original' && x.p.type === 'original') s += 4;
+        if (q.mods.original && x.p.type === 'original') s += 8;
+        if (q.mods.seleccion && x.p.type === 'seleccion') s += 8;
+        if (q.mods.cheap) s += 6 * (1 - x.p.price / maxPrice);
+        if (q.mods.best) s += 6 * (x.p.price / maxPrice);
+        if (q.mods.gift && x.p.type === 'original') s += 2;
+        if ((x.p.photos || []).length) s += 0.5;
+        // Con presupuesto, se prefiere aprovecharlo (lo mejor que se puede comprar con ese monto).
+        if (q.budget && q.budget.max) s += (hasTerms ? 2 : 6) * Math.min(1, x.eff / q.budget.max);
+        x.score = s;
       });
 
-      scored.sort((a, b) => b.score - a.score);
+      // 2) ¿Qué es relevante?
+      let relevant;
+      if (hasTerms) {
+        const cut = Math.max(1, maxRel * 0.35);
+        relevant = scored.filter(x => x.rel >= cut);
+      } else {
+        relevant = scored.slice(); // solo presupuesto o prioridades: todo el catálogo
+      }
+      relevant.sort((a, b) => b.score - a.score || a.eff - b.eff);
 
-      let recommendations = [];
-      const bestOriginal = scored.find(item => item.prod.type === 'original' && item.score > 0) || scored.find(item => item.prod.type === 'original');
-      const bestSeleccion = scored.find(item => item.prod.type === 'seleccion' && item.score > 0) || scored.find(item => item.prod.type === 'seleccion');
-
-      if (bestOriginal) recommendations.push({ ...bestOriginal.prod, roleBadge: '🏅 RECOMENDADO 100% ORIGINAL', roleColor: 'border-cyan-500/40 bg-cyan-950/20 text-cyan-300' });
-      if (bestSeleccion && bestSeleccion.prod.id !== (bestOriginal ? bestOriginal.prod.id : null)) {
-        recommendations.push({ ...bestSeleccion.prod, roleBadge: '⚡ PLUG SELECCIÓN (PRECIO / CALIDAD)', roleColor: 'border-amber-500/40 bg-amber-950/20 text-brand-amber' });
+      // Sin nada en stock que coincida: ver si hay agotados que sí coincidían.
+      if (!relevant.length) {
+        if (hasTerms) {
+          out.soldOut = active.filter(p => Number(p.stock) <= 0).filter(p => {
+            const f = advProductFields(p, catLabel);
+            return q.terms.some(t => t.forms.some(fm => fm.w && Object.keys(ADV_FIELD_W).some(k => f[k].has(fm.w) && fm.weight >= 1)));
+          }).slice(0, 3).map(p => ({ id: p.id, name: p.name }));
+        }
+        out.kind = 'none';
+        advSuggestions(out, opts);
+        return out;
       }
 
-      for (const item of scored) {
-        if (recommendations.length >= 3) break;
-        if (!recommendations.some(r => r.id === item.prod.id)) {
-          const isOrig = item.prod.type === 'original';
-          recommendations.push({
-            ...item.prod,
-            roleBadge: isOrig ? '🏅 ALTERNATIVA DESTACADA' : '⚡ PLUG SELECCIÓN DESTACADA',
-            roleColor: isOrig ? 'border-sky-500/30 bg-sky-950/20 text-sky-300' : 'border-orange-500/30 bg-orange-950/20 text-orange-300'
-          });
+      // 3) Presupuesto
+      const b = q.budget;
+      const fitOf = x => {
+        if (!b) return 'ok';
+        const hi = b.max || Infinity, lo = b.min || 0;
+        if (x.p.price < lo * 0.85) return 'low';
+        if (x.p.price <= hi) return 'ok';
+        if (x.eff <= hi) return 'transfer';
+        if (x.eff <= hi * 1.1) return 'close';
+        return 'over';
+      };
+      relevant.forEach(x => { x.fit = fitOf(x); });
+      let pool = b ? relevant.filter(x => x.fit === 'ok' || x.fit === 'transfer') : relevant;
+      if (b && !pool.length) pool = relevant.filter(x => x.fit === 'close');
+      if (b && b.min) pool = pool.filter(x => x.fit !== 'low');
+
+      // Combos: se pide presupuesto sin producto, o palabras de armado ("setup", "kit", "combo").
+      const comboWords = /\b(setup|kit|combo|pack|armar|equipo|todo|set)\b/.test(advFold(text));
+      const wantCombos = !!(b && b.max && (!hasTerms || comboWords));
+      if (wantCombos) advBuildCombos(out, relevant, b, opts, transfer);
+
+      // 4) Elegir 2 o 3 opciones distintas entre sí
+      if (!pool.length) {
+        // Nada entra en el presupuesto: mostrar lo más barato que coincide y decir cuánto se pasa.
+        if (b && b.max) {
+          const cheapest = relevant.slice().sort((a, c) => a.eff - c.eff)[0];
+          out.kind = out.combos.length ? 'combos' : 'overbudget';
+          if (out.kind === 'overbudget') {
+            out.options = [advOption(cheapest, 'cheap', 1, null, q, out, discPct)];
+            out.note = `Lo más barato que tenemos de eso sale ${advMoney(cheapest.eff)} pagando con transferencia: son ${advMoney(cheapest.eff - b.max)} más que tu presupuesto.`;
+          }
+        } else out.kind = 'none';
+        out.ranking = advRanking(relevant);
+        out.resultsCount = out.options.length + out.combos.length;
+        if (!out.resultsCount) advSuggestions(out, opts);
+        return out;
+      }
+
+      const picks = [];
+      const top = pool[0];
+      picks.push({ x: top, role: 'best' });
+      const other = pool.find(x => x.p.id !== top.p.id && x.p.type !== top.p.type);
+      if (other) picks.push({ x: other, role: 'alt' });
+      const cheapest = pool.slice().sort((a, c) => a.eff - c.eff)[0];
+      if (!picks.some(k => k.x.p.id === cheapest.p.id) && cheapest.eff <= top.eff * 0.95) picks.push({ x: cheapest, role: 'cheap' });
+      if (picks.length < 3) {
+        const pricier = pool.filter(x => !picks.some(k => k.x.p.id === x.p.id) && x.eff > top.eff * 1.05).sort((a, c) => c.score - a.score)[0];
+        if (pricier) picks.push({ x: pricier, role: 'more' });
+      }
+      if (picks.length < 3) {
+        const next = pool.find(x => !picks.some(k => k.x.p.id === x.p.id));
+        if (next) picks.push({ x: next, role: 'next' });
+      }
+      out.options = picks.slice(0, 3).map((k, i) => advOption(k.x, k.role, i + 1, picks[0].x, q, out, discPct));
+      out.kind = out.combos.length && !hasTerms ? 'combos' : 'options';
+      if (b && pool.every(x => x.fit === 'close')) out.note = 'Todo lo que coincide se pasa un poquito de tu presupuesto (menos de 10%).';
+      out.ranking = advRanking(relevant);
+      out.resultsCount = out.options.length + out.combos.length;
+      return out;
+    }
+
+    function advRanking(list) {
+      return list.slice(0, 8).map(x => ({ id: x.p.id, name: x.p.name, score: Math.round(x.score * 10) / 10, matched: x.matched.slice(), price: x.p.price, type: x.p.type, fit: x.fit || null }));
+    }
+
+    const advMoney = n => '$' + Math.round(n).toLocaleString('es-AR');
+    const ADV_ROLES = {
+      best: ['⭐', 'Nuestra recomendación'],
+      alt: null, // depende del tipo
+      cheap: ['💸', 'La más económica'],
+      more: ['🚀', 'Si querés ir por más'],
+      next: ['➕', 'También te puede servir']
+    };
+
+    function advOption(x, role, n, first, q, out, discPct) {
+      const p = x.p;
+      let icon, label;
+      if (role === 'alt') { icon = p.type === 'original' ? '🏅' : '⚡'; label = p.type === 'original' ? 'Alternativa Original' : 'Alternativa Selección (precio / calidad)'; }
+      else { [icon, label] = ADV_ROLES[role]; }
+      const reasons = [];
+      if (x.matched.length) reasons.push(`Coincide con lo que pediste: ${x.matched.slice(0, 4).join(', ')}.`);
+      const b = q.budget;
+      if (b && b.max) {
+        if (x.fit === 'ok') reasons.push(`Entra en tu presupuesto (te sobran ${advMoney(b.max - Math.min(x.p.price, x.eff))}).`);
+        else if (x.fit === 'transfer') reasons.push(`Pagando por transferencia queda en ${advMoney(x.eff)}: entra en tus ${advMoney(b.max)}.`);
+        else if (x.fit === 'close') reasons.push(`Se pasa ${advMoney(x.eff - b.max)} de tu presupuesto (con transferencia).`);
+      }
+      if (first && x.p.id !== first.p.id) {
+        const d = x.eff - first.eff;
+        if (Math.abs(d) >= 1) reasons.push(d < 0 ? `${advMoney(-d)} más barato que la opción 1.` : `${advMoney(d)} más que la opción 1.`);
+      }
+      if (Number(p.stock) > 0 && Number(p.stock) <= 3) reasons.push(`Quedan solo ${p.stock}.`);
+      reasons.push(p.type === 'original' ? 'Original con garantía oficial.' : 'PLUG Selección: calidad probada y mejor precio.');
+      if (p.featured) reasons.push('Destacado de la tienda.');
+      return { prod: p, role, n, icon, label, eff: x.eff, score: Math.round(x.score * 10) / 10, fit: x.fit || null, matched: x.matched.slice(), reasons: reasons.slice(0, 4) };
+    }
+
+    // Combos de 2 productos de categorías distintas que entran en el presupuesto.
+    function advBuildCombos(out, relevant, b, opts, transfer) {
+      const pool = relevant.filter(x => x.fit !== 'over' && x.eff < b.max).slice(0, 40);
+      const first = x => advForms(advWords(x.p.name)[0] || '')[advForms(advWords(x.p.name)[0] || '').length - 1];
+      const same = (a, c) => first(a) === first(c) || (a.p.subcategory && a.p.subcategory === c.p.subcategory);
+      const combos = [];
+      for (let i = 0; i < pool.length; i++) {
+        for (let j = i + 1; j < pool.length; j++) {
+          const a = pool[i], c = pool[j];
+          if (same(a, c)) continue;
+          const total = a.eff + c.eff;
+          if (total > b.max) continue;
+          combos.push({ a, c, total, rank: a.score + c.score + (total / b.max) * 12 });
         }
       }
-
-      if (recommendations.length === 0) {
-        recommendations = PRODUCTS.slice(0, 3).map((p, idx) => ({
-          ...p,
-          roleBadge: idx === 0 ? '🏅 DESTACADO' : '⚡ RECOMENDADO',
-          roleColor: 'border-brand-orange/40 bg-zinc-900 text-zinc-300'
-        }));
+      combos.sort((x, y) => y.rank - x.rank);
+      const used = new Set();
+      const free = Number(opts.freeShipAt) > 0 ? Number(opts.freeShipAt) : 0;
+      for (const cb of combos) {
+        if (out.combos.length >= 2) break;
+        const ids = [cb.a.p.id, cb.c.p.id];
+        if (ids.every(id => used.has(id))) continue;
+        ids.forEach(id => used.add(id));
+        out.combos.push({
+          total: cb.total, left: b.max - cb.total,
+          totalList: cb.a.p.price + cb.c.p.price,
+          freeShip: free > 0 && cb.total >= free,
+          items: [cb.a, cb.c].map(x => ({ prod: x.p, eff: x.eff }))
+        });
       }
+    }
 
+    // Sugerencias cuando no hay resultados: categorías que sí tenemos.
+    function advSuggestions(out, opts) {
+      const cats = (opts.topCats || []).slice(0, 6);
+      out.suggestions = cats.map(c => ({ id: c.id, label: (c.icon ? c.icon + ' ' : '') + c.name, text: c.name }));
+    }
+
+    // ---- Pantalla de la tienda ----
+    function advRenderOption(o, discPct) {
+      const p = o.prod;
+      const visual = (p.photos && p.photos[0]) ? p.photos[0] : '📦';
+      const isOrig = p.type === 'original';
+      const border = o.n === 1 ? 'border-brand-orange/60' : (isOrig ? 'border-cyan-500/30' : 'border-amber-500/30');
+      return `
+        <div class="relative bg-zinc-950/90 border ${border} rounded-2xl p-4 flex flex-col justify-between hover:border-brand-orange transition-all duration-300 shadow-lg group">
+          <div>
+            <div class="flex items-center justify-between mb-3 gap-2">
+              <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider font-code ${o.n === 1 ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/80 text-zinc-300'}">${o.n}. ${escapeHtml(o.icon)} ${escapeHtml(o.label)}</span>
+              <span class="text-[10px] text-zinc-400 font-semibold font-code">${escapeHtml(p.brand)}</span>
+            </div>
+            <div onclick="openProductGallery(${Number(p.id)})" class="h-32 rounded-xl bg-zinc-900/90 border border-white/[0.06] flex items-center justify-center p-3 mb-2.5 cursor-pointer group-hover:border-brand-orange/50 overflow-hidden relative" title="Hacé clic para elegir color y ver fotos">
+              ${renderVisualElement(visual, 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105', 'text-5xl')}
+            </div>
+            <h4 onclick="openProductGallery(${Number(p.id)})" class="text-sm font-bold text-white group-hover:text-brand-orange transition-colors cursor-pointer leading-snug">${escapeHtml(p.name)}</h4>
+            <ul class="mt-2 space-y-1 text-[11px] text-zinc-300 leading-relaxed">
+              ${o.reasons.map(r => `<li class="flex gap-1.5"><span class="text-brand-orange shrink-0">✓</span><span>${escapeHtml(r)}</span></li>`).join('')}
+            </ul>
+          </div>
+          <div class="mt-4 pt-3 border-t border-zinc-800/80 space-y-3">
+            <div class="flex items-baseline justify-between font-code">
+              <div>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-lg font-black text-white">${formatARS(o.eff)}</span>
+                  <span class="text-[10px] text-zinc-500 line-through font-semibold">${formatARS(p.price)}</span>
+                </div>
+                <span class="text-[10px] text-emerald-400 font-bold">${escapeHtml(String(discPct))}% OFF con Transferencia</span>
+              </div>
+            </div>
+            <button onclick="openProductGallery(${Number(p.id)})" class="w-full py-2 px-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-extrabold transition-all active:scale-95">Ver colores y comprar</button>
+          </div>
+        </div>`;
+    }
+
+    function advRenderCompare(options, discPct) {
+      if (options.length < 2) return '';
+      const row = (label, fn) => `<tr class="border-t border-zinc-800/80"><th class="text-left font-semibold text-zinc-400 py-2 pr-3 align-top whitespace-nowrap">${label}</th>${options.map(o => `<td class="py-2 px-2 align-top text-zinc-200">${fn(o)}</td>`).join('')}</tr>`;
+      return `
+        <div class="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950/70 p-3">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400 mb-2 font-code">Comparación lado a lado</div>
+          <table class="w-full text-xs min-w-[480px]">
+            <thead><tr><th></th>${options.map(o => `<th class="text-left px-2 pb-2 text-white font-bold">${o.n}. ${escapeHtml(o.prod.name)}</th>`).join('')}</tr></thead>
+            <tbody>
+              ${row('Precio de lista', o => escapeHtml(formatARS(o.prod.price)))}
+              ${row('Con transferencia', o => `<strong class="text-emerald-400">${escapeHtml(formatARS(o.eff))}</strong>`)}
+              ${row('Tipo', o => o.prod.type === 'original' ? '🏅 Original oficial' : '⚡ PLUG Selección')}
+              ${row('Garantía', o => escapeHtml(o.prod.warranty || '—'))}
+              ${row('Colores', o => escapeHtml((o.prod.colors || ['Único']).join(', ')))}
+              ${row('Stock', o => Number(o.prod.stock) > 0 ? escapeHtml(String(o.prod.stock)) + ' un.' : 'Agotado')}
+              ${row('Características', o => escapeHtml(o.prod.specs || '—'))}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    function advRenderCombos(combos, budget) {
+      if (!combos.length) return '';
+      return `
+        <div class="space-y-2">
+          <div class="text-[11px] font-bold uppercase tracking-wider text-brand-amber font-code">Combos que entran en tus ${escapeHtml(advMoney(budget.max))}</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            ${combos.map((c, i) => `
+              <div class="rounded-xl border border-zinc-800 bg-zinc-950/80 p-4">
+                <div class="text-xs font-bold text-white mb-2">Combo ${i + 1}</div>
+                <ul class="space-y-1.5 text-xs text-zinc-200">
+                  ${c.items.map(it => `<li class="flex items-center justify-between gap-2"><button type="button" onclick="openProductGallery(${Number(it.prod.id)})" class="text-left hover:text-brand-orange">${escapeHtml(it.prod.name)}</button><span class="font-code text-zinc-300 shrink-0">${escapeHtml(formatARS(it.eff))}</span></li>`).join('')}
+                </ul>
+                <div class="mt-3 pt-2 border-t border-zinc-800 text-xs flex flex-wrap items-center justify-between gap-2">
+                  <span class="text-white font-black font-code">Total ${escapeHtml(formatARS(c.total))}</span>
+                  <span class="text-emerald-400 font-semibold">Te sobran ${escapeHtml(formatARS(c.left))}${c.freeShip ? ' · envío gratis' : ''}</span>
+                </div>
+                <div class="text-[10px] text-zinc-500 mt-1">Precios con transferencia. Lista: ${escapeHtml(formatARS(c.totalList))}.</div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    function advWhatsappLink(text) {
+      const n = String(STORE_SETTINGS.whatsappNumber || '').replace(/\D/g, '');
+      if (!n) return '';
+      return `https://wa.me/${n}?text=${encodeURIComponent('Hola PLUGSHOP! Busco: ' + text)}`;
+    }
+
+    function renderAdvice(advice) {
       const resBox = document.getElementById('advisor-result');
       const countEl = document.getElementById('advisor-results-count');
       const container = document.getElementById('advisor-cards-container');
+      const discPct = STORE_SETTINGS.transferDiscountPct || 10;
+      let html = '';
+      const budget = advice.budget;
+      const chips = [];
+      if (budget && budget.max) chips.push(`Presupuesto: hasta ${advMoney(budget.max)}`);
+      if (budget && budget.min) chips.push(`Desde ${advMoney(budget.min)}`);
+      advice.terms.slice(0, 5).forEach(t => chips.push(t));
+      countEl.textContent = chips.length ? '(' + chips.join(' · ') + ')' : '';
 
-      countEl.textContent = `(${recommendations.length} opciones comparadas para "${text}")`;
-
-      container.innerHTML = recommendations.map(item => {
-        const transPrice = Math.round(item.price * (1 - (discPct / 100)));
-        const primaryVisual = (item.photos && item.photos[0]) ? item.photos[0] : '📦';
-        const isOriginal = item.type === 'original';
-        const colorsList = item.colors || ['Único'];
-
-        return `
-          <div class="relative bg-zinc-950/90 border ${item.roleColor.split(' ')[0]} rounded-2xl p-4 flex flex-col justify-between hover:border-brand-orange transition-all duration-300 shadow-lg group">
-            
-            <div>
-              <div class="flex items-center justify-between mb-3 gap-2">
-                <span class="px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-wider font-code ${item.roleColor}">
-                  ${item.roleBadge}
-                </span>
-                <span class="text-[10px] text-zinc-400 font-semibold font-code">${item.brand}</span>
-              </div>
-
-              <div onclick="openProductGallery(${item.id})" class="h-32 rounded-xl bg-zinc-900/90 border border-white/[0.06] flex items-center justify-center p-3 mb-2.5 cursor-pointer group-hover:border-brand-orange/50 overflow-hidden relative" title="Hacé clic para elegir color y ver fotos">
-                ${renderVisualElement(primaryVisual, 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105', 'text-5xl group-hover:scale-110 transition-transform duration-300')}
-                <div class="absolute inset-0 bg-brand-orange/15 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-xs font-bold text-white backdrop-blur-[1px]">
-                  🔍 Elegir Color
-                </div>
-              </div>
-
-              <div class="text-[10px] text-zinc-400 flex items-center gap-1 mb-1.5 font-code">
-                <span>🎨 Colores:</span>
-                <span class="text-zinc-200 font-medium">${escapeHtml(colorsList.join(', '))}</span>
-              </div>
-
-              <h4 onclick="openProductGallery(${item.id})" class="text-sm font-bold text-white group-hover:text-brand-orange transition-colors cursor-pointer leading-snug">
-                ${escapeHtml(item.name)}
-              </h4>
-              <p class="text-xs text-zinc-400 mt-1 line-clamp-2 leading-relaxed">
-                ${escapeHtml(item.specs)}
-              </p>
-
-              <div class="mt-2.5 flex items-center gap-1.5 text-[10px]">
-                <span class="${isOriginal ? 'text-cyan-400' : 'text-amber-400'} font-semibold flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full ${isOriginal ? 'bg-cyan-400' : 'bg-amber-400'}"></span>
-                  <span>${item.warranty || 'Garantía Asegurada'}</span>
-                </span>
-              </div>
-            </div>
-
-            <div class="mt-4 pt-3 border-t border-zinc-800/80 space-y-3">
-              <div class="flex items-baseline justify-between font-code">
-                <div>
-                  <div class="flex items-baseline gap-2">
-                    <span class="text-lg font-black text-white">${formatARS(transPrice)}</span>
-                    <span class="text-[10px] text-zinc-500 line-through font-semibold">${formatARS(item.price)}</span>
-                  </div>
-                  <span class="text-[10px] text-emerald-400 font-bold">10% OFF con Transferencia</span>
-                </div>
-                <span class="text-[10px] text-zinc-400 font-medium">Stock: ${item.stock} un.</span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2 pt-1 font-sans">
-                <button onclick="openProductGallery(${item.id})" class="py-2 px-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-200 text-xs font-semibold flex items-center justify-center gap-1 transition-all">
-                  <span>Elegir Color</span>
-                  <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                </button>
-                <button onclick="openProductGallery(${item.id})" class="py-2 px-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-extrabold flex items-center justify-center gap-1 shadow-md transition-all active:scale-95">
-                  <span>Comprar</span>
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                </button>
-              </div>
-            </div>
-
-          </div>
-        `;
-      }).join('');
-
+      if (advice.kind === 'hint') {
+        html = `<div class="md:col-span-2 lg:col-span-3 text-sm text-zinc-300 bg-zinc-900/70 border border-zinc-800 rounded-xl p-4">Contame qué buscás o cuánto querés gastar. Por ejemplo: <em>"auriculares para correr hasta 50 mil"</em> o <em>"tengo 70 mil, ¿qué me conviene?"</em>.</div>`;
+      } else if (advice.kind === 'none') {
+        const wa = advWhatsappLink(advice.query);
+        html = `<div class="md:col-span-2 lg:col-span-3 bg-zinc-900/70 border border-zinc-800 rounded-xl p-5 space-y-3">
+          <div class="text-sm text-white font-bold">No encontramos algo que coincida con "${escapeHtml(advice.query)}".</div>
+          ${advice.soldOut.length ? `<div class="text-xs text-amber-300">Lo que buscás estaba, pero está agotado por ahora: ${advice.soldOut.map(s => escapeHtml(s.name)).join(', ')}.</div>` : ''}
+          <div class="text-xs text-zinc-400">Probá con otra palabra (por ejemplo el tipo de producto) o mirá estas categorías:</div>
+          <div class="flex flex-wrap gap-2">${advice.suggestions.map(s => `<button type="button" onclick="quickAdvise(${escapeHtml(JSON.stringify(s.text))})" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs">${escapeHtml(s.label)}</button>`).join('')}</div>
+          ${wa ? `<a href="${escapeHtml(wa)}" target="_blank" rel="noopener" class="inline-block text-xs font-bold text-emerald-400 hover:text-emerald-300 underline">¿No está? Escribinos por WhatsApp y lo conseguimos →</a>` : ''}
+        </div>`;
+      } else {
+        if (advice.note) html += `<div class="md:col-span-2 lg:col-span-3 text-xs text-amber-300 bg-amber-950/20 border border-amber-500/30 rounded-xl p-3">${escapeHtml(advice.note)}</div>`;
+        if (advice.combos.length) html += `<div class="md:col-span-2 lg:col-span-3">${advRenderCombos(advice.combos, advice.budget)}</div>`;
+        if (advice.options.length) {
+          if (advice.combos.length) html += `<div class="md:col-span-2 lg:col-span-3 text-[11px] font-bold uppercase tracking-wider text-zinc-400 font-code">Productos sueltos que entran</div>`;
+          html += advice.options.map(o => advRenderOption(o, discPct)).join('');
+          html += `<div class="md:col-span-2 lg:col-span-3">${advRenderCompare(advice.options, discPct)}</div>`;
+        }
+      }
+      container.innerHTML = html;
       resBox.classList.remove('hidden');
     }
 
-    function quickAdvise(cat) {
+    // Avisa al servidor qué se buscó (sin datos personales) para el panel "Motor Inteligente".
+    // Si falla, no pasa nada: el cliente no se entera.
+    function trackAdvisorSearch(text, advice) {
+      if (!isBackendConnected() || advice.kind === 'hint') return;
+      const body = { q: String(text).slice(0, 80), results: advice.resultsCount || 0, budget: advice.budget ? (advice.budget.max || advice.budget.min || 0) : 0 };
+      apiRequest('INSIGHTS', { method: 'POST', body: JSON.stringify(body) }, '/search');
+    }
+
+    function adviseProduct(text) {
+      const advice = advisorBuild(text, PRODUCTS, {
+        discPct: STORE_SETTINGS.transferDiscountPct,
+        bias: STORE_SETTINGS.advisorBias,
+        catLabel: categoryLabel,
+        topCats: topCats(),
+        freeShipAt: STORE_SETTINGS.freeShippingThreshold
+      });
+      renderAdvice(advice);
+      trackAdvisorSearch(text, advice);
+      return advice;
+    }
+
+    // Botones de sugerencia: una frase lista para buscar.
+    function quickAdvise(text) {
       const input = document.getElementById('advisor-input');
-      if (cat === 'audio') {
-        input.value = 'auriculares con buen sonido y bateria';
-        adviseProduct('auriculares audio');
-      } else if (cat === 'gaming') {
-        input.value = 'setup gaming teclado mecanico y mouse';
-        adviseProduct('gaming setup');
-      } else if (cat === 'wearables') {
-        input.value = 'reloj inteligente deportivo y llamadas';
-        adviseProduct('smartwatch reloj');
-      } else if (cat === 'home') {
-        input.value = 'cargador rapido usb-c y gadgets';
-        adviseProduct('cargador bateria luz');
-      }
+      const t = String(text || '').trim();
+      if (!t) return;
+      input.value = t;
+      adviseProduct(t);
+    }
+
+    // Botones rápidos armados con las categorías reales de la tienda.
+    function renderAdvisorChips() {
+      const box = document.getElementById('advisor-chips');
+      if (!box) return;
+      const chip = (label, text) => `<button type="button" onclick="quickAdvise(${escapeHtml(JSON.stringify(text))})" class="px-3 py-1.5 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 transition-colors">${escapeHtml(label)}</button>`;
+      box.innerHTML = '<span class="text-zinc-400 self-center text-[11px]">Probá con:</span>' +
+        topCats().slice(0, 4).map(c => chip((c.icon ? c.icon + ' ' : '') + c.name, c.name)).join('') +
+        chip('💰 Tengo $50.000', 'tengo 50 mil') + chip('🎁 Un regalo', 'regalo hasta 80 mil');
     }
 
     // ==========================================
@@ -3824,5 +4216,6 @@
     });
   </script>
 
+<script>if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
 </body>
 </html>

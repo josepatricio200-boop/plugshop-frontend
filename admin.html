@@ -2,7 +2,14 @@
 <html lang="es" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#09090b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="PLUG Staff">
+  <link rel="manifest" href="/manifest-staff.webmanifest">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="/icon-192.png">
   <title>PLUGSHOP Staff</title>
   <meta name="robots" content="noindex, nofollow" />
   
@@ -77,9 +84,24 @@
     .text-\[11px\] { font-size: 12.5px !important; }
     .text-zinc-500 { color: #a3a3ae !important; } /* antes casi ilegible sobre fondo oscuro */
     .text-zinc-600 { color: #86868f !important; }
+  
+    /* ESCALA DE LETRA DEL PANEL (control A- / A+). Solo en pantallas de compu:
+       en el celular se usa el tamaño normal para que todo entre en la pantalla. */
+    @media (min-width: 900px) {
+      html { font-size: calc(16px * var(--ui, 1.15)); }
+      .text-\[9px\], .text-\[10px\] { font-size: calc(11px * var(--ui, 1.15)) !important; }
+      .text-\[11px\] { font-size: calc(12.5px * var(--ui, 1.15)) !important; }
+    }
+    #ui-scale-box { position: fixed; left: 12px; bottom: 12px; z-index: 70; display: none; }
+    @media (min-width: 900px) { #ui-scale-box { display: flex; } }
   </style>
 </head>
-<body class="selection:bg-brand-orange selection:text-black">
+<body class="selection:bg-brand-orange selection:text-black">  <div id="ui-scale-box" class="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-zinc-900/95 border border-zinc-600 shadow-lg" role="group" aria-label="Tamaño de la letra">
+    <span class="text-xs text-zinc-300 px-1">Letra</span>
+    <button type="button" onclick="changeUiScale(-1)" aria-label="Letra más chica" class="w-9 h-9 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm">A−</button>
+    <button type="button" onclick="changeUiScale(1)" aria-label="Letra más grande" class="w-9 h-9 rounded-lg bg-brand-orange hover:bg-orange-500 text-black font-black text-base">A+</button>
+  </div>
+
   <!-- ===== Ingreso del Staff (pantalla propia) ===== -->
   <main id="login-screen" class="hidden min-h-screen items-center justify-center p-4 bg-[#08080a]">
     <form id="login-form" onsubmit="submitStaffLogin(event)" class="w-full max-w-sm bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl p-6 space-y-5" autocomplete="on">
@@ -136,7 +158,7 @@
           <button id="btn-simulate-sale" onclick="simulateCustomerOrder()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-all font-code">
             <span>⚡ Simular Venta</span>
           </button>
-          <button onclick="logoutStaff()"$1title="Cerrar sesión">Cerrar sesión</button>
+          <button onclick="logoutStaff()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 hover:text-rose-400 text-zinc-200 text-xs font-semibold transition-all" title="Cerrar sesión">Cerrar sesión</button>
         </div>
       </div>
 
@@ -551,6 +573,11 @@
                     <label class="block mb-1 text-zinc-400">Especificación Principal (Autonomía, conectividad) *</label>
                     <input required type="text" id="new-prod-specs" placeholder="Ej. Batería 12h · Sonido Pro Original · Bluetooth 5.3 · IP67" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
                   </div>
+                  <div>
+                    <label class="block mb-1 text-zinc-400">Palabras clave para el asesor <span class="text-zinc-500">(opcional)</span></label>
+                    <input type="text" id="new-prod-keywords" maxlength="200" placeholder="Ej. correr, gym, estudiar, regalo, llamadas" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                    <p class="mt-1 text-[10px] text-zinc-500">Cómo lo buscaría un cliente. Ayuda a que el asesor lo encuentre.</p>
+                  </div>
                 </div>
 
                 <!-- Price, Cost & MOTOR DE GANANCIA EN VIVO -->
@@ -757,96 +784,88 @@
 
           </div>
 
-          <!-- TAB 3: MOTOR DE INTELIGENCIA -->
+          <!-- TAB 3: MOTOR INTELIGENTE (datos reales) -->
           <div id="admin-tab-smart-engine" class="hidden space-y-6">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <span>🧠 Motor Inteligente de Recomendación & Comparativa</span>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-brand-orange/20 text-brand-orange border border-brand-orange/30 font-code">v3.4 Activo</span>
-                </h3>
-                <p class="text-xs text-zinc-400">Algoritmo que evalúa precio, características, marcas y disponibilidad en Tucumán.</p>
-              </div>
+            <div>
+              <h3 class="text-lg font-bold text-white">🧠 Motor Inteligente</h3>
+              <p class="text-xs text-zinc-400">Acá ves cómo recomienda el asesor de la tienda y qué buscan tus clientes. Todos los números son reales.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                <span class="text-[11px] text-zinc-400 font-semibold">Salud del Catálogo</span>
-                <div class="text-2xl font-black text-emerald-400 font-code">96% Óptimo</div>
-                <p class="text-[10px] text-zinc-400">Productos con fotos múltiples, colores y garantías registradas.</p>
+                <span class="text-[11px] text-zinc-400 font-semibold">Productos completos</span>
+                <div id="engine-health" class="text-2xl font-black text-emerald-400 font-code">—</div>
+                <p id="engine-health-sub" class="text-[10px] text-zinc-400">Con foto, descripción, garantía, precio y stock.</p>
               </div>
-
               <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                <span class="text-[11px] text-zinc-400 font-semibold">Criterio de Match</span>
-                <div class="text-2xl font-black text-white font-code">4 Factores</div>
-                <p class="text-[10px] text-zinc-400">Precio + Calidad + Despacho Tucumán + Colores.</p>
+                <span class="text-[11px] text-zinc-400 font-semibold">Búsquedas en el asesor</span>
+                <div id="engine-searches" class="text-2xl font-black text-white font-code">—</div>
+                <p id="engine-searches-sub" class="text-[10px] text-zinc-400">Desde que empezó a contar.</p>
               </div>
-
               <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                <span class="text-[11px] text-zinc-400 font-semibold">Top Tendencia Local</span>
-                <div class="text-2xl font-black text-brand-amber font-code">Audio Hi-Res</div>
-                <p class="text-[10px] text-zinc-400">Auricular Pro X1 y Beat Clip Go 4 encabezan las consultas.</p>
+                <span class="text-[11px] text-zinc-400 font-semibold">Sin resultado</span>
+                <div id="engine-noresults" class="text-2xl font-black text-brand-amber font-code">—</div>
+                <p class="text-[10px] text-zinc-400">Lo que piden y hoy no tenés (o no está bien cargado).</p>
               </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div class="lg:col-span-6 p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-4">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Calibración de Factores</h4>
-                <div class="space-y-4 text-xs">
-                  <div>
-                    <div class="flex justify-between mb-1 font-code">
-                      <span class="text-zinc-300 font-medium font-sans">Margen de Ganancia</span>
-                      <span id="weight-margin-val" class="text-brand-orange font-bold">40%</span>
-                    </div>
-                    <input type="range" min="10" max="70" value="40" oninput="document.getElementById('weight-margin-val').textContent=this.value+'%'" class="w-full accent-brand-orange cursor-pointer" />
-                  </div>
-                  <div>
-                    <div class="flex justify-between mb-1 font-code">
-                      <span class="text-zinc-300 font-medium font-sans">Stock Físico en Tucumán</span>
-                      <span id="weight-stock-val" class="text-brand-amber font-bold">30%</span>
-                    </div>
-                    <input type="range" min="10" max="60" value="30" oninput="document.getElementById('weight-stock-val').textContent=this.value+'%'" class="w-full accent-brand-amber cursor-pointer" />
-                  </div>
-                  <div>
-                    <div class="flex justify-between mb-1 font-code">
-                      <span class="text-zinc-300 font-medium font-sans">Prestigio de Marca & Garantía</span>
-                      <span id="weight-brand-val" class="text-emerald-400 font-bold">30%</span>
-                    </div>
-                    <input type="range" min="10" max="60" value="30" oninput="document.getElementById('weight-brand-val').textContent=this.value+'%'" class="w-full accent-emerald-400 cursor-pointer" />
-                  </div>
-                  <button onclick="saveEngineWeights()" class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold transition-all font-sans">
-                    Guardar Pesos del Algoritmo
-                  </button>
-                  <span id="engine-saved-msg" class="hidden text-emerald-400 text-[11px] font-semibold text-center block font-code">✓ Motor recalculado exitosamente</span>
+              <div class="lg:col-span-6 p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Cómo recomienda el asesor</h4>
+                <ul class="text-xs text-zinc-300 space-y-1.5 leading-relaxed">
+                  <li>• Entiende el presupuesto: "70 mil", "70k", "$70.000", "hasta 50 mil", "entre 30 y 50 mil".</li>
+                  <li>• Entiende qué busca: nombre, marca, categoría, características y las <strong>palabras clave</strong> que cargues en cada producto. Sabe que "audífonos" y "auriculares" son lo mismo.</li>
+                  <li>• Solo recomienda productos activos y con stock.</li>
+                  <li>• Muestra 2 o 3 opciones distintas (la mejor, la del otro tipo —Original o Selección— y la más económica o la más completa) con el motivo de cada una.</li>
+                  <li>• Si el cliente solo dice cuánto tiene ("tengo 70 mil"), arma combos que entren en ese monto.</li>
+                  <li>• Cuenta el descuento por transferencia: un producto de $75.000 entra en $70.000 pagando así.</li>
+                </ul>
+                <div class="pt-3 border-t border-zinc-800 space-y-2">
+                  <label class="block text-xs font-semibold text-zinc-200" for="engine-bias">Cuando dos productos sirven igual, ¿cuál mostrar primero?</label>
+                  <select id="engine-bias" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-brand-orange">
+                    <option value="equilibrado">Equilibrado (lo que mejor coincide)</option>
+                    <option value="economico">Priorizar PLUG Selección (más económico)</option>
+                    <option value="original">Priorizar Originales (marca y garantía oficial)</option>
+                  </select>
+                  <button onclick="saveAdvisorBias()" class="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold transition-all text-sm">Guardar</button>
+                  <span id="engine-saved-msg" class="hidden text-emerald-400 text-[11px] font-semibold text-center block font-code"></span>
                 </div>
               </div>
 
-              <div class="lg:col-span-6 p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-4">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Matriz de Productos en Tendencia</h4>
-                <div class="space-y-2.5 text-xs">
-                  <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between">
-                    <div>
-                      <div class="font-bold text-white">Auricular Pro X1 Wireless</div>
-                      <div class="text-[10px] text-zinc-400 font-code">Score: <strong class="text-emerald-400">96 / 100</strong> (3 colores)</div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] bg-brand-orange/20 text-brand-orange font-bold font-code">TOP 1</span>
-                  </div>
-                  <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between">
-                    <div>
-                      <div class="font-bold text-white">Smartwatch Active 2 Pro</div>
-                      <div class="text-[10px] text-zinc-400 font-code">Score: <strong class="text-emerald-400">91 / 100</strong> (Plug Selección)</div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300 font-bold font-code">TOP 2</span>
-                  </div>
-                  <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between">
-                    <div>
-                      <div class="font-bold text-white">Cargador Rápido USB-C 45W GaN</div>
-                      <div class="text-[10px] text-zinc-400 font-code">Score: <strong class="text-emerald-400">88 / 100</strong> (Rotación Rápida)</div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-300 font-bold font-code">TOP 3</span>
-                  </div>
+              <div class="lg:col-span-6 p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Probar el asesor</h4>
+                <p class="text-xs text-zinc-400">Escribí lo que escribiría un cliente y mirá qué recomienda y por qué. No cuenta como búsqueda real.</p>
+                <div class="flex gap-2">
+                  <input id="engine-test-input" type="text" placeholder="Ej: auriculares para correr hasta 50 mil" class="flex-1 bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-white text-sm focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') adminTestAdvisor()" />
+                  <button onclick="adminTestAdvisor()" class="px-4 rounded-lg bg-brand-orange hover:bg-orange-500 text-black font-bold text-sm">Probar</button>
                 </div>
+                <div id="engine-test-result" class="space-y-2 text-xs"></div>
               </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Qué buscan tus clientes</h4>
+                <div id="engine-terms" class="flex flex-wrap gap-2 text-xs"><span class="text-zinc-500">Cargando…</span></div>
+              </div>
+              <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Pidieron y no encontraron</h4>
+                <div id="engine-missed" class="space-y-1.5 text-xs"><span class="text-zinc-500">Cargando…</span></div>
+              </div>
+              <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Productos más mirados</h4>
+                <div id="engine-views" class="space-y-1.5 text-xs"><span class="text-zinc-500">Cargando…</span></div>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+              <h4 class="text-xs font-bold text-white uppercase tracking-wider">Productos para completar</h4>
+              <p class="text-xs text-zinc-400">Mientras mejor cargado esté un producto, mejor lo encuentra el asesor y más vende. Tocá "Editar" para completarlo.</p>
+              <div id="engine-incomplete" class="space-y-2 text-xs"></div>
+            </div>
+
+            <div class="flex justify-end">
+              <button id="engine-reset-btn" onclick="resetInsights()" class="px-3 py-2 rounded-lg bg-zinc-900 hover:bg-rose-950 text-zinc-400 hover:text-rose-300 border border-zinc-800 text-xs">Borrar estadísticas y empezar de cero</button>
             </div>
           </div>
 
@@ -1383,12 +1402,13 @@
         AUTH_STAFF: '/api/auth/staff',        // POST { username, pin } -> { token, role, name }
         PRODUCTS: '/api/products',             // GET / PUT
         ORDERS: '/api/orders',                 // GET / POST
-        CUSTOMERS: '/api/customers',           // GET / POST
+        CUSTOMERS: '/api/customers',           // GET / POST / PUT/DELETE /:telefono (editar y borrar la ficha)
         STAFF_USERS: '/api/staff-users',       // GET / POST / PUT / DELETE (solo admin)
         SUPPLIERS: '/api/suppliers',           // GET (admin y logística)
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
+        INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
         BACKUP: '/api/backup',                 // GET (solo admin): copia de seguridad completa
         AUDIT: '/api/audit',                   // GET (solo admin): registro de quién cambió qué
         CLAIMS: '/api/claims',                 // POST (cliente: garantía/arrepentimiento) / GET /lookup?phone= / GET y PATCH /:id (equipo)
@@ -1443,6 +1463,7 @@
     // descuento). Lo que se carga en Ajustes del panel llega así a todos los
     // clientes. Si el servidor no responde, quedan los valores guardados.
     function applyBankDisplay() {
+      document.querySelectorAll('[data-disc]').forEach(el => { el.textContent = String(STORE_SETTINGS.transferDiscountPct || 10); });
       const a = document.getElementById('alias-display-text');
       if (a) a.textContent = STORE_SETTINGS.bankAlias;
       const c = document.getElementById('cbu-display-text');
@@ -1452,7 +1473,7 @@
       if (!isBackendConnected()) return;
       const res = await apiRequest('SETTINGS');
       if (!res || typeof res !== 'object' || res.error) return;
-      ['whatsappNumber', 'bankAlias', 'bankCbu'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
+      ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
       applyStoreWhatsappLinks();
@@ -1473,6 +1494,7 @@
     ];
     let CATEGORIES = DEFAULT_CATEGORIES.map(c => ({ ...c }));
     const sortCats = list => list.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
+    function topCats() { return sortCats(CATEGORIES.filter(c => !c.parent && c.active !== false)); }
     function subCatsOf(id, includeInactive) { return sortCats(CATEGORIES.filter(c => c.parent === id && (includeInactive || c.active !== false))); }
     function categoryLabel(id) {
       const c = CATEGORIES.find(x => x.id === id);
@@ -1599,7 +1621,7 @@
       return {
         ...p,
         name: cleanText(p.name, 120), brand: cleanText(p.brand, 60), category: cleanText(p.category, 40), subcategory: cleanText(p.subcategory, 40), active: p.active !== false,
-        specs: cleanText(p.specs, 300), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
+        specs: cleanText(p.specs, 300), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
@@ -1623,8 +1645,13 @@
       }
       return d;
     }
+    function isValidArPhone(raw) { return normalizeArPhone(raw).length === 10; }
     function waLink(rawPhone, text) {
       return 'https://wa.me/549' + normalizeArPhone(rawPhone) + (text ? '?text=' + encodeURIComponent(text) : '');
+    }
+    function samePhone(a, b) {
+      const x = normalizeArPhone(a), y = normalizeArPhone(b);
+      return x.length === 10 && x === y;
     }
 
     const DEFAULT_PRODUCTS = [
@@ -1756,7 +1783,8 @@
       whatsappNumber: '5493816993305',
       bankAlias: 'PlugShop.store.ar',
       bankCbu: '3840200500000011487511',
-      transferDiscountPct: 10
+      transferDiscountPct: 10,
+      advisorBias: 'equilibrado'
     };
 
     const DEFAULT_ORDERS = [
@@ -2309,6 +2337,8 @@
           btnEl.className = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all';
         }
       });
+
+      if (tabName === 'smart-engine') { renderEngineTab(); loadInsights(); }
 
       // En celular el menú y el contenido quedan apilados en una sola
       // columna; después de elegir una pestaña, bajamos la vista hasta el
@@ -2917,6 +2947,42 @@
       renderOrdersTable();
     }
 
+    // ---- Clientes: editar y borrar la ficha (los pedidos no se tocan) ----
+    async function editCustomer(phoneKey) {
+      const c = CUSTOMERS.find(x => samePhone(x.phone, phoneKey));
+      if (!c) return;
+      const name = prompt('Nombre del cliente:', c.name);
+      if (name === null) return;
+      const phone = prompt('WhatsApp (con característica, ej. 381 555 1234):', c.phone);
+      if (phone === null) return;
+      const zone = prompt('Zona / localidad:', c.zone || '');
+      if (zone === null) return;
+      if (name.trim().length < 2) { alert('El nombre necesita al menos 2 letras.'); return; }
+      if (!isValidArPhone(phone)) { alert('El WhatsApp no es válido: poné la característica (ej. 381 555 1234).'); return; }
+      if (CUSTOMERS.some(x => x !== c && samePhone(x.phone, phone))) { alert('Ya existe otro cliente con ese WhatsApp.'); return; }
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('CUSTOMERS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ name: name.trim(), phone: phone.trim(), zone: zone.trim() }) }, '/' + encodeURIComponent(phoneKey));
+        if (!res || res.success === false || !res.customer) { alert((res && res.error) || 'No se pudo guardar el cliente.'); return; }
+        Object.assign(c, res.customer);
+      } else {
+        Object.assign(c, { name: name.trim().slice(0, 80), phone: phone.trim().slice(0, 40), zone: zone.trim().slice(0, 80) });
+        saveStorage(STORAGE_KEYS.CUSTOMERS, CUSTOMERS);
+      }
+      refreshAdminUI();
+    }
+    async function deleteCustomer(phoneKey) {
+      const c = CUSTOMERS.find(x => samePhone(x.phone, phoneKey));
+      if (!c) return;
+      if (!confirm(`¿Borrar la ficha de ${c.name} (${c.phone})?\n\nSus pedidos, reclamos y devoluciones NO se borran. Si vuelve a comprar, la ficha se crea de nuevo.`)) return;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('CUSTOMERS', { method: 'DELETE', headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/' + encodeURIComponent(phoneKey));
+        if (!res || res.success === false) { alert((res && res.error) || 'No se pudo borrar el cliente.'); return; }
+      }
+      CUSTOMERS = CUSTOMERS.filter(x => x !== c);
+      saveStorage(STORAGE_KEYS.CUSTOMERS, CUSTOMERS);
+      refreshAdminUI();
+    }
+
     // ---- Cambio de PIN y registro de cambios ----
     function showPinMsg(t, good) {
       const el = document.getElementById('pin-msg'); if (!el) return;
@@ -3003,9 +3069,12 @@
             <button onclick="window.open(waLink('${c.phone}'), '_blank')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-semibold">
               WhatsApp ↗
             </button>
+            ${['admin', 'vendedor'].includes(currentStaffSession.role) ? `<button onclick="editCustomer('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[10px] font-semibold">✏️ Editar</button>` : ''}
+            ${currentStaffSession.role === 'admin' ? `<button onclick="deleteCustomer('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 text-[10px] font-semibold">🗑️ Borrar</button>` : ''}
           </td>
         </tr>
       `).join('');
+      if (!CUSTOMERS.length) custTable.innerHTML = '<tr><td colspan="6" class="py-6 px-4 text-center text-zinc-500">Todavía no hay clientes registrados.</td></tr>';
 
       renderStaffUsersTable();
       renderCashRegister();
@@ -3785,6 +3854,7 @@
       set('new-prod-compare', p.compareAtPrice || '');
       document.getElementById('new-prod-featured').checked = p.featured === true;
       set('new-prod-specs', p.specs || '');
+      set('new-prod-keywords', p.keywords || '');
       set('new-prod-colors', (p.colors || []).join(', '));
       const note = document.getElementById('color-stock-note');
       if (p.stockByColor) { renderColorStockInputs(p.stockByColor); note.classList.add('hidden'); }
@@ -3854,12 +3924,13 @@
       if (compareAtPrice > 0 && compareAtPrice <= price) { alert('El precio anterior tachado tiene que ser MAYOR que el precio actual (si no, no es una oferta). Dejalo vacío si no hay oferta.'); return; }
       const featured = document.getElementById('new-prod-featured').checked;
       const specs = document.getElementById('new-prod-specs').value.trim();
+      const keywords = document.getElementById('new-prod-keywords').value.trim();
 
       const rawColors = document.getElementById('new-prod-colors').value.trim();
       const colors = rawColors.split(',').map(c => c.trim()).filter(c => c.length > 0);
 
       const payload = {
-        name, brand, category, subcategory, type, warranty, stock, stockByColor, specs, featured,
+        name, brand, category, subcategory, type, warranty, stock, stockByColor, specs, keywords, featured,
         colors: colors.length > 0 ? colors : ['Único'], photos,
         badge: type === 'original' ? '100% ORIGINAL' : 'PLUG SELECCIÓN'
       };
@@ -4041,10 +4112,99 @@
       document.getElementById('calc-pct').textContent = `${pct}%`;
     }
 
-    function saveEngineWeights() {
+    // ---- Motor Inteligente (panel) ----
+    let ENGINE_INSIGHTS = null;
+
+    // Qué le falta a un producto para que el asesor y la tienda lo muestren bien.
+    function productMissing(p) {
+      const miss = [];
+      if (!(p.photos || []).some(isImageUrl)) miss.push({ k: 'foto', hard: true, text: 'Sin foto' });
+      if (String(p.specs || '').trim().length < 15) miss.push({ k: 'specs', hard: true, text: 'Descripción corta' });
+      if (!String(p.warranty || '').trim()) miss.push({ k: 'warranty', hard: true, text: 'Sin garantía' });
+      if (!(Number(p.price) > 0)) miss.push({ k: 'price', hard: true, text: 'Sin precio' });
+      if (!(Number(p.stock) > 0)) miss.push({ k: 'stock', hard: true, text: 'Sin stock' });
+      if (!String(p.keywords || '').trim()) miss.push({ k: 'keywords', hard: false, text: 'Sin palabras clave' });
+      return miss;
+    }
+
+    async function loadInsights() {
+      if (!isBackendConnected() || !currentStaffSession.token) return;
+      const res = await apiRequest('INSIGHTS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
+      if (res && typeof res === 'object' && !res.error && Array.isArray(res.terms)) ENGINE_INSIGHTS = res;
+      renderEngineTab();
+    }
+
+    function renderEngineTab() {
+      const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+      const live = PRODUCTS.filter(p => p.active !== false);
+      const done = live.filter(p => !productMissing(p).some(m => m.hard));
+      set('engine-health', live.length ? `${Math.round(done.length / live.length * 100)}%` : '—');
+      set('engine-health-sub', live.length ? `${done.length} de ${live.length} con foto, descripción, garantía, precio y stock.` : 'Todavía no hay productos activos.');
+      const bias = document.getElementById('engine-bias');
+      if (bias) bias.value = STORE_SETTINGS.advisorBias || 'equilibrado';
+
+      const todo = live.map(p => ({ p, miss: productMissing(p) })).filter(x => x.miss.length).sort((a, b) => b.miss.filter(m => m.hard).length - a.miss.filter(m => m.hard).length).slice(0, 10);
+      set('engine-incomplete', todo.length ? todo.map(x => `
+        <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="font-bold text-white truncate">${escapeHtml(x.p.name)}</div>
+            <div class="mt-1 flex flex-wrap gap-1">${x.miss.map(m => `<span class="px-1.5 py-0.5 rounded text-[10px] ${m.hard ? 'bg-rose-950/60 text-rose-300' : 'bg-zinc-800 text-zinc-400'}">${escapeHtml(m.text)}</span>`).join('')}</div>
+          </div>
+          <button onclick="switchAdminTab('inventory'); startEditProduct(${Number(x.p.id)})" class="shrink-0 px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-xs">Editar</button>
+        </div>`).join('') : '<p class="text-emerald-400">¡Todos los productos están bien cargados!</p>');
+
+      const ins = ENGINE_INSIGHTS;
+      if (!ins) {
+        const msg = isBackendConnected() ? 'No se pudieron cargar las estadísticas.' : 'Las estadísticas se guardan cuando la tienda está conectada al servidor.';
+        ['engine-terms', 'engine-missed', 'engine-views'].forEach(id => set(id, `<span class="text-zinc-500">${escapeHtml(msg)}</span>`));
+        set('engine-searches', '—'); set('engine-noresults', '—');
+        return;
+      }
+      set('engine-searches', String(ins.searches));
+      set('engine-searches-sub', ins.since ? 'Desde el ' + new Date(ins.since).toLocaleDateString('es-AR') + '.' : '');
+      set('engine-noresults', ins.searches ? `${ins.noResults} <span class="text-sm text-zinc-400">(${Math.round(ins.noResults / ins.searches * 100)}%)</span>` : '0');
+      set('engine-terms', ins.terms.length ? ins.terms.map(t => `<span class="px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-100">${escapeHtml(t.term)} <strong class="text-brand-amber font-code">${Number(t.n)}</strong></span>`).join('') : '<span class="text-zinc-500">Todavía nadie usó el asesor.</span>');
+      set('engine-missed', ins.missed.length ? ins.missed.map(m => `<div class="flex justify-between gap-2 p-2 rounded-lg bg-zinc-950 border border-zinc-800"><span class="text-white">${escapeHtml(m.q)}</span><span class="text-brand-amber font-code shrink-0">${Number(m.n)}×</span></div>`).join('') : '<span class="text-zinc-500">Nada por ahora. Cuando alguien busque algo que no tenés, aparece acá.</span>');
+      set('engine-views', ins.views.length ? ins.views.map(v => `<div class="flex justify-between gap-2 p-2 rounded-lg bg-zinc-950 border border-zinc-800"><span class="text-white truncate">${escapeHtml(v.name)}</span><span class="text-zinc-300 font-code shrink-0">${Number(v.n)}</span></div>`).join('') : '<span class="text-zinc-500">Todavía no hay visitas registradas.</span>');
+    }
+
+    async function saveAdvisorBias() {
       const msg = document.getElementById('engine-saved-msg');
-      msg.classList.remove('hidden');
-      setTimeout(() => msg.classList.add('hidden'), 2500);
+      const show = (t, ok) => { msg.textContent = t; msg.classList.toggle('text-emerald-400', ok); msg.classList.toggle('text-red-400', !ok); msg.classList.remove('hidden'); setTimeout(() => msg.classList.add('hidden'), ok ? 2500 : 6000); };
+      const advisorBias = document.getElementById('engine-bias').value;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('SETTINGS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ advisorBias }) });
+        if (!res || !res.success || !res.settings) { show((res && res.error) || 'No se pudo guardar. Probá de nuevo.', false); return; }
+        Object.assign(STORE_SETTINGS, res.settings);
+      } else STORE_SETTINGS.advisorBias = advisorBias;
+      saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
+      show('✓ Guardado: el asesor ya usa este criterio', true);
+    }
+
+    function adminTestAdvisor() {
+      const input = document.getElementById('engine-test-input');
+      const box = document.getElementById('engine-test-result');
+      const text = input.value.trim();
+      if (!text) { box.innerHTML = '<p class="text-zinc-500">Escribí algo para probar.</p>'; return; }
+      const advice = advisorBuild(text, PRODUCTS, { discPct: STORE_SETTINGS.transferDiscountPct, bias: STORE_SETTINGS.advisorBias, catLabel: categoryLabel, topCats: topCats(), freeShipAt: STORE_SETTINGS.freeShippingThreshold });
+      let html = '';
+      const b = advice.budget;
+      html += `<div class="text-zinc-400">Entendió: ${b && b.max ? 'presupuesto hasta <strong class="text-white">' + escapeHtml(formatARS(b.max)) + '</strong>' : 'sin presupuesto'}${b && b.min ? ', desde <strong class="text-white">' + escapeHtml(formatARS(b.min)) + '</strong>' : ''}${advice.terms.length ? ' · busca: <strong class="text-white">' + advice.terms.map(escapeHtml).join(', ') + '</strong>' : ''}</div>`;
+      if (advice.kind === 'hint') html += '<p class="text-zinc-500">No entendió qué se busca. Probá con un producto o un monto.</p>';
+      else if (advice.kind === 'none') html += `<p class="text-brand-amber">No encontraría nada${advice.soldOut.length ? ' (hay agotado: ' + advice.soldOut.map(s => escapeHtml(s.name)).join(', ') + ')' : ''}. Esta búsqueda quedaría en "Pidieron y no encontraron".</p>`;
+      else {
+        if (advice.note) html += `<p class="text-amber-300">${escapeHtml(advice.note)}</p>`;
+        html += advice.options.map(o => `<div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800"><div class="text-white font-bold">${o.n}. ${escapeHtml(o.prod.name)} <span class="text-zinc-400 font-normal">· ${escapeHtml(o.label)} · ${escapeHtml(formatARS(o.eff))}</span></div><div class="text-zinc-400 mt-0.5">${o.reasons.map(escapeHtml).join(' ')}</div></div>`).join('');
+        html += advice.combos.map((c, i) => `<div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-300">Combo ${i + 1}: ${c.items.map(it => escapeHtml(it.prod.name)).join(' + ')} = <strong class="text-white">${escapeHtml(formatARS(c.total))}</strong></div>`).join('');
+      }
+      box.innerHTML = html;
+    }
+
+    async function resetInsights() {
+      if (!isBackendConnected() || !currentStaffSession.token) return;
+      if (!confirm('¿Borrar todas las estadísticas del asesor y empezar de cero? Los productos y pedidos no se tocan.')) return;
+      const res = await apiRequest('INSIGHTS', { method: 'DELETE', headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
+      if (res && res.success) { ENGINE_INSIGHTS = null; await loadInsights(); } else alert((res && res.error) || 'No se pudo borrar.');
     }
 
     async function saveStoreSettings() {
@@ -4118,6 +4278,401 @@
       saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
       renderProducts();
       refreshAdminUI();
+    }
+
+    // ==========================================
+    // 10. ASESOR PLUG (motor de recomendación)
+    // ==========================================
+    // Cómo funciona (todo se calcula en el navegador con el catálogo real):
+    //  1. Entiende el presupuesto ("70 mil", "70k", "$70.000", "hasta 50k", "entre 30 y 50 mil").
+    //  2. Entiende qué busca: palabras del producto (nombre, marca, categoría, specs,
+    //     palabras clave), sinónimos ("audífonos" = "auriculares") y usos ("para correr").
+    //  3. Puntúa solo productos activos y con stock, y los compara: la mejor opción, la
+    //     alternativa del otro tipo (Original vs. Selección) y la más económica o la más completa.
+    //  4. Si solo dice cuánto tiene ("tengo 70 mil"), arma combos que entran en ese monto.
+    //  5. Cada opción trae el MOTIVO de por qué se recomienda. Nada es aleatorio.
+    const ADV_STOP = new Set(('para con sin una uno unos unas del los las que quiero busco necesito algo por favor hola tengo como cual cuales ' +
+      'esta este estos estas muy bien algun alguna ver mostrame recomendame recomendas recomendar sugerime sugeris dame quisiera queria ' +
+      'estoy buscando me mi tu si no ni un el la de en y o a al lo se es son hay unos gastar gasto plata pesos peso presupuesto ' +
+      'hasta menos maximo maxima tope entre desde minimo alrededor aproximadamente mas pasar pase').split(' '));
+
+    // Grupos de palabras equivalentes (ya sin tildes).
+    const ADV_SYN = [
+      ['auricular', 'audifono', 'headphone', 'headset', 'earbud', 'airpod', 'manoslibres'],
+      ['parlante', 'bocina', 'speaker', 'altavoz'],
+      ['reloj', 'smartwatch', 'watch', 'smartband', 'pulsera', 'band'],
+      ['cargador', 'charger', 'cargar', 'adaptador', 'fuente'],
+      ['powerbank', 'bank', 'bateria externa'],
+      ['teclado', 'keyboard'],
+      ['mouse', 'raton'],
+      ['gamer', 'gaming', 'juego', 'jugar', 'gamers'],
+      ['microfono', 'mic'],
+      ['inalambrico', 'wireless', 'bluetooth', 'sinfil'],
+      ['luz', 'lampara', 'led', 'foco', 'luminaria'],
+      ['sumergible', 'waterproof', 'agua', 'resistente', 'ip67', 'ip68', 'ip65'],
+      ['cancelacion', 'anc', 'ruido']
+    ];
+    // Usos: si el cliente dice esto, también sirven productos con estas palabras (peso bajo).
+    const ADV_USES = {
+      estudiar: ['microfono', 'cancelacion', 'ruido', 'auricular', 'comodo'],
+      estudio: ['microfono', 'cancelacion', 'ruido', 'auricular'],
+      trabajar: ['microfono', 'cancelacion', 'auricular', 'teclado', 'mouse'],
+      trabajo: ['microfono', 'cancelacion', 'auricular', 'teclado', 'mouse'],
+      oficina: ['microfono', 'teclado', 'mouse', 'cargador'],
+      llamadas: ['microfono', 'cancelacion', 'auricular'],
+      reuniones: ['microfono', 'cancelacion', 'auricular'],
+      correr: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular', 'gps'],
+      running: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular', 'gps'],
+      gym: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular'],
+      gimnasio: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular'],
+      deporte: ['deportivo', 'sport', 'sumergible', 'resistente', 'reloj', 'auricular'],
+      deportivo: ['sport', 'sumergible', 'resistente'],
+      entrenar: ['deportivo', 'sport', 'sumergible', 'reloj', 'auricular'],
+      viaje: ['cargador', 'powerbank', 'cancelacion', 'auricular', 'bateria'],
+      viajar: ['cargador', 'powerbank', 'cancelacion', 'auricular', 'bateria'],
+      auto: ['cargador', 'cable', 'soporte']
+    };
+    // Palabras que no describen el producto sino qué prioriza el cliente.
+    const ADV_MODS = {
+      cheap: ['barato', 'barata', 'baratos', 'economico', 'economica', 'accesible', 'convenientes', 'conveniente'],
+      original: ['original', 'originales', 'oficial', 'marca'],
+      seleccion: ['seleccion'],
+      best: ['mejor', 'premium', 'calidad', 'top', 'completo', 'completa'],
+      gift: ['regalo', 'regalar', 'regalarle', 'obsequio']
+    };
+
+    const advFold = s => String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    // Formas de una palabra para comparar singular/plural: cables, cable; mouses, mouse; relojes, reloj.
+    function advForms(w) {
+      const f = [w];
+      if (w.length > 3 && w.endsWith('s')) f.push(w.slice(0, -1));
+      if (w.length > 4 && w.endsWith('es')) f.push(w.slice(0, -2));
+      return f;
+    }
+    function advWords(s) { return advFold(s).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean); }
+    function advWordSet(s) { const set = new Set(); advWords(s).forEach(w => advForms(w).forEach(x => set.add(x))); return set; }
+
+    // ---- Presupuesto ----
+    // Devuelve { min, max, text } o null. "text" es el pedazo de la frase que habla de plata
+    // (se saca de la búsqueda para que "70 mil" no se tome como palabra de producto).
+    // No confunde especificaciones: "bluetooth 5.3", "45w", "10000 mah", "pantalla 4k".
+    function parseBudget(raw) {
+      const s = advFold(raw).replace(/\s+/g, ' ');
+      // Rangos: "entre 30 y 50 mil", "de 30 a 50 mil", "entre 30.000 y 50.000". El primero hereda "mil".
+      const rr = s.match(/(entre|de|desde)\s*\$?(\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?)\s*(mil|k|lucas?)?\s*(?:y|a|-|hasta)\s*\$?(\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?)\s*(mil|k|lucas?|palos?)?(?![a-z])/);
+      if (rr) {
+        const val = (d, u) => { const n = /^\d{1,3}([.,]\d{3})+$/.test(d) ? Number(d.replace(/[.,]/g, '')) : Number(d.replace(',', '.')); return Math.round(n * (/^(mil|k|luca|lucas)$/.test(u || '') ? 1000 : /^palos?$/.test(u || '') ? 1000000 : 1)); };
+        let lo = val(rr[2], rr[3]), hi = val(rr[4], rr[5]);
+        if (!rr[3] && rr[5] && lo < 1000) lo = val(rr[2], rr[5]);
+        if (lo >= 1000 && hi >= 1000) {
+          const st = rr.index, en = rr.index + rr[0].length;
+          return { min: Math.min(lo, hi), max: Math.max(lo, hi), text: s.slice(st, en), start: st, end: en, folded: s };
+        }
+      }
+      const UNITS_SPEC = /^(mah|w|watts?|hz|gb|tb|mb|mp|mm|cm|hs|horas?|h|db|pulgadas?|v|a|ma|x)\b/;
+      const num = '\\$?\\s*(\\d{1,3}(?:[.,]\\d{3})+|\\d+(?:[.,]\\d+)?)(?:\\s*(mil|k|lucas?|palos?|millon(?:es)?)(?![a-z]))?';
+      const re = new RegExp(num, 'g');
+      const found = [];
+      let m;
+      while ((m = re.exec(s))) {
+        const full = m[0];
+        const hasDollar = full.trim().startsWith('$');
+        let digits = m[1], unit = m[2] || '';
+        const after = s.slice(m.index + full.length).trim();
+        const before = s.slice(0, m.index);
+        let value;
+        if (/^\d{1,3}([.,]\d{3})+$/.test(digits)) value = Number(digits.replace(/[.,]/g, ''));
+        else value = Number(digits.replace(',', '.'));
+        if (!Number.isFinite(value) || value <= 0) continue;
+        let mult = 1;
+        if (/^(mil|k|luca|lucas)$/.test(unit)) mult = 1000;
+        else if (/^(palo|palos|millon|millones)$/.test(unit)) mult = 1000000;
+        // "k" pegada a 4 u 8 sin $ es resolución (4k, 8k), no plata.
+        if (unit === 'k' && !hasDollar && (value === 4 || value === 8)) continue;
+        // Medidas y especificaciones técnicas.
+        if (!unit && UNITS_SPEC.test(after)) continue;
+        if (!unit && /(bluetooth|bt|usb|version|v|ip|wifi|hdmi|tipo|c|type|serie|gen|pro|x)\s*$/.test(before) && value < 1000) continue;
+        value = Math.round(value * mult);
+        // Sin "mil/k/$": solo se toma si parece plata (>= 1000).
+        if (!unit && !hasDollar && value < 1000) continue;
+        if (value < 1000) continue;
+        found.push({ value, start: m.index, end: m.index + full.length, unit, hasDollar });
+      }
+      if (!found.length) return null;
+
+      // Rango: "entre 30 y 50 mil", "de 30 a 50 mil": el primero hereda "mil" si no lo trae.
+      let min = 0, max = 0, spanStart, spanEnd;
+      const first = found[0], second = found[1];
+      if (second) {
+        const between = s.slice(first.end, second.start);
+        const pre = s.slice(Math.max(0, first.start - 12), first.start);
+        if (/^\s*(y|a|-|hasta|o)\s*$/.test(between) && /(entre|de|desde)\s*$/.test(pre)) {
+          let lo = first.value, hi = second.value;
+          if (!first.unit && !first.hasDollar && second.unit && lo < 1000) lo *= 1000;
+          min = Math.min(lo, hi); max = Math.max(lo, hi);
+          spanStart = Math.max(0, first.start - (pre.match(/(entre|de|desde)\s*$/)[0].length)); spanEnd = second.end;
+        }
+      }
+      if (!max) {
+        const pre = s.slice(Math.max(0, first.start - 30), first.start);
+        const isMin = /(desde|mas de|minimo|arriba de|no menos de)\s*$/.test(pre);
+        if (isMin) min = first.value; else max = first.value;
+        const lead = pre.match(/(hasta|menos de|maximo|no mas de|tope de|tope|no pase de|por debajo de|alrededor de|aproximadamente|desde|mas de|minimo|arriba de|no menos de|presupuesto de|presupuesto|tengo|gasto|gastar|con)\s*$/);
+        spanStart = first.start - (lead ? lead[0].length : 0); spanEnd = first.end;
+      }
+      return { min, max, text: s.slice(spanStart, spanEnd), start: spanStart, end: spanEnd, folded: s };
+    }
+
+    // ---- Interpretación de la frase ----
+    function advParse(raw) {
+      const budget = parseBudget(raw);
+      let s = advFold(raw).replace(/\s+/g, ' ');
+      if (budget) s = (s.slice(0, budget.start) + ' ' + s.slice(budget.end));
+      const words = advWords(s).filter(w => !ADV_STOP.has(w) && !/^\d+$/.test(w) && w.length > 1);
+      const mods = { cheap: false, original: false, seleccion: false, best: false, gift: false };
+      const terms = []; // { label, forms:[{w, weight}] }
+      const seen = new Set();
+      words.forEach(w => {
+        let isMod = false;
+        for (const k of Object.keys(ADV_MODS)) {
+          if (ADV_MODS[k].some(x => advForms(w).includes(x) || x === w)) { mods[k] = true; isMod = true; }
+        }
+        if (isMod || seen.has(w)) return;
+        seen.add(w);
+        const forms = [];
+        const add = (x, weight) => { if (!forms.some(f => f.w === x)) forms.push({ w: x, weight, use: weight < 0.5 }); };
+        advForms(w).forEach(x => add(x, 1));
+        ADV_SYN.forEach(g => { if (advForms(w).some(x => g.includes(x))) g.forEach(x => advForms(x).forEach(y => add(y, 0.6))); });
+        const use = advForms(w).map(x => ADV_USES[x]).find(Boolean) || null;
+        if (use) use.forEach(x => advForms(x).forEach(y => add(y, 0.3)));
+        terms.push({ label: w, forms });
+      });
+      return { budget, terms, mods, words };
+    }
+
+    // Texto buscable de un producto, separado por campo.
+    function advProductFields(p, catLabelFn) {
+      const catName = id => advFold(String(catLabelFn(id) || '').replace(/[^\p{L}\p{N}\s]/gu, ' '));
+      return {
+        name: advWordSet(p.name), keywords: advWordSet(p.keywords), brand: advWordSet(p.brand),
+        cat: advWordSet(catName(p.category) + ' ' + catName(p.subcategory)),
+        specs: advWordSet(p.specs), colors: advWordSet((p.colors || []).join(' '))
+      };
+    }
+    const ADV_FIELD_W = { name: 10, keywords: 9, brand: 8, cat: 6, specs: 5, colors: 3 };
+
+    // Núcleo del asesor. Devuelve un objeto "consejo" con todo lo necesario para mostrarlo.
+    //   products: lista de productos; opts: { discPct, bias, catLabel, topCats, freeShipAt }
+    function advisorBuild(text, products, opts) {
+      opts = opts || {};
+      const discPct = Number(opts.discPct) >= 0 ? Number(opts.discPct) : 10;
+      const bias = opts.bias || 'equilibrado';
+      const catLabel = opts.catLabel || (id => id);
+      const q = advParse(text);
+      const out = { query: String(text || '').trim(), budget: q.budget ? { min: q.budget.min, max: q.budget.max } : null, terms: q.terms.map(t => t.label), kind: 'options', options: [], combos: [], ranking: [], note: '', soldOut: [], suggestions: [] };
+      const hasTerms = q.terms.length > 0;
+      const hasMods = q.mods.cheap || q.mods.original || q.mods.seleccion || q.mods.best || q.mods.gift;
+      if (!hasTerms && !q.budget && !hasMods) { out.kind = 'hint'; return out; }
+
+      const transfer = p => Math.round(p.price * (1 - discPct / 100));
+      const active = (products || []).filter(p => p && p.active !== false && Number(p.price) > 0);
+      const inStock = active.filter(p => Number(p.stock) > 0);
+
+      // 1) Puntaje de relevancia
+      const scored = inStock.map(p => {
+        const f = advProductFields(p, catLabel);
+        let rel = 0; const matched = [];
+        q.terms.forEach(t => {
+          // Palabra pedida y sinónimos: cuenta la mejor coincidencia. Un "uso" (estudiar, correr)
+          // implica varias características: cada una que tenga el producto suma un poco.
+          let best = 0, useSum = 0;
+          for (const form of t.forms) {
+            let fb = 0;
+            for (const fld of Object.keys(ADV_FIELD_W)) if (f[fld].has(form.w)) fb = Math.max(fb, ADV_FIELD_W[fld] * form.weight);
+            if (form.use) useSum += fb; else best = Math.max(best, fb);
+          }
+          const tot = best + Math.min(useSum, 12);
+          if (tot > 0) { rel += tot; if (!matched.includes(t.label)) matched.push(t.label); }
+        });
+        return { p, rel, matched, eff: transfer(p), score: rel };
+      });
+      const maxRel = Math.max(0, ...scored.map(x => x.rel));
+      const prices = scored.map(x => x.p.price);
+      const maxPrice = Math.max(1, ...prices);
+
+      scored.forEach(x => {
+        let s = x.rel;
+        if (hasTerms && maxRel > 0) s += 0; // la relevancia manda
+        if (x.p.featured) s += 3;
+        if (bias === 'economico' && x.p.type === 'seleccion') s += 4;
+        if (bias === 'original' && x.p.type === 'original') s += 4;
+        if (q.mods.original && x.p.type === 'original') s += 8;
+        if (q.mods.seleccion && x.p.type === 'seleccion') s += 8;
+        if (q.mods.cheap) s += 6 * (1 - x.p.price / maxPrice);
+        if (q.mods.best) s += 6 * (x.p.price / maxPrice);
+        if (q.mods.gift && x.p.type === 'original') s += 2;
+        if ((x.p.photos || []).length) s += 0.5;
+        // Con presupuesto, se prefiere aprovecharlo (lo mejor que se puede comprar con ese monto).
+        if (q.budget && q.budget.max) s += (hasTerms ? 2 : 6) * Math.min(1, x.eff / q.budget.max);
+        x.score = s;
+      });
+
+      // 2) ¿Qué es relevante?
+      let relevant;
+      if (hasTerms) {
+        const cut = Math.max(1, maxRel * 0.35);
+        relevant = scored.filter(x => x.rel >= cut);
+      } else {
+        relevant = scored.slice(); // solo presupuesto o prioridades: todo el catálogo
+      }
+      relevant.sort((a, b) => b.score - a.score || a.eff - b.eff);
+
+      // Sin nada en stock que coincida: ver si hay agotados que sí coincidían.
+      if (!relevant.length) {
+        if (hasTerms) {
+          out.soldOut = active.filter(p => Number(p.stock) <= 0).filter(p => {
+            const f = advProductFields(p, catLabel);
+            return q.terms.some(t => t.forms.some(fm => fm.w && Object.keys(ADV_FIELD_W).some(k => f[k].has(fm.w) && fm.weight >= 1)));
+          }).slice(0, 3).map(p => ({ id: p.id, name: p.name }));
+        }
+        out.kind = 'none';
+        advSuggestions(out, opts);
+        return out;
+      }
+
+      // 3) Presupuesto
+      const b = q.budget;
+      const fitOf = x => {
+        if (!b) return 'ok';
+        const hi = b.max || Infinity, lo = b.min || 0;
+        if (x.p.price < lo * 0.85) return 'low';
+        if (x.p.price <= hi) return 'ok';
+        if (x.eff <= hi) return 'transfer';
+        if (x.eff <= hi * 1.1) return 'close';
+        return 'over';
+      };
+      relevant.forEach(x => { x.fit = fitOf(x); });
+      let pool = b ? relevant.filter(x => x.fit === 'ok' || x.fit === 'transfer') : relevant;
+      if (b && !pool.length) pool = relevant.filter(x => x.fit === 'close');
+      if (b && b.min) pool = pool.filter(x => x.fit !== 'low');
+
+      // Combos: se pide presupuesto sin producto, o palabras de armado ("setup", "kit", "combo").
+      const comboWords = /\b(setup|kit|combo|pack|armar|equipo|todo|set)\b/.test(advFold(text));
+      const wantCombos = !!(b && b.max && (!hasTerms || comboWords));
+      if (wantCombos) advBuildCombos(out, relevant, b, opts, transfer);
+
+      // 4) Elegir 2 o 3 opciones distintas entre sí
+      if (!pool.length) {
+        // Nada entra en el presupuesto: mostrar lo más barato que coincide y decir cuánto se pasa.
+        if (b && b.max) {
+          const cheapest = relevant.slice().sort((a, c) => a.eff - c.eff)[0];
+          out.kind = out.combos.length ? 'combos' : 'overbudget';
+          if (out.kind === 'overbudget') {
+            out.options = [advOption(cheapest, 'cheap', 1, null, q, out, discPct)];
+            out.note = `Lo más barato que tenemos de eso sale ${advMoney(cheapest.eff)} pagando con transferencia: son ${advMoney(cheapest.eff - b.max)} más que tu presupuesto.`;
+          }
+        } else out.kind = 'none';
+        out.ranking = advRanking(relevant);
+        out.resultsCount = out.options.length + out.combos.length;
+        if (!out.resultsCount) advSuggestions(out, opts);
+        return out;
+      }
+
+      const picks = [];
+      const top = pool[0];
+      picks.push({ x: top, role: 'best' });
+      const other = pool.find(x => x.p.id !== top.p.id && x.p.type !== top.p.type);
+      if (other) picks.push({ x: other, role: 'alt' });
+      const cheapest = pool.slice().sort((a, c) => a.eff - c.eff)[0];
+      if (!picks.some(k => k.x.p.id === cheapest.p.id) && cheapest.eff <= top.eff * 0.95) picks.push({ x: cheapest, role: 'cheap' });
+      if (picks.length < 3) {
+        const pricier = pool.filter(x => !picks.some(k => k.x.p.id === x.p.id) && x.eff > top.eff * 1.05).sort((a, c) => c.score - a.score)[0];
+        if (pricier) picks.push({ x: pricier, role: 'more' });
+      }
+      if (picks.length < 3) {
+        const next = pool.find(x => !picks.some(k => k.x.p.id === x.p.id));
+        if (next) picks.push({ x: next, role: 'next' });
+      }
+      out.options = picks.slice(0, 3).map((k, i) => advOption(k.x, k.role, i + 1, picks[0].x, q, out, discPct));
+      out.kind = out.combos.length && !hasTerms ? 'combos' : 'options';
+      if (b && pool.every(x => x.fit === 'close')) out.note = 'Todo lo que coincide se pasa un poquito de tu presupuesto (menos de 10%).';
+      out.ranking = advRanking(relevant);
+      out.resultsCount = out.options.length + out.combos.length;
+      return out;
+    }
+
+    function advRanking(list) {
+      return list.slice(0, 8).map(x => ({ id: x.p.id, name: x.p.name, score: Math.round(x.score * 10) / 10, matched: x.matched.slice(), price: x.p.price, type: x.p.type, fit: x.fit || null }));
+    }
+
+    const advMoney = n => '$' + Math.round(n).toLocaleString('es-AR');
+    const ADV_ROLES = {
+      best: ['⭐', 'Nuestra recomendación'],
+      alt: null, // depende del tipo
+      cheap: ['💸', 'La más económica'],
+      more: ['🚀', 'Si querés ir por más'],
+      next: ['➕', 'También te puede servir']
+    };
+
+    function advOption(x, role, n, first, q, out, discPct) {
+      const p = x.p;
+      let icon, label;
+      if (role === 'alt') { icon = p.type === 'original' ? '🏅' : '⚡'; label = p.type === 'original' ? 'Alternativa Original' : 'Alternativa Selección (precio / calidad)'; }
+      else { [icon, label] = ADV_ROLES[role]; }
+      const reasons = [];
+      if (x.matched.length) reasons.push(`Coincide con lo que pediste: ${x.matched.slice(0, 4).join(', ')}.`);
+      const b = q.budget;
+      if (b && b.max) {
+        if (x.fit === 'ok') reasons.push(`Entra en tu presupuesto (te sobran ${advMoney(b.max - Math.min(x.p.price, x.eff))}).`);
+        else if (x.fit === 'transfer') reasons.push(`Pagando por transferencia queda en ${advMoney(x.eff)}: entra en tus ${advMoney(b.max)}.`);
+        else if (x.fit === 'close') reasons.push(`Se pasa ${advMoney(x.eff - b.max)} de tu presupuesto (con transferencia).`);
+      }
+      if (first && x.p.id !== first.p.id) {
+        const d = x.eff - first.eff;
+        if (Math.abs(d) >= 1) reasons.push(d < 0 ? `${advMoney(-d)} más barato que la opción 1.` : `${advMoney(d)} más que la opción 1.`);
+      }
+      if (Number(p.stock) > 0 && Number(p.stock) <= 3) reasons.push(`Quedan solo ${p.stock}.`);
+      reasons.push(p.type === 'original' ? 'Original con garantía oficial.' : 'PLUG Selección: calidad probada y mejor precio.');
+      if (p.featured) reasons.push('Destacado de la tienda.');
+      return { prod: p, role, n, icon, label, eff: x.eff, score: Math.round(x.score * 10) / 10, fit: x.fit || null, matched: x.matched.slice(), reasons: reasons.slice(0, 4) };
+    }
+
+    // Combos de 2 productos de categorías distintas que entran en el presupuesto.
+    function advBuildCombos(out, relevant, b, opts, transfer) {
+      const pool = relevant.filter(x => x.fit !== 'over' && x.eff < b.max).slice(0, 40);
+      const first = x => advForms(advWords(x.p.name)[0] || '')[advForms(advWords(x.p.name)[0] || '').length - 1];
+      const same = (a, c) => first(a) === first(c) || (a.p.subcategory && a.p.subcategory === c.p.subcategory);
+      const combos = [];
+      for (let i = 0; i < pool.length; i++) {
+        for (let j = i + 1; j < pool.length; j++) {
+          const a = pool[i], c = pool[j];
+          if (same(a, c)) continue;
+          const total = a.eff + c.eff;
+          if (total > b.max) continue;
+          combos.push({ a, c, total, rank: a.score + c.score + (total / b.max) * 12 });
+        }
+      }
+      combos.sort((x, y) => y.rank - x.rank);
+      const used = new Set();
+      const free = Number(opts.freeShipAt) > 0 ? Number(opts.freeShipAt) : 0;
+      for (const cb of combos) {
+        if (out.combos.length >= 2) break;
+        const ids = [cb.a.p.id, cb.c.p.id];
+        if (ids.every(id => used.has(id))) continue;
+        ids.forEach(id => used.add(id));
+        out.combos.push({
+          total: cb.total, left: b.max - cb.total,
+          totalList: cb.a.p.price + cb.c.p.price,
+          freeShip: free > 0 && cb.total >= free,
+          items: [cb.a, cb.c].map(x => ({ prod: x.p, eff: x.eff }))
+        });
+      }
+    }
+
+    // Sugerencias cuando no hay resultados: categorías que sí tenemos.
+    function advSuggestions(out, opts) {
+      const cats = (opts.topCats || []).slice(0, 6);
+      out.suggestions = cats.map(c => ({ id: c.id, label: (c.icon ? c.icon + ' ' : '') + c.name, text: c.name }));
     }
 
     // ==========================================
@@ -4282,7 +4837,25 @@
       }
     });
 
+
+    // ---- Tamaño de letra del panel (accesibilidad): A- / A+, se recuerda en esta compu ----
+    const UI_SCALES = [1, 1.15, 1.3, 1.5, 1.75, 2];
+    const UI_SCALE_KEY = 'PLUGSHOP_UI_SCALE';
+    let uiScaleIdx = 1;
+    function applyUiScale(idx) {
+      uiScaleIdx = Math.max(0, Math.min(UI_SCALES.length - 1, idx));
+      document.documentElement.style.setProperty('--ui', String(UI_SCALES[uiScaleIdx]));
+      try { localStorage.setItem(UI_SCALE_KEY, String(uiScaleIdx)); } catch (e) { /* sin almacenamiento: vale solo hasta cerrar */ }
+    }
+    function changeUiScale(delta) { applyUiScale(uiScaleIdx + delta); }
+    (function initUiScale() {
+      let saved = NaN;
+      try { saved = parseInt(localStorage.getItem(UI_SCALE_KEY), 10); } catch (e) {}
+      applyUiScale(Number.isFinite(saved) ? saved : 1);
+    })();
+
   </script>
 
+<script>if('serviceWorker' in navigator&&location.protocol==='https:'){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});}</script>
 </body>
 </html>
