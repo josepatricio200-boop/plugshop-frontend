@@ -443,7 +443,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff</h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v5.4</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -454,7 +454,7 @@ html { scroll-behavior: smooth; }
           <button id="btn-simulate-sale" onclick="simulateCustomerOrder()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-all font-code">
             <span>⚡ Simular Venta</span>
           </button>
-          <div id="ui-scale-box" class="hidden lg:flex items-center gap-0.5 mr-1" role="group" aria-label="Tamaño de la letra"><button type="button" onclick="changeUiScale(-1)" aria-label="Letra más chica" title="Letra más chica" class="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-[11px]">A−</button><button type="button" onclick="changeUiScale(1)" aria-label="Letra más grande" title="Letra más grande" class="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-black text-sm">A+</button></div><button type="button" data-theme-btn onclick="toggleTheme()" class="theme-btn !w-8 !h-8 mr-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200" title="Cambiar modo claro/oscuro">☀️</button><button onclick="logoutStaff()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 hover:text-rose-400 text-zinc-200 text-xs font-semibold transition-all whitespace-nowrap" title="Cerrar sesión">Cerrar sesión</button>
+          <button type="button" id="btn-sound" onclick="toggleAdminSound()" aria-label="Sonido de pedidos nuevos" title="Sonido cuando entra un pedido" class="w-8 h-8 mr-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm">🔔</button><div id="ui-scale-box" class="hidden lg:flex items-center gap-0.5 mr-1" role="group" aria-label="Tamaño de la letra"><button type="button" onclick="changeUiScale(-1)" aria-label="Letra más chica" title="Letra más chica" class="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-[11px]">A−</button><button type="button" onclick="changeUiScale(1)" aria-label="Letra más grande" title="Letra más grande" class="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-black text-sm">A+</button></div><button type="button" data-theme-btn onclick="toggleTheme()" class="theme-btn !w-8 !h-8 mr-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200" title="Cambiar modo claro/oscuro">☀️</button><button onclick="logoutStaff()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 hover:text-rose-400 text-zinc-200 text-xs font-semibold transition-all whitespace-nowrap" title="Cerrar sesión">Cerrar sesión</button>
         </div>
       </div>
 
@@ -636,30 +636,40 @@ html { scroll-behavior: smooth; }
               </div>
             </div>
 
+            <!-- Período de las tarjetas (y de los reportes de abajo) -->
+            <div class="flex items-center justify-between gap-2 flex-wrap">
+              <div class="text-xs text-zinc-400">Solo cuenta lo que ya cobraste (no los pedidos cancelados ni los que esperan el pago).</div>
+              <label class="flex items-center gap-2 text-xs text-zinc-400">Período
+                <select id="fin-period" onchange="setFinPeriod(this.value)" class="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white font-code focus:outline-none focus:border-brand-orange">
+                  <option value="1">Hoy</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="0">Todo el historial</option>
+                </select>
+              </label>
+            </div>
+
             <!-- Finance Stat Cards: Bancarizado vs Efectivo -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 font-code">
               <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                <span class="text-[11px] text-zinc-400 uppercase font-semibold">Facturación Bruta Total</span>
+                <span class="text-[11px] text-zinc-400 uppercase font-semibold">Cobrado</span>
                 <div id="fin-gross-sales" class="text-xl sm:text-2xl font-black text-white">$0</div>
-                <span class="text-[10px] text-emerald-400 font-medium font-sans">Total cobrado</span>
+                <span id="fin-pending-note" class="text-[10px] text-emerald-400 font-medium font-sans">Total cobrado</span>
               </div>
 
               <div class="p-4 rounded-2xl bg-zinc-900 border border-brand-orange/40 space-y-1">
-                <span class="text-[11px] text-brand-orange uppercase font-semibold">Bancarizado (Alias/CVU)</span>
+                <span class="text-[11px] text-brand-orange uppercase font-semibold">Por transferencia</span>
                 <div id="fin-bank-sales" class="text-xl sm:text-2xl font-black text-white">$0</div>
-                <span class="text-[10px] text-zinc-400 font-medium font-sans">Rastreado por bancos</span>
+                <span class="text-[10px] text-zinc-400 font-medium font-sans">Alias / CVU confirmados</span>
               </div>
 
               <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                <span class="text-[11px] text-zinc-400 uppercase font-semibold">Efectivo en Mano</span>
+                <span class="text-[11px] text-zinc-400 uppercase font-semibold">En efectivo</span>
                 <div id="fin-cash-sales" class="text-xl sm:text-2xl font-black text-emerald-400">$0</div>
-                <span class="text-[10px] text-emerald-400/90 font-medium font-sans">Cobrado en moto / retiro</span>
+                <span class="text-[10px] text-emerald-400/90 font-medium font-sans">Cobrado al entregar</span>
               </div>
 
               <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                <span class="text-[11px] text-zinc-400 uppercase font-semibold">Cadetería & Operativa</span>
+                <span class="text-[11px] text-zinc-400 uppercase font-semibold">Envíos despachados</span>
                 <div id="fin-shipping-ops" class="text-xl sm:text-2xl font-black text-amber-400">$0</div>
-                <span class="text-[10px] text-zinc-400 font-medium font-sans">Motos Tucumán & YB</span>
+                <span class="text-[10px] text-zinc-400 font-medium font-sans">Costo de motos</span>
               </div>
             </div>
 
@@ -667,7 +677,7 @@ html { scroll-behavior: smooth; }
             <div class="p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
               <div class="flex items-center justify-between gap-2 flex-wrap">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider">📊 Reportes de ventas</h4>
-                <select id="report-period" onchange="renderSalesReport()" class="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white font-code focus:outline-none focus:border-brand-orange">
+                <select id="report-period" onchange="setFinPeriod(this.value)" class="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white font-code focus:outline-none focus:border-brand-orange">
                   <option value="1">Hoy</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="0">Todo el historial</option>
                 </select>
               </div>
@@ -1178,11 +1188,19 @@ html { scroll-behavior: smooth; }
 
             <div id="refunds-card" class="hidden p-4 rounded-xl bg-amber-950/30 border border-amber-700/50 space-y-3 text-xs"></div>
 
+            <div id="orders-quick" class="flex flex-wrap gap-2 text-xs">
+              <button type="button" data-quick="active" onclick="setOrdersQuick('active')" class="quick-chip px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-300 font-semibold">Todos los activos <span class="qn text-zinc-500"></span></button>
+              <button type="button" data-quick="toCollect" onclick="setOrdersQuick('toCollect')" class="quick-chip px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-300 font-semibold">⏳ Esperando pago <span class="qn text-zinc-500"></span></button>
+              <button type="button" data-quick="En preparación" onclick="setOrdersQuick('En preparación')" class="quick-chip px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-300 font-semibold">📦 Para preparar <span class="qn text-zinc-500"></span></button>
+              <button type="button" data-quick="Despachado" onclick="setOrdersQuick('Despachado')" class="quick-chip px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-300 font-semibold">🛵 En camino <span class="qn text-zinc-500"></span></button>
+            </div>
+
             <div class="flex flex-col sm:flex-row gap-2 text-xs">
               <input type="search" id="orders-search" oninput="renderOrdersTable()" placeholder="🔍 Buscar por nº de pedido, nombre o teléfono" aria-label="Buscar pedidos" class="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange font-code" />
               <select id="orders-status-filter" onchange="renderOrdersTable()" aria-label="Filtrar por estado" class="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-brand-orange">
                 <option value="active">Activos (sin entregar ni cancelar)</option>
                 <option value="all">Todos</option>
+                <option value="toCollect">Esperando pago (transferencia sin confirmar)</option>
                 <option>Pago pendiente</option><option>Comprobante enviado</option><option>Comprobante rechazado</option><option>En preparación</option><option>Despachado</option><option>Entregado</option><option>Cancelado</option>
               </select>
               <select id="orders-date-filter" onchange="renderOrdersTable()" aria-label="Filtrar por fecha" class="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-brand-orange">
@@ -1193,15 +1211,13 @@ html { scroll-behavior: smooth; }
 
             <div class="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950 font-code">
               <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table id="admin-orders-table" class="w-full text-left text-xs">
                   <thead class="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider">
                     <tr>
                       <th class="py-3 px-4">Orden</th>
-                      <th class="py-3 px-4">Cliente & Contacto</th>
+                      <th class="py-3 px-4">Cliente & Entrega</th>
                       <th class="py-3 px-4">Items & Color</th>
-                      <th class="py-3 px-4">Zona Entrega</th>
-                      <th class="py-3 px-4">Método Cobro</th>
-                      <th class="py-3 px-4">Total</th>
+                      <th class="py-3 px-4">Total & Cobro</th>
                       <th class="py-3 px-4">Estado</th>
                       <th class="py-3 px-4 text-right">Acción</th>
                     </tr>
@@ -1519,6 +1535,38 @@ html { scroll-behavior: smooth; }
   </div>
 
   
+
+  <!-- Avisos de pedidos nuevos (se llena por JS) -->
+  <div id="admin-toasts" class="fixed top-3 left-3 right-3 sm:left-auto sm:right-4 sm:w-96 z-[70] space-y-2 pointer-events-none" aria-live="polite"></div>
+
+  <!-- Barra inferior del panel (solo celular) -->
+  <nav id="admin-mbar" class="hidden fixed bottom-0 inset-x-0 z-[60] md:!hidden bg-zinc-950/95 backdrop-blur border-t border-white/10" style="padding-bottom:env(safe-area-inset-bottom)" aria-label="Secciones del panel">
+    <div id="admin-mbar-items" class="grid grid-flow-col auto-cols-fr"></div>
+  </nav>
+  <div id="admin-more-sheet" class="hidden fixed inset-0 z-[65] md:!hidden" role="dialog" aria-label="Más secciones">
+    <div class="absolute inset-0 bg-black/60" onclick="closeAdminMore()"></div>
+    <div class="absolute bottom-0 inset-x-0 rounded-t-2xl bg-zinc-900 border-t border-white/10 p-3 pb-6 space-y-1" style="padding-bottom:calc(4.5rem + env(safe-area-inset-bottom))">
+      <div class="text-[11px] uppercase tracking-wider text-zinc-500 font-bold px-2 py-1">Más secciones</div>
+      <div id="admin-more-items" class="grid grid-cols-1 gap-1"></div>
+    </div>
+  </div>
+  <style>
+@media (max-width:767px){
+  #admin-main-workspace{ padding-bottom:6rem }
+  /* Pedidos: cada fila pasa a ser una tarjeta */
+  #admin-orders-table thead{ display:none }
+  #admin-orders-table, #admin-orders-table tbody{ display:block; width:100% }
+  #admin-orders-table tr{ display:grid; grid-template-columns:1fr auto; gap:.25rem .75rem; padding:.9rem .9rem; border-bottom:1px solid rgba(63,63,70,.6) }
+  #admin-orders-table td{ display:block; padding:0 !important; border:0 }
+  #admin-orders-table td.o-id{ grid-column:1; grid-row:1 }
+  #admin-orders-table td.o-total{ grid-column:2; grid-row:1; text-align:right }
+  #admin-orders-table td.o-cust, #admin-orders-table td.o-items, #admin-orders-table td.o-status, #admin-orders-table td.o-actions{ grid-column:1 / -1 }
+  #admin-orders-table td.o-status{ margin-top:.25rem }
+  #admin-orders-table td.o-actions{ margin-top:.4rem; text-align:left }
+  #admin-orders-table td.o-actions > div{ justify-content:flex-start }
+  #admin-orders-table .max-w-\[220px\], #admin-orders-table .max-w-\[200px\]{ max-width:none }
+}
+</style>
   <!-- Live Order Tracking & QR Pass Modal -->
   <div id="order-tracking-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden items-center justify-center p-3 sm:p-4 overflow-y-auto">
     <div class="relative w-full max-w-2xl bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
@@ -2634,6 +2682,7 @@ html { scroll-behavior: smooth; }
       await syncAdminDataFromServer();
       refreshAdminUI();
       applyRoleTabVisibility();
+      if (typeof startAdminWatch === 'function') startAdminWatch();
     }
 
     function closeAdminModal() {
@@ -2659,6 +2708,7 @@ html { scroll-behavior: smooth; }
       });
 
       if (tabName === 'smart-engine') { renderEngineTab(); loadInsights(); }
+      if (typeof onAdminTabShown === 'function') onAdminTabShown(tabName);
 
       // En celular el menú y el contenido quedan apilados en una sola
       // columna; después de elegir una pestaña, bajamos la vista hasta el
@@ -3145,9 +3195,66 @@ html { scroll-behavior: smooth; }
       }).filter(Boolean);
       return { lines, estimated: true };
     }
+    // ---- Finanzas: qué cuenta como "cobrado" ----
+    function isTransferOrder(o) { return !!(o && (o.isBancarizado || /transferencia/i.test(o.paymentMethod || ''))); }
+    // Transferencia: cobrada cuando el pago está confirmado. Efectivo: cuando se entregó.
+    function orderCollected(o) {
+      if (!o || o.status === 'Cancelado') return false;
+      if (isTransferOrder(o)) return o.paid !== false && !['Pago pendiente', 'Comprobante enviado', 'Comprobante rechazado'].includes(o.status);
+      return o.status === 'Entregado';
+    }
+    function orderNetTotal(o) {
+      const refunded = o && o.refund ? Math.min(Number(o.total) || 0, Number(o.refund.amount) || 0) : 0;
+      return (Number(o && o.total) || 0) - refunded;
+    }
+    function periodSince(days) {
+      days = Number(days);
+      if (days === 1) { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }
+      return days > 1 ? Date.now() - days * 86400000 : 0;
+    }
+    function finStats(orders, since) {
+      const r = { collected: 0, bank: 0, cash: 0, shipping: 0, pending: 0, pendingCount: 0 };
+      (orders || []).forEach(o => {
+        if (!o || o.status === 'Cancelado') return;
+        if (since && (o.createdAt || 0) < since) return;
+        const net = orderNetTotal(o);
+        if (orderCollected(o)) {
+          r.collected += net;
+          if (isTransferOrder(o)) r.bank += net; else r.cash += net;
+        } else { r.pending += net; r.pendingCount += 1; }
+        if (['Despachado', 'Entregado'].includes(o.status) && !String(o.deliveryType || '').includes('Retiro')) {
+          r.shipping += (typeof o.shippingCost === 'number' ? o.shippingCost : (STORE_SETTINGS.shippingCost || 0));
+        }
+      });
+      return r;
+    }
+    function setFinPeriod(v) {
+      ['fin-period', 'report-period'].forEach(id => { const el = document.getElementById(id); if (el) el.value = String(v); });
+      renderFinanceCards(); renderSalesReport();
+    }
+    function renderFinanceCards() {
+      const el = document.getElementById('fin-gross-sales');
+      if (!el) return;
+      const sel = document.getElementById('fin-period');
+      const st = finStats(ADMIN_ORDERS, periodSince(sel ? sel.value : 30));
+      el.textContent = formatARS(st.collected);
+      document.getElementById('fin-bank-sales').textContent = formatARS(st.bank);
+      document.getElementById('fin-cash-sales').textContent = formatARS(st.cash);
+      document.getElementById('fin-shipping-ops').textContent = formatARS(st.shipping);
+      const note = document.getElementById('fin-pending-note');
+      if (note) {
+        note.textContent = st.pendingCount ? `+ ${formatARS(st.pending)} por cobrar (${st.pendingCount} ${st.pendingCount === 1 ? 'pedido' : 'pedidos'})` : 'Todo lo vendido está cobrado';
+        note.className = 'text-[10px] font-medium font-sans ' + (st.pendingCount ? 'text-amber-400' : 'text-emerald-400');
+      }
+      // Historial para el contador: todo lo cobrado, sin filtro de período.
+      const all = finStats(ADMIN_ORDERS, 0);
+      const setT = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      setT('fin-breakdown-bank', formatARS(all.bank)); setT('fin-breakdown-cash', formatARS(all.cash)); setT('fin-breakdown-moto', '-' + formatARS(all.shipping));
+    }
+
     function buildSalesReport(orders, since) {
       const r = { orders: 0, revenue: 0, discounts: 0, cost: 0, profit: 0, avgTicket: 0, estimated: false, products: {}, categories: {}, payments: {} };
-      (orders || []).filter(o => o.status !== 'Cancelado' && (!since || (o.createdAt || 0) >= since)).forEach(o => {
+      (orders || []).filter(o => orderCollected(o) && (!since || (o.createdAt || 0) >= since)).forEach(o => {
         const refunded = o.refund ? Math.min(Number(o.total) || 0, Number(o.refund.amount) || 0) : 0; // plata devuelta al cliente (reclamos con reembolso)
         const total = (Number(o.total) || 0) - refunded;
         const ship = refunded ? 0 : (Number(o.shippingCost) || 0);
@@ -3176,10 +3283,7 @@ html { scroll-behavior: smooth; }
     }
     function renderSalesReport() {
       if (!document.getElementById('rep-orders')) return;
-      const days = Number((document.getElementById('report-period') || {}).value);
-      let since = 0;
-      if (days === 1) { const d = new Date(); d.setHours(0, 0, 0, 0); since = d.getTime(); }
-      else if (days > 1) since = Date.now() - days * 86400000;
+      const since = periodSince((document.getElementById('report-period') || {}).value);
       const r = buildSalesReport(ADMIN_ORDERS, since);
       const set = (id, v) => { document.getElementById(id).textContent = v; };
       set('rep-orders', r.orders); set('rep-revenue', formatARS(r.revenue)); set('rep-discounts', formatARS(r.discounts));
@@ -3191,7 +3295,9 @@ html { scroll-behavior: smooth; }
           : '<span class="text-zinc-500">Sin ventas en este período.</span>';
       };
       list(r.products, 'rep-top-products', true); list(r.categories, 'rep-by-category', false); list(r.payments, 'rep-by-payment', false);
-      document.getElementById('rep-note').textContent = 'No cuenta los pedidos cancelados. La ganancia es ventas menos envío menos costo de la mercadería.' + (r.estimated ? ' Hay pedidos viejos sin el costo guardado: se estimaron con los precios de hoy.' : '');
+      const noCost = r.revenue > 0 && r.cost === 0;
+      if (noCost) set('rep-profit', '—');
+      document.getElementById('rep-note').textContent = 'Cuenta solo pedidos cobrados (transferencia confirmada o efectivo entregado). La ganancia es ventas menos envío menos costo de la mercadería.' + (noCost ? ' ⚠️ Todavía no cargaste el costo de tus productos, por eso no se puede calcular la ganancia. Cargalo en Productos & Variantes.' : '') + (r.estimated ? ' Hay pedidos viejos sin el costo guardado: se estimaron con los precios de hoy.' : '');
     }
 
     // ---- Stock bajo (3 o menos, también por color) ----
@@ -3221,6 +3327,31 @@ html { scroll-behavior: smooth; }
     }
 
     // ---- Pedidos: filtros y notas internas ----
+    const PENDING_PAY = ['Pago pendiente', 'Comprobante enviado', 'Comprobante rechazado'];
+    function setOrdersQuick(v) {
+      const sel = document.getElementById('orders-status-filter');
+      if (sel) sel.value = v;
+      renderOrdersTable();
+    }
+    function renderOrdersQuick() {
+      const box = document.getElementById('orders-quick');
+      if (!box) return;
+      const cur = (document.getElementById('orders-status-filter') || {}).value || 'active';
+      const n = {
+        active: ADMIN_ORDERS.filter(o => !['Entregado', 'Cancelado'].includes(o.status)).length,
+        toCollect: ADMIN_ORDERS.filter(o => PENDING_PAY.includes(o.status)).length,
+        'En preparación': ADMIN_ORDERS.filter(o => o.status === 'En preparación').length,
+        Despachado: ADMIN_ORDERS.filter(o => o.status === 'Despachado').length
+      };
+      box.querySelectorAll('.quick-chip').forEach(b => {
+        const k = b.dataset.quick, on = k === cur;
+        b.querySelector('.qn').textContent = n[k] ? '· ' + n[k] : '';
+        b.classList.toggle('bg-brand-orange/15', on); b.classList.toggle('border-brand-orange', on); b.classList.toggle('text-brand-orange', on);
+        b.classList.toggle('border-zinc-700', !on); b.classList.toggle('text-zinc-300', !on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+
     function filteredAdminOrders() {
       const q = ((document.getElementById('orders-search') || {}).value || '').trim().toLowerCase();
       const st = (document.getElementById('orders-status-filter') || {}).value || 'active';
@@ -3229,7 +3360,8 @@ html { scroll-behavior: smooth; }
       const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
       return ADMIN_ORDERS.filter(o => {
         if (st === 'active' && ['Entregado', 'Cancelado'].includes(o.status)) return false;
-        if (st !== 'active' && st !== 'all' && o.status !== st) return false;
+        if (st === 'toCollect' && !PENDING_PAY.includes(o.status)) return false;
+        if (st !== 'active' && st !== 'all' && st !== 'toCollect' && o.status !== st) return false;
         if (q && ![o.id, o.customer, o.phone].join(' ').toLowerCase().includes(q) && !String(o.phone || '').replace(/\D/g, '').includes(q.replace(/\D/g, '') || '\u0000')) return false;
         if (days) {
           const t = o.createdAt || Date.parse(o.date) || 0;
@@ -3280,16 +3412,28 @@ html { scroll-behavior: smooth; }
       renderOrdersTable();
     }
 
+    function toggleOrderMore(btn) {
+      const box = btn.closest('td').querySelector('.order-more');
+      const open = box.classList.toggle('hidden') === false;
+      box.classList.toggle('flex', open);
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
     function renderOrdersTable() {
       renderRefundsCard();
       const ordersTable = document.getElementById('admin-orders-table-body');
       if (!ordersTable) return;
       const list = filteredAdminOrders();
+      renderOrdersQuick();
       const lbl = document.getElementById('orders-count-label');
       if (lbl) lbl.textContent = `Mostrando ${list.length} de ${ADMIN_ORDERS.length} pedidos`;
-      ordersTable.innerHTML = list.map(o => `
+      ordersTable.innerHTML = list.map(o => {
+        const roleOk = list2 => list2.includes(currentStaffSession.role);
+        const canScan = roleOk(['admin', 'cadete', 'vendedor']);
+        const isTransfer = o.isBancarizado || (o.paymentMethod && o.paymentMethod.includes('Transferencia'));
+        return `
         <tr class="hover:bg-zinc-900/60 transition-colors">
-          <td class="py-3 px-4 font-bold text-white">
+          <td class="py-3 px-4 font-bold text-white o-id">
             <div class="flex items-center gap-1.5">
               <button onclick="openOrderTrackingModal('${o.id}')" class="w-6 h-6 rounded bg-white p-0.5 hover:scale-110 transition-transform shrink-0" title="Ver QR y Seguimiento en Vivo">
                 <img src="${getQrCodeUrl(o.id)}" alt="QR" class="w-full h-full object-contain" />
@@ -3297,25 +3441,21 @@ html { scroll-behavior: smooth; }
               <span>${o.id}</span>
             </div>
           </td>
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 o-cust">
             <div class="font-semibold text-white font-sans">${escapeHtml(o.customer)}</div>
             <div class="text-[11px] text-zinc-400">${escapeHtml(o.phone)}</div>
+            <div class="mt-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span></div>
+            <div class="text-[10px] text-zinc-500 font-sans break-words max-w-[200px]">${escapeHtml(o.address)}</div>
           </td>
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 o-items max-w-[220px]">
             <div class="text-xs text-white font-medium font-sans">${escapeHtml(o.items)}</div>
             ${(o.notes || []).map(n => `<div class="text-[10px] mt-1 text-amber-300 font-sans">📝 ${escapeHtml(n.text)} <span class="text-zinc-500">— ${escapeHtml(n.by)}</span></div>`).join('')}
           </td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>
-            <div class="text-[10px] text-zinc-500 truncate max-w-[140px] font-sans">${escapeHtml(o.address)}</div>
+          <td class="py-3 px-4 o-total">
+            <div class="font-bold text-brand-amber">${formatARS(o.total)}</div>
+            <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${isTransfer ? 'bg-sky-950 text-sky-400 border border-sky-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">${escapeHtml(o.paymentMethod || 'Transferencia')}</span>
           </td>
-          <td class="py-3 px-4">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${o.isBancarizado || (o.paymentMethod && o.paymentMethod.includes('Transferencia')) ? 'bg-sky-950 text-sky-400 border border-sky-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
-              ${o.paymentMethod || 'Transferencia'}
-            </span>
-          </td>
-          <td class="py-3 px-4 font-bold text-brand-amber">${formatARS(o.total)}</td>
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 o-status">
             <select onchange="updateOrderStatus('${o.id}', this.value)" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer font-sans">
               <option value="Pago pendiente" ${o.status === 'Pago pendiente' ? 'selected' : ''}>Pago pendiente</option>
               <option value="Comprobante enviado" ${o.status === 'Comprobante enviado' ? 'selected' : ''}>Comprobante enviado</option>
@@ -3330,22 +3470,23 @@ html { scroll-behavior: smooth; }
             ${o.deliveryLog ? `<div class="text-[10px] mt-1 text-emerald-400">✓ ${o.deliveryLog.method === 'qr' ? 'Entregado con el QR del cliente · ' + escapeHtml(o.deliveryLog.by || '') : (o.deliveryLog.method === 'manual' ? 'Entrega marcada a mano' : 'Recepción confirmada por el cliente')}</div>` : ''}
             ${o.refund ? `<div class="text-[10px] mt-1 font-bold ${o.refund.status === 'pendiente' ? 'text-amber-400' : 'text-emerald-400'}">${o.refund.status === 'pendiente' ? '💸 Reintegro pendiente ' : '✓ Reintegro devuelto '}${formatARS(o.refund.amount)}${o.refund.ref ? ' · op. ' + escapeHtml(o.refund.ref) : ''}</div>` : ''}
           </td>
-          <td class="py-3 px-4 text-right space-x-1 font-sans">
-            ${(o.status === 'En preparación' && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role)) ? `<button onclick="openScanModal('dispatch', '${o.id}')" class="px-2 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📷 Salida</button>` : ''}
-            ${(o.status === 'Despachado' && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role)) ? `<button onclick="openScanModal('handover', '${o.id}')" class="px-2 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📲 Entregar</button>` : ''}
-            ${(o.status !== 'Cancelado' && ['admin', 'vendedor'].includes(currentStaffSession.role)) ? `<button onclick="openPackageLabel('${o.id}')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">🏷️ Etiqueta</button>` : ''}
-            ${(o.proof || o.hasProof) ? `<button onclick="openProofModal('${o.id}')" class="px-2 py-1 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[11px] font-semibold">🧾 Comprobante</button>` : ''}
-            <button onclick="openOrderTrackingModal('${o.id}')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-brand-amber text-[11px] font-bold transition-colors font-code" title="Ver Radar y QR">
-              QR ↗
-            </button>
-            <button onclick="addOrderNote('${o.id}')" class="px-2 py-1 rounded bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 text-[11px] font-semibold" title="Nota interna (el cliente no la ve)">📝 Nota</button>
-            <button onclick="sendOrderUpdateWhatsApp('${o.id}')" class="px-2 py-1 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800 text-[11px] font-semibold transition-colors" title="Contactar por WhatsApp">
-              WhatsApp
-            </button>
+          <td class="py-3 px-4 text-right font-sans o-actions">
+            <div class="flex flex-wrap justify-end items-center gap-1.5">
+              ${(o.status === 'En preparación' && canScan) ? `<button onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📷 Salida</button>` : ''}
+              ${(o.status === 'Despachado' && canScan) ? `<button onclick="openScanModal('handover', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📲 Entregar</button>` : ''}
+              ${(o.proof || o.hasProof) ? `<button onclick="openProofModal('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[11px] font-semibold">🧾 Comprobante</button>` : ''}
+              <button onclick="sendOrderUpdateWhatsApp('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800 text-[11px] font-semibold transition-colors" title="Contactar al cliente por WhatsApp">WhatsApp</button>
+              <button type="button" onclick="toggleOrderMore(this)" aria-expanded="false" aria-label="Más acciones del pedido ${escapeHtml(o.id)}" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-bold">⋯ Más</button>
+            </div>
+            <div class="order-more hidden mt-1.5 flex-wrap justify-end gap-1.5">
+              ${(o.status !== 'Cancelado' && roleOk(['admin', 'vendedor'])) ? `<button onclick="openPackageLabel('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">🏷️ Etiqueta</button>` : ''}
+              <button onclick="openOrderTrackingModal('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-brand-amber text-[11px] font-bold transition-colors" title="Ver Radar y QR">QR ↗</button>
+              <button onclick="addOrderNote('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 text-[11px] font-semibold" title="Nota interna (el cliente no la ve)">📝 Nota</button>
+            </div>
           </td>
         </tr>
-      `).join('');
-      if (!list.length) ordersTable.innerHTML = '<tr><td colspan="8" class="py-6 px-4 text-center text-zinc-500">No hay pedidos con esos filtros.</td></tr>';
+      `}).join('');
+      if (!list.length) ordersTable.innerHTML = '<tr><td colspan="6" class="py-6 px-4 text-center text-zinc-500">No hay pedidos con esos filtros.</td></tr>';
     }
     async function addOrderNote(orderId) {
       const text = prompt('Nota interna sobre el pedido ' + orderId + ' (el cliente NO la ve):', '');
@@ -3433,21 +3574,10 @@ html { scroll-behavior: smooth; }
       document.getElementById('badge-products-count').textContent = PRODUCTS.length;
       document.getElementById('badge-cust-count').textContent = CUSTOMERS.length;
 
-      // Finances & ARCA
-      const totalSales = ADMIN_ORDERS.reduce((acc, o) => acc + o.total, 0);
-      const bankSales = ADMIN_ORDERS.filter(o => o.isBancarizado || (o.paymentMethod && o.paymentMethod.includes('Transferencia'))).reduce((acc, o) => acc + o.total, 0);
-      const cashSales = totalSales - bankSales;
-      const totalShippingCost = ADMIN_ORDERS.filter(o => !o.deliveryType.includes('Retiro')).reduce((acc, o) => acc + (typeof o.shippingCost === 'number' ? o.shippingCost : STORE_SETTINGS.shippingCost), 0);
-
-      document.getElementById('fin-gross-sales').textContent = formatARS(totalSales);
-      document.getElementById('fin-bank-sales').textContent = formatARS(bankSales);
-      document.getElementById('fin-cash-sales').textContent = formatARS(cashSales);
-      document.getElementById('fin-shipping-ops').textContent = formatARS(totalShippingCost);
+      // Finanzas: solo pedidos cobrados (ver orderCollected)
+      renderFinanceCards();
       renderSalesReport();
 
-      document.getElementById('fin-breakdown-bank').textContent = formatARS(bankSales);
-      document.getElementById('fin-breakdown-cash').textContent = formatARS(cashSales);
-      document.getElementById('fin-breakdown-moto').textContent = '-' + formatARS(totalShippingCost);
 
       renderInventoryTable();
 
@@ -5145,6 +5275,7 @@ html { scroll-behavior: smooth; }
     }
 
     function resetStaffSession() {
+      stopAdminWatch();
       clearStaffSession();
       isAdminAuthenticated = false;
       currentStaffSession = { role: 'admin', name: 'Admin (modo local)', token: null };
@@ -5275,6 +5406,174 @@ html { scroll-behavior: smooth; }
       try { saved = parseInt(localStorage.getItem(UI_SCALE_KEY), 10); } catch (e) {}
       applyUiScale(Number.isFinite(saved) ? saved : 1);
     })();
+
+
+    // ==========================================
+    // PEDIDOS NUEVOS: el panel se actualiza solo y avisa
+    // ==========================================
+    const WATCH_MS = 45000;
+    const SOUND_KEY = 'PLUGSHOP_ADMIN_SOUND';
+    const BASE_TITLE = 'PLUGSHOP Staff';
+    const orderWatch = { timer: null, known: null, status: {}, sig: '', unseen: 0, busy: false, dirty: false, sound: true, audio: null };
+    try { orderWatch.sound = localStorage.getItem(SOUND_KEY) !== '0'; } catch (e) {}
+
+    function orderSignature(list) {
+      return list.map(o => [o.id, o.status, o.paid, o.hasProof || !!o.proof, o.refund ? o.refund.status : '', (o.notes || []).length].join('|')).join(';');
+    }
+    function renderSoundBtn() {
+      const b = document.getElementById('btn-sound');
+      if (b) { b.textContent = orderWatch.sound ? '🔔' : '🔕'; b.setAttribute('aria-pressed', orderWatch.sound ? 'true' : 'false'); }
+    }
+    function toggleAdminSound() {
+      orderWatch.sound = !orderWatch.sound;
+      try { localStorage.setItem(SOUND_KEY, orderWatch.sound ? '1' : '0'); } catch (e) {}
+      renderSoundBtn();
+      if (orderWatch.sound) playOrderBeep();
+    }
+    function playOrderBeep() {
+      if (!orderWatch.sound) return;
+      try {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        const ctx = orderWatch.audio || (orderWatch.audio = new AC());
+        if (ctx.state === 'suspended') ctx.resume();
+        [[880, 0], [1175, 0.16]].forEach(([f, t]) => {
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+          g.gain.exponentialRampToValueAtTime(0.25, ctx.currentTime + t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + 0.28);
+          o.connect(g); g.connect(ctx.destination);
+          o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + 0.3);
+        });
+      } catch (e) { /* sin sonido: el aviso en pantalla igual aparece */ }
+    }
+
+    function showAdminToast(text, tab) {
+      const box = document.getElementById('admin-toasts');
+      if (!box) return;
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'pointer-events-auto w-full text-left px-4 py-3 rounded-xl bg-zinc-900 border border-brand-orange/60 shadow-2xl text-sm text-white font-semibold flex items-start gap-2';
+      el.textContent = text;
+      el.onclick = () => { el.remove(); if (tab) switchAdminTab(tab); };
+      box.appendChild(el);
+      while (box.children.length > 3) box.firstChild.remove();
+      setTimeout(() => { if (el.parentNode) el.remove(); }, 9000);
+    }
+
+    function updateUnseenUi() {
+      document.title = orderWatch.unseen > 0 ? `(${orderWatch.unseen}) 🔔 ${BASE_TITLE}` : BASE_TITLE;
+      const badge = document.getElementById('badge-orders-count');
+      if (badge) {
+        if (orderWatch.unseen > 0) { badge.textContent = orderWatch.unseen + ' nuevo' + (orderWatch.unseen === 1 ? '' : 's'); badge.className = 'text-[10px] px-1.5 py-0.5 rounded bg-brand-orange text-black font-bold font-code'; }
+        else { badge.textContent = ADMIN_ORDERS.length; badge.className = 'text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code'; }
+      }
+      renderAdminMobileBar();
+    }
+    function clearUnseen() { if (orderWatch.unseen) { orderWatch.unseen = 0; updateUnseenUi(); } }
+
+    function renderOrdersLight() {
+      const body = document.getElementById('admin-orders-table-body');
+      const a = document.activeElement;
+      // No redibujar la tabla mientras alguien está usando un desplegable o escribiendo en ella.
+      if (body && a && body.contains(a) && /^(SELECT|INPUT|TEXTAREA)$/.test(a.tagName)) { orderWatch.dirty = true; return; }
+      orderWatch.dirty = false;
+      renderOrdersTable();
+      renderFinanceCards();
+      renderSalesReport();
+      updateUnseenUi();
+    }
+
+    // Compara lo que llegó con lo que ya se conocía; devuelve los avisos a mostrar.
+    function detectOrderEvents(list) {
+      const ev = { fresh: [], proofs: [] };
+      if (!orderWatch.known) return ev;
+      list.forEach(o => {
+        if (!orderWatch.known.has(o.id)) ev.fresh.push(o);
+        else if (o.status === 'Comprobante enviado' && orderWatch.status[o.id] !== 'Comprobante enviado') ev.proofs.push(o);
+      });
+      return ev;
+    }
+    function rememberOrders(list) {
+      orderWatch.known = new Set(list.map(o => o.id));
+      orderWatch.status = {};
+      list.forEach(o => { orderWatch.status[o.id] = o.status; });
+      orderWatch.sig = orderSignature(list);
+    }
+
+    async function pollOrders() {
+      if (orderWatch.busy) return;
+      if (!isBackendConnected() || !currentStaffSession.token || !['admin', 'vendedor', 'cadete'].includes(currentStaffSession.role)) return;
+      orderWatch.busy = true;
+      try {
+        const res = await apiRequest('ORDERS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
+        if (!Array.isArray(res)) return;
+        const ev = detectOrderEvents(res);
+        const sig = orderSignature(res);
+        const changed = sig !== orderWatch.sig;
+        ADMIN_ORDERS = res;
+        rememberOrders(res);
+        if (changed || orderWatch.dirty) renderOrdersLight();
+        const n = ev.fresh.length;
+        if (n) {
+          orderWatch.unseen += n;
+          const o = ev.fresh[0];
+          showAdminToast(n === 1 ? `🔔 Pedido nuevo ${o.id} · ${o.customer || 'Cliente'} · ${formatARS(o.total)}` : `🔔 ${n} pedidos nuevos`, 'orders');
+        }
+        if (ev.proofs.length) {
+          orderWatch.unseen += ev.proofs.length;
+          showAdminToast(ev.proofs.length === 1 ? `🧾 Comprobante recibido · ${ev.proofs[0].id}` : `🧾 ${ev.proofs.length} comprobantes recibidos`, 'orders');
+        }
+        if (n || ev.proofs.length) { playOrderBeep(); updateUnseenUi(); }
+      } finally { orderWatch.busy = false; }
+    }
+
+    function startAdminWatch() {
+      stopAdminWatch();
+      renderSoundBtn();
+      renderAdminMobileBar();
+      if (!isBackendConnected() || !currentStaffSession.token) return;
+      rememberOrders(ADMIN_ORDERS);
+      orderWatch.timer = setInterval(pollOrders, WATCH_MS);
+    }
+    function stopAdminWatch() {
+      if (orderWatch.timer) clearInterval(orderWatch.timer);
+      orderWatch.timer = null; orderWatch.known = null; orderWatch.unseen = 0; orderWatch.dirty = false;
+      document.title = BASE_TITLE;
+      const bar = document.getElementById('admin-mbar'); if (bar) bar.classList.add('hidden');
+      closeAdminMore();
+    }
+    // Al volver a la pestaña del navegador se actualiza enseguida, sin esperar el turno.
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && orderWatch.timer) pollOrders(); });
+
+    // ==========================================
+    // BARRA INFERIOR EN CELULAR
+    // ==========================================
+    const MBAR_MAIN = [['orders', '🛵', 'Pedidos'], ['inventory', '📦', 'Productos'], ['finances', '📊', 'Finanzas']];
+    const MBAR_LABELS = { finances: ['📊', 'Finanzas'], inventory: ['📦', 'Productos'], 'smart-engine': ['🧠', 'Asesor'], orders: ['🛵', 'Pedidos'], suppliers: ['🤝', 'Proveedores'], offers: ['🏷️', 'Ofertas'], customers: ['👥', 'Clientes'], claims: ['🛡️', 'Reclamos'], 'staff-users': ['🔑', 'Usuarios'], settings: ['⚙️', 'Ajustes'] };
+    let adminCurrentTab = '';
+    function onAdminTabShown(tab) {
+      adminCurrentTab = tab;
+      if (tab === 'orders') clearUnseen();
+      renderAdminMobileBar();
+    }
+    function renderAdminMobileBar() {
+      const bar = document.getElementById('admin-mbar'), items = document.getElementById('admin-mbar-items');
+      if (!bar || !items) return;
+      if (!isAdminAuthenticated) { bar.classList.add('hidden'); return; }
+      const allowed = Object.keys(MBAR_LABELS).filter(t => tabAllowedForRole(t, currentStaffSession.role));
+      const main = MBAR_MAIN.filter(([t]) => allowed.includes(t));
+      const rest = allowed.filter(t => !main.some(([m]) => m === t));
+      const btn = (on, onclick, icon, label, dot) => `<button type="button" onclick="${onclick}" class="relative flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold ${on ? 'text-brand-orange' : 'text-zinc-400'}" ${on ? 'aria-current="page"' : ''}><span class="text-lg leading-none">${icon}</span><span>${label}</span>${dot ? `<span class="absolute top-1.5 left-1/2 ml-2 min-w-[16px] h-4 px-1 rounded-full bg-brand-orange text-black text-[10px] font-black flex items-center justify-center">${dot}</span>` : ''}</button>`;
+      items.innerHTML = main.map(([t, i, l]) => btn(adminCurrentTab === t, `closeAdminMore();switchAdminTab('${t}')`, i, l, t === 'orders' && orderWatch.unseen ? orderWatch.unseen : 0)).join('') +
+        (rest.length ? btn(rest.includes(adminCurrentTab), 'openAdminMore()', '☰', 'Más', 0) : '');
+      bar.classList.remove('hidden');
+      const more = document.getElementById('admin-more-items');
+      if (more) more.innerHTML = rest.map(t => `<button type="button" onclick="closeAdminMore();switchAdminTab('${t}')" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left ${adminCurrentTab === t ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/60 text-zinc-200'}"><span class="text-lg">${MBAR_LABELS[t][0]}</span>${MBAR_LABELS[t][1]}</button>`).join('');
+    }
+    function openAdminMore() { const s = document.getElementById('admin-more-sheet'); if (s) s.classList.remove('hidden'); }
+    function closeAdminMore() { const s = document.getElementById('admin-more-sheet'); if (s) s.classList.add('hidden'); }
 
 
     // ---- Modo claro / oscuro (se recuerda en cada navegador) ----
