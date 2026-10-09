@@ -1,7 +1,7 @@
 // PLUGSHOP: service worker mínimo.
 // - Páginas: siempre se pide la versión nueva a internet; si no hay conexión, se muestra la última guardada.
 // - Nunca se guarda nada del servidor de datos (pedidos, cuentas, tokens): solo la propia página y los íconos.
-const CACHE = 'plugshop-shell-v1';
+const CACHE = 'plugshop-shell-v2';
 const SHELL = ['/', '/index.html', '/icon-192.png'];
 
 self.addEventListener('install', e => {
