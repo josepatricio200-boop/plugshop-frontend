@@ -143,7 +143,7 @@
     html[data-theme="light"] .text-zinc-800 { color: #d4d4da !important; }
     html[data-theme="light"] ::placeholder { color: #9a9aa4 !important; }
     /* Texto blanco que sí tiene que quedar blanco: sobre colores fuertes */
-    html[data-theme="light"] :is([class^="bg-brand-orange"],[class*=" bg-brand-orange"]).text-white, html[data-theme="light"] :is([class^="bg-rose-"],[class*=" bg-rose-"]).text-white,
+    html[data-theme="light"] :is([class^="bg-brand-orange"],[class*=" bg-brand-orange"]):not([class*="bg-brand-orange/"]).text-white, html[data-theme="light"] :is([class^="bg-rose-"],[class*=" bg-rose-"]).text-white,
     html[data-theme="light"] :is([class^="bg-emerald-"],[class*=" bg-emerald-"]).text-white, html[data-theme="light"] .bg-brand-orange .text-white { color: #ffffff !important; }
     html[data-theme="light"] :is([class^="bg-black/"],[class*=" bg-black/"]).text-white { color: #18181b !important; }
     /* Colores de acento: más oscuros para que se lean sobre blanco */
@@ -170,6 +170,222 @@
 
     /* Botón de tema */
     .theme-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; font-size: 16px; line-height: 1; cursor: pointer; }
+
+    /* ---- Contraste (v4.1): textos de color pastel -> versión oscura legible sobre fondo claro ---- */
+html[data-theme="light"] :is([class^="text-emerald-100"],[class*=" text-emerald-100"]),
+html[data-theme="light"] .hover\:text-emerald-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-emerald-100,
+html[data-theme="light"] :is([class^="text-emerald-200"],[class*=" text-emerald-200"]),
+html[data-theme="light"] .hover\:text-emerald-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-emerald-200,
+html[data-theme="light"] :is([class^="text-emerald-300"],[class*=" text-emerald-300"]),
+html[data-theme="light"] .hover\:text-emerald-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-emerald-300,
+html[data-theme="light"] :is([class^="text-emerald-400"],[class*=" text-emerald-400"]),
+html[data-theme="light"] .hover\:text-emerald-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-emerald-400 { color: #047857 !important; }
+html[data-theme="light"] :is([class^="text-green-100"],[class*=" text-green-100"]),
+html[data-theme="light"] .hover\:text-green-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-green-100,
+html[data-theme="light"] :is([class^="text-green-200"],[class*=" text-green-200"]),
+html[data-theme="light"] .hover\:text-green-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-green-200,
+html[data-theme="light"] :is([class^="text-green-300"],[class*=" text-green-300"]),
+html[data-theme="light"] .hover\:text-green-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-green-300,
+html[data-theme="light"] :is([class^="text-green-400"],[class*=" text-green-400"]),
+html[data-theme="light"] .hover\:text-green-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-green-400 { color: #15803d !important; }
+html[data-theme="light"] :is([class^="text-amber-100"],[class*=" text-amber-100"]),
+html[data-theme="light"] .hover\:text-amber-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-amber-100,
+html[data-theme="light"] :is([class^="text-amber-200"],[class*=" text-amber-200"]),
+html[data-theme="light"] .hover\:text-amber-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-amber-200,
+html[data-theme="light"] :is([class^="text-amber-300"],[class*=" text-amber-300"]),
+html[data-theme="light"] .hover\:text-amber-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-amber-300,
+html[data-theme="light"] :is([class^="text-amber-400"],[class*=" text-amber-400"]),
+html[data-theme="light"] .hover\:text-amber-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-amber-400 { color: #b45309 !important; }
+html[data-theme="light"] :is([class^="text-yellow-100"],[class*=" text-yellow-100"]),
+html[data-theme="light"] .hover\:text-yellow-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-yellow-100,
+html[data-theme="light"] :is([class^="text-yellow-200"],[class*=" text-yellow-200"]),
+html[data-theme="light"] .hover\:text-yellow-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-yellow-200,
+html[data-theme="light"] :is([class^="text-yellow-300"],[class*=" text-yellow-300"]),
+html[data-theme="light"] .hover\:text-yellow-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-yellow-300,
+html[data-theme="light"] :is([class^="text-yellow-400"],[class*=" text-yellow-400"]),
+html[data-theme="light"] .hover\:text-yellow-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-yellow-400 { color: #a16207 !important; }
+html[data-theme="light"] :is([class^="text-orange-100"],[class*=" text-orange-100"]),
+html[data-theme="light"] .hover\:text-orange-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-orange-100,
+html[data-theme="light"] :is([class^="text-orange-200"],[class*=" text-orange-200"]),
+html[data-theme="light"] .hover\:text-orange-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-orange-200,
+html[data-theme="light"] :is([class^="text-orange-300"],[class*=" text-orange-300"]),
+html[data-theme="light"] .hover\:text-orange-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-orange-300,
+html[data-theme="light"] :is([class^="text-orange-400"],[class*=" text-orange-400"]),
+html[data-theme="light"] .hover\:text-orange-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-orange-400 { color: #c2410c !important; }
+html[data-theme="light"] :is([class^="text-rose-100"],[class*=" text-rose-100"]),
+html[data-theme="light"] .hover\:text-rose-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-rose-100,
+html[data-theme="light"] :is([class^="text-rose-200"],[class*=" text-rose-200"]),
+html[data-theme="light"] .hover\:text-rose-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-rose-200,
+html[data-theme="light"] :is([class^="text-rose-300"],[class*=" text-rose-300"]),
+html[data-theme="light"] .hover\:text-rose-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-rose-300,
+html[data-theme="light"] :is([class^="text-rose-400"],[class*=" text-rose-400"]),
+html[data-theme="light"] .hover\:text-rose-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-rose-400 { color: #be123c !important; }
+html[data-theme="light"] :is([class^="text-red-100"],[class*=" text-red-100"]),
+html[data-theme="light"] .hover\:text-red-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-red-100,
+html[data-theme="light"] :is([class^="text-red-200"],[class*=" text-red-200"]),
+html[data-theme="light"] .hover\:text-red-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-red-200,
+html[data-theme="light"] :is([class^="text-red-300"],[class*=" text-red-300"]),
+html[data-theme="light"] .hover\:text-red-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-red-300,
+html[data-theme="light"] :is([class^="text-red-400"],[class*=" text-red-400"]),
+html[data-theme="light"] .hover\:text-red-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-red-400 { color: #b91c1c !important; }
+html[data-theme="light"] :is([class^="text-cyan-100"],[class*=" text-cyan-100"]),
+html[data-theme="light"] .hover\:text-cyan-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-cyan-100,
+html[data-theme="light"] :is([class^="text-cyan-200"],[class*=" text-cyan-200"]),
+html[data-theme="light"] .hover\:text-cyan-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-cyan-200,
+html[data-theme="light"] :is([class^="text-cyan-300"],[class*=" text-cyan-300"]),
+html[data-theme="light"] .hover\:text-cyan-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-cyan-300,
+html[data-theme="light"] :is([class^="text-cyan-400"],[class*=" text-cyan-400"]),
+html[data-theme="light"] .hover\:text-cyan-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-cyan-400 { color: #0e7490 !important; }
+html[data-theme="light"] :is([class^="text-sky-100"],[class*=" text-sky-100"]),
+html[data-theme="light"] .hover\:text-sky-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-sky-100,
+html[data-theme="light"] :is([class^="text-sky-200"],[class*=" text-sky-200"]),
+html[data-theme="light"] .hover\:text-sky-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-sky-200,
+html[data-theme="light"] :is([class^="text-sky-300"],[class*=" text-sky-300"]),
+html[data-theme="light"] .hover\:text-sky-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-sky-300,
+html[data-theme="light"] :is([class^="text-sky-400"],[class*=" text-sky-400"]),
+html[data-theme="light"] .hover\:text-sky-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-sky-400 { color: #0369a1 !important; }
+html[data-theme="light"] :is([class^="text-blue-100"],[class*=" text-blue-100"]),
+html[data-theme="light"] .hover\:text-blue-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-blue-100,
+html[data-theme="light"] :is([class^="text-blue-200"],[class*=" text-blue-200"]),
+html[data-theme="light"] .hover\:text-blue-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-blue-200,
+html[data-theme="light"] :is([class^="text-blue-300"],[class*=" text-blue-300"]),
+html[data-theme="light"] .hover\:text-blue-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-blue-300,
+html[data-theme="light"] :is([class^="text-blue-400"],[class*=" text-blue-400"]),
+html[data-theme="light"] .hover\:text-blue-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-blue-400 { color: #1d4ed8 !important; }
+html[data-theme="light"] :is([class^="text-purple-100"],[class*=" text-purple-100"]),
+html[data-theme="light"] .hover\:text-purple-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-purple-100,
+html[data-theme="light"] :is([class^="text-purple-200"],[class*=" text-purple-200"]),
+html[data-theme="light"] .hover\:text-purple-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-purple-200,
+html[data-theme="light"] :is([class^="text-purple-300"],[class*=" text-purple-300"]),
+html[data-theme="light"] .hover\:text-purple-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-purple-300,
+html[data-theme="light"] :is([class^="text-purple-400"],[class*=" text-purple-400"]),
+html[data-theme="light"] .hover\:text-purple-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-purple-400 { color: #7e22ce !important; }
+html[data-theme="light"] :is([class^="text-fuchsia-100"],[class*=" text-fuchsia-100"]),
+html[data-theme="light"] .hover\:text-fuchsia-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-fuchsia-100,
+html[data-theme="light"] :is([class^="text-fuchsia-200"],[class*=" text-fuchsia-200"]),
+html[data-theme="light"] .hover\:text-fuchsia-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-fuchsia-200,
+html[data-theme="light"] :is([class^="text-fuchsia-300"],[class*=" text-fuchsia-300"]),
+html[data-theme="light"] .hover\:text-fuchsia-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-fuchsia-300,
+html[data-theme="light"] :is([class^="text-fuchsia-400"],[class*=" text-fuchsia-400"]),
+html[data-theme="light"] .hover\:text-fuchsia-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-fuchsia-400 { color: #a21caf !important; }
+html[data-theme="light"] :is([class^="text-indigo-100"],[class*=" text-indigo-100"]),
+html[data-theme="light"] .hover\:text-indigo-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-indigo-100,
+html[data-theme="light"] :is([class^="text-indigo-200"],[class*=" text-indigo-200"]),
+html[data-theme="light"] .hover\:text-indigo-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-indigo-200,
+html[data-theme="light"] :is([class^="text-indigo-300"],[class*=" text-indigo-300"]),
+html[data-theme="light"] .hover\:text-indigo-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-indigo-300,
+html[data-theme="light"] :is([class^="text-indigo-400"],[class*=" text-indigo-400"]),
+html[data-theme="light"] .hover\:text-indigo-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-indigo-400 { color: #4338ca !important; }
+html[data-theme="light"] :is([class^="text-violet-100"],[class*=" text-violet-100"]),
+html[data-theme="light"] .hover\:text-violet-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-violet-100,
+html[data-theme="light"] :is([class^="text-violet-200"],[class*=" text-violet-200"]),
+html[data-theme="light"] .hover\:text-violet-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-violet-200,
+html[data-theme="light"] :is([class^="text-violet-300"],[class*=" text-violet-300"]),
+html[data-theme="light"] .hover\:text-violet-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-violet-300,
+html[data-theme="light"] :is([class^="text-violet-400"],[class*=" text-violet-400"]),
+html[data-theme="light"] .hover\:text-violet-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-violet-400 { color: #6d28d9 !important; }
+html[data-theme="light"] :is([class^="text-pink-100"],[class*=" text-pink-100"]),
+html[data-theme="light"] .hover\:text-pink-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-pink-100,
+html[data-theme="light"] :is([class^="text-pink-200"],[class*=" text-pink-200"]),
+html[data-theme="light"] .hover\:text-pink-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-pink-200,
+html[data-theme="light"] :is([class^="text-pink-300"],[class*=" text-pink-300"]),
+html[data-theme="light"] .hover\:text-pink-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-pink-300,
+html[data-theme="light"] :is([class^="text-pink-400"],[class*=" text-pink-400"]),
+html[data-theme="light"] .hover\:text-pink-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-pink-400 { color: #be185d !important; }
+html[data-theme="light"] :is([class^="text-teal-100"],[class*=" text-teal-100"]),
+html[data-theme="light"] .hover\:text-teal-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-teal-100,
+html[data-theme="light"] :is([class^="text-teal-200"],[class*=" text-teal-200"]),
+html[data-theme="light"] .hover\:text-teal-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-teal-200,
+html[data-theme="light"] :is([class^="text-teal-300"],[class*=" text-teal-300"]),
+html[data-theme="light"] .hover\:text-teal-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-teal-300,
+html[data-theme="light"] :is([class^="text-teal-400"],[class*=" text-teal-400"]),
+html[data-theme="light"] .hover\:text-teal-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-teal-400 { color: #0f766e !important; }
+html[data-theme="light"] :is([class^="text-lime-100"],[class*=" text-lime-100"]),
+html[data-theme="light"] .hover\:text-lime-100:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-lime-100,
+html[data-theme="light"] :is([class^="text-lime-200"],[class*=" text-lime-200"]),
+html[data-theme="light"] .hover\:text-lime-200:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-lime-200,
+html[data-theme="light"] :is([class^="text-lime-300"],[class*=" text-lime-300"]),
+html[data-theme="light"] .hover\:text-lime-300:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-lime-300,
+html[data-theme="light"] :is([class^="text-lime-400"],[class*=" text-lime-400"]),
+html[data-theme="light"] .hover\:text-lime-400:hover,
+html[data-theme="light"] .group:hover .group-hover\:text-lime-400 { color: #4d7c0f !important; }
+html[data-theme="light"] .text-brand-orange, html[data-theme="light"] .hover\:text-brand-orange:hover, html[data-theme="light"] .group:hover .group-hover\:text-brand-orange { color: #c2410c !important; }
+html[data-theme="light"] .text-brand-amber, html[data-theme="light"] .hover\:text-brand-amber:hover, html[data-theme="light"] .group:hover .group-hover\:text-brand-amber { color: #b45309 !important; }
+/* Pestañas del panel: la activa y el hover se ven claros */
+html[data-theme="light"] .admin-tab-btn { color: #3f3f46; }
+html[data-theme="light"] .admin-tab-btn.text-brand-orange { color: #c2410c !important; background-color: rgba(255,98,0,.12) !important; border-color: rgba(194,65,12,.45) !important; }
+
+/* Logo: la insignia queda siempre oscura (el dibujo del carrito es blanco) */
+html[data-theme="light"] .logo-badge { background-color: #08080a !important; border-color: rgba(255,98,0,.55) !important; }
+html[data-theme="light"] .logo-badge.text-brand-orange { color: #ff6200 !important; }
+html[data-theme="light"] .grad-text { background-image: linear-gradient(90deg,#c2410c,#ea580c 55%,#b45309) !important; }
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
@@ -215,7 +431,7 @@
       <!-- Top Bar of Admin Modal -->
       <div class="p-3 sm:p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/95 shrink-0">
         <div class="flex items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-black border border-brand-orange/50 flex items-center justify-center text-brand-orange font-black text-xs shadow-[0_0_10px_rgba(255,98,0,0.3)] font-code">
+          <div class="logo-badge w-8 h-8 rounded-lg bg-black border border-brand-orange/50 flex items-center justify-center text-brand-orange font-black text-xs shadow-[0_0_10px_rgba(255,98,0,0.3)] font-code">
             PS
           </div>
           <div>
