@@ -85,6 +85,13 @@
     .text-zinc-500 { color: #a3a3ae !important; } /* antes casi ilegible sobre fondo oscuro */
     .text-zinc-600 { color: #86868f !important; }
   
+    /* Franja de marcas: se desplaza sola; se frena al pasar el mouse o si el sistema pide menos movimiento */
+    .brand-track { animation: brand-scroll 38s linear infinite; }
+    .brand-marquee:hover .brand-track { animation-play-state: paused; }
+    .brand-marquee { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+    @keyframes brand-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) { .brand-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; } }
+  
     /* ESCALA DE LETRA DEL PANEL (control A- / A+). Solo en pantallas de compu:
        en el celular se usa el tamaño normal para que todo entre en la pantalla. */
     @media (min-width: 900px) {
@@ -92,16 +99,82 @@
       .text-\[9px\], .text-\[10px\] { font-size: calc(11px * var(--ui, 1.15)) !important; }
       .text-\[11px\] { font-size: calc(12.5px * var(--ui, 1.15)) !important; }
     }
-    #ui-scale-box { position: fixed; left: 12px; bottom: 12px; z-index: 70; display: none; }
-    @media (min-width: 900px) { #ui-scale-box { display: flex; } }
   </style>
-</head>
-<body class="selection:bg-brand-orange selection:text-black">  <div id="ui-scale-box" class="flex items-center gap-1 px-2 py-1.5 rounded-xl bg-zinc-900/95 border border-zinc-600 shadow-lg" role="group" aria-label="Tamaño de la letra">
-    <span class="text-xs text-zinc-300 px-1">Letra</span>
-    <button type="button" onclick="changeUiScale(-1)" aria-label="Letra más chica" class="w-9 h-9 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-sm">A−</button>
-    <button type="button" onclick="changeUiScale(1)" aria-label="Letra más grande" class="w-9 h-9 rounded-lg bg-brand-orange hover:bg-orange-500 text-black font-black text-base">A+</button>
-  </div>
+<style>
+    /* ============================================================
+       MODO CLARO (se activa con data-theme="light" en <html>).
+       El sitio está hecho en oscuro; acá se "traducen" los grises.
+       ============================================================ */
+    html[data-theme="light"] { color-scheme: light; }
+    html[data-theme="light"] body { background-color: #f4f4f6 !important; color: #18181b !important; }
+    html[data-theme="light"] ::-webkit-scrollbar-track { background: #f4f4f6; }
+    html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #c9c9d2; }
 
+    /* Fondos */
+    html[data-theme="light"] :is([class^="bg-[#08080a]"],[class*=" bg-[#08080a]"]) { background-color: rgba(244,244,246,.92) !important; }
+    html[data-theme="light"] .bg-black, html[data-theme="light"] .bg-zinc-950, html[data-theme="light"] :is([class^="bg-zinc-950/"],[class*=" bg-zinc-950/"]) { background-color: #f4f4f6 !important; }
+    html[data-theme="light"] .bg-zinc-900, html[data-theme="light"] :is([class^="bg-zinc-900/"],[class*=" bg-zinc-900/"]) { background-color: #ffffff !important; }
+    html[data-theme="light"] .bg-zinc-800, html[data-theme="light"] :is([class^="bg-zinc-800/"],[class*=" bg-zinc-800/"]) { background-color: #e7e7eb !important; }
+    html[data-theme="light"] .bg-zinc-700 { background-color: #d4d4da !important; }
+    html[data-theme="light"] :is([class^="bg-black/"],[class*=" bg-black/"]) { background-color: rgba(255,255,255,.92) !important; }
+    html[data-theme="light"] .fixed.inset-0:is([class^="bg-black/"],[class*=" bg-black/"]) { background-color: rgba(15,15,18,.55) !important; }
+    html[data-theme="light"] :is([class^="bg-white/["],[class*=" bg-white/["]) { background-color: rgba(0,0,0,.04) !important; }
+    html[data-theme="light"] :is([class^="from-zinc-"],[class*=" from-zinc-"]), html[data-theme="light"] :is([class^="via-zinc-"],[class*=" via-zinc-"]), html[data-theme="light"] :is([class^="to-zinc-"],[class*=" to-zinc-"]) { background-image: linear-gradient(#ffffff, #f4f4f6) !important; }
+    html[data-theme="light"] .to-black, html[data-theme="light"] :is([class^="to-black/"],[class*=" to-black/"]) { --tw-gradient-to: #f4f4f6 !important; }
+    /* Botones blancos del modo oscuro pasan a oscuros */
+    html[data-theme="light"] .bg-white { background-color: #18181b !important; color: #ffffff !important; }
+    html[data-theme="light"] .bg-white .text-black, html[data-theme="light"] .bg-white.text-black { color: #ffffff !important; }
+    html[data-theme="light"] .hover\:bg-zinc-200:hover { background-color: #3f3f46 !important; }
+
+    /* Hover */
+    html[data-theme="light"] .hover\:bg-zinc-700:hover, html[data-theme="light"] .hover\:bg-zinc-750:hover { background-color: #d4d4da !important; }
+    html[data-theme="light"] .hover\:bg-zinc-800:hover, html[data-theme="light"] :is([class^="hover:bg-zinc-800/"],[class*=" hover:bg-zinc-800/"]):hover { background-color: #e7e7eb !important; }
+    html[data-theme="light"] .hover\:bg-zinc-900:hover, html[data-theme="light"] :is([class^="hover:bg-zinc-900/"],[class*=" hover:bg-zinc-900/"]):hover { background-color: #ececf0 !important; }
+    html[data-theme="light"] .hover\:text-white:hover { color: #18181b !important; }
+    html[data-theme="light"] .hover\:text-zinc-300:hover { color: #27272a !important; }
+
+    /* Textos */
+    html[data-theme="light"] .text-white, html[data-theme="light"] .text-zinc-100 { color: #18181b !important; }
+    html[data-theme="light"] .text-zinc-200 { color: #27272a !important; }
+    html[data-theme="light"] .text-zinc-300 { color: #3f3f46 !important; }
+    html[data-theme="light"] .text-zinc-400 { color: #52525b !important; }
+    html[data-theme="light"] .text-zinc-500 { color: #62626c !important; }
+    html[data-theme="light"] .text-zinc-600 { color: #71717a !important; }
+    html[data-theme="light"] .text-zinc-800 { color: #d4d4da !important; }
+    html[data-theme="light"] ::placeholder { color: #9a9aa4 !important; }
+    /* Texto blanco que sí tiene que quedar blanco: sobre colores fuertes */
+    html[data-theme="light"] :is([class^="bg-brand-orange"],[class*=" bg-brand-orange"]).text-white, html[data-theme="light"] :is([class^="bg-rose-"],[class*=" bg-rose-"]).text-white,
+    html[data-theme="light"] :is([class^="bg-emerald-"],[class*=" bg-emerald-"]).text-white, html[data-theme="light"] .bg-brand-orange .text-white { color: #ffffff !important; }
+    html[data-theme="light"] :is([class^="bg-black/"],[class*=" bg-black/"]).text-white { color: #18181b !important; }
+    /* Colores de acento: más oscuros para que se lean sobre blanco */
+    html[data-theme="light"] .text-emerald-400, html[data-theme="light"] .text-emerald-300 { color: #047857 !important; }
+    html[data-theme="light"] .text-amber-400, html[data-theme="light"] .text-amber-300, html[data-theme="light"] .text-brand-amber, html[data-theme="light"] .text-yellow-300 { color: #b45309 !important; }
+    html[data-theme="light"] .text-rose-300, html[data-theme="light"] .text-rose-400 { color: #be123c !important; }
+    html[data-theme="light"] .text-red-400, html[data-theme="light"] .text-red-300 { color: #b91c1c !important; }
+    html[data-theme="light"] .text-cyan-300, html[data-theme="light"] .text-cyan-400 { color: #0e7490 !important; }
+    html[data-theme="light"] .text-sky-300, html[data-theme="light"] .text-sky-400 { color: #0369a1 !important; }
+    html[data-theme="light"] .text-orange-300, html[data-theme="light"] .text-orange-400 { color: #c2410c !important; }
+    /* Etiquetas de colores oscuros (chips) se aclaran */
+    html[data-theme="light"] :is(:is([class^="bg-emerald-950"],[class*=" bg-emerald-950"]),:is([class^="bg-rose-950"],[class*=" bg-rose-950"]),:is([class^="bg-amber-950"],[class*=" bg-amber-950"]),:is([class^="bg-cyan-950"],[class*=" bg-cyan-950"]),:is([class^="bg-sky-950"],[class*=" bg-sky-950"]),:is([class^="bg-orange-950"],[class*=" bg-orange-950"]),:is([class^="bg-red-950"],[class*=" bg-red-950"]),:is([class^="bg-blue-950"],[class*=" bg-blue-950"]),:is([class^="bg-purple-950"],[class*=" bg-purple-950"]),:is([class^="bg-yellow-950"],[class*=" bg-yellow-950"]),:is([class^="bg-green-950"],[class*=" bg-green-950"])) { background-color: rgba(0,0,0,.05) !important; }
+    html[data-theme="light"] :is([class^="bg-brand-orange/"],[class*=" bg-brand-orange/"]) { background-color: rgba(255,98,0,.12) !important; }
+
+    /* Bordes */
+    html[data-theme="light"] .border-zinc-900, html[data-theme="light"] .border-zinc-800, html[data-theme="light"] :is([class^="border-zinc-800/"],[class*=" border-zinc-800/"]),
+    html[data-theme="light"] .border-zinc-700, html[data-theme="light"] :is([class^="border-zinc-700/"],[class*=" border-zinc-700/"]) { border-color: #dcdce2 !important; }
+    html[data-theme="light"] .border-zinc-600 { border-color: #c4c4cc !important; }
+    html[data-theme="light"] :is([class^="border-white/"],[class*=" border-white/"]) { border-color: rgba(0,0,0,.09) !important; }
+    html[data-theme="light"] :is([class^="divide-zinc-"],[class*=" divide-zinc-"]) > :not([hidden]) ~ :not([hidden]) { border-color: #e4e4e9 !important; }
+    html[data-theme="light"] :is([class^="ring-"],[class*=" ring-"]) { --tw-ring-color: rgba(0,0,0,.08); }
+    /* Sombras fuertes del modo oscuro: más suaves */
+    html[data-theme="light"] .shadow-2xl, html[data-theme="light"] .shadow-lg { box-shadow: 0 10px 30px rgba(0,0,0,.10) !important; }
+
+    /* Botón de tema */
+    .theme-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; font-size: 16px; line-height: 1; cursor: pointer; }
+
+  </style>
+  <script>try{if(localStorage.getItem('PLUGSHOP_THEME')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+</head>
+<body class="selection:bg-brand-orange selection:text-black">
   <!-- ===== Ingreso del Staff (pantalla propia) ===== -->
   <main id="login-screen" class="hidden min-h-screen items-center justify-center p-4 bg-[#08080a]">
     <form id="login-form" onsubmit="submitStaffLogin(event)" class="w-full max-w-sm bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl p-6 space-y-5" autocomplete="on">
@@ -148,7 +221,7 @@
           <div>
             <div class="flex items-center gap-2">
               <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff</h3>
-              <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
+              <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
           </div>
@@ -158,7 +231,7 @@
           <button id="btn-simulate-sale" onclick="simulateCustomerOrder()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-all font-code">
             <span>⚡ Simular Venta</span>
           </button>
-          <button onclick="logoutStaff()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 hover:text-rose-400 text-zinc-200 text-xs font-semibold transition-all" title="Cerrar sesión">Cerrar sesión</button>
+          <div id="ui-scale-box" class="hidden lg:flex items-center gap-0.5 mr-1" role="group" aria-label="Tamaño de la letra"><button type="button" onclick="changeUiScale(-1)" aria-label="Letra más chica" title="Letra más chica" class="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-[11px]">A−</button><button type="button" onclick="changeUiScale(1)" aria-label="Letra más grande" title="Letra más grande" class="w-7 h-7 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-black text-sm">A+</button></div><button type="button" data-theme-btn onclick="toggleTheme()" class="theme-btn !w-8 !h-8 mr-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-200" title="Cambiar modo claro/oscuro">☀️</button><button onclick="logoutStaff()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 hover:text-rose-400 text-zinc-200 text-xs font-semibold transition-all whitespace-nowrap" title="Cerrar sesión">Cerrar sesión</button>
         </div>
       </div>
 
@@ -497,10 +570,11 @@
                 <p class="text-[11px] text-zinc-400 mt-1">Pausar una categoría oculta de la tienda todos sus productos, sin borrarlos. Para borrar una categoría tiene que estar vacía.</p>
               </div>
               <div id="admin-categories-list" class="space-y-1.5 text-xs"></div>
+              <button type="button" id="btn-suggested-cats" onclick="addSuggestedCategories()" class="hidden px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold">✨ Agregar categorías sugeridas (Celulares, Accesorios y nombres en español)</button>
               <form id="admin-category-form" onsubmit="createCategoryFromForm(event)" class="hidden flex-wrap items-end gap-2 text-xs pt-3 border-t border-zinc-800">
                 <div>
                   <label class="block mb-1 text-zinc-400">Ícono</label>
-                  <input type="text" id="new-cat-icon" maxlength="4" placeholder="🏠" class="w-16 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white text-center focus:outline-none focus:border-brand-orange" />
+                  <input type="text" id="new-cat-icon" maxlength="8" readonly placeholder="Elegir" title="Tocá para elegir un ícono" onclick="openIconPicker(this, e => { this.value = e; })" class="w-20 cursor-pointer bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white text-center text-lg focus:outline-none focus:border-brand-orange" />
                 </div>
                 <div class="flex-1 min-w-[140px]">
                   <label class="block mb-1 text-zinc-400">Nombre *</label>
@@ -2350,9 +2424,10 @@
     }
 
     // ---- Categorías: panel ----
-    function showCategoryMsg(text) {
+    function showCategoryMsg(text, ok) {
       const el = document.getElementById('category-msg');
       if (!el) return;
+      el.classList.toggle('text-emerald-400', !!ok); el.classList.toggle('text-rose-400', !ok);
       el.textContent = text || '';
       el.classList.toggle('hidden', !text);
       if (text) setTimeout(() => el.classList.add('hidden'), 6000);
@@ -2386,6 +2461,7 @@
       const isAdmin = currentStaffSession.role === 'admin';
       const form = document.getElementById('admin-category-form');
       if (form) { form.classList.toggle('hidden', !isAdmin); form.classList.toggle('flex', isAdmin); }
+      const sug = document.getElementById('btn-suggested-cats'); if (sug) sug.classList.toggle('hidden', !isAdmin);
       const count = id => PRODUCTS.filter(p => p.category === id || p.subcategory === id).length;
       const btn = (cls, onclick, label) => `<button onclick="${onclick}" class="px-2 py-1 rounded border text-[11px] font-semibold transition-colors ${cls}">${label}</button>`;
       const row = (c, indent) => {
@@ -2399,6 +2475,7 @@
           </div>
           ${isAdmin ? `<div class="flex items-center gap-1.5">
             ${btn('bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200', `toggleCategoryActive('${escapeHtml(c.id)}')`, paused ? 'Activar' : 'Pausar')}
+            ${btn('bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200', `pickCategoryIcon('${escapeHtml(c.id)}', this)`, 'Ícono')}
             ${btn('bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200', `renameCategory('${escapeHtml(c.id)}')`, 'Renombrar')}
             ${btn('bg-rose-950/60 hover:bg-rose-900/80 border-rose-800/60 text-rose-400', `deleteCategory('${escapeHtml(c.id)}')`, 'Borrar')}
           </div>` : ''}
@@ -2439,6 +2516,99 @@
       Object.assign(c, res);
       fillCategorySelects(); renderCategoriesAdmin(); renderInventoryTable();
     }
+    // ---- Selector de íconos (categorías) ----
+    const ICON_CHOICES = ['📱','📲','💻','🖥️','⌚','🎧','🎮','🕹️','⌨️','🖱️','🔌','🔋','⚡','💡','🔦','🏠','🍳','🧹','🛋️','📷','🎙️','🔊','📺','🎒','🛠️','🧰','🚗','🛵','🧸','🎁','⭐','🔥','🏷️','🧴','🧼','👟','👕','🕶️','📦','🛡️','🔒','🔑','📡','🖨️','💾','🎵','📚','⚽','🚲','🍎','🤖','🧩'];
+    function closeIconPicker() { const p = document.getElementById('icon-picker'); if (p) p.remove(); document.removeEventListener('mousedown', iconPickerOutside, true); document.removeEventListener('keydown', iconPickerKey, true); }
+    function iconPickerOutside(e) { const p = document.getElementById('icon-picker'); if (p && !p.contains(e.target) && !(e.target.closest && e.target.closest('[data-icon-anchor]'))) closeIconPicker(); }
+    function iconPickerKey(e) { if (e.key === 'Escape') closeIconPicker(); }
+    // anchor: el botón/campo desde donde se abre; onPick(emoji) recibe la elección ('' = sin ícono).
+    function openIconPicker(anchor, onPick) {
+      closeIconPicker();
+      anchor.setAttribute('data-icon-anchor', '1');
+      const box = document.createElement('div');
+      box.id = 'icon-picker';
+      box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', 'Elegir ícono');
+      box.className = 'fixed z-[90] w-72 max-w-[92vw] p-3 rounded-2xl bg-zinc-900 border border-zinc-600 shadow-2xl';
+      const grid = document.createElement('div'); grid.className = 'grid grid-cols-8 gap-1';
+      ICON_CHOICES.forEach(ic => {
+        const b = document.createElement('button'); b.type = 'button'; b.textContent = ic; b.setAttribute('aria-label', 'Ícono ' + ic);
+        b.className = 'h-8 w-8 rounded-lg hover:bg-zinc-700 text-lg leading-none flex items-center justify-center';
+        b.addEventListener('click', () => { closeIconPicker(); onPick(ic); });
+        grid.appendChild(b);
+      });
+      const none = document.createElement('button'); none.type = 'button'; none.textContent = 'Sin ícono';
+      none.className = 'mt-2 w-full py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold';
+      none.addEventListener('click', () => { closeIconPicker(); onPick(''); });
+      box.appendChild(grid); box.appendChild(none);
+      document.body.appendChild(box);
+      const r = anchor.getBoundingClientRect();
+      const w = box.offsetWidth, h = box.offsetHeight;
+      const left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8));
+      const top = (r.bottom + h + 8 > window.innerHeight) ? Math.max(8, r.top - h - 6) : r.bottom + 6;
+      box.style.left = left + 'px'; box.style.top = top + 'px';
+      setTimeout(() => { document.addEventListener('mousedown', iconPickerOutside, true); document.addEventListener('keydown', iconPickerKey, true); }, 0);
+    }
+    function pickCategoryIcon(id, anchor) {
+      const c = CATEGORIES.find(x => x.id === id); if (!c) return;
+      openIconPicker(anchor, async icon => {
+        const res = await categoryApi('PUT', '/' + encodeURIComponent(id), { icon });
+        if (!res) return;
+        Object.assign(c, res);
+        fillCategorySelects(); renderCategoriesAdmin();
+      });
+    }
+
+    // ---- Categorías sugeridas (idioma de acá + Celulares por marca) ----
+    // Solo crea lo que falta y renombra los dos nombres en inglés. No toca productos.
+    const SUGGESTED_CATEGORIES = [
+      { name: 'Audio', icon: '🎧', subs: ['Auriculares', 'Parlantes'] },
+      { name: 'Smartwatch', icon: '⌚', renames: ['wearables'] },
+      { name: 'Celulares', icon: '📱', subs: ['iPhone', 'Samsung', 'Xiaomi', 'Poco', 'Motorola'] },
+      { name: 'Gaming', icon: '🎮' },
+      { name: 'Hogar y carga', icon: '🏠', renames: ['home'] },
+      { name: 'Accesorios', icon: '🔌', subs: ['Cargadores y cables', 'Fundas y protectores'] }
+    ];
+    async function addSuggestedCategories() {
+      if (!isBackendConnected() || !currentStaffSession.token) { showCategoryMsg('Para administrar categorías hay que estar conectado al servidor.'); return; }
+      const norm = t => advFold(t).trim();
+      const plan = [];
+      SUGGESTED_CATEGORIES.forEach(sc => {
+        let top = CATEGORIES.find(c => !c.parent && norm(c.name) === norm(sc.name));
+        if (!top && sc.renames) {
+          const old = CATEGORIES.find(c => !c.parent && sc.renames.includes(c.id));
+          if (old) { plan.push({ kind: 'rename', cat: old, name: sc.name, icon: sc.icon }); top = old; }
+        }
+        if (!top) plan.push({ kind: 'create', name: sc.name, icon: sc.icon, parent: null });
+        (sc.subs || []).forEach(sn => {
+          if (!(top && CATEGORIES.some(c => c.parent === top.id && norm(c.name) === norm(sn)))) plan.push({ kind: 'create', name: sn, icon: '', parentName: sc.name, parentCat: top || null });
+        });
+      });
+      if (!plan.length) { showCategoryMsg('Ya tenés todas las categorías sugeridas.', true); return; }
+      const lines = plan.map(p => p.kind === 'rename' ? `• Renombrar "${p.cat.name}" a "${p.name}"` : `• Crear ${p.parentName ? '"' + p.name + '" dentro de ' + p.parentName : '"' + p.name + '"'}`);
+      if (!confirm('Esto va a hacer:\n\n' + lines.join('\n') + '\n\nLos productos no se tocan. ¿Seguimos?')) return;
+      const created = {};
+      for (const p of plan) {
+        if (p.kind === 'rename') {
+          const res = await categoryApi('PUT', '/' + encodeURIComponent(p.cat.id), { name: p.name, icon: p.icon });
+          if (!res) break;
+          Object.assign(p.cat, res);
+        } else {
+          let parentId = null;
+          if (p.parentName) {
+            const par = p.parentCat || created[p.parentName] || CATEGORIES.find(c => !c.parent && norm(c.name) === norm(p.parentName));
+            if (!par) continue;
+            parentId = par.id;
+          }
+          const res = await categoryApi('POST', '', { name: p.name, icon: p.icon, parent: parentId });
+          if (!res) break;
+          CATEGORIES.push(res);
+          if (!parentId) created[p.name] = res;
+        }
+      }
+      fillCategorySelects(); renderCategoriesAdmin(); renderInventoryTable();
+      showCategoryMsg('Listo. Revisá la lista de arriba.', true);
+    }
+
     async function deleteCategory(id) {
       const c = CATEGORIES.find(x => x.id === id); if (!c) return;
       if (!confirm(`¿Borrar "${c.name}"? Esto no se puede deshacer.`)) return;
@@ -4853,6 +5023,28 @@
       try { saved = parseInt(localStorage.getItem(UI_SCALE_KEY), 10); } catch (e) {}
       applyUiScale(Number.isFinite(saved) ? saved : 1);
     })();
+
+
+    // ---- Modo claro / oscuro (se recuerda en cada navegador) ----
+    const THEME_KEY = 'PLUGSHOP_THEME';
+    function currentTheme() { return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark'; }
+    function syncThemeButtons() {
+      const light = currentTheme() === 'light';
+      document.querySelectorAll('[data-theme-btn]').forEach(b => {
+        b.textContent = light ? '🌙' : '☀️';
+        b.setAttribute('aria-label', light ? 'Cambiar a modo oscuro' : 'Cambiar a modo claro');
+        b.setAttribute('title', light ? 'Modo oscuro' : 'Modo claro');
+      });
+      const m = document.querySelector('meta[name="theme-color"]');
+      if (m) m.setAttribute('content', light ? '#f4f4f6' : '#09090b');
+    }
+    function applyTheme(t) {
+      if (t === 'light') document.documentElement.setAttribute('data-theme', 'light'); else document.documentElement.removeAttribute('data-theme');
+      try { localStorage.setItem(THEME_KEY, t); } catch (e) { /* sin almacenamiento: vale hasta cerrar */ }
+      syncThemeButtons();
+    }
+    function toggleTheme() { applyTheme(currentTheme() === 'light' ? 'dark' : 'light'); }
+    syncThemeButtons();
 
   </script>
 
