@@ -764,7 +764,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v5.5</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v5.8</span>
           </div>
         </div>
 
@@ -1004,6 +1004,8 @@ html { scroll-behavior: smooth; }
             </div>
             <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">PS-902</strong> · Despacho local Tucumán & YB</p>
             <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
+            <a id="track-wa-send" href="#" target="_blank" rel="noopener" class="hidden mt-2 w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold">📲 Enviar mi pedido por WhatsApp</a>
+            <p id="track-wa-hint" class="hidden text-[11px] text-zinc-400 mt-1">Si WhatsApp no se abrió solo, tocá el botón verde: es el paso que confirma tu compra con nosotros.</p>
           </div>
         </div>
         <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
@@ -1027,8 +1029,8 @@ html { scroll-behavior: smooth; }
               <div id="track-route-eta" class="text-base font-extrabold text-white mt-0.5 font-code">Tiempo estimado de entrega: ~35 min</div>
             </div>
             <div class="text-left sm:text-right">
-              <span class="text-[10px] text-zinc-500 block font-code">Cadete asignado</span>
-              <strong id="track-driver-name" class="text-xs text-zinc-200 font-semibold">Moto Express #4 (Lucas R.)</strong>
+              <span class="text-[10px] text-zinc-500 block font-code">Entrega a cargo de</span>
+              <strong id="track-driver-name" class="text-xs text-zinc-200 font-semibold">Equipo PlugShop</strong>
             </div>
           </div>
 
@@ -1056,7 +1058,7 @@ html { scroll-behavior: smooth; }
               <strong id="track-modal-address" class="text-white">Yerba Buena (Av. Aconquija)</strong>
             </div>
             <a id="track-contact-driver-btn" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/60 text-emerald-400 font-bold transition-all self-start sm:self-auto font-code">
-              <span>Contactar al Cadete por WhatsApp ↗</span>
+              <span>Consultar mi pedido por WhatsApp ↗</span>
             </a>
           </div>
         </div>
@@ -1202,7 +1204,7 @@ html { scroll-behavior: smooth; }
             </div>
           </div>
           <div>
-            <label class="block mb-1 text-zinc-400">Dirección o Referencia de Entrega</label>
+            <label class="block mb-1 text-zinc-400">Dirección o Referencia de Entrega *</label>
             <input type="text" id="chk-address" placeholder="Ej. Av. Aconquija 1800 (YB) o Barrio Norte (S.M.T.)" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
           </div>
         </div>
@@ -2648,7 +2650,20 @@ html { scroll-behavior: smooth; }
       openOrderTrackingModal(cleanId);
     }
 
+    // Último mensaje de compra armado: se ofrece como botón en el seguimiento por si el
+    // navegador (sobre todo Safari en iPhone) bloquea que WhatsApp se abra solo.
+    let pendingWaUrl = null, pendingWaOrder = null;
+    function showTrackWa(orderId) {
+      const btn = document.getElementById('track-wa-send'), hint = document.getElementById('track-wa-hint');
+      if (!btn || !hint) return;
+      const show = !!pendingWaUrl && pendingWaOrder === orderId;
+      if (show) btn.href = pendingWaUrl;
+      btn.classList.toggle('hidden', !show); btn.classList.toggle('flex', show);
+      hint.classList.toggle('hidden', !show);
+    }
+
     async function openOrderTrackingModal(orderId) {
+      showTrackWa(null);
       // orderId puede venir del hash de la URL (#track=...), es decir de
       // afuera de la app: se sanitiza acá para evitar inyección de HTML
       // antes de usarlo en cualquier lado.
@@ -2696,7 +2711,7 @@ html { scroll-behavior: smooth; }
       `;
 
       const driverBtn = document.getElementById('track-contact-driver-btn');
-      const driverMsg = `Hola! Soy el cliente de la orden *${order.id}* (${order.address}). Te escribo para consultar en qué punto del viaje venís con la moto.`;
+      const driverMsg = `Hola! Soy el cliente de la orden *${order.id}* (${order.address}). Te escribo para consultar cómo viene mi pedido.`;
       driverBtn.href = `https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(driverMsg)}`;
 
       applyTrackingStages(order.status);
@@ -3343,11 +3358,23 @@ html { scroll-behavior: smooth; }
     let lastCheckoutAt = 0;
 
     async function sendOrderViaWhatsApp() {
-      const name = document.getElementById('chk-name').value.trim() || 'Cliente';
+      const name = document.getElementById('chk-name').value.trim();
       const phone = document.getElementById('chk-phone').value.trim();
-      const address = document.getElementById('chk-address').value.trim() || 'Yerba Buena / Tucumán';
       const zoneEl = document.querySelector('input[name="chk-zone"]:checked');
       const selectedZone = zoneEl ? zoneEl.value : 'yb';
+      const addressRaw = document.getElementById('chk-address').value.trim();
+      // Nombre y dirección son obligatorios: sin ellos no podemos entregar ni avisarle al cliente.
+      if (name.length < 2) {
+        alert('Escribí tu nombre y apellido para poder armar el pedido.');
+        document.getElementById('chk-name').focus();
+        return;
+      }
+      if (selectedZone !== 'retiro' && addressRaw.length < 5) {
+        alert('Escribí la dirección o una referencia de entrega (calle y número, o barrio).');
+        document.getElementById('chk-address').focus();
+        return;
+      }
+      const address = addressRaw || 'Retiro en punto de entrega';
       const payEl = document.querySelector('input[name="chk-payment"]:checked');
       const paymentMethod = payEl ? payEl.value : 'transferencia';
 
@@ -3510,7 +3537,9 @@ html { scroll-behavior: smooth; }
         `--------------------------------\n` +
         `¡Hola! Quiero confirmar mi pedido y coordinar el despacho.`;
 
-      window.open(`https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(messageRaw)}`, '_blank');
+      pendingWaUrl = `https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(messageRaw)}`;
+      pendingWaOrder = orderNumber;
+      try { window.open(pendingWaUrl, '_blank'); } catch (e) { /* si lo bloquea, queda el botón del seguimiento */ }
       cart = [];
       removeCoupon();
       updateCartUI();
@@ -3518,6 +3547,7 @@ html { scroll-behavior: smooth; }
 
       setTimeout(() => {
         openOrderTrackingModal(orderNumber);
+        showTrackWa(orderNumber);
       }, 700);
     }
 

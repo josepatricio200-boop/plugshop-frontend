@@ -443,7 +443,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v5.5</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v5.8</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -933,12 +933,23 @@ html { scroll-behavior: smooth; }
                     <span class="text-xs font-bold text-white flex items-center gap-1.5 font-code">
                       <span>⚡ Motor de Fijación de Precios & Rentabilidad Neta</span>
                     </span>
-                    <div class="flex items-center gap-1.5 text-[10px] font-code">
-                      <span class="text-zinc-500">Markup rápido:</span>
-                      <button type="button" onclick="applyMarkupPreset(30)" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 transition-colors">+30%</button>
-                      <button type="button" onclick="applyMarkupPreset(50)" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 transition-colors">+50%</button>
-                      <button type="button" onclick="applyMarkupPreset(75)" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-brand-amber transition-colors">+75%</button>
-                      <button type="button" onclick="applyMarkupPreset(100)" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-brand-orange transition-colors">+100% (2x)</button>
+                    <div class="flex flex-col items-end gap-1.5 text-[10px] font-code">
+                      <div class="flex items-center gap-1.5 flex-wrap justify-end">
+                        <span class="text-zinc-500">Ganancia sobre el costo:</span>
+                        <span id="markup-presets" class="flex items-center gap-1.5 flex-wrap"></span>
+                        <button type="button" onclick="toggleMarkupEdit()" title="Cambiar los porcentajes de los botones" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-400 transition-colors">✎ Editar</button>
+                      </div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-zinc-500">Otro %:</span>
+                        <input type="number" id="markup-custom" min="0" max="1000" step="0.5" placeholder="Ej. 18" class="w-16 bg-zinc-900 border border-zinc-700 rounded p-1 text-white text-center" onkeydown="if(event.key==='Enter'){event.preventDefault();applyCustomMarkup();}" />
+                        <button type="button" onclick="applyCustomMarkup()" class="px-2 py-0.5 rounded bg-brand-orange/20 hover:bg-brand-orange/30 border border-brand-orange/50 text-brand-amber transition-colors">Aplicar</button>
+                      </div>
+                      <div id="markup-edit" class="hidden items-center gap-1.5 flex-wrap justify-end">
+                        <span class="text-zinc-500">Tus botones (separados por coma, hasta 8):</span>
+                        <input type="text" id="markup-edit-input" maxlength="60" placeholder="5, 10, 15, 20, 25" class="w-40 bg-zinc-900 border border-zinc-700 rounded p-1 text-white" onkeydown="if(event.key==='Enter'){event.preventDefault();saveMarkupPresets();}" />
+                        <button type="button" onclick="saveMarkupPresets()" class="px-2 py-0.5 rounded bg-emerald-500 hover:bg-emerald-400 text-black font-bold transition-colors">Guardar</button>
+                        <button type="button" onclick="resetMarkupPresets()" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-400 transition-colors">Volver a 30, 50, 75, 100</button>
+                      </div>
                     </div>
                   </div>
 
@@ -1746,6 +1757,8 @@ html { scroll-behavior: smooth; }
             </div>
             <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">PS-902</strong> · Despacho local Tucumán & YB</p>
             <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
+            <a id="track-wa-send" href="#" target="_blank" rel="noopener" class="hidden mt-2 w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold">📲 Enviar mi pedido por WhatsApp</a>
+            <p id="track-wa-hint" class="hidden text-[11px] text-zinc-400 mt-1">Si WhatsApp no se abrió solo, tocá el botón verde: es el paso que confirma tu compra con nosotros.</p>
           </div>
         </div>
         <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
@@ -1769,8 +1782,8 @@ html { scroll-behavior: smooth; }
               <div id="track-route-eta" class="text-base font-extrabold text-white mt-0.5 font-code">Tiempo estimado de entrega: ~35 min</div>
             </div>
             <div class="text-left sm:text-right">
-              <span class="text-[10px] text-zinc-500 block font-code">Cadete asignado</span>
-              <strong id="track-driver-name" class="text-xs text-zinc-200 font-semibold">Moto Express #4 (Lucas R.)</strong>
+              <span class="text-[10px] text-zinc-500 block font-code">Entrega a cargo de</span>
+              <strong id="track-driver-name" class="text-xs text-zinc-200 font-semibold">Equipo PlugShop</strong>
             </div>
           </div>
 
@@ -1798,7 +1811,7 @@ html { scroll-behavior: smooth; }
               <strong id="track-modal-address" class="text-white">Yerba Buena (Av. Aconquija)</strong>
             </div>
             <a id="track-contact-driver-btn" href="#" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-700/60 text-emerald-400 font-bold transition-all self-start sm:self-auto font-code">
-              <span>Contactar al Cadete por WhatsApp ↗</span>
+              <span>Consultar mi pedido por WhatsApp ↗</span>
             </a>
           </div>
         </div>
@@ -2701,6 +2714,44 @@ html { scroll-behavior: smooth; }
       }
     }
 
+    // Los botones de ganancia sobre el costo se pueden cambiar. Se guardan en esta computadora o celular.
+    const MARKUP_KEY = 'plugshop_markup_presets_v1', MARKUP_DEFAULT = [30, 50, 75, 100];
+    function loadMarkupPresets() {
+      try {
+        const a = JSON.parse(localStorage.getItem(MARKUP_KEY));
+        if (Array.isArray(a)) { const v = a.map(Number).filter(n => Number.isFinite(n) && n > 0 && n <= 1000).slice(0, 8); if (v.length) return v; }
+      } catch (e) { /* sin almacenamiento: se usan los de siempre */ }
+      return MARKUP_DEFAULT.slice();
+    }
+    function renderMarkupPresets() {
+      const box = document.getElementById('markup-presets');
+      if (!box) return;
+      box.innerHTML = loadMarkupPresets().map((p, i) => `<button type="button" onclick="applyMarkupPreset(${Number(p)})" class="px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 ${i === 0 ? 'text-zinc-300' : 'text-brand-amber'} transition-colors">+${Number(p)}%</button>`).join('');
+    }
+    function toggleMarkupEdit() {
+      const box = document.getElementById('markup-edit');
+      if (!box) return;
+      const open = box.classList.contains('hidden');
+      box.classList.toggle('hidden', !open); box.classList.toggle('flex', open);
+      if (open) { const inp = document.getElementById('markup-edit-input'); inp.value = loadMarkupPresets().join(', '); inp.focus(); }
+    }
+    function saveMarkupPresets() {
+      const inp = document.getElementById('markup-edit-input');
+      const vals = String(inp.value || '').split(/[,;\s]+/).map(x => parseFloat(x.replace(',', '.'))).filter(n => Number.isFinite(n) && n > 0 && n <= 1000);
+      const uniq = Array.from(new Set(vals)).slice(0, 8);
+      if (!uniq.length) { alert('Escribí al menos un porcentaje, por ejemplo: 5, 10, 15, 20, 25'); return; }
+      try { localStorage.setItem(MARKUP_KEY, JSON.stringify(uniq)); } catch (e) { alert('Este navegador no deja guardar los botones. Se van a ver hasta que cierres la página.'); }
+      renderMarkupPresets(); toggleMarkupEdit();
+    }
+    function resetMarkupPresets() {
+      try { localStorage.removeItem(MARKUP_KEY); } catch (e) { /* nada */ }
+      renderMarkupPresets(); toggleMarkupEdit();
+    }
+    function applyCustomMarkup() {
+      const pct = parseFloat(document.getElementById('markup-custom').value);
+      if (!Number.isFinite(pct) || pct < 0 || pct > 1000) { alert('Escribí un porcentaje entre 0 y 1000. Por ejemplo: 18'); return; }
+      applyMarkupPreset(pct);
+    }
     function applyMarkupPreset(pct) {
       const costInput = document.getElementById('new-prod-cost');
       const priceInput = document.getElementById('new-prod-price');
@@ -2757,7 +2808,20 @@ html { scroll-behavior: smooth; }
       return localQrUrl(window.location.origin + window.location.pathname + '#track=' + encodeURIComponent(orderId), 4);
     }
 
+    // Último mensaje de compra armado: se ofrece como botón en el seguimiento por si el
+    // navegador (sobre todo Safari en iPhone) bloquea que WhatsApp se abra solo.
+    let pendingWaUrl = null, pendingWaOrder = null;
+    function showTrackWa(orderId) {
+      const btn = document.getElementById('track-wa-send'), hint = document.getElementById('track-wa-hint');
+      if (!btn || !hint) return;
+      const show = !!pendingWaUrl && pendingWaOrder === orderId;
+      if (show) btn.href = pendingWaUrl;
+      btn.classList.toggle('hidden', !show); btn.classList.toggle('flex', show);
+      hint.classList.toggle('hidden', !show);
+    }
+
     async function openOrderTrackingModal(orderId) {
+      showTrackWa(null);
       // orderId puede venir del hash de la URL (#track=...), es decir de
       // afuera de la app: se sanitiza acá para evitar inyección de HTML
       // antes de usarlo en cualquier lado.
@@ -2805,7 +2869,7 @@ html { scroll-behavior: smooth; }
       `;
 
       const driverBtn = document.getElementById('track-contact-driver-btn');
-      const driverMsg = `Hola! Soy el cliente de la orden *${order.id}* (${order.address}). Te escribo para consultar en qué punto del viaje venís con la moto.`;
+      const driverMsg = `Hola! Soy el cliente de la orden *${order.id}* (${order.address}). Te escribo para consultar cómo viene mi pedido.`;
       driverBtn.href = `https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(driverMsg)}`;
 
       applyTrackingStages(order.status);
@@ -4145,6 +4209,7 @@ html { scroll-behavior: smooth; }
     }
 
     function refreshAdminUI() {
+      renderMarkupPresets();
       renderClaims();
       if (!document.querySelector('#color-stock-box input')) renderColorStockInputs({});
       fillCategorySelects();
