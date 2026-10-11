@@ -764,7 +764,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v6.0</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v6.2</span>
           </div>
         </div>
 
@@ -930,6 +930,7 @@ html { scroll-behavior: smooth; }
         <div id="cust-session-bar" class="hidden p-3 rounded-xl bg-emerald-950/30 border border-emerald-800/50 flex items-center justify-between gap-2 flex-wrap">
           <span class="text-emerald-300 font-semibold text-[11px]">✓ Cuenta abierta<span id="cust-session-note" class="text-zinc-400 font-normal"></span></span>
           <div class="flex gap-2 flex-wrap">
+            <button onclick="closeCustomerModal(); toggleNotifPanel()" class="px-3 py-1.5 rounded-lg bg-brand-orange/15 hover:bg-brand-orange/25 border border-brand-orange/40 text-brand-amber text-[11px] font-semibold">🔔 Ver mis avisos</button>
             <button onclick="showAddOrderForm()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">+ Agregar otro pedido</button>
             <button onclick="customerLogout()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-300 text-[11px] font-semibold">Salir / No soy yo</button>
           </div>
@@ -949,19 +950,6 @@ html { scroll-behavior: smooth; }
           <div id="cust-register-done" class="hidden flex items-center justify-between gap-3 flex-wrap">
             <span id="cust-register-done-text" class="text-emerald-400 font-semibold"></span>
             <button onclick="clearCustomerProfile()" class="text-[11px] text-zinc-400 hover:text-white underline">Cambiar datos</button>
-          </div>
-        </div>
-
-        <div class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="font-bold text-white text-xs">Ingresá tu WhatsApp para buscar tus pedidos</span>
-            <span id="cust-status-badge" class="px-2 py-0.5 rounded text-[10px] bg-zinc-800 text-zinc-400 font-code">🔒 Datos protegidos</span>
-          </div>
-          <div class="flex flex-col sm:flex-row gap-2">
-            <input type="text" id="cust-phone-input" placeholder="Tu número de WhatsApp (ej. 381 555 1234)" class="flex-1 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') lookupCustomerOrders()" />
-            <button onclick="lookupCustomerOrders()" class="px-4 py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold transition-all">
-              Ver Mis Pedidos
-            </button>
           </div>
         </div>
 
@@ -1437,6 +1425,7 @@ html { scroll-behavior: smooth; }
       // 🔌 TODO: endpoints reales de tu backend (ajustá los paths a tu API)
       ENDPOINTS: {
         AUTH_ADMIN: '/api/auth/admin',        // POST { pin } -> { token }
+        AUTH_ME: '/api/auth/me',               // GET -> { role, name, perms }
         AUTH_STAFF: '/api/auth/staff',        // POST { username, pin } -> { token, role, name }
         PRODUCTS: '/api/products',             // GET / PUT
         ORDERS: '/api/orders',                 // GET / POST
@@ -1639,6 +1628,21 @@ html { scroll-behavior: smooth; }
     // Cuando no hay backend conectado, se asume "admin" (mismo comportamiento
     // que la app tenía antes: quien entra con el PIN ve todo el panel).
     let currentStaffSession = { role: 'admin', name: 'Admin (modo local)', token: null };
+
+    // Permisos por usuario (los manda el servidor al entrar y se refrescan con /api/auth/me).
+    // Estos son los "de fábrica" de cada rol: sirven de respaldo si la sesión no trae la lista.
+    const PERM_DEFAULTS = {
+      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
+      cadete: ['orders.view', 'orders.dispatch'],
+      reposicion: ['products.manage', 'insights.view'],
+      logistica: ['suppliers.view']
+    };
+    function can(perm) {
+      const s = currentStaffSession || {};
+      if (s.role === 'admin') return true;
+      const list = Array.isArray(s.perms) ? s.perms : (PERM_DEFAULTS[s.role] || []);
+      return list.includes(perm);
+    }
 
     // Escapa texto ingresado por usuarios (nombres, teléfonos, IDs de
     // seguimiento, búsquedas) antes de insertarlo como HTML, para evitar
@@ -3798,7 +3802,7 @@ html { scroll-behavior: smooth; }
       // Ojo: en modo conectado el pedido de un cliente puede NO estar en
       // ADMIN_ORDERS (ese cliente no inició sesión como staff), así que acá
       // no se busca el objeto completo — solo hace falta el ID para mostrarlo.
-      if ((mode === 'dispatch' || mode === 'handover') && !(isAdminAuthenticated && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role))) {
+      if ((mode === 'dispatch' || mode === 'handover') && !(isAdminAuthenticated && (can('orders.dispatch') || can('orders.manage')))) {
         alert('Solo el equipo puede registrar la salida o la entrega de un paquete.');
         return;
       }

@@ -443,7 +443,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.0</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.2</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -1372,6 +1372,7 @@ html { scroll-behavior: smooth; }
             </div>
 
             <div id="refunds-card" class="hidden p-4 rounded-xl bg-amber-950/30 border border-amber-700/50 space-y-3 text-xs"></div>
+            <div id="returns-card" class="hidden p-4 rounded-xl bg-sky-950/30 border border-sky-700/50 space-y-3 text-xs"></div>
 
             <div id="orders-quick" class="flex flex-wrap gap-2 text-xs">
               <button type="button" data-quick="active" onclick="setOrdersQuick('active')" class="quick-chip px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-300 font-semibold">Todos los activos <span class="qn text-zinc-500"></span></button>
@@ -1547,7 +1548,7 @@ html { scroll-behavior: smooth; }
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 class="text-lg font-bold text-white">Usuarios Internos & Permisos</h3>
-                <p class="text-xs text-zinc-400">Cuentas para tu equipo (vendedor, reposición, cadete, logística), cada una con acceso solo a lo que le corresponde.</p>
+                <p class="text-xs text-zinc-400">Cuentas para tu equipo (vendedor, reposición, cadete, logística). Cada rol viene con permisos de fábrica y con el botón <strong class="text-sky-300">🔐 Permisos</strong> prendés o apagás cada acción por usuario.</p>
               </div>
             </div>
 
@@ -1943,6 +1944,7 @@ html { scroll-behavior: smooth; }
       // 🔌 TODO: endpoints reales de tu backend (ajustá los paths a tu API)
       ENDPOINTS: {
         AUTH_ADMIN: '/api/auth/admin',        // POST { pin } -> { token }
+        AUTH_ME: '/api/auth/me',               // GET -> { role, name, perms }
         AUTH_STAFF: '/api/auth/staff',        // POST { username, pin } -> { token, role, name }
         PRODUCTS: '/api/products',             // GET / PUT
         ORDERS: '/api/orders',                 // GET / POST
@@ -2113,24 +2115,24 @@ html { scroll-behavior: smooth; }
       const headers = { Authorization: 'Bearer ' + currentStaffSession.token };
       const tasks = [loadSettingsFromServer(), loadAnnouncements(), loadClaims(), loadAudit(), loadCoupons()];
 
-      if (['admin', 'vendedor', 'cadete'].includes(role)) {
+      if (can('orders.view')) {
         tasks.push(apiRequest('ORDERS', { headers }).then(res => {
           if (Array.isArray(res)) ADMIN_ORDERS = res;
         }));
       }
-      if (['admin', 'reposicion'].includes(role)) {
+      if (can('products.manage')) {
         tasks.push(apiRequest('PRODUCTS', { headers }, '/full').then(res => {
           if (Array.isArray(res)) PRODUCTS = res.map(sanitizeProduct);
         }));
         tasks.push(loadCategoriesFromServer(headers));
       }
       if (role === 'admin') tasks.push(loadIphoneAdmin(true));
-      if (['admin', 'vendedor'].includes(role)) {
+      if (can('customers.manage')) {
         tasks.push(apiRequest('CUSTOMERS', { headers }).then(res => {
           if (Array.isArray(res)) CUSTOMERS = res;
         }));
       }
-      if (['admin', 'logistica'].includes(role)) {
+      if (can('suppliers.view')) {
         tasks.push(apiRequest('SUPPLIERS', { headers }).then(res => {
           if (Array.isArray(res)) SUPPLIERS = res;
         }));
@@ -2161,9 +2163,45 @@ html { scroll-behavior: smooth; }
       'settings': ['admin']
     };
 
+    // Permisos por usuario (los manda el servidor al entrar y se refrescan con /api/auth/me).
+    // Estos son los "de fábrica" de cada rol: sirven de respaldo si la sesión no trae la lista.
+    const PERM_DEFAULTS = {
+      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
+      cadete: ['orders.view', 'orders.dispatch'],
+      reposicion: ['products.manage', 'insights.view'],
+      logistica: ['suppliers.view']
+    };
+    function can(perm) {
+      const s = currentStaffSession || {};
+      if (s.role === 'admin') return true;
+      const list = Array.isArray(s.perms) ? s.perms : (PERM_DEFAULTS[s.role] || []);
+      return list.includes(perm);
+    }
+    // Qué permiso hace falta para ver cada pestaña (null = cualquiera del equipo; sin entrada = solo admin).
+    const TAB_PERMS = {
+      'today': null,
+      'inventory': ['products.manage'],
+      'orders': ['orders.view'],
+      'suppliers': ['suppliers.view'],
+      'customers': ['customers.manage'],
+      'claims': ['claims.manage']
+    };
     function tabAllowedForRole(tabName, role) {
       if (role === 'admin') return true;
-      return (ADMIN_TAB_ROLES[tabName] || ['admin']).includes(role);
+      const need = TAB_PERMS[tabName];
+      if (need === undefined) return false;
+      if (need === null) return true;
+      return need.some(can);
+    }
+    // Pide al servidor mis permisos actuales (por si el admin los cambió mientras tenía el panel abierto).
+    async function refreshMyPerms() {
+      if (!isBackendConnected() || !currentStaffSession.token || currentStaffSession.role === 'admin') return;
+      const me = await apiRequest('AUTH_ME', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
+      if (me && me.success && Array.isArray(me.perms)) {
+        const changed = JSON.stringify(me.perms) !== JSON.stringify(currentStaffSession.perms || null);
+        currentStaffSession.perms = me.perms; currentStaffSession.role = me.role || currentStaffSession.role;
+        if (changed) { applyRoleTabVisibility(); if (typeof refreshAdminUI === 'function') refreshAdminUI(); }
+      }
     }
 
     // Oculta del todo (botón + contenido) las pestañas que el rol logueado
@@ -2978,6 +3016,7 @@ html { scroll-behavior: smooth; }
 
       // El panel se muestra enseguida con lo que ya había; cuando llegan
       // los datos reales del servidor, se vuelve a dibujar solo.
+      await refreshMyPerms();
       await syncAdminDataFromServer();
       refreshAdminUI();
       applyRoleTabVisibility();
@@ -3652,15 +3691,84 @@ html { scroll-behavior: smooth; }
       if (h < 48) return `hace ${h} h`;
       return `hace ${Math.floor(h / 24)} días`;
     }
-    function showClaimsMsg(t) {
+    function showClaimsMsg(t, okTone) {
       const el = document.getElementById('claims-msg'); if (!el) return;
+      el.className = 'text-[11px] font-semibold ' + (okTone ? 'text-emerald-400' : 'text-rose-400');
       el.textContent = t || ''; el.classList.toggle('hidden', !t);
-      if (t) setTimeout(() => el.classList.add('hidden'), 6000);
+      if (t && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+      if (t) setTimeout(() => el.classList.add('hidden'), 9000);
     }
     async function loadClaims() {
-      if (!isBackendConnected() || !currentStaffSession.token || !['admin', 'vendedor'].includes(currentStaffSession.role)) return;
+      if (!isBackendConnected() || !currentStaffSession.token || !can('claims.manage')) return;
       const res = await apiRequest('CLAIMS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
       if (Array.isArray(res)) { CLAIMS = res; renderClaims(); }
+    }
+    // Mensajes listos para el cliente (se pueden editar antes de guardar). Se agrupan por estado.
+    const CLAIM_TEMPLATES = {
+      'Recibido': ['Recibimos tu reclamo. Lo vamos a revisar y te respondemos en el día.'],
+      'En revisión': [
+        'Estamos revisando tu reclamo. Te avisamos apenas tengamos novedades.',
+        'Estamos revisando el producto.',
+        'Necesitamos fotos o un video del problema: mandanos por WhatsApp así avanzamos.',
+        'Ya recibimos el producto y lo estamos revisando.'
+      ],
+      'Aprobado': [
+        'Aprobamos tu reclamo. En breve te contamos los próximos pasos.',
+        'Aprobamos tu reclamo. Te pasamos por WhatsApp cómo devolvernos el producto.',
+        'Aprobamos tu reclamo. Estamos preparando el cambio de tu producto.'
+      ],
+      'Resuelto': [
+        'Estamos gestionando tu reembolso. Lo vas a ver reflejado dentro de las 48 hs hábiles.',
+        'Ya te devolvimos el dinero. Mirá el comprobante en Mi Cuenta.',
+        'Tu producto ya fue reparado. Coordinamos la entrega por WhatsApp.',
+        'Ya te enviamos el producto de reemplazo. Gracias por tu paciencia.',
+        'Cerramos tu reclamo. Cualquier duda, escribinos por WhatsApp.'
+      ],
+      'Rechazado': [
+        'No pudimos aprobar el reclamo porque el producto tiene signos de mal uso o golpes.',
+        'No pudimos aprobar el reclamo porque se venció el plazo de garantía.',
+        'No pudimos aprobar el reclamo porque pasó el plazo de 10 días para el arrepentimiento.',
+        'No pudimos aprobar el reclamo. Escribinos por WhatsApp y lo vemos juntos.'
+      ]
+    };
+    // Mensaje sugerido según estado y resolución (para completarlo solo al cambiar el estado).
+    function claimDefaultMessage(status, resolution) {
+      const t = CLAIM_TEMPLATES[status] || [];
+      if (status === 'Resuelto') {
+        if (resolution === 'Reembolso') return t[0];
+        if (resolution === 'Reparación') return t[2];
+        if (resolution === 'Cambio') return t[3];
+        return t[4];
+      }
+      if (status === 'Aprobado' && resolution === 'Cambio') return t[2];
+      return t[0] || '';
+    }
+    function claimAllTemplates() { return Object.values(CLAIM_TEMPLATES).reduce((a, l) => a.concat(l), []); }
+    // Al cambiar estado/resolución: si el mensaje está vacío o es uno de los predeterminados, lo cambia por el que corresponde.
+    function claimAutoMessage(id) {
+      const g = k => document.getElementById(`claim-${k}-${id}`);
+      const msg = g('msg'); if (!msg) return;
+      const cur = msg.value.trim();
+      if (cur && !claimAllTemplates().includes(cur)) return;
+      msg.value = claimDefaultMessage(g('status').value, g('res').value);
+      claimPreview(id);
+    }
+    function claimPickTemplate(id, sel) {
+      const msg = document.getElementById('claim-msg-' + id);
+      if (sel.value && msg) msg.value = sel.value;
+      sel.value = '';
+      claimPreview(id);
+    }
+    function claimPreview(id) {
+      const el = document.getElementById('claim-prev-' + id); if (!el) return;
+      const m = (document.getElementById('claim-msg-' + id) || {}).value || '';
+      el.textContent = m.trim() ? m.trim() : 'Sin mensaje: el cliente recibe el aviso del estado.';
+    }
+    function claimFeedback(id, ok, text) {
+      const el = document.getElementById('claim-fb-' + id); if (!el) return;
+      el.className = 'text-[11px] font-semibold ' + (ok ? 'text-emerald-400' : 'text-rose-400');
+      el.textContent = text;
+      el.scrollIntoView && el.scrollIntoView({ block: 'nearest' });
     }
     function renderClaims() {
       const openCount = CLAIMS.filter(c => ['Recibido', 'En revisión', 'Aprobado'].includes(c.status)).length;
@@ -3689,14 +3797,25 @@ html { scroll-behavior: smooth; }
             <a href="${wa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-semibold">WhatsApp ↗</a>
           </div>
           ${c.reason ? `<div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200">“${escapeHtml(c.reason)}”</div>` : ''}
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <select id="claim-status-${id}" class="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white">${CLAIM_STATUSES.map(st => `<option ${st === c.status ? 'selected' : ''}>${st}</option>`).join('')}</select>
-            <select id="claim-res-${id}" class="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white">${opt(CLAIM_RESOLUTIONS, c.resolution || '')}</select>
-            <input id="claim-msg-${id}" maxlength="300" value="${escapeHtml(c.customerMessage || '')}" placeholder="Mensaje para el cliente (lo ve en su campanita)" class="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white placeholder-zinc-600" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label class="space-y-1"><span class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Estado del reclamo</span>
+              <select id="claim-status-${id}" onchange="claimAutoMessage('${id}')" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white">${CLAIM_STATUSES.map(st => `<option ${st === c.status ? 'selected' : ''}>${st}</option>`).join('')}</select></label>
+            <label class="space-y-1"><span class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Cómo se resuelve <span class="normal-case font-normal">(obligatorio solo para "Resuelto")</span></span>
+              <select id="claim-res-${id}" onchange="claimAutoMessage('${id}')" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white">${opt(CLAIM_RESOLUTIONS, c.resolution || '')}</select></label>
           </div>
-          <div class="flex gap-2">
-            <input id="claim-note-${id}" maxlength="400" placeholder="Nota interna (el cliente NO la ve)" class="flex-1 min-w-0 bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white placeholder-zinc-600" />
-            <button onclick="saveClaim('${id}')" class="px-4 py-2 rounded-lg bg-brand-orange hover:bg-orange-500 text-black font-bold">Guardar</button>
+          <div class="space-y-1.5">
+            <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Mensaje para el cliente <span class="normal-case font-normal">(le llega a su campanita 🔔 al guardar)</span></span>
+            <select onchange="claimPickTemplate('${id}', this)" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-zinc-300">
+              <option value="">➕ Elegir un mensaje listo…</option>
+              ${Object.keys(CLAIM_TEMPLATES).map(st => `<optgroup label="${st}">${CLAIM_TEMPLATES[st].map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('')}</optgroup>`).join('')}
+            </select>
+            <textarea id="claim-msg-${id}" maxlength="300" rows="2" oninput="claimPreview('${id}')" placeholder="O escribí tu propio mensaje…" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white placeholder-zinc-600">${escapeHtml(c.customerMessage || '')}</textarea>
+            <div class="p-2 rounded-lg bg-sky-950/30 border border-sky-900/50 text-[11px] text-sky-200">👁 El cliente verá: <span id="claim-prev-${id}">${escapeHtml(c.customerMessage || 'Sin mensaje: el cliente recibe el aviso del estado.')}</span></div>
+          </div>
+          <input id="claim-note-${id}" maxlength="400" placeholder="Nota interna (el cliente NO la ve)" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white placeholder-zinc-600" />
+          <div class="flex items-center gap-3 flex-wrap">
+            <button id="claim-btn-${id}" onclick="saveClaim('${id}')" class="px-4 py-2.5 rounded-lg bg-brand-orange hover:bg-orange-500 text-black font-bold">Guardar y avisar al cliente</button>
+            <span id="claim-fb-${id}" class="text-[11px] font-semibold"></span>
           </div>
           ${notes ? `<div class="space-y-1">${notes}</div>` : ''}
           ${hist ? `<div class="text-[10px] text-zinc-600 font-code">${hist}</div>` : ''}
@@ -3706,13 +3825,33 @@ html { scroll-behavior: smooth; }
     async function saveClaim(id) {
       const g = k => document.getElementById(`claim-${k}-${id}`);
       const body = { status: g('status').value, resolution: g('res').value, customerMessage: g('msg').value.trim() };
+      if (body.status === 'Resuelto' && !body.resolution) {
+        g('res').classList.add('border-rose-500');
+        claimFeedback(id, false, 'Para marcarlo "Resuelto" elegí cómo se resuelve (Reparación, Cambio, Reembolso o Sin resolución).');
+        return;
+      }
+      g('res').classList.remove('border-rose-500');
       const note = g('note').value.trim();
       if (note) body.note = note;
+      const btn = g('btn'); if (btn) { btn.disabled = true; btn.classList.add('opacity-60'); }
       const res = await apiRequest('CLAIMS', { method: 'PATCH', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify(body) }, '/' + encodeURIComponent(id));
-      if (!res || res.success === false || !res.claim) { showClaimsMsg((res && res.error) || 'No se pudo guardar el reclamo.'); return; }
+      if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); }
+      if (!res || res.success === false || !res.claim) { claimFeedback(id, false, (res && res.error) || 'No se pudo guardar el reclamo. Probá de nuevo.'); return; }
       const idx = CLAIMS.findIndex(c => c.id === id);
       if (idx !== -1) CLAIMS[idx] = res.claim;
+      // Si el reclamo canceló un pedido en camino, traemos los pedidos de nuevo para que se vea.
+      try {
+        const od = await apiRequest('ORDERS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
+        if (Array.isArray(od)) ADMIN_ORDERS = od;
+      } catch (e) {}
+      const keepFilter = (document.getElementById('claims-filter') || {}).value;
       renderClaims();
+      renderOrdersTable();
+      renderTodayTab();
+      // Si el reclamo salió de la lista (p. ej. quedó Resuelto y el filtro es "abiertos"), avisamos arriba para que no parezca que se perdió.
+      const stillShown = !!document.getElementById('claim-fb-' + id);
+      if (stillShown) claimFeedback(id, true, '✓ Guardado. El cliente ya lo ve en su campanita.');
+      else showClaimsMsg(`✓ ${id} guardado como "${res.claim.status}". El cliente ya lo ve en su campanita. Lo encontrás en el filtro "Cerrados".`, true);
     }
 
     // ---- Anuncios de la campanita (admin) ----
@@ -4032,7 +4171,7 @@ html { scroll-behavior: smooth; }
     function renderRefundsCard() {
       const box = document.getElementById('refunds-card');
       if (!box) return;
-      const canPay = ['admin', 'vendedor'].includes(currentStaffSession.role);
+      const canPay = can('refunds.manage');
       const pending = canPay ? ADMIN_ORDERS.filter(o => o.refund && o.refund.status === 'pendiente') : [];
       box.classList.toggle('hidden', !pending.length);
       if (!pending.length) { box.innerHTML = ''; return; }
@@ -4052,6 +4191,36 @@ html { scroll-behavior: smooth; }
             <button onclick="markRefundDone('${o.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold">Marcar devuelto</button>
           </div>`;
         }).join('')}`;
+    }
+    // ---- Paquetes por recuperar: pedido cancelado cuando ya iba en camino ----
+    function renderReturnsCard() {
+      const box = document.getElementById('returns-card');
+      if (!box) return;
+      const canDo = can('refunds.manage');
+      const list = canDo ? ADMIN_ORDERS.filter(o => o.returnPending) : [];
+      box.classList.toggle('hidden', !list.length);
+      if (!list.length) { box.innerHTML = ''; return; }
+      box.innerHTML = `
+        <div class="font-bold text-sky-200 text-sm">📦 Paquetes por recuperar (${list.length})</div>
+        <div class="text-[11px] text-sky-300/80">El cliente canceló con el pedido en camino. Cuando el paquete vuelva al depósito, tocá el botón para devolver el stock.</div>
+        ${list.map(o => `<div class="p-3 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-between gap-2 flex-wrap">
+            <div>
+              <div class="font-bold text-white">${escapeHtml(o.id)} · ${escapeHtml(o.customer)}</div>
+              <div class="text-[11px] text-zinc-400">WhatsApp ${escapeHtml(o.phone)} · ${escapeHtml(o.address || '')}</div>
+            </div>
+            <button onclick="markReturned('${o.id}')" class="px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-black font-bold">Ya volvió al depósito</button>
+          </div>`).join('')}`;
+    }
+    async function markReturned(orderId) {
+      const order = ADMIN_ORDERS.find(o => o.id === orderId);
+      if (!order) return;
+      if (!confirm(`¿El paquete de ${order.customer} (${order.id}) ya está de vuelta en el depósito?\n\nSi aceptás, los productos vuelven al stock.`)) return;
+      if (!isBackendConnected() || !currentStaffSession.token) { order.returnPending = false; saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS); renderOrdersTable(); return; }
+      const res = await apiRequest('ORDERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/' + encodeURIComponent(orderId) + '/returned');
+      if (!res || res.success === false) { alert((res && res.error) || 'No se pudo registrar la devolución.'); return; }
+      Object.assign(order, res.order);
+      try { const pr = await apiRequest('PRODUCTS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/full'); if (Array.isArray(pr)) PRODUCTS = pr.map(sanitizeProduct); } catch (e) {}
+      refreshAdminUI();
     }
     async function markRefundDone(orderId) {
       const order = ADMIN_ORDERS.find(o => o.id === orderId);
@@ -4079,6 +4248,7 @@ html { scroll-behavior: smooth; }
 
     function renderOrdersTable() {
       renderRefundsCard();
+      renderReturnsCard();
       const ordersTable = document.getElementById('admin-orders-table-body');
       if (!ordersTable) return;
       const list = filteredAdminOrders();
@@ -4087,7 +4257,8 @@ html { scroll-behavior: smooth; }
       if (lbl) lbl.textContent = `Mostrando ${list.length} de ${ADMIN_ORDERS.length} pedidos`;
       ordersTable.innerHTML = list.map(o => {
         const roleOk = list2 => list2.includes(currentStaffSession.role);
-        const canScan = roleOk(['admin', 'cadete', 'vendedor']);
+        const canScan = can('orders.dispatch') || can('orders.manage');
+        const canManageOrd = can('orders.manage');
         const isTransfer = o.isBancarizado || (o.paymentMethod && o.paymentMethod.includes('Transferencia'));
         return `
         <tr class="hover:bg-zinc-900/60 transition-colors">
@@ -4115,13 +4286,9 @@ html { scroll-behavior: smooth; }
           </td>
           <td class="py-3 px-4 o-status">
             <select onchange="updateOrderStatus('${o.id}', this.value)" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer font-sans">
-              <option value="Pago pendiente" ${o.status === 'Pago pendiente' ? 'selected' : ''}>Pago pendiente</option>
-              <option value="Comprobante enviado" ${o.status === 'Comprobante enviado' ? 'selected' : ''}>Comprobante enviado</option>
-              <option value="Comprobante rechazado" ${o.status === 'Comprobante rechazado' ? 'selected' : ''}>Comprobante rechazado</option>
-              <option value="En preparación" ${o.status === 'En preparación' ? 'selected' : ''}>En preparación</option>
-              <option value="Despachado" ${o.status === 'Despachado' ? 'selected' : ''}>Despachado (En moto)</option>
-              <option value="Entregado" ${o.status === 'Entregado' ? 'selected' : ''}>Entregado</option>
-              <option value="Cancelado" ${o.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
+              ${[['Pago pendiente', 'Pago pendiente'], ['Comprobante enviado', 'Comprobante enviado'], ['Comprobante rechazado', 'Comprobante rechazado'], ['En preparación', 'En preparación'], ['Despachado', 'Despachado (En moto)'], ['Entregado', 'Entregado'], ['Cancelado', 'Cancelado']]
+                .filter(([v]) => canManageOrd || v === o.status || (o.status === 'En preparación' && v === 'Despachado') || (o.status === 'Despachado' && v === 'Entregado'))
+                .map(([v, l]) => `<option value="${v}" ${o.status === v ? 'selected' : ''}>${l}</option>`).join('')}
             </select>
             ${(o.isBancarizado && o.paid === false && o.status !== 'Cancelado') ? `<div class="text-[10px] mt-1 ${(o.proof || o.hasProof) ? 'text-sky-400' : 'text-amber-400'}">${(o.proof || o.hasProof) ? '🧾 Comprobante recibido' : '⏳ Sin comprobante'}</div>` : (o.paid ? '<div class="text-[10px] mt-1 text-emerald-400">✓ Pago confirmado</div>' : '')}
             ${o.dispatchLog ? `<div class="text-[10px] mt-1 text-sky-400">📦 Salida escaneada ${escapeHtml(new Date(o.dispatchLog.at).toLocaleTimeString('es-AR', {hour: '2-digit', minute: '2-digit'}))} · ${escapeHtml(o.dispatchLog.by)}</div>` : ''}
@@ -4137,7 +4304,7 @@ html { scroll-behavior: smooth; }
               <button type="button" onclick="toggleOrderMore(this)" aria-expanded="false" aria-label="Más acciones del pedido ${escapeHtml(o.id)}" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-bold">⋯ Más</button>
             </div>
             <div class="order-more hidden mt-1.5 flex-wrap justify-end gap-1.5">
-              ${(o.status !== 'Cancelado' && roleOk(['admin', 'vendedor'])) ? `<button onclick="openPackageLabel('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">🏷️ Etiqueta</button>` : ''}
+              ${(o.status !== 'Cancelado' && canManageOrd) ? `<button onclick="openPackageLabel('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">🏷️ Etiqueta</button>` : ''}
               <button onclick="openOrderTrackingModal('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-brand-amber text-[11px] font-bold transition-colors" title="Ver Radar y QR">QR ↗</button>
               <button onclick="addOrderNote('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 text-[11px] font-semibold" title="Nota interna (el cliente no la ve)">📝 Nota</button>
             </div>
@@ -4241,6 +4408,7 @@ html { scroll-behavior: smooth; }
       add(transferPending, '💳', 'Transferencias por confirmar', 'Revisá que la plata esté en tu cuenta y confirmá el pago.', 'orders', 'toCollect', 'amber');
       add(cashToPrepare, '💵', 'Pedidos en efectivo por preparar', 'Se cobran al entregar. Pasalos a "En preparación" cuando los armes.', 'orders', 'active', 'amber');
       add(live.filter(o => o.status === 'En preparación').length, '📦', 'Para preparar y despachar', 'Cobrados y listos para armar.', 'orders', 'En preparación', 'orange');
+      add(ADMIN_ORDERS.filter(o => o.returnPending).length, '↩️', 'Paquetes por recuperar', 'Cancelados en camino. Avisá cuando vuelvan al depósito.', 'orders', 'all', 'sky');
       add(live.filter(o => o.status === 'Despachado').length, '🛵', 'En camino al cliente', 'Esperando que el cliente reciba.', 'orders', 'Despachado', 'sky');
       const openClaims = CLAIMS.filter(c => ['Recibido', 'En revisión', 'Aprobado'].includes(c.status)).length;
       add(openClaims, '🛡️', 'Reclamos abiertos', 'Un cliente espera tu respuesta.', 'claims', '', 'rose');
@@ -4309,7 +4477,7 @@ html { scroll-behavior: smooth; }
             <button onclick="window.open(waLink('${c.phone}'), '_blank')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-semibold">
               WhatsApp ↗
             </button>
-            ${['admin', 'vendedor'].includes(currentStaffSession.role) ? `<button onclick="editCustomer('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[10px] font-semibold">✏️ Editar</button>` : ''}
+            ${can('customers.manage') ? `<button onclick="editCustomer('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[10px] font-semibold">✏️ Editar</button>` : ''}
             ${currentStaffSession.role === 'admin' ? `<button onclick="deleteCustomer('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 text-[10px] font-semibold">🗑️ Borrar</button>` : ''}
           </td>
         </tr>
@@ -4383,6 +4551,11 @@ html { scroll-behavior: smooth; }
       if (badge) badge.textContent = users.length;
 
       const roleLabels = { admin: 'Admin', vendedor: 'Vendedor', reposicion: 'Reposición', cadete: 'Cadete', logistica: 'Logística' };
+      STAFF_USERS_LIST = users;
+      if (!STAFF_PERMS) {
+        const pr = await apiRequest('STAFF_USERS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/permissions');
+        if (pr && Array.isArray(pr.catalog)) STAFF_PERMS = pr;
+      }
 
       tbody.innerHTML = users.map(u => `
         <tr class="hover:bg-zinc-900/60 transition-colors">
@@ -4395,6 +4568,7 @@ html { scroll-behavior: smooth; }
             </span>
           </td>
           <td class="py-3 px-4 text-right font-sans space-x-2">
+            <button onclick="toggleStaffPerms(${u.id})" class="px-2 py-1 rounded bg-sky-950 hover:bg-sky-900 border border-sky-800 text-sky-300 text-[10px] font-semibold">🔐 Permisos</button>
             <button onclick="toggleStaffUserActive(${u.id}, ${u.active})" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-semibold">
               ${u.active ? 'Desactivar' : 'Reactivar'}
             </button>
@@ -4403,7 +4577,68 @@ html { scroll-behavior: smooth; }
             </button>
           </td>
         </tr>
+        <tr id="perms-row-${u.id}" class="hidden bg-zinc-900/40"><td colspan="5" class="p-4 font-sans" id="perms-box-${u.id}"></td></tr>
       `).join('') || `<tr><td colspan="5" class="py-4 px-4 text-zinc-500 text-center">Todavía no creaste usuarios de equipo.</td></tr>`;
+    }
+
+    // ---- Permisos por usuario: el administrador prende o apaga cada acción ----
+    let STAFF_USERS_LIST = [];
+    let STAFF_PERMS = null; // { catalog:[{key,group,label}], defaults:{rol:[claves]} }
+    function toggleStaffPerms(id) {
+      const row = document.getElementById('perms-row-' + id);
+      if (!row) return;
+      const open = row.classList.toggle('hidden') === false;
+      if (open) renderStaffPerms(id);
+    }
+    function renderStaffPerms(id) {
+      const u = STAFF_USERS_LIST.find(x => x.id === id);
+      const box = document.getElementById('perms-box-' + id);
+      if (!u || !box) return;
+      if (!STAFF_PERMS) { box.innerHTML = '<p class="text-zinc-500 text-xs">No se pudo cargar la lista de permisos. Actualizá el servidor (backend).</p>'; return; }
+      const on = new Set(u.effectivePerms || []);
+      const groups = {};
+      STAFF_PERMS.catalog.forEach(p => { (groups[p.group] = groups[p.group] || []).push(p); });
+      box.innerHTML = `
+        <div class="text-[11px] text-zinc-400 mb-3">Marcá lo que <strong class="text-white">${escapeHtml(u.name)}</strong> puede hacer. Los cambios valen apenas tocás <em>Guardar permisos</em> (no hace falta que vuelva a entrar).</div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">
+          ${Object.keys(groups).map(g => `<div class="space-y-1.5">
+            <div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">${escapeHtml(g)}</div>
+            ${groups[g].map(p => `<label class="flex items-start gap-2 text-xs text-zinc-200 cursor-pointer">
+              <input type="checkbox" data-perm="${escapeHtml(p.key)}" ${on.has(p.key) ? 'checked' : ''} class="mt-0.5 w-4 h-4 accent-orange-500" />
+              <span>${escapeHtml(p.label)}</span></label>`).join('')}
+          </div>`).join('')}
+        </div>
+        <div class="flex items-center gap-2 flex-wrap mt-4">
+          <button onclick="saveStaffPerms(${u.id})" class="px-4 py-2 rounded-lg bg-brand-orange hover:opacity-90 text-black font-extrabold text-xs">Guardar permisos</button>
+          <button onclick="resetStaffPerms(${u.id})" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold">Volver a lo de fábrica del rol</button>
+          <span id="perms-msg-${u.id}" class="text-[11px] font-semibold"></span>
+        </div>`;
+    }
+    async function putStaffPerms(id, perms, okText) {
+      const msg = document.getElementById('perms-msg-' + id);
+      const res = await apiRequest('STAFF_USERS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ perms }) }, '/' + id);
+      if (!res || res.success === false || !res.id) {
+        if (msg) { msg.className = 'text-[11px] font-semibold text-rose-400'; msg.textContent = (res && res.error) || 'No se pudo guardar. Probá de nuevo.'; }
+        return;
+      }
+      const i = STAFF_USERS_LIST.findIndex(x => x.id === id);
+      if (i !== -1) STAFF_USERS_LIST[i] = res;
+      renderStaffPerms(id);
+      const m2 = document.getElementById('perms-msg-' + id);
+      if (m2) { m2.className = 'text-[11px] font-semibold text-emerald-400'; m2.textContent = okText; }
+    }
+    function saveStaffPerms(id) {
+      const perms = {};
+      document.querySelectorAll(`#perms-box-${id} input[data-perm]`).forEach(cb => { perms[cb.dataset.perm] = cb.checked; });
+      return putStaffPerms(id, perms, '✓ Guardado. Ya rige para este usuario.');
+    }
+    function resetStaffPerms(id) {
+      const u = STAFF_USERS_LIST.find(x => x.id === id);
+      if (!u || !STAFF_PERMS) return;
+      const base = new Set(STAFF_PERMS.defaults[u.role] || []);
+      const perms = {};
+      STAFF_PERMS.catalog.forEach(p => { perms[p.key] = base.has(p.key); });
+      return putStaffPerms(id, perms, '✓ Volvió a lo de fábrica del rol.');
     }
 
     async function createStaffUserFromForm() {
@@ -4467,7 +4702,7 @@ html { scroll-behavior: smooth; }
       const card = document.getElementById('cashreg-card');
       if (!noBackendMsg || !card) return;
 
-      const canUse = isBackendConnected() && currentStaffSession.token && ['admin', 'vendedor'].includes(currentStaffSession.role);
+      const canUse = isBackendConnected() && currentStaffSession.token && can('cash.manage');
       if (!canUse) {
         noBackendMsg.classList.remove('hidden');
         card.classList.add('hidden');
@@ -4645,7 +4880,7 @@ html { scroll-behavior: smooth; }
       // Ojo: en modo conectado el pedido de un cliente puede NO estar en
       // ADMIN_ORDERS (ese cliente no inició sesión como staff), así que acá
       // no se busca el objeto completo — solo hace falta el ID para mostrarlo.
-      if ((mode === 'dispatch' || mode === 'handover') && !(isAdminAuthenticated && ['admin', 'cadete', 'vendedor'].includes(currentStaffSession.role))) {
+      if ((mode === 'dispatch' || mode === 'handover') && !(isAdminAuthenticated && (can('orders.dispatch') || can('orders.manage')))) {
         alert('Solo el equipo puede registrar la salida o la entrega de un paquete.');
         return;
       }
