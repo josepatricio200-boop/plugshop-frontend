@@ -443,7 +443,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v5.8</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.0</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -465,11 +465,15 @@ html { scroll-behavior: smooth; }
       <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden">
         
         <!-- LEFT SIDEBAR WITH TABS -->
-        <aside class="w-full md:w-64 bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-800/80 p-3 sm:p-4 flex flex-col justify-between shrink-0 md:overflow-y-auto">
+        <aside class="hidden md:flex w-full md:w-64 bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-800/80 p-3 sm:p-4 flex-col justify-between shrink-0 md:overflow-y-auto">
           <div class="space-y-1">
             <div class="text-[10px] uppercase font-bold tracking-wider text-zinc-500 px-3 py-1.5 font-code">Módulos de Gestión</div>
 
             <!-- Tab Buttons -->
+            <button onclick="switchAdminTab('today')" id="tab-btn-today" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-base">🏠</span><span>Hoy</span></span>
+              <span id="badge-today-count" class="text-[10px] text-zinc-500 font-code"></span>
+            </button>
             <button onclick="switchAdminTab('finances')" id="tab-btn-finances" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5">
                 <span class="text-sm">📊</span>
@@ -569,6 +573,16 @@ html { scroll-behavior: smooth; }
         <!-- FULL RIGHT WORKSPACE AREA -->
         <main id="admin-main-workspace" class="flex-1 bg-zinc-900/40 p-4 sm:p-6 lg:p-8 md:overflow-y-auto">
           
+          <!-- TAB 0: HOY (lo urgente del día) -->
+          <div id="admin-tab-today" class="hidden space-y-5">
+            <div>
+              <h3 class="text-lg font-bold text-white">Hoy</h3>
+              <p id="today-sub" class="text-xs text-zinc-400 mt-0.5">Lo que necesita tu atención ahora mismo. Tocá una tarjeta para ir directo.</p>
+            </div>
+            <div id="today-cards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+            <div id="today-allok" class="hidden rounded-2xl border border-emerald-800/50 bg-emerald-950/30 p-5 text-sm text-emerald-300 font-semibold">✅ Todo al día. No hay nada urgente por hacer.</div>
+          </div>
+
           <!-- TAB 1: FINANZAS & REGISTRO ARCA-READY -->
           <div id="admin-tab-finances" class="space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2133,6 +2147,7 @@ html { scroll-behavior: smooth; }
     // Qué roles pueden ver cada pestaña del panel Staff. "admin" siempre
     // puede ver todo, sin importar esta lista.
     const ADMIN_TAB_ROLES = {
+      'today': ['admin', 'vendedor', 'cadete', 'reposicion', 'logistica'],
       'finances': ['admin'],
       'inventory': ['admin', 'reposicion'],
       'iphone': ['admin'],
@@ -2975,7 +2990,7 @@ html { scroll-behavior: smooth; }
     }
 
     function switchAdminTab(tabName) {
-      const allTabs = ['finances', 'inventory', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'claims', 'staff-users', 'settings'];
+      const allTabs = ['today', 'finances', 'inventory', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'claims', 'staff-users', 'settings'];
       
       allTabs.forEach(t => {
         const tabEl = document.getElementById(`admin-tab-${t}`);
@@ -4208,7 +4223,42 @@ html { scroll-behavior: smooth; }
       box.innerHTML = res.length ? res.map(x => `<div class="p-2 rounded-lg bg-zinc-950/70 border border-zinc-800"><span class="text-zinc-500 font-code">${escapeHtml(new Date(x.at).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }))}</span> · <span class="text-brand-amber font-semibold">${escapeHtml(x.by)}</span> · <span class="text-white">${escapeHtml(x.action)}</span>${x.detail ? ' <span class="text-zinc-400">— ' + escapeHtml(x.detail) + '</span>' : ''}</div>`).join('') : '<p class="text-zinc-500">Todavía no hay movimientos.</p>';
     }
 
+    // ---- Hoy: lo urgente del día, según lo que el rol puede ver ----
+    function goToday(tab, quick) {
+      switchAdminTab(tab);
+      if (tab === 'orders' && quick) setOrdersQuick(quick);
+    }
+    function renderTodayTab() {
+      const box = document.getElementById('today-cards');
+      if (!box) return;
+      const role = (currentStaffSession && currentStaffSession.role) || 'admin';
+      const can = t => tabAllowedForRole(t, role);
+      const cards = [];
+      const add = (n, icon, label, hint, tab, quick, tone) => { if (n > 0 && can(tab)) cards.push({ n, icon, label, hint, tab, quick, tone }); };
+      const live = ADMIN_ORDERS.filter(o => !['Entregado', 'Cancelado'].includes(o.status));
+      const transferPending = live.filter(o => o.isBancarizado && PENDING_PAY.includes(o.status)).length;
+      const cashToPrepare = live.filter(o => !o.isBancarizado && PENDING_PAY.includes(o.status)).length;
+      add(transferPending, '💳', 'Transferencias por confirmar', 'Revisá que la plata esté en tu cuenta y confirmá el pago.', 'orders', 'toCollect', 'amber');
+      add(cashToPrepare, '💵', 'Pedidos en efectivo por preparar', 'Se cobran al entregar. Pasalos a "En preparación" cuando los armes.', 'orders', 'active', 'amber');
+      add(live.filter(o => o.status === 'En preparación').length, '📦', 'Para preparar y despachar', 'Cobrados y listos para armar.', 'orders', 'En preparación', 'orange');
+      add(live.filter(o => o.status === 'Despachado').length, '🛵', 'En camino al cliente', 'Esperando que el cliente reciba.', 'orders', 'Despachado', 'sky');
+      const openClaims = CLAIMS.filter(c => ['Recibido', 'En revisión', 'Aprobado'].includes(c.status)).length;
+      add(openClaims, '🛡️', 'Reclamos abiertos', 'Un cliente espera tu respuesta.', 'claims', '', 'rose');
+      const low = (typeof lowStockItems === 'function' ? lowStockItems(PRODUCTS.filter(p => p.active !== false)) : []).length;
+      add(low, '📉', 'Productos con poco stock', 'Quedan 3 o menos. Conviene reponer.', 'inventory', '', 'rose');
+      const tones = { amber: 'border-amber-700/50 bg-amber-950/20 text-amber-300', orange: 'border-orange-700/50 bg-orange-950/20 text-orange-300', sky: 'border-sky-700/50 bg-sky-950/20 text-sky-300', rose: 'border-rose-700/50 bg-rose-950/20 text-rose-300' };
+      box.innerHTML = cards.map(c => `<button type="button" onclick="goToday('${c.tab}', '${c.quick || ''}')" class="text-left rounded-2xl border p-4 hover:brightness-125 transition ${tones[c.tone]}">
+        <div class="flex items-center justify-between"><span class="text-2xl">${c.icon}</span><span class="text-3xl font-black text-white">${c.n}</span></div>
+        <div class="mt-2 text-sm font-bold text-white">${c.label}</div>
+        <div class="text-[11px] text-zinc-400 mt-0.5">${c.hint}</div></button>`).join('');
+      const allok = document.getElementById('today-allok'); if (allok) allok.classList.toggle('hidden', cards.length > 0);
+      const total = cards.reduce((a, c) => a + c.n, 0);
+      const bd = document.getElementById('badge-today-count');
+      if (bd) { bd.textContent = total || ''; bd.className = 'text-[10px] font-code ' + (total ? 'text-brand-orange font-bold' : 'text-zinc-500'); }
+    }
+
     function refreshAdminUI() {
+      renderTodayTab();
       renderMarkupPresets();
       renderClaims();
       if (!document.querySelector('#color-stock-box input')) renderColorStockInputs({});
@@ -4853,6 +4903,12 @@ html { scroll-behavior: smooth; }
         if (newStatus === 'Cancelado' && order.status !== 'Cancelado') {
           reason = prompt('Motivo de la cancelación (el cliente lo va a ver en sus avisos):', '');
           if (reason === null) { refreshAdminUI(); return; }
+        }
+        // Pasar una transferencia a "En preparación" la marca como COBRADA: pedimos confirmación
+        // para que un toque sin querer no cuente plata que todavía no llegó.
+        if (newStatus === 'En preparación' && order.isBancarizado && order.paid === false) {
+          const okCobro = confirm(`¿Ya te llegó la transferencia de ${formatARS(order.total)} de ${order.customer}?\n\nSi aceptás, el pedido se marca como COBRADO y pasa a preparación.`);
+          if (!okCobro) { refreshAdminUI(); return; }
         }
         const res = await apiRequest('ORDERS', {
           method: 'PATCH',
@@ -6204,8 +6260,8 @@ html { scroll-behavior: smooth; }
     // ==========================================
     // BARRA INFERIOR EN CELULAR
     // ==========================================
-    const MBAR_MAIN = [['orders', '🛵', 'Pedidos'], ['inventory', '📦', 'Productos'], ['finances', '📊', 'Finanzas']];
-    const MBAR_LABELS = { finances: ['📊', 'Finanzas'], inventory: ['📦', 'Productos'], iphone: ['📱', 'iPhone'], 'smart-engine': ['🧠', 'Asesor'], orders: ['🛵', 'Pedidos'], suppliers: ['🤝', 'Proveedores'], offers: ['🏷️', 'Ofertas'], customers: ['👥', 'Clientes'], claims: ['🛡️', 'Reclamos'], 'staff-users': ['🔑', 'Usuarios'], settings: ['⚙️', 'Ajustes'] };
+    const MBAR_MAIN = [['today', '🏠', 'Hoy'], ['orders', '🛵', 'Pedidos'], ['inventory', '📦', 'Productos'], ['finances', '📊', 'Finanzas']];
+    const MBAR_LABELS = { today: ['🏠', 'Hoy'], finances: ['📊', 'Finanzas'], inventory: ['📦', 'Productos'], iphone: ['📱', 'iPhone'], 'smart-engine': ['🧠', 'Asesor'], orders: ['🛵', 'Pedidos'], suppliers: ['🤝', 'Proveedores'], offers: ['🏷️', 'Ofertas'], customers: ['👥', 'Clientes'], claims: ['🛡️', 'Reclamos'], 'staff-users': ['🔑', 'Usuarios'], settings: ['⚙️', 'Ajustes'] };
     let adminCurrentTab = '';
     function onAdminTabShown(tab) {
       adminCurrentTab = tab;
