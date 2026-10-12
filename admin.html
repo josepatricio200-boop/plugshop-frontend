@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.5</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.6</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -1126,7 +1126,7 @@ html { scroll-behavior: smooth; }
                   <div id="product-form-error" class="hidden text-rose-400 text-xs font-semibold font-code">
                     ⚠️ Debe completar al menos la Foto 1 y Foto 2 para cumplir el estándar de calidad.
                   </div>
-                  <button type="button" id="btn-cancel-edit" onclick="cancelEditProduct()" class="hidden ml-auto px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs">Cancelar edición</button>
+                  <button type="button" id="btn-cancel-edit" onclick="cancelEditProduct(true)" class="hidden ml-auto px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs">Cancelar edición</button>
                   <button type="submit" id="btn-save-prod" class="ml-auto px-6 py-2.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-bold text-xs shadow-md hover:opacity-95 transition-all">
                     Guardar y Publicar en Tienda
                   </button>
@@ -3910,7 +3910,7 @@ html { scroll-behavior: smooth; }
               <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded font-bold ${s.paymentTerm === 'before' ? 'bg-sky-500/15 text-sky-300' : 'bg-emerald-500/15 text-emerald-300'}">${s.paymentTerm === 'before' ? '💳 Pago antes de retirar' : '⏳ Retiro y pago después'}</span></div>
             <div class="text-right shrink-0">${st}</div>
           </div>
-          <div class="text-[11px] text-zinc-400 leading-relaxed">${PAY.period === 'all' ? '' : `En este período vendiste mercadería suya por <strong class="text-white">${formatARS(s.periodOwed)}</strong> (${s.periodUnits} unidad${s.periodUnits === 1 ? '' : 'es'}). `}Total debido <strong class="text-zinc-200">${formatARS(s.owed)}</strong> · ya pagado <strong class="text-zinc-200">${formatARS(s.paid)}</strong>.</div>
+          <div class="text-[11px] text-zinc-400 leading-relaxed">${PAY.period === 'all' ? '' : `En este período vendiste mercadería suya por <strong class="text-white">${formatARS(s.periodOwed)}</strong> (${s.periodUnits} unidad${s.periodUnits === 1 ? '' : 'es'}). `}Total debido <strong class="text-zinc-200">${formatARS(s.owed)}</strong> · ya pagado <strong class="text-zinc-200">${formatARS(s.paid)}</strong>.${s.payments && s.payments.length ? ` Último pago: <strong class="text-emerald-400">${formatARS(s.payments[0].amount)}</strong> el ${escapeHtml(String(s.payments[0].date).slice(8) + '/' + String(s.payments[0].date).slice(5, 7))}.` : ''}</div>
           <div class="flex flex-wrap gap-2">
             <button type="button" onclick="payTogglePay(${s.id})" class="px-3 py-2 rounded-lg bg-brand-orange hover:bg-orange-500 text-black text-[11px] font-bold">💸 Registrar pago</button>
             <button type="button" onclick="payToggleDetail(${s.id})" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">${open ? 'Ocultar detalle' : 'Ver detalle'}</button>
@@ -3934,10 +3934,23 @@ html { scroll-behavior: smooth; }
           <button type="button" onclick="payToggleDetail('un')" class="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-200 text-[11px] font-semibold">${PAY.open.un ? 'Ocultar detalle' : 'Ver cuáles son'}</button>
           ${PAY.open.un ? payLinesHtml(un.lines) : ''}
         </div>` : '';
-      body.innerHTML = `<div class="flex flex-wrap items-center gap-2">${chip('week', 'Esta semana')}${chip('month', 'Este mes')}${chip('all', 'Todo')}</div>
+      body.innerHTML = `<div class="flex flex-wrap items-center gap-2">${chip('week', 'Esta semana')}${chip('month', 'Este mes')}${chip('all', 'Todo')}<button type="button" onclick="(document.getElementById('pay-history')||{scrollIntoView(){}}).scrollIntoView({behavior:'smooth',block:'start'})" class="ml-auto px-3 py-1.5 rounded-lg text-[11px] font-bold bg-emerald-500/15 text-emerald-300">💸 Ver pagos hechos</button></div>
         <div class="p-4 rounded-2xl bg-zinc-900 border border-white/[0.08] flex items-center justify-between gap-3"><div><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Total que le debés a tus proveedores</div><div class="text-2xl font-black text-white font-code">${formatARS(owing)}</div></div><div class="text-[11px] text-zinc-400 max-w-[55%] text-right leading-snug">Con "Retiro y pago después" se debe desde que el pedido sale en camino. Con "Pago antes" se debe desde que el pedido está confirmado. Los cancelados no cuentan.</div></div>
         ${unCard}
-        ${cards || '<div class="p-6 rounded-xl bg-zinc-900 border border-dashed border-zinc-700 text-center text-xs text-zinc-400">Todavía no cargaste proveedores. Agregalos en "Directorio".</div>'}`;
+        ${cards || '<div class="p-6 rounded-xl bg-zinc-900 border border-dashed border-zinc-700 text-center text-xs text-zinc-400">Todavía no cargaste proveedores. Agregalos en "Directorio".</div>'}
+        ${payHistoryHtml(d)}`;
+    }
+    // Todos los pagos que anotaste, de todos los proveedores, del más nuevo al más viejo.
+    function payHistoryHtml(d) {
+      const all = [];
+      d.suppliers.forEach(s => (s.payments || []).forEach(p => all.push({ ...p, supName: s.name })));
+      all.sort((a, b) => (String(b.date) + String(b.id).padStart(8, '0')).localeCompare(String(a.date) + String(a.id).padStart(8, '0')));
+      const total = all.reduce((a, p) => a + p.amount, 0);
+      const fdate = x => escapeHtml(String(x).slice(8) + '/' + String(x).slice(5, 7) + '/' + String(x).slice(0, 4));
+      return `<div id="pay-history" class="p-4 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-2" style="scroll-margin-top:72px">
+        <div class="flex items-center justify-between gap-2"><h4 class="font-bold text-white text-sm">💸 Pagos que hiciste a proveedores</h4><span class="text-[11px] text-zinc-400">${all.length} pago${all.length === 1 ? '' : 's'} · total <strong class="text-emerald-400 font-code">${formatARS(total)}</strong></span></div>
+        ${all.length ? `<div class="divide-y divide-zinc-800/60">${all.map(p => `<div class="flex items-center justify-between gap-3 py-2 text-[11px]"><div class="min-w-0"><div class="text-zinc-200 font-semibold"><span class="font-code text-zinc-400">${fdate(p.date)}</span> · ${escapeHtml(p.supName)}</div><div class="text-zinc-500 truncate">${p.note ? escapeHtml(p.note) + ' · ' : ''}anotado por ${escapeHtml(p.by || 'Admin')}</div></div><div class="flex items-center gap-2 shrink-0"><strong class="font-code text-emerald-400 text-xs">${formatARS(p.amount)}</strong><button type="button" onclick="deleteSupplierPayment(${p.supplierId},${p.id})" class="text-rose-400" title="Borrar este pago" aria-label="Borrar pago">🗑️</button></div></div>`).join('')}</div>` : '<div class="text-[11px] text-zinc-500 py-2">Todavía no anotaste pagos. Cuando le pagues a un proveedor, tocá "Registrar pago" en su tarjeta y queda acá.</div>'}
+      </div>`;
     }
     function payToggleDetail(id) { PAY.open[id] = !PAY.open[id]; renderPayables(); }
     function payTogglePay(id) { PAY.payFor = PAY.payFor === id ? null : id; renderPayables(); }
@@ -5580,7 +5593,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.5): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.6): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -7495,10 +7508,12 @@ html { scroll-behavior: smooth; }
       banner.classList.remove('hidden');
       document.getElementById('btn-save-prod').textContent = 'Guardar cambios';
       document.getElementById('btn-cancel-edit').classList.remove('hidden');
+      openTabSection('inventory', 'new'); // el formulario vive en "Cargar producto": ir directo ahí
       document.getElementById('admin-new-product-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
-    function cancelEditProduct() {
+    function cancelEditProduct(goBack) {
+      const wasEditing = editingProductId !== null;
       editingProductId = null;
       fillProductSupplierSelect('');
       const form = document.getElementById('admin-new-product-form');
@@ -7512,6 +7527,7 @@ html { scroll-behavior: smooth; }
       document.getElementById('btn-save-prod').textContent = 'Guardar y Publicar en Tienda';
       document.getElementById('btn-cancel-edit').classList.add('hidden');
       updateLiveProfitCalculator();
+      if (goBack === true && wasEditing) openTabSection('inventory', 'inv'); // al cancelar vuelve a la lista
     }
 
     function handleCreateProductWithPhotos(e) {
@@ -7576,7 +7592,7 @@ html { scroll-behavior: smooth; }
           if (isEdit) {
             const idx = PRODUCTS.findIndex(p => p.id === editingProductId);
             if (idx !== -1) PRODUCTS[idx] = sanitizeProduct(res);
-            cancelEditProduct();
+            cancelEditProduct(true);
           } else {
             PRODUCTS.unshift(sanitizeProduct(res));
             e.target.reset();
@@ -7599,7 +7615,7 @@ html { scroll-behavior: smooth; }
         const existing = PRODUCTS.find(p => p.id === editingProductId);
         if (existing) Object.assign(existing, { ...payload, price, cost });
         saveStorage(STORAGE_KEYS.PRODUCTS, PRODUCTS);
-        cancelEditProduct();
+        cancelEditProduct(true);
         renderProducts();
         updateCartUI();
         refreshAdminUI();
