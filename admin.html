@@ -443,7 +443,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.3</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.5</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -1541,6 +1541,7 @@ html { scroll-behavior: smooth; }
               </select>
             </div>
             <div id="claims-msg" class="hidden text-[11px] font-semibold text-rose-400"></div>
+            <div id="claims-refunds-card" class="hidden p-4 rounded-xl bg-amber-950/30 border border-amber-700/50 space-y-3 text-xs"></div>
             <div id="claims-list" class="space-y-3"></div>
           </div>
 
@@ -3770,6 +3771,55 @@ html { scroll-behavior: smooth; }
       el.textContent = text;
       el.scrollIntoView && el.scrollIntoView({ block: 'nearest' });
     }
+    // Datos del pedido y del reintegro dentro de la tarjeta del reclamo (para no ir a otra pestaña).
+    function claimOrderBlock(c) {
+      const o = ADMIN_ORDERS.find(x => x.id === c.orderId);
+      if (!o) return '';
+      const id = escapeHtml(c.id);
+      const canRefund = can('refunds.manage');
+      const closedOk = ['Aprobado', 'Resuelto'].includes(c.status) && c.resolution === 'Reembolso';
+      let refund = '';
+      if (o.refund) {
+        refund = o.refund.status === 'devuelto'
+          ? `<div class="text-emerald-400 font-semibold">✓ Reintegro devuelto ${formatARS(o.refund.amount)}${o.refund.ref ? ' · op. ' + escapeHtml(o.refund.ref) : ''}</div>`
+          : `<div class="flex items-center gap-2 flex-wrap"><span class="text-amber-300 font-bold">💸 Reintegro pendiente ${formatARS(o.refund.amount)}</span>${canRefund ? `<input id="claim-op-${id}" maxlength="60" placeholder="N° de operación" class="w-36 bg-zinc-950 border border-zinc-700 rounded-lg p-1.5 text-white placeholder-zinc-600" /><button type="button" onclick="claimMarkRefund('${id}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold">Marcar devuelto</button>` : ''}</div>`;
+      } else if (o.isBancarizado && o.paid && !['Resuelto', 'Rechazado'].includes(c.status)) {
+        refund = `<label class="flex items-center gap-2 flex-wrap text-zinc-300">Monto a devolver si es reembolso:
+          <input id="claim-amt-${id}" type="number" min="1" max="${Number(o.total) || 0}" value="${Number(o.total) || 0}" class="w-28 bg-zinc-950 border border-zinc-700 rounded-lg p-1.5 text-white" />
+          <span class="text-zinc-500">(pagó ${formatARS(o.total)}; podés bajarlo para un reintegro parcial)</span></label>`;
+      } else if (!o.isBancarizado && closedOk) {
+        refund = '<div class="text-zinc-400">Pago en efectivo: no hay transferencia para devolver.</div>';
+      }
+      return `<div class="p-3 rounded-lg bg-zinc-950 border border-zinc-800 space-y-1.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-zinc-300"><span class="font-code text-white">${escapeHtml(o.id)}</span> · ${escapeHtml(o.items || '')}</span><span class="px-2 py-0.5 rounded font-semibold ${getStatusBadgeClass(o.status)}">${escapeHtml(o.status)}</span></div>
+        <div class="text-zinc-500">${formatARS(o.total)} · ${escapeHtml(o.paymentMethod || '')}${o.paid ? ' · pago confirmado' : ''}${o.returnPending ? ' · <span class="text-sky-300">paquete por recuperar</span>' : ''}</div>
+        ${refund}
+      </div>`;
+    }
+    // Atajos: completan estado + resolución + mensaje (se pueden editar antes de guardar).
+    function claimQuick(id, kind) {
+      const g = k => document.getElementById(`claim-${k}-${id}`);
+      const map = { 'Reembolso': ['Resuelto', 'Reembolso'], 'Cambio': ['Aprobado', 'Cambio'], 'Reparación': ['Aprobado', 'Reparación'], 'Rechazar': ['Rechazado', ''], 'Revisión': ['En revisión', ''] };
+      const [st, res] = map[kind] || [];
+      if (!st || !g('status')) return;
+      g('status').value = st; g('res').value = res;
+      g('msg').value = '';
+      claimAutoMessage(id);
+      if (kind === 'Reparación') g('msg').value = 'Aprobamos tu reclamo. Vamos a reparar tu producto: te escribimos por WhatsApp para coordinar.';
+      claimPreview(id);
+      claimFeedback(id, true, 'Revisá el mensaje y tocá "Guardar y avisar al cliente".');
+    }
+    async function claimMarkRefund(id) {
+      const c = CLAIMS.find(x => x.id === id); if (!c) return;
+      const o = ADMIN_ORDERS.find(x => x.id === c.orderId); if (!o || !o.refund) return;
+      const ref = (document.getElementById('claim-op-' + id) || {}).value || '';
+      if (ref.trim().length < 3) { claimFeedback(id, false, 'Anotá el número de operación de la transferencia (lo ve el cliente).'); return; }
+      const res = await apiRequest('ORDERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ ref: ref.trim() }) }, '/' + encodeURIComponent(o.id) + '/refund');
+      if (!res || res.success === false) { claimFeedback(id, false, (res && res.error) || 'No se pudo marcar el reintegro.'); return; }
+      Object.assign(o, res.order);
+      renderClaims(); renderOrdersTable(); renderTodayTab();
+      claimFeedback(id, true, '✓ Reintegro marcado como devuelto. El cliente ya lo ve.');
+    }
     function renderClaims() {
       const openCount = CLAIMS.filter(c => ['Recibido', 'En revisión', 'Aprobado'].includes(c.status)).length;
       const badge = document.getElementById('badge-claims-count');
@@ -3797,6 +3847,11 @@ html { scroll-behavior: smooth; }
             <a href="${wa}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-semibold">WhatsApp ↗</a>
           </div>
           ${c.reason ? `<div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800 text-zinc-200">“${escapeHtml(c.reason)}”</div>` : ''}
+          ${claimOrderBlock(c)}
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mr-1">Respuesta rápida</span>
+            ${[['Reembolso', '💸 Reembolso'], ['Cambio', '🔄 Cambio'], ['Reparación', '🔧 Reparación'], ['Rechazar', '✕ Rechazar'], ['Revisión', '🔎 En revisión']].map(([k, l]) => `<button type="button" onclick="claimQuick('${id}', '${k}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">${l}</button>`).join('')}
+          </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <label class="space-y-1"><span class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Estado del reclamo</span>
               <select id="claim-status-${id}" onchange="claimAutoMessage('${id}')" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-white">${CLAIM_STATUSES.map(st => `<option ${st === c.status ? 'selected' : ''}>${st}</option>`).join('')}</select></label>
@@ -3831,6 +3886,8 @@ html { scroll-behavior: smooth; }
         return;
       }
       g('res').classList.remove('border-rose-500');
+      const amtEl = document.getElementById('claim-amt-' + id);
+      if (amtEl && body.resolution === 'Reembolso' && Number(amtEl.value) > 0) body.refundAmount = Number(amtEl.value);
       const note = g('note').value.trim();
       if (note) body.note = note;
       const btn = g('btn'); if (btn) { btn.disabled = true; btn.classList.add('opacity-60'); }
@@ -4169,14 +4226,15 @@ html { scroll-behavior: smooth; }
     }
     // ---- Reintegros: plata que hay que devolverle al cliente por transferencia ----
     function renderRefundsCard() {
-      const box = document.getElementById('refunds-card');
-      if (!box) return;
       const canPay = can('refunds.manage');
       const pending = canPay ? ADMIN_ORDERS.filter(o => o.refund && o.refund.status === 'pendiente') : [];
-      box.classList.toggle('hidden', !pending.length);
-      if (!pending.length) { box.innerHTML = ''; return; }
-      const total = pending.reduce((a, o) => a + (o.refund.amount || 0), 0);
-      box.innerHTML = `
+      ['refunds-card', 'claims-refunds-card'].forEach(boxId => {
+        const box = document.getElementById(boxId);
+        if (!box) return;
+        box.classList.toggle('hidden', !pending.length);
+        if (!pending.length) { box.innerHTML = ''; return; }
+        const total = pending.reduce((a, o) => a + (o.refund.amount || 0), 0);
+        box.innerHTML = `
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <div class="font-bold text-amber-200 text-sm">💸 Reintegros pendientes (${pending.length}) · ${formatARS(total)}</div>
           <div class="text-[11px] text-amber-300/80">Transferí a la misma cuenta con la que pagó el cliente. Plazo: 48 hs hábiles.</div>
@@ -4191,6 +4249,7 @@ html { scroll-behavior: smooth; }
             <button onclick="markRefundDone('${o.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold">Marcar devuelto</button>
           </div>`;
         }).join('')}`;
+      });
     }
     // ---- Paquetes por recuperar: pedido cancelado cuando ya iba en camino ----
     function renderReturnsCard() {
@@ -4237,6 +4296,7 @@ html { scroll-behavior: smooth; }
       if (!res || res.success === false) { alert((res && res.error) || 'No se pudo marcar el reintegro.'); return; }
       Object.assign(order, res.order);
       renderOrdersTable();
+      renderClaims();
     }
 
     function toggleOrderMore(btn) {
@@ -4802,6 +4862,15 @@ html { scroll-behavior: smooth; }
       document.getElementById('cashreg-close-note').value = '';
       alert(`Caja cerrada. ${diffMsg}`);
       renderCashRegister();
+    }
+
+    function getStatusBadgeClass(status) {
+      if (status === 'Entregado') return 'bg-emerald-950 text-emerald-400 border border-emerald-800';
+      if (status === 'Despachado') return 'bg-sky-950 text-sky-400 border border-sky-800';
+      if (status === 'Cancelado' || status === 'Comprobante rechazado') return 'bg-rose-950 text-rose-400 border border-rose-800';
+      if (status === 'Comprobante enviado') return 'bg-sky-950 text-sky-400 border border-sky-800';
+      if (status === 'En preparación') return 'bg-brand-orange/20 text-brand-orange border border-brand-orange/40';
+      return 'bg-amber-950/80 text-brand-amber border border-amber-800';
     }
     setInterval(() => { if (document.visibilityState === 'visible' && typeof loadNotifications === 'function') loadNotifications(); }, 60000);
     // Al volver a la pestaña o a la app, se buscan avisos nuevos enseguida (sin esperar al minuto).
