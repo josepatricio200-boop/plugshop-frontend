@@ -764,7 +764,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v6.2</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v6.3</span>
           </div>
         </div>
 
@@ -917,8 +917,8 @@ html { scroll-behavior: smooth; }
             <input type="text" id="cust-order-input" autocomplete="off" autocapitalize="characters" placeholder="N° de pedido (ej. PS-AB12CD34)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white uppercase focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') submitCustomerAccess()" />
           </div>
           <label class="flex items-start gap-2 text-[11px] text-zinc-300 cursor-pointer">
-            <input type="checkbox" id="cust-remember" class="mt-0.5" />
-            <span>Recordarme en este celular <span class="text-zinc-500">(no lo marques si el celular o la compu es de otra persona)</span></span>
+            <input type="checkbox" id="cust-remember" class="mt-0.5" checked />
+            <span>Mantener mi sesión iniciada en este celular <span class="text-zinc-500">(así te llegan los avisos a la campanita 🔔. Desmarcalo si el celular o la compu es de otra persona)</span></span>
           </label>
           <div class="flex items-center gap-2 flex-wrap">
             <button id="cust-access-btn" onclick="submitCustomerAccess()" class="px-4 py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold transition-all">Ver mis pedidos</button>
@@ -953,14 +953,20 @@ html { scroll-behavior: smooth; }
           </div>
         </div>
 
+        <div id="cust-dashboard" class="hidden space-y-3">
+          <div id="cust-summary" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
+          <div id="cust-tabs" class="flex gap-1.5 overflow-x-auto pb-1"></div>
+        </div>
+
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <h4 class="font-bold text-white text-xs uppercase tracking-wider">Historial de Compras & Garantías</h4>
+            <h4 id="cust-section-title" class="font-bold text-white text-xs uppercase tracking-wider">Historial de Compras & Garantías</h4>
             <span class="text-[11px] text-zinc-400">Entrega rápida en <span data-zone>Tucumán</span></span>
           </div>
           
           <div id="customer-orders-list" class="space-y-3"></div>
           <div id="customer-claims-list" class="space-y-2 mt-5"></div>
+          <div id="customer-notifs-list" class="hidden space-y-2"></div>
         </div>
       </div>
 
@@ -2836,7 +2842,7 @@ html { scroll-behavior: smooth; }
       set('cust-access-cancel', !(walletToken && addingOrder));
       set('cust-session-bar', !walletToken);
       const note = document.getElementById('cust-session-note');
-      if (note) note.textContent = walletRemembered ? ' · te recordamos en este celular' : ' · se cierra cuando cerrás el navegador';
+      if (note) note.textContent = walletRemembered ? ' · sesión guardada en este celular' : ' · se cierra cuando cerrás el navegador';
       renderRegisterCard();
     }
     function showAddOrderForm() {
@@ -2851,7 +2857,7 @@ html { scroll-behavior: smooth; }
     }
     function customerLogout() {
       walletClear();
-      myOrders = []; myClaims = []; addingOrder = false;
+      myOrders = []; myClaims = []; addingOrder = false; custTab = 'orders';
       notifState = { items: [], announcements: notifState.announcements };
       // "No soy yo": también se borra lo que el celular recordaba de la persona.
       try { localStorage.removeItem(PROFILE_KEY); } catch (e) {}
@@ -2932,7 +2938,59 @@ html { scroll-behavior: smooth; }
       </div>`;
     }
 
-    function renderMyOrders() {
+    // ---- Mini panel del cliente: resumen + pestañas (Mis pedidos / Cancelados / Reclamos / Avisos) ----
+    let custTab = 'orders';
+    function setCustTab(t) { custTab = t; renderMyOrders(); renderMyClaims(); renderCustNotifs(); renderCustDashboard(); }
+    function renderCustDashboard() {
+      const dash = document.getElementById('cust-dashboard');
+      if (!dash) return;
+      dash.classList.toggle('hidden', !walletToken);
+      if (!walletToken) return;
+      const cancelled = myOrders.filter(o => o.status === 'Cancelado');
+      const active = myOrders.filter(o => !['Entregado', 'Cancelado'].includes(o.status));
+      const delivered = myOrders.filter(o => o.status === 'Entregado');
+      const spent = delivered.reduce((a, o) => a + (Number(o.total) || 0), 0);
+      const refunded = myOrders.filter(o => o.refund).reduce((a, o) => a + (Number(o.refund.amount) || 0), 0);
+      const openClaims = myClaims.filter(c => ['Recibido', 'En revisión', 'Aprobado'].includes(c.status)).length;
+      const unread = notifUnreadCount();
+      const name = (myOrders[0] && myOrders[0].customer) ? String(myOrders[0].customer).split(' ')[0] : '';
+      const box = (n, label, tone) => `<div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800"><div class="text-lg font-black ${tone || 'text-white'}">${n}</div><div class="text-[10px] text-zinc-400 leading-tight">${label}</div></div>`;
+      document.getElementById('cust-summary').innerHTML =
+        (name ? `<div class="col-span-2 sm:col-span-4 text-sm font-bold text-white">Hola${name ? ', ' + escapeHtml(name) : ''} 👋</div>` : '') +
+        box(active.length, 'pedidos en curso', active.length ? 'text-brand-amber' : '') +
+        box(delivered.length ? formatARS(spent) : '$0', `comprado (${delivered.length} entregado${delivered.length === 1 ? '' : 's'})`, 'text-emerald-400') +
+        box(cancelled.length, refunded ? `cancelados · ${formatARS(refunded)} a reintegrar/devueltos` : 'cancelados') +
+        box(openClaims, 'reclamos abiertos', openClaims ? 'text-sky-300' : '');
+      const tab = (id, label, n) => `<button onclick="setCustTab('${id}')" class="shrink-0 px-3 py-2 rounded-lg text-[11px] font-bold border ${custTab === id ? 'bg-brand-orange/15 border-brand-orange/50 text-brand-amber' : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:bg-zinc-800'}">${label}${n ? ` <span class="ml-1 px-1.5 rounded-full bg-zinc-800 text-zinc-200 text-[10px]">${n}</span>` : ''}</button>`;
+      document.getElementById('cust-tabs').innerHTML =
+        tab('orders', '🛍️ Mis pedidos', myOrders.length) + tab('cancelled', '✕ Cancelados', cancelled.length) + tab('claims', '🛡️ Reclamos', myClaims.length) + tab('notifs', '🔔 Avisos', unread);
+      const titles = { orders: 'Historial de Compras & Garantías', cancelled: 'Pedidos cancelados y reintegros', claims: 'Mis reclamos', notifs: 'Avisos de mis pedidos' };
+      const h = document.getElementById('cust-section-title'); if (h) h.textContent = titles[custTab] || titles.orders;
+      const show = (id, on) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); };
+      show('customer-orders-list', custTab === 'orders' || custTab === 'cancelled');
+      show('customer-claims-list', custTab === 'orders' || custTab === 'claims');
+      show('customer-notifs-list', custTab === 'notifs');
+    }
+    function renderCustNotifs() {
+      const box = document.getElementById('customer-notifs-list');
+      if (!box) return;
+      if (!walletToken) { box.innerHTML = ''; return; }
+      if (!notifState.items.length) { box.innerHTML = '<div class="p-6 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center text-xs text-zinc-400">Todavía no tenés avisos. Cuando cambie el estado de un pedido o reclamo, lo vas a ver acá y en la campanita 🔔.</div>'; return; }
+      box.innerHTML = notifState.items.slice().sort((a, b) => b.at - a.at).map(n => `
+        <div class="p-3 rounded-xl border ${n.read ? 'bg-zinc-900/70 border-zinc-800' : 'bg-brand-orange/10 border-brand-orange/40'}">
+          <div class="font-bold text-white text-xs">${escapeHtml(n.title)}</div>
+          <p class="text-zinc-300 mt-1 leading-relaxed text-xs">${escapeHtml(n.body)}</p>
+          <div class="text-[10px] text-zinc-500 mt-1.5 font-code">Pedido ${escapeHtml(n.orderId)} · ${notifTimeAgo(n.at)}</div>
+        </div>`).join('');
+      if (custTab === 'notifs' && notifState.items.some(n => !n.read) && isBackendConnected()) {
+        apiRequest('NOTIFICATIONS', { method: 'POST', headers: walletHeaders(), body: '{}' }, '/read');
+        notifState.items = notifState.items.map(n => ({ ...n, read: true }));
+        updateNotifBadge();
+      }
+    }
+
+    function renderMyOrders() { renderMyOrdersList(); renderCustDashboard(); }
+    function renderMyOrdersList() {
       const container = document.getElementById('customer-orders-list');
       const badge = document.getElementById('cust-status-badge');
       if (!container) return;
@@ -2953,7 +3011,9 @@ html { scroll-behavior: smooth; }
       }
       if (badge) { badge.textContent = `${myOrders.length} pedido(s)`; badge.className = 'px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-code'; }
 
-      container.innerHTML = myOrders.map(order => `
+      const listOrders = custTab === 'cancelled' ? myOrders.filter(o => o.status === 'Cancelado') : myOrders;
+      if (!listOrders.length) { container.innerHTML = '<div class="p-6 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center text-xs text-zinc-400">No tenés pedidos cancelados. 🎉</div>'; return; }
+      container.innerHTML = listOrders.map(order => `
         <div class="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div class="flex items-center gap-2">
@@ -3451,7 +3511,7 @@ html { scroll-behavior: smooth; }
         serverOrder = res.order;
         // El servidor entrega un pase para ESTE pedido: así el cliente lo ve en Mi Cuenta
         // sin volver a escribir nada (se borra al cerrar el navegador, salvo que elija "Recordarme").
-        if (res.wallet) walletSet(res.wallet, false);
+        if (res.wallet) walletSet(res.wallet, true);
         loadNotifications();
         orderNumber = serverOrder.id;
         grandTotal = serverOrder.total;
@@ -3670,10 +3730,11 @@ html { scroll-behavior: smooth; }
       renderMyClaims();
       renderMyOrders();
     }
-    function renderMyClaims() {
+    function renderMyClaims() { renderMyClaimsList(); renderCustDashboard(); }
+    function renderMyClaimsList() {
       const box = document.getElementById('customer-claims-list');
       if (!box) return;
-      if (!myClaims.length) { box.innerHTML = ''; return; }
+      if (!myClaims.length) { box.innerHTML = custTab === 'claims' ? '<div class="p-6 rounded-xl bg-zinc-900/60 border border-zinc-800 text-center text-xs text-zinc-400">Todavía no hiciste ningún reclamo.</div>' : ''; return; }
       box.innerHTML = '<div class="text-xs font-bold text-white">Mis reclamos</div>' + myClaims.map(c => `
         <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs space-y-1">
           <div class="flex items-center justify-between gap-2 flex-wrap"><span class="font-bold text-white font-code">${escapeHtml(c.id)}</span><span class="px-2 py-0.5 rounded font-semibold ${claimStatusClass(c.status)}">${escapeHtml(c.status)}</span></div>
@@ -3719,6 +3780,7 @@ html { scroll-behavior: smooth; }
       updateNotifBadge();
       const panel = document.getElementById('notif-panel');
       if (panel && !panel.classList.contains('hidden')) renderNotifications();
+      renderCustNotifs(); renderCustDashboard();
     }
     function renderNotifications() {
       const body = document.getElementById('notif-body');
@@ -3764,6 +3826,9 @@ html { scroll-behavior: smooth; }
       panel.classList.add('hidden'); panel.classList.remove('flex');
     }
     setInterval(() => { if (document.visibilityState === 'visible' && typeof loadNotifications === 'function') loadNotifications(); }, 60000);
+    // Al volver a la pestaña o a la app, se buscan avisos nuevos enseguida (sin esperar al minuto).
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && walletToken) loadNotifications(); });
+    window.addEventListener('focus', () => { if (walletToken) loadNotifications(); });
 
     // ==========================================
     // CADENA DE CUSTODIA: ETIQUETA + DOBLE ESCANEO

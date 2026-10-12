@@ -443,7 +443,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.2</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.3</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -4804,6 +4804,9 @@ html { scroll-behavior: smooth; }
       renderCashRegister();
     }
     setInterval(() => { if (document.visibilityState === 'visible' && typeof loadNotifications === 'function') loadNotifications(); }, 60000);
+    // Al volver a la pestaña o a la app, se buscan avisos nuevos enseguida (sin esperar al minuto).
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && walletToken) loadNotifications(); });
+    window.addEventListener('focus', () => { if (walletToken) loadNotifications(); });
 
     // ==========================================
     // CADENA DE CUSTODIA: ETIQUETA + DOBLE ESCANEO
