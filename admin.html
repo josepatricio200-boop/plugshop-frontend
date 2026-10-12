@@ -91,6 +91,19 @@
     .brand-marquee { -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
     @keyframes brand-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     @media (prefers-reduced-motion: reduce) { .brand-track { animation: none; flex-wrap: wrap; width: auto; justify-content: center; } }
+
+    /* Panel en el celular: las tablas de pedidos y clientes se vuelven tarjetas */
+    @media (max-width: 767px) {
+      #admin-orders-table thead, #admin-customers-table thead { display: none; }
+      #admin-orders-table, #admin-orders-table tbody, #admin-customers-table, #admin-customers-table tbody { display: block; width: 100%; }
+      #admin-orders-table tbody tr, #admin-customers-table tbody tr { display: block; position: relative; margin: 10px; padding: 6px 2px; border: 1px solid rgba(113,113,122,.45); border-radius: 16px; }
+      #admin-orders-table tbody td, #admin-customers-table tbody td { display: block; padding: 6px 12px !important; border: 0; max-width: none !important; }
+      #admin-orders-table tbody td.o-sel { position: absolute; top: 4px; right: 4px; padding: 8px !important; }
+      #admin-orders-table tbody td.o-actions > div, #admin-customers-table tbody td:last-child { justify-content: flex-start; text-align: left; }
+      #admin-orders-table tbody td.o-actions .order-more { justify-content: flex-start; }
+      #admin-orders-table tbody td.o-status select { width: 100%; padding-top: 10px; padding-bottom: 10px; font-size: 14px; }
+      #admin-orders-table tbody td.o-actions button, #admin-customers-table tbody td:last-child button { min-height: 40px; }
+    }
   
     /* ESCALA DE LETRA DEL PANEL (control A- / A+). Solo en pantallas de compu:
        en el celular se usa el tamaño normal para que todo entre en la pantalla. */
@@ -436,20 +449,24 @@ html { scroll-behavior: smooth; }
     <div class="relative w-full h-full bg-zinc-950 overflow-hidden flex flex-col">
       
       <!-- Top Bar of Admin Modal -->
-      <div class="p-3 sm:p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/95 shrink-0">
+      <div class="p-3 sm:p-4 border-b border-zinc-800 flex flex-wrap sm:flex-nowrap items-center justify-between gap-y-2 bg-zinc-900/95 shrink-0">
         <div class="flex items-center gap-3">
           <div class="logo-badge w-8 h-8 rounded-lg bg-black border border-brand-orange/50 flex items-center justify-center text-brand-orange font-black text-xs shadow-[0_0_10px_rgba(255,98,0,0.3)] font-code">
             PS
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.6</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.7</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
           </div>
         </div>
         
+        <div class="relative order-last sm:order-none basis-full sm:basis-auto sm:flex-1 min-w-0 sm:max-w-md sm:mx-4" role="search">
+          <input id="gsearch" type="search" autocomplete="off" oninput="gsearchRun()" onkeydown="gsearchKey(event)" placeholder="🔍 Buscar pedido, cliente o teléfono   ( / )" aria-label="Buscar en todo el panel" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange" />
+          <div id="gsearch-results" class="hidden absolute left-0 right-0 top-full mt-1 z-30 max-h-[60vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-xl shadow-2xl"></div>
+        </div>
         <div class="flex items-center gap-2">
           <button id="btn-simulate-sale" onclick="simulateCustomerOrder()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-all font-code">
             <span>⚡ Simular Venta</span>
@@ -586,8 +603,10 @@ html { scroll-behavior: smooth; }
               <h3 class="text-lg font-bold text-white">Hoy</h3>
               <p id="today-sub" class="text-xs text-zinc-400 mt-0.5">Lo que necesita tu atención ahora mismo. Tocá una tarjeta para ir directo.</p>
             </div>
+            <div id="today-mine"></div>
             <div id="today-cards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"></div>
             <div id="today-allok" class="hidden rounded-2xl border border-emerald-800/50 bg-emerald-950/30 p-5 text-sm text-emerald-300 font-semibold">✅ Todo al día. No hay nada urgente por hacer.</div>
+            <div id="today-extras" class="space-y-4"></div>
           </div>
 
           <!-- TAB 1: FINANZAS & REGISTRO ARCA-READY -->
@@ -1377,7 +1396,11 @@ html { scroll-behavior: smooth; }
                 <h3 class="text-lg font-bold text-white">Cola de Pedidos & Despachos en Tucumán</h3>
                 <p class="text-xs text-zinc-400">Monitoreá las compras coordinadas por WhatsApp, colores elegidos, cobro y cadetería.</p>
               </div>
-              <button id="btn-scan-handover" onclick="openScanModal('handover', '')" class="self-start px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold">📲 Entregar: escanear QR del cliente</button>
+              <div class="flex flex-wrap gap-2 self-start">
+                <button id="btn-new-order" onclick="openManualOrder()" class="px-4 py-2.5 rounded-xl bg-brand-orange hover:brightness-110 text-black text-xs font-black">➕ Nuevo pedido</button>
+                <button id="btn-route" onclick="openRoute()" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-bold">🗺️ Hoja de ruta</button>
+                <button id="btn-scan-handover" onclick="openScanModal('handover', '')" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold">📲 Entregar: escanear QR del cliente</button>
+              </div>
             </div>
 
             <div id="refunds-card" class="hidden p-4 rounded-xl bg-amber-950/30 border border-amber-700/50 space-y-3 text-xs"></div>
@@ -1401,7 +1424,10 @@ html { scroll-behavior: smooth; }
               <select id="orders-date-filter" onchange="renderOrdersTable()" aria-label="Filtrar por fecha" class="bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-brand-orange">
                 <option value="all">Todas las fechas</option><option value="1">Hoy</option><option value="7">Últimos 7 días</option><option value="30">Últimos 30 días</option>
               </select>
+              <select id="orders-courier-filter" onchange="renderOrdersTable()" aria-label="Filtrar por repartidor" class="hidden bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-brand-orange"></select>
             </div>
+            <div id="orders-views" class="flex flex-wrap items-center gap-1.5"></div>
+            <div id="orders-bulk" class="hidden flex flex-wrap items-center gap-2 p-3 rounded-xl bg-zinc-900 border border-brand-orange/40 text-xs"></div>
             <div id="orders-count-label" class="text-[11px] text-zinc-500 font-code"></div>
 
             <div class="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950 font-code">
@@ -1409,6 +1435,7 @@ html { scroll-behavior: smooth; }
                 <table id="admin-orders-table" class="w-full text-left text-xs">
                   <thead class="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider">
                     <tr>
+                      <th class="py-3 pl-4 pr-1 w-8"><input type="checkbox" id="orders-sel-all" onchange="toggleAllOrderSel(this.checked)" aria-label="Seleccionar todos los pedidos de la lista" class="w-4 h-4 accent-orange-500" /></th>
                       <th class="py-3 px-4">Orden</th>
                       <th class="py-3 px-4">Cliente & Entrega</th>
                       <th class="py-3 px-4">Items & Color</th>
@@ -1520,7 +1547,7 @@ html { scroll-behavior: smooth; }
 
             <div class="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950 font-code">
               <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table id="admin-customers-table" class="w-full text-left text-xs">
                   <thead class="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider">
                     <tr>
                       <th class="py-3 px-4">Cliente</th>
@@ -2131,6 +2158,7 @@ html { scroll-behavior: smooth; }
         tasks.push(apiRequest('ORDERS', { headers }).then(res => {
           if (Array.isArray(res)) ADMIN_ORDERS = res;
         }));
+        tasks.push(loadCouriers());
       }
       if (can('products.manage')) {
         tasks.push(apiRequest('PRODUCTS', { headers }, '/full').then(res => {
@@ -2178,7 +2206,7 @@ html { scroll-behavior: smooth; }
     // Permisos por usuario (los manda el servidor al entrar y se refrescan con /api/auth/me).
     // Estos son los "de fábrica" de cada rol: sirven de respaldo si la sesión no trae la lista.
     const PERM_DEFAULTS = {
-      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
+      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'orders.create', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
       cadete: ['orders.view', 'orders.dispatch'],
       reposicion: ['products.manage', 'insights.view'],
       logistica: ['suppliers.view']
@@ -2230,7 +2258,7 @@ html { scroll-behavior: smooth; }
       const me = await apiRequest('AUTH_ME', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
       if (me && me.success && Array.isArray(me.perms)) {
         const changed = JSON.stringify(me.perms) !== JSON.stringify(currentStaffSession.perms || null);
-        currentStaffSession.perms = me.perms; currentStaffSession.role = me.role || currentStaffSession.role;
+        currentStaffSession.perms = me.perms; currentStaffSession.role = me.role || currentStaffSession.role; if (me.staffId) currentStaffSession.staffId = me.staffId;
         if (changed) { applyRoleTabVisibility(); if (typeof refreshAdminUI === 'function') refreshAdminUI(); }
       }
     }
@@ -4249,10 +4277,13 @@ html { scroll-behavior: smooth; }
       const days = Number((document.getElementById('orders-date-filter') || {}).value) || 0;
       const since = days ? Date.now() - (days === 1 ? 0 : days * 86400000) : 0;
       const startOfToday = new Date(); startOfToday.setHours(0, 0, 0, 0);
+      const cf = (document.getElementById('orders-courier-filter') || {}).value || '';
       return ADMIN_ORDERS.filter(o => {
         if (st === 'active' && ['Entregado', 'Cancelado'].includes(o.status)) return false;
         if (st === 'toCollect' && !PENDING_PAY.includes(o.status)) return false;
         if (st !== 'active' && st !== 'all' && st !== 'toCollect' && o.status !== st) return false;
+        if (cf === 'none' && o.courierId) return false;
+        if (cf && cf !== 'none' && String(o.courierId || '') !== cf) return false;
         if (q && ![o.id, o.customer, o.phone].join(' ').toLowerCase().includes(q) && !String(o.phone || '').replace(/\D/g, '').includes(q.replace(/\D/g, '') || '\u0000')) return false;
         if (days) {
           const t = o.createdAt || Date.parse(o.date) || 0;
@@ -4359,18 +4390,20 @@ html { scroll-behavior: smooth; }
         const isTransfer = o.isBancarizado || (o.paymentMethod && o.paymentMethod.includes('Transferencia'));
         return `
         <tr class="hover:bg-zinc-900/60 transition-colors">
+          <td class="py-3 pl-4 pr-1 o-sel"><input type="checkbox" ${SEL_ORDERS.has(o.id) ? 'checked' : ''} onchange="toggleOrderSel('${o.id}', this.checked)" aria-label="Seleccionar pedido ${escapeHtml(o.id)}" class="w-4 h-4 accent-orange-500" /></td>
           <td class="py-3 px-4 font-bold text-white o-id">
             <div class="flex items-center gap-1.5">
               <button onclick="openOrderTrackingModal('${o.id}')" class="w-6 h-6 rounded bg-white p-0.5 hover:scale-110 transition-transform shrink-0" title="Ver QR y Seguimiento en Vivo">
                 <img src="${getQrCodeUrl(o.id)}" alt="QR" class="w-full h-full object-contain" />
               </button>
-              <span>${o.id}</span>
+              <button type="button" onclick="openOrderFicha('${o.id}')" class="underline decoration-dotted underline-offset-2 hover:text-brand-orange whitespace-nowrap" title="Abrir la ficha del pedido">${o.id}</button>
             </div>
+            <div class="mt-1 text-[10px] font-semibold text-zinc-500 whitespace-nowrap">${escapeHtml(ppWhen(o.createdAt) || o.date || '')}${o.channel && o.channel !== 'Web' ? ' · ' + escapeHtml(o.channel) : ''}</div>
           </td>
           <td class="py-3 px-4 o-cust">
             <div class="font-semibold text-white font-sans">${escapeHtml(o.customer)}</div>
             <div class="text-[11px] text-zinc-400">${escapeHtml(o.phone)}</div>
-            <div class="mt-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span></div>
+            <div class="mt-1 flex flex-wrap gap-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>${o.courierName ? `<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-semibold text-sky-300">🛵 ${escapeHtml(o.courierName)}</span>` : ''}</div>
             <div class="text-[10px] text-zinc-500 font-sans break-words max-w-[200px]">${escapeHtml(o.address)}</div>
           </td>
           <td class="py-3 px-4 o-items max-w-[220px]">
@@ -4394,10 +4427,11 @@ html { scroll-behavior: smooth; }
           </td>
           <td class="py-3 px-4 text-right font-sans o-actions">
             <div class="flex flex-wrap justify-end items-center gap-1.5">
+              <button type="button" onclick="openOrderFicha('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-black text-[11px] font-bold">📋 Ficha</button>
               ${(o.status === 'En preparación' && canScan) ? `<button onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📷 Salida</button>` : ''}
               ${(o.status === 'Despachado' && canScan) ? `<button onclick="openScanModal('handover', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📲 Entregar</button>` : ''}
               ${(o.proof || o.hasProof) ? `<button onclick="openProofModal('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[11px] font-semibold">🧾 Comprobante</button>` : ''}
-              <button onclick="sendOrderUpdateWhatsApp('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800 text-[11px] font-semibold transition-colors" title="Contactar al cliente por WhatsApp">WhatsApp</button>
+              <button onclick="sendOrderUpdateWhatsApp('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800 text-[11px] font-semibold transition-colors" title="Abre WhatsApp con el mensaje que corresponde al estado del pedido">WhatsApp</button>
               <button type="button" onclick="toggleOrderMore(this)" aria-expanded="false" aria-label="Más acciones del pedido ${escapeHtml(o.id)}" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-bold">⋯ Más</button>
             </div>
             <div class="order-more hidden mt-1.5 flex-wrap justify-end gap-1.5">
@@ -4408,7 +4442,14 @@ html { scroll-behavior: smooth; }
           </td>
         </tr>
       `}).join('');
-      if (!list.length) ordersTable.innerHTML = '<tr><td colspan="6" class="py-6 px-4 text-center text-zinc-500">No hay pedidos con esos filtros.</td></tr>';
+      if (!list.length) ordersTable.innerHTML = '<tr><td colspan="7" class="py-6 px-4 text-center text-zinc-500">No hay pedidos con esos filtros.</td></tr>';
+      const all = document.getElementById('orders-sel-all');
+      if (all) all.checked = list.length > 0 && list.every(o => SEL_ORDERS.has(o.id));
+      renderBulkBar();
+      renderOrderViews();
+      renderCourierFilter();
+      renderOrderFicha();
+      renderRoute();
     }
     async function addOrderNote(orderId) {
       const text = prompt('Nota interna sobre el pedido ' + orderId + ' (el cliente NO la ve):', '');
@@ -4487,12 +4528,833 @@ html { scroll-behavior: smooth; }
       box.innerHTML = res.length ? res.map(x => `<div class="p-2 rounded-lg bg-zinc-950/70 border border-zinc-800"><span class="text-zinc-500 font-code">${escapeHtml(new Date(x.at).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }))}</span> · <span class="text-brand-amber font-semibold">${escapeHtml(x.by)}</span> · <span class="text-white">${escapeHtml(x.action)}</span>${x.detail ? ' <span class="text-zinc-400">— ' + escapeHtml(x.detail) + '</span>' : ''}</div>`).join('') : '<p class="text-zinc-500">Todavía no hay movimientos.</p>';
     }
 
+
+    // ==========================================================================
+    // PANEL PRO (v6.7): ficha de pedido con línea de tiempo, pedido manual,
+    // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
+    // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
+    // ==========================================================================
+    const ppAuth = () => ({ Authorization: 'Bearer ' + currentStaffSession.token });
+    const ppMs = v => (typeof v === 'number' ? v : (v ? (Date.parse(v) || 0) : 0));
+    const ppWhen = v => {
+      const ms = ppMs(v); if (!ms) return '';
+      return new Date(ms).toLocaleString('es-AR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    };
+    const ppLive = () => isBackendConnected() && !!currentStaffSession.token;
+    const PP_TONE = {
+      'Pago pendiente': 'bg-amber-950 text-amber-300 border-amber-800',
+      'Comprobante enviado': 'bg-sky-950 text-sky-300 border-sky-800',
+      'Comprobante rechazado': 'bg-rose-950 text-rose-300 border-rose-800',
+      'En preparación': 'bg-orange-950 text-orange-300 border-orange-800',
+      'Despachado': 'bg-sky-950 text-sky-300 border-sky-800',
+      'Entregado': 'bg-emerald-950 text-emerald-300 border-emerald-800',
+      'Cancelado': 'bg-zinc-800 text-zinc-400 border-zinc-700'
+    };
+    const ppBadge = st => `<span class="inline-block px-2 py-0.5 rounded-full border text-[10px] font-bold ${PP_TONE[st] || 'bg-zinc-800 text-zinc-300 border-zinc-700'}">${escapeHtml(st || '')}</span>`;
+    const ppIsTransfer = o => !!(o && (o.isBancarizado || (o.paymentMethod && String(o.paymentMethod).includes('Transferencia'))));
+    const ppFindOrder = id => ADMIN_ORDERS.find(x => x.id === id);
+
+    // ---------- Repartidores ----------
+    let COURIERS = [];
+    async function loadCouriers() {
+      if (!ppLive() || !can('orders.view')) return;
+      const r = await apiRequest('ORDERS', { headers: ppAuth() }, '/couriers');
+      if (Array.isArray(r)) COURIERS = r;
+    }
+    async function assignCourier(orderId, courierId) {
+      const o = ppFindOrder(orderId); if (!o) return;
+      if (!ppLive()) { alert('Para asignar repartidores tenés que estar conectado al servidor.'); return; }
+      const res = await apiRequest('ORDERS', { method: 'POST', headers: ppAuth(), body: JSON.stringify({ courierId: courierId === '' ? null : Number(courierId) }) }, '/' + encodeURIComponent(orderId) + '/assign');
+      if (!res || res.success === false || !res.order) { alert((res && res.error) || 'No se pudo asignar el repartidor.'); refreshAdminUI(); return; }
+      Object.assign(o, res.order);
+      refreshAdminUI();
+    }
+    function ppCourierSelect(o, cls) {
+      if (!can('orders.manage') || ['Entregado', 'Cancelado'].includes(o.status)) return o.courierName ? `<span class="text-zinc-200">${escapeHtml(o.courierName)}</span>` : '<span class="text-zinc-500">Sin asignar</span>';
+      if (!COURIERS.length && !o.courierId) return '<span class="text-zinc-500">Sin repartidores cargados (creá un usuario con rol Cadete)</span>';
+      const opts = COURIERS.slice();
+      if (o.courierId && !opts.some(c => c.id === o.courierId)) opts.push({ id: o.courierId, name: o.courierName || 'Repartidor' });
+      return `<select onchange="assignCourier('${o.id}', this.value)" aria-label="Repartidor del pedido ${escapeHtml(o.id)}" class="${cls || 'bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-xs text-white'}"><option value="">Sin asignar</option>${opts.map(c => `<option value="${c.id}" ${o.courierId === c.id ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}</select>`;
+    }
+
+    // ---------- Mensajes de WhatsApp por estado ----------
+    function waOrderVars(o) {
+      const first = String(o.customer || '').trim().split(/\s+/)[0] || '';
+      return {
+        nombre: first, id: o.id, total: formatARS(o.total || 0), items: o.items || '',
+        alias: STORE_SETTINGS.bankAlias || '', cbu: STORE_SETTINGS.bankCbu || '',
+        cadete: o.courierName || '', sitio: (typeof location !== 'undefined' && location.origin && location.origin !== 'null') ? location.origin : 'nuestra tienda'
+      };
+    }
+    function waTemplates(o) {
+      const v = waOrderVars(o);
+      const bank = ppIsTransfer(o)
+        ? `Para confirmarlo, transferí *${v.total}* a:\n• Alias: *${v.alias}*${v.cbu ? `\n• CBU: ${v.cbu}` : ''}\nY mandanos el comprobante por acá o desde Mi Cuenta (${v.sitio}).`
+        : `Lo pagás en efectivo cuando lo recibís: *${v.total}*.`;
+      const T = {
+        pago: { label: '💳 Datos para pagar', text: `¡Hola ${v.nombre}! 👋 Te escribimos de *PLUGSHOP*. Tu pedido *#${v.id}* (${v.items}) quedó en *${v.total}*.\n\n${bank}\n\n¡Gracias por tu compra!` },
+        recordatorio: { label: '⏰ Recordar el pago', text: `Hola ${v.nombre}, te escribimos de *PLUGSHOP*. Tu pedido *#${v.id}* sigue pendiente de pago por *${v.total}*.\n\nSi ya transferiste, mandanos el comprobante. Si ya no lo querés, avisanos y lo cancelamos para liberar el stock. 🙌` },
+        revision: { label: '🧾 Recibimos tu comprobante', text: `¡Hola ${v.nombre}! Recibimos tu comprobante del pedido *#${v.id}*. Lo estamos verificando y en breve te confirmamos. ¡Gracias!` },
+        rechazado: { label: '⚠️ Comprobante con problema', text: `Hola ${v.nombre}, no pudimos validar el comprobante del pedido *#${v.id}*. ¿Podés mandarnos de nuevo la captura de la transferencia (que se vea el monto y la fecha)? Gracias.` },
+        preparando: { label: '📦 Pago recibido, preparando', text: `¡Hola ${v.nombre}! Recibimos tu pago del pedido *#${v.id}* ✅. Ya lo estamos preparando y te avisamos apenas salga.` },
+        despachado: { label: '🛵 Va en camino', text: `¡Hola ${v.nombre}! Tu pedido *#${v.id}* ya va en camino 🛵${v.cadete ? ` con ${v.cadete}` : ''}.\n\nCuando te lo entreguen, mostrá el QR de entrega desde *Mi Cuenta* (${v.sitio}). ${ppIsTransfer(o) ? '' : `Recordá que se abona en efectivo: *${v.total}*.`}`.trim() },
+        entregado: { label: '✅ Gracias por tu compra', text: `¡Gracias por tu compra, ${v.nombre}! 🙌 Tu pedido *#${v.id}* figura como entregado. Si tenés algún problema con el producto, escribinos por acá o desde *Mi Cuenta → Reclamos* dentro del período de garantía.` },
+        cancelado: { label: '❌ Pedido cancelado', text: `Hola ${v.nombre}, te avisamos que tu pedido *#${v.id}* fue cancelado${o.cancelReason ? ` (${o.cancelReason})` : ''}.${o.refund && o.refund.status === 'pendiente' ? ` Te vamos a devolver *${formatARS(o.refund.amount)}* a la misma cuenta con la que pagaste (hasta 48 hs hábiles).` : ''} Cualquier duda, escribinos.` },
+        nuevo: { label: '🆕 Confirmar pedido nuevo', text: `¡Hola ${v.nombre}! 👋 Te cargamos tu pedido *#${v.id}* en *PLUGSHOP*:\n${v.items}\n\nTotal: *${v.total}*\n\n${bank}\n\nPodés seguirlo entrando a ${v.sitio} → *Mi Cuenta* con tu WhatsApp y el número de pedido.` },
+        libre: { label: '💬 Mensaje en blanco', text: `¡Hola ${v.nombre}! Te escribimos de *PLUGSHOP* por tu pedido *#${v.id}*. ` }
+      };
+      return T;
+    }
+    function waDefaultKey(o) {
+      return ({ 'Pago pendiente': 'pago', 'Comprobante enviado': 'revision', 'Comprobante rechazado': 'rechazado', 'En preparación': 'preparando', 'Despachado': 'despachado', 'Entregado': 'entregado', 'Cancelado': 'cancelado' })[o.status] || 'libre';
+    }
+    function waSend(orderId, key) {
+      const o = ppFindOrder(orderId); if (!o) return;
+      const t = waTemplates(o)[key || waDefaultKey(o)] || waTemplates(o).libre;
+      window.open(waLink(o.phone, t.text), '_blank');
+    }
+    function waMenuKeys(o) {
+      const all = ['pago', 'recordatorio', 'revision', 'rechazado', 'preparando', 'despachado', 'entregado', 'cancelado', 'libre'];
+      const main = waDefaultKey(o);
+      return [main].concat(all.filter(k => k !== main));
+    }
+
+    // ---------- Línea de tiempo ----------
+    function orderTimeline(o) {
+      if (Array.isArray(o.events) && o.events.length) return o.events.map(e => ({ at: ppMs(e.at), by: e.by, text: e.text })).sort((a, b) => a.at - b.at);
+      // Pedidos viejos (sin registro): se arma con lo que se sabe.
+      const out = [];
+      out.push({ at: ppMs(o.createdAt) || ppMs(o.date), by: o.createdBy || 'Cliente', text: o.createdBy ? 'Se cargó el pedido' : 'Hizo el pedido en la tienda' });
+      if (o.proof || o.hasProof) out.push({ at: 0, by: 'Cliente', text: 'Subió el comprobante de transferencia' });
+      if (o.paid) out.push({ at: 0, by: o.paidBy || 'Equipo', text: 'Pago confirmado' });
+      (o.notes || []).forEach(n => out.push({ at: ppMs(n.at), by: n.by, text: 'Nota interna: ' + n.text }));
+      if (o.dispatchLog) out.push({ at: ppMs(o.dispatchLog.at), by: o.dispatchLog.by, text: 'Escaneó la salida del paquete' });
+      if (o.deliveryLog) out.push({ at: ppMs(o.deliveryLog.at), by: o.deliveryLog.by || 'Cliente', text: o.deliveryLog.method === 'qr' ? 'Entrega confirmada con el QR del cliente' : (o.deliveryLog.method === 'manual' ? 'Entrega marcada a mano' : 'El cliente confirmó la recepción') });
+      if (o.refund) {
+        out.push({ at: ppMs(o.refund.requestedAt), by: 'Sistema', text: 'Reintegro pendiente por ' + formatARS(o.refund.amount) });
+        if (o.refund.status === 'devuelto') out.push({ at: ppMs(o.refund.doneAt), by: o.refund.by || 'Equipo', text: 'Reintegro devuelto' + (o.refund.ref ? ' · op. ' + o.refund.ref : '') });
+      }
+      if (o.status === 'Cancelado') out.push({ at: 0, by: 'Equipo', text: 'Pedido cancelado' + (o.cancelReason ? ': ' + o.cancelReason : '') });
+      const timed = out.filter(e => e.at).sort((a, b) => a.at - b.at);
+      return [out[0]].concat(out.slice(1).filter(e => !e.at), timed.filter(e => e !== out[0]));
+    }
+    function ppEventIcon(t) {
+      t = String(t || '').toLowerCase();
+      if (/reintegro|devuel/.test(t)) return '💸';
+      if (/cancel/.test(t)) return '❌';
+      if (/entreg|recepci/.test(t)) return '✅';
+      if (/salida|despach|camino/.test(t)) return '🛵';
+      if (/repartidor|asign/.test(t)) return '🧑‍✈️';
+      if (/pago|cobr|comprobante|transfer/.test(t)) return '💳';
+      if (/nota/.test(t)) return '📝';
+      if (/reclamo|arrepent/.test(t)) return '🛡️';
+      return '•';
+    }
+
+    // ---------- Ficha del pedido ----------
+    let FICHA_ID = null;
+    function openOrderFicha(id) { FICHA_ID = id; renderOrderFicha(); }
+    function closeOrderFicha() { FICHA_ID = null; const e = document.getElementById('order-ficha'); if (e) e.remove(); }
+    function ppRow(label, value, strong) {
+      return `<div class="flex items-baseline justify-between gap-3 py-1 text-xs"><span class="text-zinc-400">${label}</span><span class="${strong ? 'font-black text-brand-amber text-sm' : 'text-zinc-100 font-semibold'} text-right">${value}</span></div>`;
+    }
+    function ppSection(title, body) {
+      return `<section class="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4"><h4 class="text-[11px] uppercase tracking-wider font-bold text-zinc-400 mb-2">${title}</h4>${body}</section>`;
+    }
+    function renderOrderFicha() {
+      if (!FICHA_ID) return;
+      const o = ppFindOrder(FICHA_ID);
+      if (!o) { closeOrderFicha(); return; }
+      let wrap = document.getElementById('order-ficha');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'order-ficha';
+        wrap.className = 'fixed inset-0 z-[55] bg-black/70 flex justify-end';
+        wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-label', 'Ficha del pedido');
+        wrap.addEventListener('click', e => { if (e.target === wrap) closeOrderFicha(); });
+        document.body.appendChild(wrap);
+      }
+      const prev = wrap.firstElementChild ? wrap.firstElementChild.scrollTop : 0;
+      const canManage = can('orders.manage'), canScan = can('orders.dispatch') || canManage;
+      const closed = ['Entregado', 'Cancelado'].includes(o.status);
+      const lines = Array.isArray(o.lines) && o.lines.length ? o.lines : null;
+      const subtotal = lines ? lines.reduce((a, l) => a + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0) : null;
+      const ship = Number(o.shippingCost) || 0;
+      const isAdmin = currentStaffSession.role === 'admin';
+      let profit = null;
+      if (isAdmin && lines) profit = lines.reduce((a, l) => a + (Number(l.qty) || 0) * ((Number(l.unitPrice) || 0) - (Number(l.unitCost) || 0)), 0) - (o.discountApplied || 0) - (o.couponAmount || 0) - (o.manualDiscount || 0);
+      const hasProof = !!(o.proof || o.hasProof);
+      const transfer = ppIsTransfer(o);
+      const payLine = o.status === 'Cancelado' ? 'Pedido cancelado'
+        : o.paid ? `✓ Cobrado${o.paidBy ? ' · ' + escapeHtml(o.paidBy) : ''}`
+        : transfer ? (hasProof ? '🧾 Comprobante recibido: falta confirmar' : '⏳ Esperando la transferencia')
+        : '💵 Se cobra en efectivo al entregar';
+
+      // Acciones principales según el estado
+      const act = [];
+      const btn = (cls, onclick, label) => act.push(`<button type="button" onclick="${onclick}" class="px-3 py-2 rounded-xl text-xs font-bold ${cls}">${label}</button>`);
+      if (hasProof && canManage && ['Comprobante enviado', 'Pago pendiente', 'Comprobante rechazado'].includes(o.status)) btn('bg-sky-500 hover:bg-sky-400 text-black', `openProofModal('${o.id}')`, '🧾 Ver comprobante');
+      if (canManage && transfer && o.paid === false && ['Pago pendiente', 'Comprobante enviado', 'Comprobante rechazado'].includes(o.status)) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `updateOrderStatus('${o.id}', 'En preparación')`, '✓ Confirmar pago');
+      if (!transfer && canManage && ['Pago pendiente'].includes(o.status)) btn('bg-orange-500 hover:bg-orange-400 text-black', `updateOrderStatus('${o.id}', 'En preparación')`, '📦 Pasar a preparación');
+      if (o.status === 'En preparación' && canScan) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `openScanModal('dispatch', '${o.id}')`, '📷 Registrar salida');
+      if (o.status === 'Despachado' && canScan) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `openScanModal('handover', '${o.id}')`, '📲 Entregar (QR del cliente)');
+      if (o.status !== 'Cancelado' && canManage) btn('bg-zinc-800 hover:bg-zinc-700 text-zinc-100', `openPackageLabel('${o.id}')`, '🏷️ Etiqueta');
+      btn('bg-zinc-800 hover:bg-zinc-700 text-amber-200', `addOrderNote('${o.id}')`, '📝 Nota');
+      if (!closed && canManage) btn('bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800', `updateOrderStatus('${o.id}', 'Cancelado')`, 'Cancelar pedido');
+
+      const tl = orderTimeline(o);
+      const keys = waMenuKeys(o), tpl = waTemplates(o);
+      const custKnown = typeof CUSTOMERS !== 'undefined' && CUSTOMERS.some(c => samePhone(c.phone, o.phone));
+      const productsHtml = lines
+        ? `<div class="divide-y divide-zinc-800">${lines.map(l => `<div class="flex items-start justify-between gap-3 py-1.5 text-xs"><div><div class="text-white font-semibold">${escapeHtml(l.qty)}× ${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">Color: ${escapeHtml(l.color || 'Único')} · ${formatARS(l.unitPrice)} c/u</div></div><div class="text-zinc-100 font-bold">${formatARS((l.qty || 0) * (l.unitPrice || 0))}</div></div>`).join('')}</div>`
+        : `<div class="text-xs text-zinc-200">${escapeHtml(o.items || '')}</div>`;
+      const money = [];
+      if (subtotal !== null) money.push(ppRow('Productos', formatARS(subtotal)));
+      if (o.discountApplied) money.push(ppRow('Descuento por transferencia', '−' + formatARS(o.discountApplied)));
+      if (o.couponAmount) money.push(ppRow('Cupón ' + escapeHtml(o.coupon || ''), '−' + formatARS(o.couponAmount)));
+      if (o.manualDiscount) money.push(ppRow('Descuento del equipo', '−' + formatARS(o.manualDiscount)));
+      money.push(ppRow('Envío', ship ? formatARS(ship) : 'Sin costo'));
+      money.push(`<div class="border-t border-zinc-800 mt-1 pt-1">${ppRow('Total', formatARS(o.total || 0), true)}</div>`);
+      if (profit !== null) money.push(ppRow('Ganancia estimada (solo admin)', formatARS(profit)));
+
+      wrap.innerHTML = `
+      <div class="w-full sm:max-w-xl h-full overflow-y-auto bg-zinc-950 border-l border-white/[0.12] shadow-2xl">
+        <div class="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 p-4 flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap"><span class="text-base font-black text-white font-code">#${escapeHtml(o.id)}</span>${ppBadge(o.status)}${o.returnPending ? '<span class="px-2 py-0.5 rounded-full border border-sky-800 bg-sky-950 text-sky-300 text-[10px] font-bold">↩️ Paquete por recuperar</span>' : ''}</div>
+            <div class="text-[11px] text-zinc-400 mt-1">${escapeHtml(ppWhen(o.createdAt) || o.date || '')} · Canal: <strong class="text-zinc-200">${escapeHtml(o.channel || 'Web')}</strong>${o.createdBy ? ' · cargado por ' + escapeHtml(o.createdBy) : ''}</div>
+          </div>
+          <button type="button" onclick="closeOrderFicha()" aria-label="Cerrar ficha" class="w-9 h-9 shrink-0 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200">✕</button>
+        </div>
+        <div class="p-4 space-y-4">
+          <div class="flex flex-wrap gap-2">${act.join('')}</div>
+
+          ${ppSection('Cliente', `
+            <div class="text-sm font-bold text-white">${escapeHtml(o.customer)}</div>
+            <div class="text-xs text-zinc-300 mt-0.5 font-code">${escapeHtml(o.phone)}</div>
+            <div class="text-xs text-zinc-400 mt-1">📍 ${escapeHtml(o.address || o.deliveryType || '')}</div>
+            <div class="flex flex-wrap gap-2 mt-3">
+              <a href="tel:+549${normalizeArPhone(o.phone)}" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-[11px] font-semibold">📞 Llamar</a>
+              ${(can('customers.manage') && custKnown) ? `<button type="button" onclick="openCustomerFicha('${normalizeArPhone(o.phone)}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-[11px] font-semibold">👤 Ver ficha del cliente</button>` : ''}
+            </div>`)}
+
+          ${ppSection('Productos', productsHtml)}
+
+          ${ppSection('Pago', `${ppRow('Forma de pago', escapeHtml(o.paymentMethod || 'Transferencia'))}${ppRow('Estado', payLine)}<div class="mt-1">${money.join('')}</div>${o.refund ? `<div class="mt-2 p-2.5 rounded-lg text-xs font-semibold ${o.refund.status === 'pendiente' ? 'bg-amber-950/40 border border-amber-800 text-amber-300' : 'bg-emerald-950/40 border border-emerald-800 text-emerald-300'}">${o.refund.status === 'pendiente' ? '💸 Reintegro pendiente ' : '✓ Reintegro devuelto '}${formatARS(o.refund.amount)}${o.refund.reason ? ' · ' + escapeHtml(o.refund.reason) : ''}${o.refund.ref ? ' · op. ' + escapeHtml(o.refund.ref) : ''}</div>` : ''}`)}
+
+          ${ppSection('Entrega', `${ppRow('Zona', escapeHtml(o.deliveryType || ''))}${ppRow('Repartidor', ppCourierSelect(o))}${o.dispatchLog ? ppRow('Salida', escapeHtml(ppWhen(o.dispatchLog.at)) + ' · ' + escapeHtml(o.dispatchLog.by || '')) : ''}${o.deliveryLog ? ppRow('Entrega', escapeHtml(ppWhen(o.deliveryLog.at)) + ' · ' + (o.deliveryLog.method === 'qr' ? 'con QR del cliente' : (o.deliveryLog.method === 'manual' ? 'marcada a mano' : 'confirmada por el cliente'))) : ''}`)}
+
+          ${ppSection('Mensaje por WhatsApp', `
+            <div class="flex flex-wrap gap-1.5">${keys.map((k, i) => `<button type="button" onclick="waSend('${o.id}', '${k}')" class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border ${i === 0 ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800'}">${tpl[k].label}</button>`).join('')}</div>
+            <p class="text-[11px] text-zinc-500 mt-2">Se abre WhatsApp con el mensaje ya escrito; lo revisás y lo mandás vos.</p>`)}
+
+          ${(o.notes && o.notes.length) ? ppSection('Notas internas', o.notes.map(n => `<div class="text-xs text-amber-200 py-1">📝 ${escapeHtml(n.text)} <span class="text-zinc-500">— ${escapeHtml(n.by)}, ${escapeHtml(ppWhen(n.at))}</span></div>`).join('')) : ''}
+
+          ${ppSection('Historial del pedido', `<ol class="relative border-l border-zinc-700 ml-2 space-y-3 pl-4">${tl.map(e => `<li class="relative"><span class="absolute -left-[25px] top-0 w-5 h-5 rounded-full bg-zinc-900 border border-zinc-700 flex items-center justify-center text-[10px]">${ppEventIcon(e.text)}</span><div class="text-xs text-zinc-100">${escapeHtml(e.text)}</div><div class="text-[11px] text-zinc-500">${escapeHtml(e.by || '')}${e.at ? ' · ' + escapeHtml(ppWhen(e.at)) : ''}</div></li>`).join('')}</ol>`)}
+        </div>
+      </div>`;
+      if (wrap.firstElementChild) wrap.firstElementChild.scrollTop = prev;
+    }
+
+    // ---------- Pedido manual ----------
+    let MO = null;
+    const MO_ZONES = { yb: 'Yerba Buena Express', smt: 'San Miguel de Tucumán', retiro: 'Punto de Retiro Coordinado' };
+    function openManualOrder(prefill) {
+      if (!can('orders.create')) { alert('Tu usuario no tiene permiso para crear pedidos.'); return; }
+      if (!ppLive()) { alert('Para crear pedidos desde el panel tenés que estar conectado al servidor.'); return; }
+      MO = { lines: [], q: '', channel: 'WhatsApp', zone: 'yb', pay: 'transfer', status: 'Pago pendiente', name: '', phone: '', address: '', discount: '', ship: '', note: '', busy: false, err: '', done: null };
+      if (prefill) Object.assign(MO, prefill);
+      renderManualOrder();
+    }
+    function closeManualOrder() { MO = null; const e = document.getElementById('manual-order'); if (e) e.remove(); }
+    function moStockOf(p, color) {
+      if (p.stockByColor && Object.prototype.hasOwnProperty.call(p.stockByColor, color)) return Number(p.stockByColor[color]) || 0;
+      return Number(p.stock) || 0;
+    }
+    function moCalc() {
+      const subtotal = MO.lines.reduce((a, l) => a + l.price * l.qty, 0);
+      const isT = MO.pay === 'transfer';
+      const pct = typeof STORE_SETTINGS.transferDiscountPct === 'number' ? STORE_SETTINGS.transferDiscountPct : 10;
+      const disc = isT ? Math.round(subtotal * pct / 100) : 0;
+      const base = Number(STORE_SETTINGS.shippingCost) || 0;
+      const zoneShip = MO.zone === 'smt' ? (typeof STORE_SETTINGS.shippingCostSmt === 'number' ? STORE_SETTINGS.shippingCostSmt : base) : base;
+      const free = subtotal >= (Number(STORE_SETTINGS.freeShippingThreshold) || Infinity);
+      let ship = (MO.zone === 'retiro' || free) ? 0 : zoneShip;
+      if (MO.ship !== '' && Number.isFinite(Number(MO.ship))) ship = Math.max(0, Math.round(Number(MO.ship)));
+      const extra = Math.max(0, Math.round(Number(MO.discount) || 0));
+      return { subtotal, pct, disc, ship, extra, total: Math.max(0, subtotal - disc - extra + ship) };
+    }
+    function moSet(k, v) {
+      MO[k] = v;
+      if (k === 'channel' && v === 'Mostrador') { MO.zone = 'retiro'; MO.pay = 'cash'; MO.status = 'Entregado'; moSyncControls(); }
+      if (k === 'zone' || k === 'pay' || k === 'discount' || k === 'ship') moRenderSummary();
+      if (k === 'phone') moLookupCustomer();
+    }
+    function moSyncControls() {
+      ['channel', 'zone', 'pay', 'status'].forEach(k => { const el = document.getElementById('mo-' + k); if (el) el.value = MO[k]; });
+      moRenderSummary();
+    }
+    function moLookupCustomer() {
+      if (!isValidArPhone(MO.phone) || typeof CUSTOMERS === 'undefined') return;
+      const c = CUSTOMERS.find(x => samePhone(x.phone, MO.phone));
+      const hint = document.getElementById('mo-cust-hint');
+      if (!hint) return;
+      if (c) {
+        hint.textContent = `Cliente conocido: ${c.name} · ${c.ordersCount || 0} compra(s)`;
+        const nm = document.getElementById('mo-name');
+        if (nm && !nm.value.trim()) { nm.value = c.name; MO.name = c.name; }
+      } else hint.textContent = 'Cliente nuevo: se va a crear su ficha.';
+    }
+    function moAddLine(pid, color) {
+      const p = PRODUCTS.find(x => x.id === pid); if (!p) return;
+      const avail = moStockOf(p, color);
+      const cur = MO.lines.find(l => l.id === pid && l.color === color);
+      if (cur) { if (cur.qty + 1 > avail) { alert('No hay más stock de ese producto en ese color.'); return; } cur.qty++; }
+      else { if (avail < 1) { alert('Sin stock de ese producto en ese color.'); return; } MO.lines.push({ id: pid, name: p.name, color, price: Number(p.price) || 0, qty: 1 }); }
+      moRenderLines(); moRenderSummary();
+    }
+    function moQty(i, d) {
+      const l = MO.lines[i]; if (!l) return;
+      const p = PRODUCTS.find(x => x.id === l.id);
+      const nq = l.qty + d;
+      if (nq < 1) { MO.lines.splice(i, 1); }
+      else if (p && nq > moStockOf(p, l.color)) { alert('No hay más stock de ese producto en ese color.'); return; }
+      else l.qty = nq;
+      moRenderLines(); moRenderSummary();
+    }
+    function moRenderResults() {
+      const box = document.getElementById('mo-results'); if (!box) return;
+      const q = (MO.q || '').trim().toLowerCase();
+      const list = PRODUCTS.filter(p => p.active !== false && (!q || [p.name, p.brand, p.category, p.keywords].join(' ').toLowerCase().includes(q))).slice(0, q ? 12 : 8);
+      box.innerHTML = list.length ? list.map(p => {
+        const colors = (p.colors && p.colors.length ? p.colors : ['Único']);
+        return `<div class="flex items-center gap-2 p-2 rounded-lg bg-zinc-900 border border-zinc-800 text-xs">
+          <div class="flex-1 min-w-0"><div class="font-semibold text-white truncate">${escapeHtml(p.name)}</div><div class="text-[11px] text-zinc-400">${formatARS(p.price)} · stock ${escapeHtml(p.stock)}</div></div>
+          <select id="mo-col-${p.id}" aria-label="Color de ${escapeHtml(p.name)}" class="bg-zinc-950 border border-zinc-700 rounded-lg px-1.5 py-1 text-[11px] text-white max-w-[110px]">${colors.map(c => `<option value="${escapeHtml(c)}" ${moStockOf(p, c) < 1 ? 'disabled' : ''}>${escapeHtml(c)}${p.stockByColor ? ' (' + moStockOf(p, c) + ')' : ''}</option>`).join('')}</select>
+          <button type="button" onclick="moAddLine(${p.id}, document.getElementById('mo-col-${p.id}').value)" class="px-2.5 py-1.5 rounded-lg bg-brand-orange text-black font-bold">＋</button>
+        </div>`;
+      }).join('') : '<div class="text-xs text-zinc-500 p-2">No encontré productos con ese nombre.</div>';
+    }
+    function moRenderLines() {
+      const box = document.getElementById('mo-lines'); if (!box) return;
+      box.innerHTML = MO.lines.length ? MO.lines.map((l, i) => `<div class="flex items-center gap-2 py-1.5 text-xs border-b border-zinc-800 last:border-0">
+        <div class="flex-1 min-w-0"><div class="text-white font-semibold truncate">${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">${escapeHtml(l.color)} · ${formatARS(l.price)} c/u</div></div>
+        <button type="button" onclick="moQty(${i}, -1)" aria-label="Menos" class="w-7 h-7 rounded-lg bg-zinc-800 text-white font-bold">−</button>
+        <span class="w-6 text-center text-white font-bold">${l.qty}</span>
+        <button type="button" onclick="moQty(${i}, 1)" aria-label="Más" class="w-7 h-7 rounded-lg bg-zinc-800 text-white font-bold">＋</button>
+        <span class="w-20 text-right text-brand-amber font-bold">${formatARS(l.price * l.qty)}</span></div>`).join('') : '<div class="text-xs text-zinc-500 py-2">Todavía no agregaste productos. Buscá arriba y tocá ＋.</div>';
+    }
+    function moRenderSummary() {
+      const box = document.getElementById('mo-summary'); if (!box) return;
+      const c = moCalc();
+      box.innerHTML = `${ppRow('Productos', formatARS(c.subtotal))}${c.disc ? ppRow(`Descuento por transferencia (${c.pct}%)`, '−' + formatARS(c.disc)) : ''}${c.extra ? ppRow('Descuento del equipo', '−' + formatARS(c.extra)) : ''}${ppRow('Envío', c.ship ? formatARS(c.ship) : 'Sin costo')}<div class="border-t border-zinc-800 mt-1 pt-1">${ppRow('Total estimado', formatARS(c.total), true)}</div><p class="text-[10px] text-zinc-500 mt-1">El servidor confirma el total final al guardar.</p>`;
+    }
+    function renderManualOrder() {
+      let wrap = document.getElementById('manual-order');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'manual-order';
+        wrap.className = 'fixed inset-0 z-[58] bg-black/80 flex items-center justify-center p-2 sm:p-4';
+        wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-label', 'Nuevo pedido');
+        document.body.appendChild(wrap);
+      }
+      if (MO.done) { renderManualDone(wrap); return; }
+      const inp = 'w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange';
+      const lbl = 'block text-[11px] font-bold text-zinc-400 mb-1';
+      wrap.innerHTML = `
+      <div class="w-full max-w-2xl max-h-[94vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-2xl shadow-2xl">
+        <div class="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 p-4 flex items-center justify-between gap-3">
+          <div><h3 class="text-base font-black text-white">➕ Nuevo pedido</h3><p class="text-[11px] text-zinc-400">Para ventas que llegan por WhatsApp, teléfono o mostrador. Descuenta el stock y queda en la caja.</p></div>
+          <button type="button" onclick="closeManualOrder()" aria-label="Cerrar" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200">✕</button>
+        </div>
+        <div class="p-4 space-y-4">
+          <section class="space-y-3">
+            <h4 class="text-[11px] uppercase tracking-wider font-bold text-zinc-400">1 · Cliente</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label class="${lbl}" for="mo-phone">WhatsApp</label><input id="mo-phone" type="tel" inputmode="tel" autocomplete="off" placeholder="381 555 1234" value="${escapeHtml(MO.phone)}" oninput="moSet('phone', this.value)" class="${inp}" /><div id="mo-cust-hint" class="text-[11px] text-sky-300 mt-1 min-h-[1em]"></div></div>
+              <div><label class="${lbl}" for="mo-name">Nombre</label><input id="mo-name" type="text" autocomplete="off" placeholder="Nombre y apellido" value="${escapeHtml(MO.name)}" oninput="moSet('name', this.value)" class="${inp}" /></div>
+            </div>
+            <div><label class="${lbl}" for="mo-channel">¿Por dónde pidió?</label>
+              <select id="mo-channel" onchange="moSet('channel', this.value)" class="${inp}">${['WhatsApp', 'Mostrador', 'Teléfono', 'Otro'].map(c => `<option ${MO.channel === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+          </section>
+
+          <section class="space-y-3">
+            <h4 class="text-[11px] uppercase tracking-wider font-bold text-zinc-400">2 · Productos</h4>
+            <input id="mo-q" type="search" placeholder="🔍 Buscar producto por nombre o marca" value="${escapeHtml(MO.q)}" oninput="MO.q=this.value;moRenderResults()" class="${inp}" />
+            <div id="mo-results" class="space-y-1.5 max-h-56 overflow-y-auto"></div>
+            <div class="rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-1"><div id="mo-lines"></div></div>
+          </section>
+
+          <section class="space-y-3">
+            <h4 class="text-[11px] uppercase tracking-wider font-bold text-zinc-400">3 · Entrega y pago</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div><label class="${lbl}" for="mo-zone">Entrega</label>
+                <select id="mo-zone" onchange="moSet('zone', this.value)" class="${inp}">${Object.entries(MO_ZONES).map(([k, v]) => `<option value="${k}" ${MO.zone === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+              <div><label class="${lbl}" for="mo-address">Dirección o referencia</label><input id="mo-address" type="text" placeholder="Calle, número, barrio" value="${escapeHtml(MO.address)}" oninput="MO.address=this.value" class="${inp}" /></div>
+              <div><label class="${lbl}" for="mo-pay">Forma de pago</label>
+                <select id="mo-pay" onchange="moSet('pay', this.value)" class="${inp}"><option value="transfer" ${MO.pay === 'transfer' ? 'selected' : ''}>Transferencia (con descuento)</option><option value="cash" ${MO.pay === 'cash' ? 'selected' : ''}>Efectivo (precio lista)</option></select></div>
+              <div><label class="${lbl}" for="mo-status">¿Cómo queda el pedido?</label>
+                <select id="mo-status" onchange="MO.status=this.value" class="${inp}"><option value="Pago pendiente" ${MO.status === 'Pago pendiente' ? 'selected' : ''}>Todavía no pagó</option><option value="En preparación" ${MO.status === 'En preparación' ? 'selected' : ''}>Ya pagó: a preparar</option><option value="Entregado" ${MO.status === 'Entregado' ? 'selected' : ''}>Ya pagó y se lo llevó</option></select></div>
+              <div><label class="${lbl}" for="mo-discount">Descuento extra en $ (opcional)</label><input id="mo-discount" type="number" min="0" inputmode="numeric" placeholder="0" value="${escapeHtml(MO.discount)}" oninput="moSet('discount', this.value)" class="${inp}" /></div>
+              <div><label class="${lbl}" for="mo-ship">Envío en $ (vacío = automático)</label><input id="mo-ship" type="number" min="0" inputmode="numeric" placeholder="Automático" value="${escapeHtml(MO.ship)}" oninput="moSet('ship', this.value)" class="${inp}" /></div>
+            </div>
+            <div><label class="${lbl}" for="mo-note">Nota interna (el cliente no la ve)</label><input id="mo-note" type="text" maxlength="400" placeholder="Ej.: lo retira el hermano, pide factura…" value="${escapeHtml(MO.note)}" oninput="MO.note=this.value" class="${inp}" /></div>
+          </section>
+
+          <div class="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4" id="mo-summary"></div>
+          <div id="mo-err" role="alert" class="${MO.err ? '' : 'hidden '}text-xs font-semibold text-rose-400">${escapeHtml(MO.err)}</div>
+          <div class="flex gap-2 justify-end">
+            <button type="button" onclick="closeManualOrder()" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-sm font-bold">Cancelar</button>
+            <button type="button" id="mo-save" onclick="submitManualOrder()" class="px-5 py-2.5 rounded-xl bg-brand-orange hover:brightness-110 text-black text-sm font-black">Crear pedido</button>
+          </div>
+        </div>
+      </div>`;
+      moRenderResults(); moRenderLines(); moRenderSummary(); moLookupCustomer();
+    }
+    function moError(t) {
+      MO.err = t || '';
+      const el = document.getElementById('mo-err'); if (!el) return;
+      el.textContent = MO.err; el.classList.toggle('hidden', !MO.err);
+    }
+    async function submitManualOrder() {
+      if (!MO || MO.busy) return;
+      const name = (MO.name || '').trim();
+      if (name.length < 2) { moError('Escribí el nombre del cliente.'); return; }
+      if (!isValidArPhone(MO.phone)) { moError('El WhatsApp no es válido: poné la característica (ej. 381 555 1234).'); return; }
+      if (!MO.lines.length) { moError('Agregá al menos un producto.'); return; }
+      if (MO.zone !== 'retiro' && (MO.address || '').trim().length < 3) { moError('Escribí la dirección o referencia de entrega.'); return; }
+      const c = moCalc();
+      if (c.extra > c.subtotal - c.disc) { moError('El descuento extra no puede ser mayor que el total de los productos.'); return; }
+      moError('');
+      const isT = MO.pay === 'transfer';
+      const zoneLabel = MO_ZONES[MO.zone];
+      const body = {
+        customer: name, phone: MO.phone.trim(),
+        address: MO.zone === 'retiro' ? zoneLabel : `${zoneLabel} (${(MO.address || '').trim()})`,
+        deliveryType: zoneLabel, zoneLabel, zone: MO.zone, isTransfer: isT,
+        paymentMethod: isT ? `Transferencia Bancaria (${c.pct}% OFF)` : 'Efectivo en Mano (Precio lista)',
+        channel: MO.channel, initialStatus: MO.status, extraDiscount: c.extra || undefined,
+        shippingOverride: MO.ship !== '' ? Number(MO.ship) : undefined, note: (MO.note || '').trim() || undefined,
+        items: MO.lines.map(l => ({ id: l.id, qty: l.qty, color: l.color }))
+      };
+      MO.busy = true;
+      const sv = document.getElementById('mo-save'); if (sv) { sv.disabled = true; sv.textContent = 'Guardando…'; }
+      const res = await apiRequest('ORDERS', { method: 'POST', headers: ppAuth(), body: JSON.stringify(body) }, '/manual');
+      if (!MO) return;
+      MO.busy = false;
+      if (sv) { sv.disabled = false; sv.textContent = 'Crear pedido'; }
+      if (!res || res.success === false || !res.order) { moError((res && res.error) || 'No se pudo crear el pedido. Probá de nuevo.'); return; }
+      ADMIN_ORDERS.unshift(res.order);
+      try {
+        const pr = await apiRequest('PRODUCTS', { headers: ppAuth() }, can('products.manage') ? '/full' : '');
+        if (Array.isArray(pr)) PRODUCTS = pr.map(sanitizeProduct);
+      } catch (e) {}
+      try {
+        if (can('customers.manage')) { const cr = await apiRequest('CUSTOMERS', { headers: ppAuth() }); if (Array.isArray(cr)) CUSTOMERS = cr; }
+      } catch (e) {}
+      MO.done = res.order;
+      refreshAdminUI();
+      renderManualOrder();
+    }
+    function renderManualDone(wrap) {
+      const o = MO.done;
+      wrap.innerHTML = `
+      <div class="w-full max-w-md bg-zinc-950 border border-white/[0.15] rounded-2xl shadow-2xl p-6 text-center space-y-4">
+        <div class="text-4xl">✅</div>
+        <div><div class="text-lg font-black text-white">Pedido creado</div><div class="text-sm text-zinc-300 mt-1"><span class="font-code text-brand-amber">#${escapeHtml(o.id)}</span> · ${escapeHtml(o.customer)} · <strong>${formatARS(o.total)}</strong></div>
+        <div class="text-[11px] text-zinc-400 mt-1">Estado: ${escapeHtml(o.status)}${o.paid ? ' · cobrado' : ''}. El stock ya se descontó.</div></div>
+        <div class="grid gap-2">
+          <button type="button" onclick="waSend('${o.id}', 'nuevo')" class="py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black text-sm">💬 Mandarle el pedido por WhatsApp</button>
+          <button type="button" onclick="{const id='${o.id}';closeManualOrder();openOrderFicha(id);}" class="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-bold text-sm">📋 Ver la ficha del pedido</button>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="openManualOrder()" class="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-bold text-sm">＋ Cargar otro</button>
+            <button type="button" onclick="closeManualOrder()" class="py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-bold text-sm">Cerrar</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    // ---------- Hoja de ruta ----------
+    function routeCandidates(onlyIds) {
+      const deliverable = o => ['En preparación', 'Despachado'].includes(o.status) && o.zone !== 'retiro' && !/retiro/i.test(o.deliveryType || '');
+      let list = ADMIN_ORDERS.filter(deliverable);
+      if (onlyIds) list = list.filter(o => onlyIds.includes(o.id));
+      return list;
+    }
+    function routeGroups(onlyIds) {
+      const myId = currentStaffSession.staffId;
+      let list = routeCandidates(onlyIds);
+      const manager = can('orders.manage');
+      if (!manager && !onlyIds) list = list.filter(o => myId && o.courierId === myId);
+      const groups = new Map();
+      list.forEach(o => {
+        const k = o.courierId || 0;
+        if (!groups.has(k)) groups.set(k, { id: k, name: o.courierName || 'Sin asignar', orders: [] });
+        groups.get(k).orders.push(o);
+      });
+      return [...groups.values()].sort((a, b) => (a.id === 0) - (b.id === 0) || a.name.localeCompare(b.name));
+    }
+    function routeToCollect(o) { return (!ppIsTransfer(o) && !o.paid) ? (Number(o.total) || 0) : 0; }
+    function openRoute(onlyIds) {
+      window.__routeOnly = onlyIds && onlyIds.length ? onlyIds : null;
+      let wrap = document.getElementById('route-sheet');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'route-sheet';
+        wrap.className = 'fixed inset-0 z-[56] bg-black/80 flex items-center justify-center p-2 sm:p-4';
+        wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-label', 'Hoja de ruta');
+        wrap.addEventListener('click', e => { if (e.target === wrap) closeRoute(); });
+        document.body.appendChild(wrap);
+      }
+      renderRoute();
+    }
+    function closeRoute() { const e = document.getElementById('route-sheet'); if (e) e.remove(); window.__routeOnly = null; }
+    function routeStop(o, i) {
+      const collect = routeToCollect(o);
+      const addr = String(o.address || '').replace(/^[^(]*\(/, '').replace(/\)$/, '') || o.address || '';
+      return `<div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-1.5">
+        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-bold text-white">${i + 1}. ${escapeHtml(o.customer)} <span class="font-code text-[11px] text-zinc-400">#${escapeHtml(o.id)}</span></div><div class="text-xs text-zinc-300">📍 ${escapeHtml(o.address || '')}</div></div>${ppBadge(o.status)}</div>
+        <div class="text-[11px] text-zinc-400">${escapeHtml(o.items || '')}</div>
+        ${collect ? `<div class="text-sm font-black text-amber-300">💵 Cobrar ${formatARS(collect)} en efectivo</div>` : '<div class="text-[11px] font-semibold text-emerald-400">✓ Ya pagado</div>'}
+        ${(o.notes || []).map(n => `<div class="text-[11px] text-amber-200">📝 ${escapeHtml(n.text)}</div>`).join('')}
+        <div class="flex flex-wrap gap-1.5 pt-1">
+          <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr + ', Tucumán, Argentina')}" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg bg-sky-950 border border-sky-800 text-sky-300 text-[11px] font-bold">🗺️ Mapa</a>
+          <a href="tel:+549${normalizeArPhone(o.phone)}" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 text-[11px] font-bold">📞 Llamar</a>
+          <button type="button" onclick="waSend('${o.id}', '${o.status === 'Despachado' ? 'despachado' : 'preparando'}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-300 text-[11px] font-bold">💬 Avisar</button>
+          ${o.status === 'En preparación' && (can('orders.dispatch') || can('orders.manage')) ? `<button type="button" onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500 text-black text-[11px] font-bold">📷 Salida</button>` : ''}
+          ${o.status === 'Despachado' && (can('orders.dispatch') || can('orders.manage')) ? `<button type="button" onclick="openScanModal('handover', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500 text-black text-[11px] font-bold">📲 Entregar</button>` : ''}
+          <button type="button" onclick="openOrderFicha('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 text-[11px] font-bold">📋 Ficha</button>
+        </div></div>`;
+    }
+    function renderRoute() {
+      const wrap = document.getElementById('route-sheet'); if (!wrap) return;
+      const groups = routeGroups(window.__routeOnly);
+      const total = groups.reduce((a, g) => a + g.orders.length, 0);
+      const cash = groups.reduce((a, g) => a + g.orders.reduce((s, o) => s + routeToCollect(o), 0), 0);
+      const mine = !can('orders.manage');
+      wrap.innerHTML = `<div class="w-full max-w-2xl max-h-[94vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-2xl shadow-2xl">
+        <div class="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 p-4 flex items-center justify-between gap-3">
+          <div><h3 class="text-base font-black text-white">🗺️ Hoja de ruta</h3><p class="text-[11px] text-zinc-400">${total} entrega(s) pendientes${cash ? ' · a cobrar en efectivo ' + formatARS(cash) : ''}${mine ? ' · solo las tuyas' : ''}</p></div>
+          <div class="flex gap-2"><button type="button" onclick="printRoute()" class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-bold">🖨️ Imprimir</button><button type="button" onclick="closeRoute()" aria-label="Cerrar" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200">✕</button></div>
+        </div>
+        <div class="p-4 space-y-5">
+          ${total ? groups.map(g => `<section class="space-y-2"><h4 class="text-xs font-black text-white flex items-center gap-2">🛵 ${escapeHtml(g.name)} <span class="text-zinc-400 font-semibold">· ${g.orders.length} parada(s)${g.orders.reduce((s, o) => s + routeToCollect(o), 0) ? ' · cobra ' + formatARS(g.orders.reduce((s, o) => s + routeToCollect(o), 0)) : ''}</span></h4>${g.orders.map(routeStop).join('')}</section>`).join('')
+            : `<div class="text-center text-sm text-zinc-400 py-8">${mine ? 'No tenés entregas asignadas por ahora. Cuando te asignen pedidos aparecen acá.' : 'No hay entregas con envío pendientes. Los pedidos en preparación o en camino con envío a domicilio aparecen acá.'}</div>`}
+        </div></div>`;
+    }
+    function printRoute() {
+      const groups = routeGroups(window.__routeOnly);
+      const w = window.open('', '_blank');
+      if (!w) { alert('El navegador bloqueó la ventana de impresión. Permitila e intentá de nuevo.'); return; }
+      const fecha = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' });
+      w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Hoja de ruta</title><style>body{font:14px/1.4 system-ui,sans-serif;margin:12mm;color:#111}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:18px 0 6px;border-bottom:2px solid #111;padding-bottom:3px}.s{border:1px solid #999;border-radius:6px;padding:8px;margin:6px 0;page-break-inside:avoid}.c{font-weight:700}small{color:#555}@media print{button{display:none}}</style></head><body><h1>PLUGSHOP · Hoja de ruta</h1><small>${escapeHtml(fecha)}</small>${groups.map(g => `<h2>${escapeHtml(g.name)} (${g.orders.length})</h2>${g.orders.map((o, i) => `<div class="s"><b>${i + 1}. ${escapeHtml(o.customer)}</b> · #${escapeHtml(o.id)}<br>📍 ${escapeHtml(o.address || '')}<br>📞 ${escapeHtml(o.phone)}<br>${escapeHtml(o.items || '')}<br>${routeToCollect(o) ? `<span class="c">COBRAR ${formatARS(routeToCollect(o))} (efectivo)</span>` : 'Ya pagado'}${(o.notes || []).map(n => '<br>Nota: ' + escapeHtml(n.text)).join('')}</div>`).join('')}`).join('') || '<p>No hay entregas pendientes.</p>'}<p><button onclick="print()">Imprimir</button></p>`);
+      w.document.close();
+    }
+
+    // ---------- Selección masiva, filtros guardados ----------
+    const SEL_ORDERS = new Set();
+    function toggleOrderSel(id, on) { if (on) SEL_ORDERS.add(id); else SEL_ORDERS.delete(id); renderBulkBar(); }
+    function toggleAllOrderSel(on) {
+      filteredAdminOrders().forEach(o => { if (on) SEL_ORDERS.add(o.id); else SEL_ORDERS.delete(o.id); });
+      renderOrdersTable();
+    }
+    function clearOrderSel() { SEL_ORDERS.clear(); renderOrdersTable(); }
+    function selectedOrders() { return ADMIN_ORDERS.filter(o => SEL_ORDERS.has(o.id)); }
+    function renderBulkBar() {
+      const box = document.getElementById('orders-bulk'); if (!box) return;
+      const sel = selectedOrders();
+      box.classList.toggle('hidden', !sel.length);
+      if (!sel.length) { box.innerHTML = ''; return; }
+      const manager = can('orders.manage'), scan = manager || can('orders.dispatch');
+      box.innerHTML = `<span class="font-bold text-white">${sel.length} seleccionado(s)</span>
+        ${manager && COURIERS.length ? `<select id="bulk-courier" aria-label="Asignar repartidor a la selección" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1.5 text-xs text-white"><option value="">Asignar a…</option>${COURIERS.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}</select><button type="button" onclick="bulkAssign()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">Asignar</button>` : ''}
+        ${scan ? `<button type="button" onclick="bulkStatus('Despachado')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 border border-sky-800 text-sky-300 font-semibold">🛵 Pasar a en camino</button><button type="button" onclick="bulkStatus('Entregado')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-300 font-semibold">✅ Marcar entregados</button>` : ''}
+        <button type="button" onclick="openRoute(selectedOrders().map(o => o.id))" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">🗺️ Hoja de ruta</button>
+        <button type="button" onclick="exportSelectedOrders()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">⬇️ Exportar</button>
+        <button type="button" onclick="clearOrderSel()" class="px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-semibold">Quitar selección</button>`;
+    }
+    async function bulkAssign() {
+      const cid = (document.getElementById('bulk-courier') || {}).value;
+      if (!cid) { alert('Elegí primero a qué repartidor asignar.'); return; }
+      const list = selectedOrders().filter(o => !['Entregado', 'Cancelado'].includes(o.status));
+      if (!list.length) { alert('Los pedidos elegidos ya están cerrados.'); return; }
+      let ok = 0;
+      for (const o of list) {
+        const res = await apiRequest('ORDERS', { method: 'POST', headers: ppAuth(), body: JSON.stringify({ courierId: Number(cid) }) }, '/' + encodeURIComponent(o.id) + '/assign');
+        if (res && res.order) { Object.assign(o, res.order); ok++; }
+      }
+      SEL_ORDERS.clear(); refreshAdminUI();
+      alert(`Listo: ${ok} de ${list.length} pedido(s) asignados.`);
+    }
+    async function bulkStatus(next) {
+      const from = next === 'Despachado' ? 'En preparación' : 'Despachado';
+      const all = selectedOrders(), list = all.filter(o => o.status === from);
+      if (!list.length) { alert(`Ninguno de los pedidos elegidos está en "${from}". Solo se puede avanzar un paso por vez.`); return; }
+      if (!confirm(`¿Pasar ${list.length} pedido(s) a "${next === 'Despachado' ? 'En camino' : 'Entregado'}"?${all.length > list.length ? `\n(${all.length - list.length} no están en "${from}" y se saltean.)` : ''}`)) return;
+      if (!ppLive()) { alert('Para cambiar estados en forma masiva tenés que estar conectado al servidor.'); return; }
+      let ok = 0, fails = [];
+      for (const o of list) {
+        const res = await apiRequest('ORDERS', { method: 'PATCH', headers: ppAuth(), body: JSON.stringify({ status: next }) }, '/' + encodeURIComponent(o.id));
+        if (res && res.order && res.success !== false) { Object.assign(o, res.order); ok++; } else fails.push(o.id + ': ' + ((res && res.error) || 'error'));
+      }
+      SEL_ORDERS.clear(); refreshAdminUI();
+      alert(`Listo: ${ok} de ${list.length} actualizado(s).${fails.length ? '\n\nNo se pudieron:\n' + fails.join('\n') : ''}`);
+    }
+    function exportSelectedOrders() {
+      const list = selectedOrders(); if (!list.length) return;
+      const q = s => `"${String(s == null ? '' : s).replace(/"/g, '""')}"`;
+      let csv = 'Pedido,Fecha,Cliente,Telefono,Direccion,Items,Pago,Total,Estado,Repartidor\n';
+      list.forEach(o => { csv += [q(o.id), q(o.date), q(o.customer), q(o.phone), q(o.address), q(o.items), q(o.paymentMethod), o.total, q(o.status), q(o.courierName)].join(',') + '\n'; });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      a.download = `pedidos_seleccion_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    const VIEWS_KEY = 'plugshop_order_views_v1';
+    function loadOrderViews() { try { const v = JSON.parse(localStorage.getItem(VIEWS_KEY) || '[]'); return Array.isArray(v) ? v.slice(0, 12) : []; } catch (e) { return []; } }
+    function saveOrderViews(v) { try { localStorage.setItem(VIEWS_KEY, JSON.stringify(v.slice(0, 12))); } catch (e) {} }
+    function currentOrderView() {
+      const g = id => (document.getElementById(id) || {}).value || '';
+      return { q: g('orders-search'), st: g('orders-status-filter') || 'active', days: g('orders-date-filter') || 'all', courier: g('orders-courier-filter') || '' };
+    }
+    function saveCurrentView() {
+      const name = prompt('Ponele un nombre a esta vista (ej. "Para despachar hoy"):', '');
+      if (!name || !name.trim()) return;
+      const views = loadOrderViews().filter(v => v.name !== name.trim().slice(0, 30));
+      views.push({ name: name.trim().slice(0, 30), ...currentOrderView() });
+      saveOrderViews(views); renderOrderViews();
+    }
+    function applyOrderView(i) {
+      const v = loadOrderViews()[i]; if (!v) return;
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      set('orders-search', v.q || ''); set('orders-status-filter', v.st || 'active'); set('orders-date-filter', v.days || 'all'); set('orders-courier-filter', v.courier || '');
+      renderOrdersTable();
+    }
+    function deleteOrderView(i) { const v = loadOrderViews(); v.splice(i, 1); saveOrderViews(v); renderOrderViews(); }
+    function renderOrderViews() {
+      const box = document.getElementById('orders-views'); if (!box) return;
+      const views = loadOrderViews();
+      box.innerHTML = views.map((v, i) => `<span class="inline-flex items-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-200 text-[11px]"><button type="button" onclick="applyOrderView(${i})" class="pl-3 pr-2 py-1 font-semibold hover:text-brand-orange">⭐ ${escapeHtml(v.name)}</button><button type="button" onclick="deleteOrderView(${i})" aria-label="Borrar la vista ${escapeHtml(v.name)}" class="pr-2.5 pl-1 py-1 text-zinc-500 hover:text-rose-400">×</button></span>`).join('')
+        + `<button type="button" onclick="saveCurrentView()" class="px-3 py-1 rounded-full border border-dashed border-zinc-600 text-zinc-400 hover:text-white text-[11px] font-semibold">💾 Guardar esta vista</button>`;
+    }
+    function renderCourierFilter() {
+      const sel = document.getElementById('orders-courier-filter'); if (!sel) return;
+      const cur = sel.value;
+      const names = new Map(COURIERS.map(c => [String(c.id), c.name]));
+      ADMIN_ORDERS.forEach(o => { if (o.courierId && !names.has(String(o.courierId))) names.set(String(o.courierId), o.courierName || 'Repartidor'); });
+      sel.classList.toggle('hidden', !names.size);
+      sel.innerHTML = '<option value="">Todos los repartidores</option><option value="none">Sin asignar</option>' + [...names].map(([id, n]) => `<option value="${id}">${escapeHtml(n)}</option>`).join('');
+      sel.value = [...sel.options].some(op => op.value === cur) ? cur : '';
+    }
+
+    // ---------- Buscador global ----------
+    function gsearchQuery() { return ((document.getElementById('gsearch') || {}).value || '').trim(); }
+    function gsearchRun() {
+      const box = document.getElementById('gsearch-results'); if (!box) return;
+      const q = gsearchQuery().toLowerCase(), digits = q.replace(/\D/g, '');
+      if (q.length < 2) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const hit = (...parts) => { const t = parts.join(' ').toLowerCase(); return t.includes(q) || (digits.length >= 4 && t.replace(/\D/g, '').includes(digits)); };
+      const orders = can('orders.view') ? ADMIN_ORDERS.filter(o => hit(o.id, o.customer, o.phone, o.items)).slice(0, 6) : [];
+      const custs = can('customers.manage') ? CUSTOMERS.filter(c => hit(c.name, c.phone, (c.tags || []).join(' '))).slice(0, 4) : [];
+      const prods = can('products.manage') ? PRODUCTS.filter(p => hit(p.name, p.brand, p.keywords)).slice(0, 4) : [];
+      const row = (icon, title, sub, click) => `<button type="button" onclick="${click}" class="w-full text-left px-3 py-2 hover:bg-zinc-800 flex items-center gap-2.5 text-xs"><span class="text-base">${icon}</span><span class="min-w-0"><span class="block text-white font-semibold truncate">${title}</span><span class="block text-zinc-400 truncate">${sub}</span></span></button>`;
+      let html = '';
+      if (orders.length) html += '<div class="px-3 pt-2 pb-1 text-[10px] uppercase font-bold text-zinc-500">Pedidos</div>' + orders.map(o => row('🧾', `#${escapeHtml(o.id)} · ${escapeHtml(o.customer)}`, `${escapeHtml(o.status)} · ${formatARS(o.total || 0)}`, `gsearchGo('order','${o.id}')`)).join('');
+      if (custs.length) html += '<div class="px-3 pt-2 pb-1 text-[10px] uppercase font-bold text-zinc-500">Clientes</div>' + custs.map(c => row('👤', escapeHtml(c.name), `${escapeHtml(c.phone)} · ${c.ordersCount || 0} compra(s)`, `gsearchGo('customer','${normalizeArPhone(c.phone)}')`)).join('');
+      if (prods.length) html += '<div class="px-3 pt-2 pb-1 text-[10px] uppercase font-bold text-zinc-500">Productos</div>' + prods.map(p => row('📦', escapeHtml(p.name), `${formatARS(p.price)} · stock ${escapeHtml(p.stock)}`, `gsearchGo('product','${p.id}')`)).join('');
+      box.innerHTML = html || '<div class="px-3 py-3 text-xs text-zinc-400">No encontré nada con eso.</div>';
+      box.classList.remove('hidden');
+    }
+    function gsearchGo(kind, key) {
+      const inp = document.getElementById('gsearch'); if (inp) inp.value = '';
+      const box = document.getElementById('gsearch-results'); if (box) { box.classList.add('hidden'); box.innerHTML = ''; }
+      if (kind === 'order') openOrderFicha(key);
+      else if (kind === 'customer') openCustomerFicha(key);
+      else if (kind === 'product') switchAdminTab('inventory');
+    }
+    function gsearchKey(e) {
+      if (e.key === 'Escape') { e.target.value = ''; gsearchRun(); e.target.blur(); }
+      else if (e.key === 'Enter') { const first = document.querySelector('#gsearch-results button'); if (first) first.click(); }
+    }
+
+    // ---------- Ficha de cliente ----------
+    let CFICHA = null;
+    const CUST_TAG_PRESETS = ['VIP', 'Mayorista', 'Revendedor', 'Puntual', 'Moroso', 'Pide factura'];
+    function custOrders(c) { return ADMIN_ORDERS.filter(o => samePhone(o.phone, c.phone)); }
+    function openCustomerFicha(phoneKey) {
+      const c = CUSTOMERS.find(x => samePhone(x.phone, phoneKey));
+      if (!c) { alert('No encontré la ficha de ese cliente.'); return; }
+      CFICHA = { phone: normalizeArPhone(c.phone), tags: Array.isArray(c.tags) ? c.tags.slice() : [], note: c.note || '' };
+      renderCustomerFicha();
+    }
+    function closeCustomerFicha() { CFICHA = null; const e = document.getElementById('customer-ficha'); if (e) e.remove(); }
+    function cfNewOrder() {
+      const c = CUSTOMERS.find(x => samePhone(x.phone, CFICHA.phone)); if (!c) return;
+      const pre = { name: c.name, phone: c.phone };
+      closeCustomerFicha(); openManualOrder(pre);
+    }
+    function cfToggleTag(t) { const i = CFICHA.tags.findIndex(x => x.toLowerCase() === t.toLowerCase()); if (i >= 0) CFICHA.tags.splice(i, 1); else if (CFICHA.tags.length < 8) CFICHA.tags.push(t); renderCustomerFicha(); }
+    function cfAddTag() {
+      const t = (prompt('Etiqueta nueva (ej. "Amigo de Juan"):', '') || '').trim().slice(0, 20);
+      if (t && !CFICHA.tags.some(x => x.toLowerCase() === t.toLowerCase()) && CFICHA.tags.length < 8) { CFICHA.tags.push(t); renderCustomerFicha(); }
+    }
+    async function cfSave() {
+      const c = CUSTOMERS.find(x => samePhone(x.phone, CFICHA.phone)); if (!c) return;
+      CFICHA.note = (document.getElementById('cf-note') || {}).value || '';
+      const msg = document.getElementById('cf-msg');
+      if (ppLive()) {
+        const res = await apiRequest('CUSTOMERS', { method: 'PUT', headers: ppAuth(), body: JSON.stringify({ tags: CFICHA.tags, note: CFICHA.note }) }, '/' + encodeURIComponent(CFICHA.phone));
+        if (!res || res.success === false || !res.customer) { if (msg) { msg.textContent = (res && res.error) || 'No se pudo guardar.'; msg.className = 'text-xs font-semibold text-rose-400'; } return; }
+        Object.assign(c, res.customer);
+      } else { c.tags = CFICHA.tags.slice(); c.note = CFICHA.note.slice(0, 600); saveStorage(STORAGE_KEYS.CUSTOMERS, CUSTOMERS); }
+      if (msg) { msg.textContent = '✓ Guardado'; msg.className = 'text-xs font-semibold text-emerald-400'; }
+      refreshAdminUI();
+    }
+    function renderCustomerFicha() {
+      if (!CFICHA) return;
+      const c = CUSTOMERS.find(x => samePhone(x.phone, CFICHA.phone));
+      if (!c) { closeCustomerFicha(); return; }
+      let wrap = document.getElementById('customer-ficha');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'customer-ficha';
+        wrap.className = 'fixed inset-0 z-[55] bg-black/70 flex justify-end';
+        wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-label', 'Ficha del cliente');
+        wrap.addEventListener('click', e => { if (e.target === wrap) closeCustomerFicha(); });
+        document.body.appendChild(wrap);
+      }
+      const orders = custOrders(c).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+      const valid = orders.filter(o => o.status !== 'Cancelado');
+      const spent = valid.filter(orderCollected).reduce((a, o) => a + orderNetTotal(o), 0);
+      const avg = valid.length ? Math.round(valid.reduce((a, o) => a + (Number(o.total) || 0), 0) / valid.length) : 0;
+      const first = orders.length ? orders[orders.length - 1] : null, last = orders[0] || null;
+      const claims = (typeof CLAIMS !== 'undefined' ? CLAIMS : []).filter(cl => samePhone(cl.phone, c.phone));
+      const refunds = orders.filter(o => o.refund);
+      const stat = (label, val) => `<div class="rounded-xl bg-zinc-900 border border-zinc-800 p-3"><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">${label}</div><div class="text-base font-black text-white mt-0.5">${val}</div></div>`;
+      const prev = wrap.firstElementChild ? wrap.firstElementChild.scrollTop : 0;
+      const noteVal = (document.getElementById('cf-note') || {}).value;
+      wrap.innerHTML = `<div class="w-full sm:max-w-xl h-full overflow-y-auto bg-zinc-950 border-l border-white/[0.12] shadow-2xl">
+        <div class="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 p-4 flex items-start justify-between gap-3">
+          <div class="min-w-0"><div class="text-base font-black text-white truncate">${escapeHtml(c.name)}${c.registered ? ' <span class="text-[10px] text-emerald-400">✓ Registrado</span>' : ''}</div><div class="text-xs text-zinc-400 font-code">${escapeHtml(c.phone)}${c.zone ? ' · ' + escapeHtml(c.zone) : ''}</div></div>
+          <button type="button" onclick="closeCustomerFicha()" aria-label="Cerrar ficha" class="w-9 h-9 shrink-0 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200">✕</button>
+        </div>
+        <div class="p-4 space-y-4">
+          <div class="flex flex-wrap gap-2">
+            <a href="${waLink(c.phone)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold">💬 WhatsApp</a>
+            ${can('orders.create') ? `<button type="button" onclick="cfNewOrder()" class="px-3 py-2 rounded-xl bg-brand-orange text-black text-xs font-bold">➕ Nuevo pedido</button>` : ''}
+            ${can('customers.manage') ? `<button type="button" onclick="editCustomer('${normalizeArPhone(c.phone)}')" class="px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-xs font-bold">✏️ Editar datos</button>` : ''}
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            ${stat('Compras', valid.length)}${stat('Total gastado', formatARS(spent))}${stat('Ticket promedio', valid.length ? formatARS(avg) : '—')}${stat('Última compra', last ? escapeHtml(last.date || ppWhen(last.createdAt)) : '—')}
+          </div>
+          ${first ? `<div class="text-[11px] text-zinc-500">Cliente desde ${escapeHtml(first.date || ppWhen(first.createdAt))}</div>` : ''}
+          ${ppSection('Etiquetas y nota interna', `
+            <div class="flex flex-wrap gap-1.5">${CUST_TAG_PRESETS.concat(CFICHA.tags.filter(t => !CUST_TAG_PRESETS.some(p => p.toLowerCase() === t.toLowerCase()))).map(t => { const on = CFICHA.tags.some(x => x.toLowerCase() === t.toLowerCase()); return `<button type="button" onclick="cfToggleTag(this.dataset.t)" data-t="${escapeHtml(t)}" aria-pressed="${on}" class="px-2.5 py-1 rounded-full border text-[11px] font-semibold ${on ? 'bg-brand-orange/20 border-brand-orange text-brand-orange' : 'bg-zinc-900 border-zinc-700 text-zinc-400'}">${escapeHtml(t)}</button>`; }).join('')}<button type="button" onclick="cfAddTag()" class="px-2.5 py-1 rounded-full border border-dashed border-zinc-600 text-[11px] text-zinc-400">＋ Otra</button></div>
+            <textarea id="cf-note" rows="3" maxlength="600" placeholder="Notas que solo ve el equipo (preferencias, horarios, cosas a recordar)…" class="mt-3 w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange">${escapeHtml(noteVal !== undefined ? noteVal : CFICHA.note)}</textarea>
+            ${can('customers.manage') ? '<div class="flex items-center gap-3 mt-2"><button type="button" onclick="cfSave()" class="px-3 py-2 rounded-xl bg-zinc-100 text-black text-xs font-bold">Guardar</button><span id="cf-msg" class="text-xs"></span></div>' : ''}`)}
+          ${ppSection(`Pedidos (${orders.length})`, orders.length ? `<div class="divide-y divide-zinc-800">${orders.slice(0, 15).map(o => `<button type="button" onclick="openOrderFicha('${o.id}')" class="w-full text-left py-2 flex items-center justify-between gap-2 text-xs hover:bg-zinc-900/60"><span class="min-w-0"><span class="font-code text-white">#${escapeHtml(o.id)}</span> <span class="text-zinc-400">${escapeHtml(o.date || ppWhen(o.createdAt))}</span><span class="block text-[11px] text-zinc-400 truncate">${escapeHtml(o.items || '')}</span></span><span class="text-right shrink-0"><span class="block text-brand-amber font-bold">${formatARS(o.total || 0)}</span>${ppBadge(o.status)}</span></button>`).join('')}</div>${orders.length > 15 ? `<div class="text-[11px] text-zinc-500 mt-2">Mostrando los 15 más recientes.</div>` : ''}` : '<div class="text-xs text-zinc-500">Todavía no hizo pedidos.</div>')}
+          ${(claims.length || refunds.length) ? ppSection('Reclamos y reintegros', `${claims.map(cl => `<div class="text-xs py-1 text-zinc-200">🛡️ ${cl.type === 'garantia' ? 'Garantía' : 'Arrepentimiento'} · pedido <span class="font-code">${escapeHtml(cl.orderId)}</span> · <strong>${escapeHtml(cl.status)}</strong></div>`).join('')}${refunds.map(o => `<div class="text-xs py-1 ${o.refund.status === 'pendiente' ? 'text-amber-300' : 'text-emerald-300'}">💸 ${o.refund.status === 'pendiente' ? 'Reintegro pendiente' : 'Reintegro devuelto'} ${formatARS(o.refund.amount)} · <span class="font-code">${escapeHtml(o.id)}</span></div>`).join('')}`) : ''}
+        </div></div>`;
+      if (wrap.firstElementChild) wrap.firstElementChild.scrollTop = prev;
+    }
+
+    // ---------- Hoy: resumen de ventas, lista de lanzamiento, mis entregas ----------
+    const LAUNCH_KEY = 'plugshop_launch_v1';
+    function launchManual() { try { const v = JSON.parse(localStorage.getItem(LAUNCH_KEY) || '{}'); return v && typeof v === 'object' ? v : {}; } catch (e) { return {}; } }
+    function toggleLaunch(id) {
+      const v = launchManual(); v[id] = !v[id];
+      try { localStorage.setItem(LAUNCH_KEY, JSON.stringify(v)); } catch (e) {}
+      renderTodayExtras();
+    }
+    function launchItems() {
+      const man = launchManual();
+      const legalOk = typeof LEGAL_DATA === 'undefined' ? true : !Object.values(LEGAL_DATA).some(x => String(x).includes('[COMPLETAR'));
+      const aliasOk = !!STORE_SETTINGS.bankAlias && STORE_SETTINGS.bankAlias !== 'PlugShop.store.ar';
+      const cbuOk = !!STORE_SETTINGS.bankCbu && STORE_SETTINGS.bankCbu !== '3840200500000011487511';
+      const active = PRODUCTS.filter(p => p.active !== false);
+      const noPhoto = active.filter(p => !(p.photos && p.photos.length)).length;
+      return [
+        { id: 'legal', auto: true, ok: legalOk, label: 'Datos legales completos (razón social, CUIT, domicilio, email)', hint: 'Todavía tienen [COMPLETAR] en los textos legales de la tienda.' },
+        { id: 'bank', auto: true, ok: aliasOk && cbuOk, label: 'Alias y CBU son los de tu cuenta', hint: 'Están los datos de ejemplo. Cargá los tuyos en Ajustes → Datos de cobro.' },
+        { id: 'products', auto: true, ok: active.length >= 1 && noPhoto === 0, label: 'Productos reales cargados, todos con foto', hint: active.length ? `${noPhoto} producto(s) activos sin foto.` : 'No hay productos activos.' },
+        { id: 'pin', ok: !!man.pin, label: 'Cambié el PIN del administrador', hint: 'Ajustes → Seguridad. Usá uno que nadie conozca.' },
+        { id: 'test', ok: !!man.test, label: 'Hice un pedido de prueba completo (pedir → pagar → despachar → entregar)', hint: '' },
+        { id: 'clean', ok: !!man.clean, label: 'Borré los pedidos, clientes y reclamos de prueba', hint: '' },
+        { id: 'lawyer', ok: !!man.lawyer, label: 'Un abogado revisó los textos legales', hint: '' },
+        { id: 'banner', ok: !!man.banner, label: 'Saqué el cartel de "Versión piloto"', hint: 'Se quita en una actualización de la tienda.' }
+      ];
+    }
+    function weekdayShort(d) { return ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][d.getDay()]; }
+    function salesBetween(from, to) {
+      let n = 0, total = 0;
+      ADMIN_ORDERS.forEach(o => {
+        const t = ppMs(o.createdAt) || ppMs(o.date); if (!t || t < from || t >= to) return;
+        if (o.status === 'Cancelado') return;
+        n++; if (orderCollected(o)) total += orderNetTotal(o);
+      });
+      return { n, total };
+    }
+    function deltaChip(cur, prev) {
+      if (!prev) return cur ? '<span class="text-emerald-400 font-bold">nuevo</span>' : '<span class="text-zinc-500">—</span>';
+      const p = Math.round((cur - prev) / prev * 100);
+      return `<span class="${p >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${p >= 0 ? '▲' : '▼'} ${Math.abs(p)}%</span>`;
+    }
+    function renderTodayExtras() {
+      const box = document.getElementById('today-extras'); if (!box) return;
+      const mineBox = document.getElementById('today-mine');
+      const parts = [], mineParts = [];
+      const role = currentStaffSession.role;
+      // Mis entregas (repartidores)
+      if (!can('orders.manage') && can('orders.dispatch')) {
+        const myId = currentStaffSession.staffId;
+        const mine = ADMIN_ORDERS.filter(o => ['En preparación', 'Despachado'].includes(o.status) && myId && o.courierId === myId);
+        mineParts.push(`<button type="button" onclick="openRoute()" class="w-full text-left rounded-2xl border border-sky-700/50 bg-sky-950/20 p-4 hover:brightness-125"><div class="flex items-center justify-between"><span class="text-2xl">🗺️</span><span class="text-3xl font-black text-white">${mine.length}</span></div><div class="mt-2 text-sm font-bold text-white">Mis entregas</div><div class="text-[11px] text-zinc-400">Tocá para ver tu hoja de ruta con dirección, mapa y cobros.</div></button>`);
+      }
+      // Resumen de ventas
+      if (role === 'admin' || can('insights.view')) {
+        const sod = new Date(); sod.setHours(0, 0, 0, 0);
+        const d0 = sod.getTime(), DAY = 86400000;
+        const today = salesBetween(d0, d0 + DAY), yest = salesBetween(d0 - DAY, d0);
+        const week = salesBetween(d0 - 6 * DAY, d0 + DAY), pweek = salesBetween(d0 - 13 * DAY, d0 - 6 * DAY);
+        const days = [];
+        for (let i = 6; i >= 0; i--) { const s = d0 - i * DAY; days.push({ label: weekdayShort(new Date(s)), ...salesBetween(s, s + DAY), today: i === 0 }); }
+        const max = Math.max(1, ...days.map(d => d.total));
+        const pending = finStats(ADMIN_ORDERS, 0);
+        const tile = (label, val, sub) => `<div class="rounded-xl bg-zinc-900 border border-zinc-800 p-3"><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">${label}</div><div class="text-xl font-black text-white mt-0.5">${val}</div><div class="text-[11px] text-zinc-400 mt-0.5">${sub}</div></div>`;
+        parts.push(`<section class="rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 space-y-3" aria-label="Resumen de ventas">
+          <div class="flex items-center justify-between"><h4 class="text-sm font-black text-white">📈 Resumen de ventas</h4><span class="text-[11px] text-zinc-500">Cobradas, sin contar reintegros</span></div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+            ${tile('Hoy', formatARS(today.total), `${today.n} pedido(s) · ayer ${formatARS(yest.total)} ${deltaChip(today.total, yest.total)}`)}
+            ${tile('Últimos 7 días', formatARS(week.total), `${week.n} pedido(s) · ${deltaChip(week.total, pweek.total)} vs semana anterior`)}
+            ${tile('Ticket promedio (7 d)', week.n ? formatARS(Math.round(week.total / Math.max(1, week.n))) : '—', 'por pedido')}
+            ${tile('Por cobrar', formatARS(pending.pending || 0), `${pending.pendingCount || 0} pedido(s) sin cobrar`)}
+          </div>
+          <div class="flex items-end gap-1.5 h-20" role="img" aria-label="Ventas de los últimos 7 días">${days.map(d => `<div class="flex-1 flex flex-col items-center justify-end gap-1 h-full"><div class="w-full rounded-t ${d.today ? 'bg-brand-orange' : 'bg-zinc-700'}" style="height:${Math.max(4, Math.round(d.total / max * 100))}%" title="${formatARS(d.total)}"></div><div class="text-[10px] text-zinc-500">${d.label}</div></div>`).join('')}</div>
+        </section>`);
+      }
+      // Lista de lanzamiento (solo admin)
+      if (role === 'admin') {
+        const items = launchItems(), done = items.filter(i => i.ok).length;
+        if (done < items.length) {
+          parts.push(`<section class="rounded-2xl border border-orange-700/40 bg-orange-950/10 p-4 space-y-3" aria-label="Lista de lanzamiento">
+            <div class="flex items-center justify-between gap-3"><h4 class="text-sm font-black text-white">🚀 Antes de abrir al público</h4><span class="text-xs font-bold text-orange-300">${done} de ${items.length}</span></div>
+            <div class="h-2 rounded-full bg-zinc-800 overflow-hidden"><div class="h-full bg-brand-orange" style="width:${Math.round(done / items.length * 100)}%"></div></div>
+            <ul class="space-y-1.5">${items.map(i => `<li class="flex items-start gap-2.5 text-xs">${i.auto ? `<span class="mt-0.5 w-4 text-center ${i.ok ? 'text-emerald-400' : 'text-amber-400'}">${i.ok ? '✓' : '○'}</span>` : `<input type="checkbox" ${i.ok ? 'checked' : ''} onchange="toggleLaunch('${i.id}')" class="mt-0.5 w-4 h-4 accent-orange-500" aria-label="${escapeHtml(i.label)}" />`}<span class="${i.ok ? 'text-zinc-500 line-through' : 'text-zinc-100'}">${escapeHtml(i.label)}${(!i.ok && i.hint) ? `<span class="block text-[11px] text-zinc-500 no-underline">${escapeHtml(i.hint)}</span>` : ''}</span></li>`).join('')}</ul>
+          </section>`);
+        }
+      }
+      box.innerHTML = parts.join('');
+      if (mineBox) mineBox.innerHTML = mineParts.join('');
+    }
+
     // ---- Hoy: lo urgente del día, según lo que el rol puede ver ----
     function goToday(tab, quick) {
       switchAdminTab(tab);
       if (tab === 'orders' && quick) setOrdersQuick(quick);
     }
     function renderTodayTab() {
+      renderTodayExtras();
       const box = document.getElementById('today-cards');
       if (!box) return;
       const role = (currentStaffSession && currentStaffSession.role) || 'admin';
@@ -4565,12 +5427,13 @@ html { scroll-behavior: smooth; }
       const custTable = document.getElementById('admin-customers-table-body');
       custTable.innerHTML = CUSTOMERS.map(c => `
         <tr class="hover:bg-zinc-900/60 transition-colors">
-          <td class="py-3 px-4 font-bold text-white font-sans">${escapeHtml(c.name)}${c.registered ? ' <span class="text-[10px] text-emerald-400 font-code">✓ Registrado</span>' : ''}</td>
+          <td class="py-3 px-4 font-bold text-white font-sans"><button type="button" onclick="openCustomerFicha('${normalizeArPhone(c.phone)}')" class="text-left underline decoration-dotted underline-offset-2 hover:text-brand-orange" title="Abrir la ficha del cliente">${escapeHtml(c.name)}</button>${c.registered ? ' <span class="text-[10px] text-emerald-400 font-code">✓ Registrado</span>' : ''}${(c.tags || []).map(t => ` <span class="px-1.5 py-0.5 rounded-full bg-brand-orange/15 text-brand-orange text-[10px] font-semibold">${escapeHtml(t)}</span>`).join('')}</td>
           <td class="py-3 px-4 text-zinc-300">${escapeHtml(c.phone)}</td>
           <td class="py-3 px-4 text-zinc-400 font-sans">${escapeHtml(c.zone)}</td>
           <td class="py-3 px-4 font-semibold text-white font-sans">${c.ordersCount} compras</td>
           <td class="py-3 px-4 font-bold text-brand-amber">${formatARS(c.totalSpent)}</td>
           <td class="py-3 px-4 text-right font-sans">
+            <button onclick="openCustomerFicha('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-zinc-100 hover:bg-white text-black text-[10px] font-bold">📋 Ficha</button>
             <button onclick="window.open(waLink('${c.phone}'), '_blank')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-semibold">
               WhatsApp ↗
             </button>
@@ -5292,8 +6155,7 @@ html { scroll-behavior: smooth; }
     function sendOrderUpdateWhatsApp(orderId) {
       const order = ADMIN_ORDERS.find(o => o.id === orderId);
       if (!order) return;
-      const msg = `¡Hola ${order.customer}! Te escribimos de *PLUGSHOP* para avisarte que tu pedido *#${order.id}* está en estado: *${order.status.toUpperCase()}*.`;
-      window.open(waLink(order.phone, msg), '_blank');
+      waSend(orderId, waDefaultKey(order));
     }
 
     // ==========================================
@@ -6296,7 +7158,7 @@ html { scroll-behavior: smooth; }
     function saveStaffSession() {
       try {
         if (currentStaffSession.token) sessionStorage.setItem(STAFF_SESSION_KEY, JSON.stringify({
-          role: currentStaffSession.role, name: currentStaffSession.name, token: currentStaffSession.token
+          role: currentStaffSession.role, name: currentStaffSession.name, token: currentStaffSession.token, staffId: currentStaffSession.staffId || null
         }));
       } catch (e) {}
     }
@@ -6305,7 +7167,7 @@ html { scroll-behavior: smooth; }
       try {
         const s = JSON.parse(sessionStorage.getItem(STAFF_SESSION_KEY) || 'null');
         if (s && typeof s.token === 'string' && s.token && Object.prototype.hasOwnProperty.call(ROLE_LABELS, s.role)) {
-          return { role: s.role, name: String(s.name || '').slice(0, 60), token: s.token };
+          return { role: s.role, name: String(s.name || '').slice(0, 60), token: s.token, staffId: Number.isInteger(s.staffId) ? s.staffId : null };
         }
       } catch (e) {}
       return null;
@@ -6640,6 +7502,25 @@ html { scroll-behavior: smooth; }
     }
     function openAdminMore() { const s = document.getElementById('admin-more-sheet'); if (s) s.classList.remove('hidden'); }
     function closeAdminMore() { const s = document.getElementById('admin-more-sheet'); if (s) s.classList.add('hidden'); }
+
+    // Atajos del panel: "/" busca, Esc cierra la ventana de arriba.
+    document.addEventListener('keydown', e => {
+      const t = e.target, typing = t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable);
+      if (e.key === '/' && !typing) {
+        const g = document.getElementById('gsearch'), m = document.getElementById('admin-modal');
+        if (g && m && !m.classList.contains('hidden')) { e.preventDefault(); g.focus(); }
+      } else if (e.key === 'Escape') {
+        if (document.getElementById('manual-order')) closeManualOrder();
+        else if (document.getElementById('route-sheet')) closeRoute();
+        else if (document.getElementById('customer-ficha')) closeCustomerFicha();
+        else if (document.getElementById('order-ficha')) closeOrderFicha();
+      }
+    });
+    document.addEventListener('click', e => {
+      const r = document.getElementById('gsearch-results');
+      if (r && !r.classList.contains('hidden') && !e.target.closest('#gsearch') && !e.target.closest('#gsearch-results')) r.classList.add('hidden');
+    });
+
 
 
     // ---- Modo claro / oscuro (se recuerda en cada navegador) ----
