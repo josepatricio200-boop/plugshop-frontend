@@ -777,7 +777,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v8.0</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v8.2</span>
           </div>
         </div>
 
@@ -817,7 +817,8 @@ html { scroll-behavior: smooth; }
           <div class="space-y-4">
             <div>
               <h3 id="gallery-title" class="text-xl font-extrabold text-white leading-tight"></h3>
-              <p id="gallery-specs" class="text-xs text-zinc-400 mt-1.5 leading-relaxed"></p>
+              <div id="gallery-specs" class="text-xs text-zinc-400 mt-1.5 leading-relaxed"></div>
+              <button type="button" id="gallery-specs-more" onclick="toggleGalleryDesc()" class="hidden mt-1 text-[11px] font-bold text-brand-orange hover:underline">Ver descripción completa ▾</button>
             </div>
 
             <!-- INTERACTIVE COLOR VARIANT SELECTOR -->
@@ -864,6 +865,22 @@ html { scroll-behavior: smooth; }
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Visor de fotos a pantalla completa -->
+  <div id="photo-lightbox" class="hidden fixed inset-0 z-[80] bg-black flex-col" role="dialog" aria-modal="true" aria-label="Fotos del producto">
+    <div class="shrink-0 flex items-center justify-between gap-3 px-4 py-3 text-zinc-200">
+      <span id="lb-counter" class="text-xs font-bold font-code w-16"></span>
+      <span id="lb-title" class="min-w-0 truncate text-sm font-bold text-white"></span>
+      <button type="button" onclick="closeLightbox()" aria-label="Cerrar" class="w-10 h-10 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-lg">✕</button>
+    </div>
+    <div class="relative flex-1 min-h-0" ontouchstart="lbTouchStart(event)" ontouchend="lbTouchEnd(event)">
+      <div id="lb-wrap" class="absolute inset-0 flex px-2 sm:px-16"></div>
+      <button type="button" id="lb-prev" onclick="lbStep(-1)" aria-label="Foto anterior" class="hidden absolute left-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white text-2xl leading-none">‹</button>
+      <button type="button" id="lb-next" onclick="lbStep(1)" aria-label="Foto siguiente" class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/60 hover:bg-black/80 text-white text-2xl leading-none">›</button>
+    </div>
+    <div class="shrink-0 px-4 pt-2 pb-1 text-center text-[11px] text-zinc-400" id="lb-hint"></div>
+    <div id="lb-thumbs" class="shrink-0 flex gap-2 overflow-x-auto no-scrollbar px-4 pb-4 pt-1"></div>
   </div>
 
   <!-- Customer Account & Order Tracking Modal -->
@@ -1678,6 +1695,11 @@ html { scroll-behavior: smooth; }
     function cleanText(v, max = 200) {
       return String(v ?? '').replace(/[<>`]/g, '').replace(/"/g, '”').replace(/'/g, '’').trim().slice(0, max);
     }
+    // Texto largo (descripción): respeta los saltos de línea.
+    function cleanLongText(v, max = 3000) {
+      return String(v ?? '').replace(/\r\n?/g, '\n').replace(/[<>`]/g, '').replace(/"/g, '”').replace(/'/g, '’')
+        .split('\n').map(l => l.replace(/[ \t]+$/g, '')).join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, max);
+    }
     function cleanVisual(v) {
       const s = String(v ?? '').trim();
       if (/^https?:\/\/[^\s"'<>`]+$/i.test(s)) return s;
@@ -1700,7 +1722,7 @@ html { scroll-behavior: smooth; }
       return {
         ...p,
         name: cleanText(p.name, 120), brand: cleanText(p.brand, 60), category: cleanText(p.category, 40), subcategory: cleanText(p.subcategory, 40), active: p.active !== false,
-        specs: cleanText(p.specs, 300), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
+        specs: cleanLongText(p.specs, 3000), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
@@ -2300,7 +2322,7 @@ html { scroll-behavior: smooth; }
 
       document.getElementById('detail-modal-brand').textContent = prod.brand;
       document.getElementById('gallery-title').textContent = prod.name;
-      document.getElementById('gallery-specs').textContent = prod.specs;
+      renderGalleryDesc(prod.specs);
       document.getElementById('gallery-warranty').textContent = prod.warranty;
       const wNote = document.getElementById('gallery-warranty-note');
       if (wNote) {
@@ -2330,6 +2352,44 @@ html { scroll-behavior: smooth; }
       document.getElementById('product-detail-modal').classList.remove('hidden');
       document.getElementById('product-detail-modal').classList.add('flex');
     }
+
+    // Descripción: párrafos, listas (líneas con - • *) y subtítulos (líneas que terminan en ":"). Si es larga, se pliega.
+    function descHtml(raw) {
+      const out = []; let para = [], list = [];
+      const flushP = () => { if (para.length) { out.push('<p class="mb-2">' + para.map(escapeHtml).join('<br>') + '</p>'); para = []; } };
+      const flushL = () => { if (list.length) { out.push('<ul class="mb-2 space-y-1">' + list.map(t => '<li class="flex gap-2"><span class="text-brand-orange shrink-0">•</span><span>' + escapeHtml(t) + '</span></li>').join('') + '</ul>'); list = []; } };
+      String(raw || '').replace(/\r/g, '').split('\n').forEach(line => {
+        const t = line.trim();
+        if (!t) { flushP(); flushL(); return; }
+        const li = t.match(/^(?:[-•*·▪►→✔✅]|\d{1,2}[.)])\s+(.+)$/);
+        if (li) { flushP(); list.push(li[1]); return; }
+        if (t.length <= 60 && /:$/.test(t)) { flushP(); flushL(); out.push('<p class="mt-2 mb-1 font-bold text-zinc-200">' + escapeHtml(t) + '</p>'); return; }
+        flushL(); para.push(t);
+      });
+      flushP(); flushL();
+      return out.join('');
+    }
+    let galleryDescOpen = false;
+    function renderGalleryDesc(raw) {
+      const box = document.getElementById('gallery-specs'), btn = document.getElementById('gallery-specs-more');
+      if (!box) return;
+      galleryDescOpen = false;
+      box.innerHTML = descHtml(raw);
+      const long = String(raw || '').length > 320 || String(raw || '').split('\n').length > 7;
+      box.dataset.long = long ? '1' : '';
+      applyGalleryDescState();
+      if (btn) btn.classList.toggle('hidden', !long);
+    }
+    function applyGalleryDescState() {
+      const box = document.getElementById('gallery-specs'), btn = document.getElementById('gallery-specs-more');
+      if (!box) return;
+      const clamp = box.dataset.long === '1' && !galleryDescOpen;
+      box.style.maxHeight = clamp ? '9.5rem' : '';
+      box.style.overflow = clamp ? 'hidden' : '';
+      box.style.webkitMaskImage = box.style.maskImage = clamp ? 'linear-gradient(to bottom, #000 70%, transparent)' : '';
+      if (btn) btn.textContent = galleryDescOpen ? 'Ver menos ▴' : 'Ver descripción completa ▾';
+    }
+    function toggleGalleryDesc() { galleryDescOpen = !galleryDescOpen; applyGalleryDescState(); }
 
     function renderGalleryColorPills(colors) {
       const row = document.getElementById('gallery-colors-pills-row');
@@ -2403,7 +2463,10 @@ html { scroll-behavior: smooth; }
       const activePhoto = photos[activeGalleryPhotoIndex] || photos[0];
 
       const mainView = document.getElementById('gallery-main-view');
-      mainView.innerHTML = renderVisualElement(activePhoto, 'w-full h-full object-contain max-h-64 rounded-xl', 'text-8xl select-none');
+      const many = photos.length > 1;
+      mainView.innerHTML = `<button type="button" onclick="openLightbox(${activeGalleryPhotoIndex})" aria-label="Ver la foto en grande" class="w-full h-full flex items-center justify-center cursor-zoom-in">${renderVisualElement(activePhoto, 'w-full h-full object-contain max-h-64 rounded-xl', 'text-8xl select-none')}</button>
+        <span class="pointer-events-none absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/60 text-[10px] font-bold text-zinc-100">🔍 Tocá para ampliar${many ? ' · ' + (activeGalleryPhotoIndex + 1) + '/' + photos.length : ''}</span>
+        ${many ? `<button type="button" onclick="stepGalleryPhoto(-1)" aria-label="Foto anterior" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white text-xl leading-none">‹</button><button type="button" onclick="stepGalleryPhoto(1)" aria-label="Foto siguiente" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white text-xl leading-none">›</button>` : ''}`;
 
       const thumbsRow = document.getElementById('gallery-thumbnails-row');
       thumbsRow.innerHTML = photos.map((ph, idx) => {
@@ -2423,6 +2486,63 @@ html { scroll-behavior: smooth; }
       activeGalleryPhotoIndex = index;
       renderGalleryActivePhoto();
     }
+    function stepGalleryPhoto(d) {
+      if (!activeGalleryProduct) return;
+      const n = (activeGalleryProduct.photos || []).length; if (n < 2) return;
+      switchGalleryPhoto((activeGalleryPhotoIndex + d + n) % n);
+    }
+
+    // ---- Visor de fotos a pantalla completa: flechas, deslizar, miniaturas y zoom ----
+    let LB_ZOOM = false, LB_X = null;
+    function lbOpen() { const e = document.getElementById('photo-lightbox'); return !!e && !e.classList.contains('hidden'); }
+    function openLightbox(i) {
+      const e = document.getElementById('photo-lightbox'); if (!e || !activeGalleryProduct) return;
+      activeGalleryPhotoIndex = Math.max(0, Math.min(Number(i) || 0, (activeGalleryProduct.photos || ['x']).length - 1));
+      LB_ZOOM = false;
+      e.classList.remove('hidden'); e.classList.add('flex');
+      lbRender();
+    }
+    function closeLightbox() {
+      const e = document.getElementById('photo-lightbox'); if (!e) return;
+      e.classList.add('hidden'); e.classList.remove('flex');
+      if (activeGalleryProduct) renderGalleryActivePhoto();
+    }
+    function lbStep(d) {
+      if (!activeGalleryProduct) return;
+      const n = (activeGalleryProduct.photos || []).length; if (n < 2) return;
+      activeGalleryPhotoIndex = (activeGalleryPhotoIndex + d + n) % n; LB_ZOOM = false; lbRender();
+    }
+    function lbGo(i) { activeGalleryPhotoIndex = i; LB_ZOOM = false; lbRender(); }
+    function lbToggleZoom() { LB_ZOOM = !LB_ZOOM; lbRender(); const w = document.getElementById('lb-wrap'); if (w && LB_ZOOM) { w.scrollLeft = (w.scrollWidth - w.clientWidth) / 2; w.scrollTop = (w.scrollHeight - w.clientHeight) / 2; } }
+    function lbRender() {
+      const p = activeGalleryProduct; if (!p) return;
+      const photos = (p.photos && p.photos.length) ? p.photos : ['📦'];
+      const i = Math.min(activeGalleryPhotoIndex, photos.length - 1), many = photos.length > 1;
+      const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+      const t = document.getElementById('lb-title'); if (t) t.textContent = p.name || '';
+      const c = document.getElementById('lb-counter'); if (c) c.textContent = many ? (i + 1) + ' / ' + photos.length : '';
+      const wrap = document.getElementById('lb-wrap');
+      if (wrap) {
+        wrap.style.overflow = LB_ZOOM ? 'auto' : 'hidden';
+        wrap.innerHTML = `<button type="button" onclick="lbToggleZoom()" aria-label="${LB_ZOOM ? 'Alejar' : 'Acercar'}" class="m-auto shrink-0 ${LB_ZOOM ? 'cursor-zoom-out' : 'cursor-zoom-in'}" style="${LB_ZOOM ? 'width:220%;height:220%' : 'width:100%;height:100%'}">${renderVisualElement(photos[i], 'w-full h-full object-contain', 'text-[10rem] leading-none select-none')}</button>`;
+      }
+      ['lb-prev', 'lb-next'].forEach(id => { const b = document.getElementById(id); if (b) b.classList.toggle('hidden', !many); });
+      set('lb-thumbs', many ? photos.map((ph, k) => `<button type="button" onclick="lbGo(${k})" aria-label="Ver foto ${k + 1}" class="w-14 h-14 rounded-xl border overflow-hidden shrink-0 flex items-center justify-center ${k === 0 ? 'ml-auto' : ''} ${k === photos.length - 1 ? 'mr-auto' : ''} ${k === i ? 'border-brand-orange ring-2 ring-brand-orange/50' : 'border-zinc-700 opacity-60 hover:opacity-100'}">${renderVisualElement(ph, 'w-full h-full object-cover', 'text-xl')}</button>`).join('') : '');
+      const act = document.querySelector('#lb-thumbs .ring-2'); if (act && act.scrollIntoView) act.scrollIntoView({ inline: 'center', block: 'nearest' });
+      const hint = document.getElementById('lb-hint'); if (hint) hint.textContent = LB_ZOOM ? 'Tocá la foto para alejar · deslizá para moverte' : 'Tocá la foto para acercar' + (many ? ' · deslizá o usá las flechas para ver las otras' : '');
+    }
+    function lbTouchStart(e) { LB_X = (!LB_ZOOM && e.touches && e.touches.length === 1) ? e.touches[0].clientX : null; }
+    function lbTouchEnd(e) {
+      if (LB_X === null || !e.changedTouches || !e.changedTouches.length) return;
+      const dx = e.changedTouches[0].clientX - LB_X; LB_X = null;
+      if (Math.abs(dx) > 50) lbStep(dx < 0 ? 1 : -1);
+    }
+    document.addEventListener('keydown', function(e) {
+      if (!lbOpen()) return;
+      if (e.key === 'Escape') closeLightbox();
+      else if (e.key === 'ArrowRight') lbStep(1);
+      else if (e.key === 'ArrowLeft') lbStep(-1);
+    });
 
     function resetFilters() {
       currentCategory = 'all';

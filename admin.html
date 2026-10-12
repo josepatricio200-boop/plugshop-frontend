@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.0</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.2</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -927,8 +927,9 @@ html { scroll-behavior: smooth; }
                     <span class="text-[10px] text-zinc-400 block mt-1">El cliente podrá seleccionar su color preferido antes de agregar al carrito.</span>
                   </div>
                   <div>
-                    <label class="block mb-1 text-zinc-400">Especificación Principal (Autonomía, conectividad) *</label>
-                    <input required type="text" id="new-prod-specs" placeholder="Ej. Batería 12h · Sonido Pro Original · Bluetooth 5.3 · IP67" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                    <label class="block mb-1 text-zinc-400">Descripción del producto *</label>
+                    <textarea required id="new-prod-specs" rows="7" maxlength="3000" oninput="updateSpecsCount()" placeholder="Pegá acá la descripción del proveedor, o escribila.&#10;&#10;Ej:&#10;Auriculares Bluetooth 5.3 con estuche de carga.&#10;&#10;Características:&#10;- Batería 12 horas&#10;- Resistentes al agua IP67&#10;- Micrófono con cancelación de ruido" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange leading-relaxed"></textarea>
+                    <div class="mt-1 flex items-start justify-between gap-3 text-[10px] text-zinc-500 font-sans"><span>Se respetan los saltos de línea. Las líneas que empiezan con - o • salen como lista. Una línea que termina en ":" sale como subtítulo.</span><span id="new-prod-specs-count" class="shrink-0 font-code">0 / 3000</span></div>
                   </div>
                   <div>
                     <label class="block mb-1 text-zinc-400">Palabras clave para el asesor <span class="text-zinc-500">(opcional)</span></label>
@@ -1120,6 +1121,100 @@ html { scroll-behavior: smooth; }
                     </div>
 
                   </div>
+
+                  <div id="extra-photo-slots" class="hidden grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                    <!-- FOTO 4 (Opcional) -->
+                    <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <label class="font-bold text-[11px] text-zinc-200">Foto 4 (Opcional)</label>
+                        <span id="tag-photo-4-status" class="text-[9px] text-zinc-500 font-code">Opcional</span>
+                      </div>
+
+                      <div id="preview-photo-4-box" class="h-28 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden relative group">
+                        <span class="text-2xl text-zinc-600">📷</span>
+                      </div>
+
+                      <label class="w-full py-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-zinc-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                        <span>📁 Adjuntar archivo</span>
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event, 'prod-photo-4', 'preview-photo-4-box', 'tag-photo-4-status')" class="hidden" />
+                      </label>
+
+                      <input type="text" id="prod-photo-4" oninput="handleManualPhotoInput('prod-photo-4', 'preview-photo-4-box', 'tag-photo-4-status')" placeholder="O pegá URL / emoji..." class="w-full bg-zinc-950 border border-zinc-800 rounded-md p-1.5 text-[10px] text-white focus:outline-none focus:border-brand-orange font-code" />
+                    </div>
+                    <!-- FOTO 5 (Opcional) -->
+                    <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <label class="font-bold text-[11px] text-zinc-200">Foto 5 (Opcional)</label>
+                        <span id="tag-photo-5-status" class="text-[9px] text-zinc-500 font-code">Opcional</span>
+                      </div>
+
+                      <div id="preview-photo-5-box" class="h-28 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden relative group">
+                        <span class="text-2xl text-zinc-600">📷</span>
+                      </div>
+
+                      <label class="w-full py-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-zinc-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                        <span>📁 Adjuntar archivo</span>
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event, 'prod-photo-5', 'preview-photo-5-box', 'tag-photo-5-status')" class="hidden" />
+                      </label>
+
+                      <input type="text" id="prod-photo-5" oninput="handleManualPhotoInput('prod-photo-5', 'preview-photo-5-box', 'tag-photo-5-status')" placeholder="O pegá URL / emoji..." class="w-full bg-zinc-950 border border-zinc-800 rounded-md p-1.5 text-[10px] text-white focus:outline-none focus:border-brand-orange font-code" />
+                    </div>
+                    <!-- FOTO 6 (Opcional) -->
+                    <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <label class="font-bold text-[11px] text-zinc-200">Foto 6 (Opcional)</label>
+                        <span id="tag-photo-6-status" class="text-[9px] text-zinc-500 font-code">Opcional</span>
+                      </div>
+
+                      <div id="preview-photo-6-box" class="h-28 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden relative group">
+                        <span class="text-2xl text-zinc-600">📷</span>
+                      </div>
+
+                      <label class="w-full py-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-zinc-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                        <span>📁 Adjuntar archivo</span>
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event, 'prod-photo-6', 'preview-photo-6-box', 'tag-photo-6-status')" class="hidden" />
+                      </label>
+
+                      <input type="text" id="prod-photo-6" oninput="handleManualPhotoInput('prod-photo-6', 'preview-photo-6-box', 'tag-photo-6-status')" placeholder="O pegá URL / emoji..." class="w-full bg-zinc-950 border border-zinc-800 rounded-md p-1.5 text-[10px] text-white focus:outline-none focus:border-brand-orange font-code" />
+                    </div>
+                    <!-- FOTO 7 (Opcional) -->
+                    <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <label class="font-bold text-[11px] text-zinc-200">Foto 7 (Opcional)</label>
+                        <span id="tag-photo-7-status" class="text-[9px] text-zinc-500 font-code">Opcional</span>
+                      </div>
+
+                      <div id="preview-photo-7-box" class="h-28 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden relative group">
+                        <span class="text-2xl text-zinc-600">📷</span>
+                      </div>
+
+                      <label class="w-full py-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-zinc-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                        <span>📁 Adjuntar archivo</span>
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event, 'prod-photo-7', 'preview-photo-7-box', 'tag-photo-7-status')" class="hidden" />
+                      </label>
+
+                      <input type="text" id="prod-photo-7" oninput="handleManualPhotoInput('prod-photo-7', 'preview-photo-7-box', 'tag-photo-7-status')" placeholder="O pegá URL / emoji..." class="w-full bg-zinc-950 border border-zinc-800 rounded-md p-1.5 text-[10px] text-white focus:outline-none focus:border-brand-orange font-code" />
+                    </div>
+                    <!-- FOTO 8 (Opcional) -->
+                    <div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <label class="font-bold text-[11px] text-zinc-200">Foto 8 (Opcional)</label>
+                        <span id="tag-photo-8-status" class="text-[9px] text-zinc-500 font-code">Opcional</span>
+                      </div>
+
+                      <div id="preview-photo-8-box" class="h-28 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center overflow-hidden relative group">
+                        <span class="text-2xl text-zinc-600">📷</span>
+                      </div>
+
+                      <label class="w-full py-1.5 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-zinc-200 text-[10px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer">
+                        <span>📁 Adjuntar archivo</span>
+                        <input type="file" accept="image/*" onchange="handleFileUpload(event, 'prod-photo-8', 'preview-photo-8-box', 'tag-photo-8-status')" class="hidden" />
+                      </label>
+
+                      <input type="text" id="prod-photo-8" oninput="handleManualPhotoInput('prod-photo-8', 'preview-photo-8-box', 'tag-photo-8-status')" placeholder="O pegá URL / emoji..." class="w-full bg-zinc-950 border border-zinc-800 rounded-md p-1.5 text-[10px] text-white focus:outline-none focus:border-brand-orange font-code" />
+                    </div>
+                  </div>
+                  <button type="button" id="btn-more-photos" onclick="showExtraPhotoSlots()" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-bold">➕ Agregar más fotos (hasta 8 en total)</button>
 
                   <div class="flex items-center gap-2 pt-1 text-[10px] text-zinc-500 font-code">
                     <span>Carga rápida demo:</span>
@@ -2562,6 +2657,11 @@ html { scroll-behavior: smooth; }
     function cleanText(v, max = 200) {
       return String(v ?? '').replace(/[<>`]/g, '').replace(/"/g, '”').replace(/'/g, '’').trim().slice(0, max);
     }
+    // Texto largo (descripción): respeta los saltos de línea.
+    function cleanLongText(v, max = 3000) {
+      return String(v ?? '').replace(/\r\n?/g, '\n').replace(/[<>`]/g, '').replace(/"/g, '”').replace(/'/g, '’')
+        .split('\n').map(l => l.replace(/[ \t]+$/g, '')).join('\n').replace(/\n{3,}/g, '\n\n').trim().slice(0, max);
+    }
     function cleanVisual(v) {
       const s = String(v ?? '').trim();
       if (/^https?:\/\/[^\s"'<>`]+$/i.test(s)) return s;
@@ -2574,7 +2674,7 @@ html { scroll-behavior: smooth; }
       return {
         ...p,
         name: cleanText(p.name, 120), brand: cleanText(p.brand, 60), category: cleanText(p.category, 40), subcategory: cleanText(p.subcategory, 40), active: p.active !== false,
-        specs: cleanText(p.specs, 300), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
+        specs: cleanLongText(p.specs, 3000), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
@@ -3822,6 +3922,10 @@ html { scroll-behavior: smooth; }
     }
 
     // ---- Proveedor en cada producto ----
+    function updateSpecsCount() {
+      const t = document.getElementById('new-prod-specs'), c = document.getElementById('new-prod-specs-count');
+      if (t && c) c.textContent = t.value.length + ' / 3000';
+    }
     function syncPickupCheck() {
       const sel = document.getElementById('new-prod-supplier'), ck = document.getElementById('new-prod-pickup');
       if (!sel || !ck) return;
@@ -5801,7 +5905,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v8.0): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v8.2): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -7703,21 +7807,29 @@ html { scroll-behavior: smooth; }
       reader.readAsText(file);
     }
 
+    // Fotos por producto: hasta 8 (las 3 primeras siempre visibles; de la 4 a la 8 se abren con el botón).
+    const PHOTO_MAX = 8;
+    const photoSlotIds = () => Array.from({ length: PHOTO_MAX }, (_, i) => i + 1);
+    function showExtraPhotoSlots(show) {
+      const box = document.getElementById('extra-photo-slots'), btn = document.getElementById('btn-more-photos');
+      if (box) box.classList.toggle('hidden', show === false);
+      if (btn) btn.classList.toggle('hidden', show !== false);
+    }
+    function readPhotoSlots() {
+      return photoSlotIds().map(n => { const el = document.getElementById('prod-photo-' + n); return el ? el.value.trim() : ''; }).filter(v => v.length > 0);
+    }
+    function clearAllPhotoSlots() {
+      photoSlotIds().forEach(n => clearPhotoSlot('prod-photo-' + n, 'preview-photo-' + n + '-box', 'tag-photo-' + n + '-status'));
+      showExtraPhotoSlots(false);
+    }
     function validatePhotosInput() {
-      const p1 = document.getElementById('prod-photo-1').value.trim();
-      const p2 = document.getElementById('prod-photo-2').value.trim();
-      const p3 = document.getElementById('prod-photo-3').value.trim();
-      
-      let count = 0;
-      if (p1) count++;
-      if (p2) count++;
-      if (p3) count++;
+      const count = readPhotoSlots().length;
 
       const badge = document.getElementById('photo-validation-badge');
       const err = document.getElementById('product-form-error');
 
       if (count >= 2) {
-        badge.textContent = `${count} / 3 fotos listas ✓`;
+        badge.textContent = `${count} / ${PHOTO_MAX} fotos listas ✓`;
         badge.className = 'px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800 font-code';
         err.classList.add('hidden');
       } else {
@@ -7769,7 +7881,7 @@ html { scroll-behavior: smooth; }
       document.getElementById('new-prod-featured').checked = p.featured === true;
       set('new-prod-delivery', vehicleOfProduct(p));
       fillProductSupplierSelect(p.supplierId, p.pickupAtSupplier === true);
-      set('new-prod-specs', p.specs || '');
+      set('new-prod-specs', p.specs || ''); updateSpecsCount();
       set('new-prod-keywords', p.keywords || '');
       set('new-prod-colors', (p.colors || []).join(', '));
       const note = document.getElementById('color-stock-note');
@@ -7780,11 +7892,12 @@ html { scroll-behavior: smooth; }
         note.textContent = `Este producto tenía un stock único de ${p.stock || 0}. Lo puse en "${first}": repartilo entre los colores antes de guardar.`;
         note.classList.remove('hidden');
       }
-      [1, 2, 3].forEach(n => {
+      photoSlotIds().forEach(n => {
         const val = (p.photos || [])[n - 1] || '';
         set('prod-photo-' + n, val);
         updatePhotoPreview('preview-photo-' + n + '-box', val, 'prod-photo-' + n, 'tag-photo-' + n + '-status');
       });
+      showExtraPhotoSlots((p.photos || []).length > 3 ? true : false);
       validatePhotosInput();
       updateLiveProfitCalculator();
 
@@ -7807,7 +7920,7 @@ html { scroll-behavior: smooth; }
       autoFillWarrantyDefault('original');
       renderColorStockInputs({});
       const csn = document.getElementById('color-stock-note'); if (csn) csn.classList.add('hidden');
-      [1, 2, 3].forEach(n => clearPhotoSlot('prod-photo-' + n, 'preview-photo-' + n + '-box', 'tag-photo-' + n + '-status'));
+      clearAllPhotoSlots();
       document.getElementById('edit-mode-banner').classList.add('hidden');
       document.getElementById('btn-save-prod').textContent = 'Guardar y Publicar en Tienda';
       document.getElementById('btn-cancel-edit').classList.add('hidden');
@@ -7818,11 +7931,7 @@ html { scroll-behavior: smooth; }
     function handleCreateProductWithPhotos(e) {
       e.preventDefault();
       
-      const p1 = document.getElementById('prod-photo-1').value.trim();
-      const p2 = document.getElementById('prod-photo-2').value.trim();
-      const p3 = document.getElementById('prod-photo-3').value.trim();
-
-      const photos = [p1, p2, p3].filter(p => p.length > 0);
+      const photos = readPhotoSlots();
 
       if (photos.length < 2) {
         document.getElementById('product-form-error').classList.remove('hidden');
@@ -7883,9 +7992,7 @@ html { scroll-behavior: smooth; }
             e.target.reset();
             onProdCategoryChange();
             renderColorStockInputs({});
-            clearPhotoSlot('prod-photo-1', 'preview-photo-1-box', 'tag-photo-1-status');
-            clearPhotoSlot('prod-photo-2', 'preview-photo-2-box', 'tag-photo-2-status');
-            clearPhotoSlot('prod-photo-3', 'preview-photo-3-box', 'tag-photo-3-status');
+            clearAllPhotoSlots();
             updateLiveProfitCalculator();
           }
           renderProducts();
@@ -7916,9 +8023,7 @@ html { scroll-behavior: smooth; }
       e.target.reset();
       onProdCategoryChange();
       renderColorStockInputs({});
-      clearPhotoSlot('prod-photo-1', 'preview-photo-1-box', 'tag-photo-1-status');
-      clearPhotoSlot('prod-photo-2', 'preview-photo-2-box', 'tag-photo-2-status');
-      clearPhotoSlot('prod-photo-3', 'preview-photo-3-box', 'tag-photo-3-status');
+      clearAllPhotoSlots();
       updateLiveProfitCalculator();
 
       renderProducts();
