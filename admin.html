@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.6</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.7</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -513,6 +513,9 @@ html { scroll-behavior: smooth; }
               <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">💰 Logística y Finanzas</div>
               <button onclick="openFinSection('cash')"  data-nav-tab="finances" data-fin-nav="cash" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">💵</span><span>Caja diaria</span></span>
+            </button>
+              <button onclick="switchAdminTab('couriers')" id="tab-btn-couriers" data-nav-tab="couriers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🛵</span><span>Rendición de Cadetes</span></span>
             </button>
               <button onclick="switchAdminTab('suppliers')" id="tab-btn-suppliers" data-nav-tab="suppliers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">🤝</span><span>Proveedores</span></span><span id="badge-suppliers-count" class="text-[10px] text-zinc-500 font-code"></span>
@@ -628,6 +631,10 @@ html { scroll-behavior: smooth; }
                   <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
                     <div class="text-[10px] text-zinc-400 uppercase">Ventas Efvo. Hoy</div>
                     <div id="cashreg-sales-display" class="text-sm font-bold text-emerald-400">$0</div>
+                  </div>
+                  <div id="cashreg-courier-box" class="hidden p-3 rounded-xl bg-zinc-950 border border-zinc-800">
+                    <div class="text-[10px] text-zinc-400 uppercase">Rendic. cadetes</div>
+                    <div id="cashreg-courier-display" class="text-sm font-bold text-sky-400">$0</div>
                   </div>
                   <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
                     <div class="text-[10px] text-zinc-400 uppercase">Gastos</div>
@@ -1481,6 +1488,16 @@ html { scroll-behavior: smooth; }
             <p class="text-[10px] text-zinc-500 leading-snug">🔒 Con el candado el precio queda fijo aunque cambies el costo (se recalcula el margen). Si escribís un precio a mano, el candado se pone solo. Los pedidos que ya hiciste no cambian.</p>
           </div>
 
+          <!-- TAB: RENDICIÓN DE CADETES (solo administrador) -->
+          <div id="admin-tab-couriers" class="hidden space-y-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Rendición de cadetes</h3>
+              <p class="text-xs text-zinc-400">El cadete se queda con el envío de cada entrega. Si cobró en efectivo, esa plata es del negocio. Acá ves cuánto debe entregar o cuánto le tenés que pagar, y cerrás el turno cuando quieras (por día o por semana).</p>
+            </div>
+            <div id="cr-msg" class="hidden text-xs font-semibold"></div>
+            <div id="cr-body" class="space-y-4"></div>
+          </div>
+
           <!-- TAB 5: PROVEEDORES -->
           <div id="admin-tab-suppliers" class="hidden space-y-6">
             <div data-sec-chips="suppliers" class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex md:hidden gap-1.5 overflow-x-auto" role="tablist" aria-label="Secciones"></div>
@@ -2091,6 +2108,7 @@ html { scroll-behavior: smooth; }
         PRICING: '/api/products/pricing-config', // GET / PUT { rounding } (solo admin)
         BULK_COSTS: '/api/products/bulk-costs',  // POST { items: [{ id, cost, marginPct, price, locked }] } (solo admin)
         SUPPLIER_PAYABLES: '/api/suppliers/payables', // GET ?from&to (solo admin)
+        COURIER_SETTLE: '/api/cash-register/couriers', // /pending /history /settle /assign /start /mine (rendición de cadetes)
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
@@ -2271,6 +2289,7 @@ html { scroll-behavior: smooth; }
         tasks.push(loadCategoriesFromServer(headers));
       }
       if (role === 'admin') tasks.push(loadIphoneAdmin(true));
+      if (role !== 'admin' && can('orders.dispatch')) tasks.push(loadMyCourier());
       if (can('customers.manage')) {
         tasks.push(apiRequest('CUSTOMERS', { headers }).then(res => {
           if (Array.isArray(res)) CUSTOMERS = res;
@@ -2296,6 +2315,7 @@ html { scroll-behavior: smooth; }
       'today': ['admin', 'vendedor', 'cadete', 'reposicion', 'logistica'],
       'finances': ['admin'],
       'costs': ['admin'],
+      'couriers': ['admin'],
       'inventory': ['admin', 'reposicion'],
       'iphone': ['admin'],
       'smart-engine': ['admin'],
@@ -2343,6 +2363,7 @@ html { scroll-behavior: smooth; }
         { id: 'iphone', tab: 'iphone', icon: '📱', label: 'Sección iPhone' }] },
       { id: 'fin', icon: '💰', label: 'Logística y Finanzas', items: [
         { id: 'cash', tab: 'finances', fin: 'cash', icon: '💵', label: 'Caja diaria' },
+        { id: 'couriers', tab: 'couriers', icon: '🛵', label: 'Rendición de Cadetes' },
         { id: 'suppliers', tab: 'suppliers', icon: '🤝', label: 'Proveedores' },
         { id: 'mono', tab: 'finances', fin: 'mono', icon: '🧾', label: 'Monotributo' }] },
       { id: 'crm', icon: '👥', label: 'Clientes y Marketing', items: [
@@ -3364,8 +3385,8 @@ html { scroll-behavior: smooth; }
     }
 
     function switchAdminTab(tabName) {
-      if (tabName === 'costs' && currentStaffSession.role !== 'admin') return; // solo el administrador cambia costos
-      const allTabs = ['today', 'finances', 'inventory', 'costs', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'claims', 'staff-users', 'settings'];
+      if ((tabName === 'costs' || tabName === 'couriers') && currentStaffSession.role !== 'admin') return; // solo el administrador
+      const allTabs = ['today', 'finances', 'inventory', 'costs', 'couriers', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'claims', 'staff-users', 'settings'];
       
       allTabs.forEach(t => {
         const tabEl = document.getElementById(`admin-tab-${t}`);
@@ -3388,6 +3409,7 @@ html { scroll-behavior: smooth; }
       if (typeof onAdminTabShown === 'function') onAdminTabShown(tabName);
       if (tabName === 'iphone') loadIphoneAdmin();
       if (tabName === 'costs') openCostsTab();
+      if (tabName === 'couriers') openCouriersTab();
 
       // En celular el menú y el contenido quedan apilados en una sola
       // columna; después de elegir una pestaña, bajamos la vista hasta el
@@ -3588,7 +3610,7 @@ html { scroll-behavior: smooth; }
       if (ADMIN_LOADING) {
         body = '<div class="text-center text-sm text-zinc-400 py-14">⏳ Cargando lo último del servidor…</div>';
       } else if (APP_TAB === 'home') {
-        body = `<div class="grid grid-cols-2 gap-3">
+        body = (caps.deliver && !can('orders.manage') ? myCourierCardHtml() : '') + `<div class="grid grid-cols-2 gap-3">
           ${caps.pack ? tile('pack', '📦', packTodo, 'para embalar', 'border-amber-600/50 bg-amber-950/20') : ''}
           ${caps.deliver ? tile('deliver', '🛵', delivs.length, 'entregas' + (onWay ? ` (${onWay} en camino)` : ''), 'border-sky-600/50 bg-sky-950/20') : ''}
           ${caps.stock ? tile('stock', '⚠️', low, 'con stock bajo', 'border-rose-600/50 bg-rose-950/20') : ''}
@@ -3599,7 +3621,7 @@ html { scroll-behavior: smooth; }
         body = list.length ? `<p class="text-xs text-zinc-400">Tildá cada producto a medida que lo ponés en la caja. Después imprimí la etiqueta y marcá "Ya está embalado".</p>` + list.map(appPackCard).join('') : '<div class="text-center text-sm text-zinc-400 py-14">No hay pedidos para embalar. 🎉</div>';
       } else if (APP_TAB === 'deliver') {
         const mine = !can('orders.manage');
-        body = delivs.length ? `<p class="text-xs text-zinc-400">${mine ? 'Tus entregas. ' : ''}Primero las que ya están en camino. "Salida" cuando retirás el paquete y "Entregar" con el QR del cliente.</p>` + delivs.map((o, i) => `<div class="space-y-1"><div class="text-[11px] font-bold ${o.status === 'Despachado' ? 'text-sky-300' : (o.packedAt ? 'text-emerald-300' : 'text-amber-300')}">${o.status === 'Despachado' ? '🛵 En camino' : (o.packedAt ? '✅ Embalado, listo para retirar' : '⏳ Todavía falta embalar')}</div>${routeStop(o, i)}</div>`).join('') : `<div class="text-center text-sm text-zinc-400 py-14">${mine ? 'No tenés entregas asignadas por ahora.' : 'No hay entregas pendientes.'}</div>`;
+        body = (mine ? myCourierCardHtml() : '') + (delivs.length ? `<p class="text-xs text-zinc-400">${mine ? 'Tus entregas. ' : ''}Primero las que ya están en camino. "Salida" cuando retirás el paquete y "Entregar" con el QR del cliente.</p>` + delivs.map((o, i) => `<div class="space-y-1"><div class="text-[11px] font-bold ${o.status === 'Despachado' ? 'text-sky-300' : (o.packedAt ? 'text-emerald-300' : 'text-amber-300')}">${o.status === 'Despachado' ? '🛵 En camino' : (o.packedAt ? '✅ Embalado, listo para retirar' : '⏳ Todavía falta embalar')}</div>${routeStop(o, i)}</div>`).join('') : `<div class="text-center text-sm text-zinc-400 py-14">${mine ? 'No tenés entregas asignadas por ahora.' : 'No hay entregas pendientes.'}</div>`);
       } else if (APP_TAB === 'stock') {
         const q = APP_STOCK_Q.trim().toLowerCase();
         let list = PRODUCTS.filter(p => !q || [p.name, p.brand, p.category].join(' ').toLowerCase().includes(q));
@@ -3623,6 +3645,172 @@ html { scroll-behavior: smooth; }
       let list = PRODUCTS.filter(p => !q || [p.name, p.brand, p.category].join(' ').toLowerCase().includes(q));
       if (APP_STOCK_LOW) { const lowIds = new Set(lowStockItems(PRODUCTS).map(x => x.id)); list = list.filter(p => lowIds.has(p.id)); }
       box.innerHTML = list.slice(0, 40).map(appStockCard).join('') || '<div class="text-center text-sm text-zinc-400 py-10">No encontré productos.</div>';
+    }
+
+    // ---- Rendición de cadetes (solo administrador) ----
+    // El cadete se queda con el envío de cada entrega. Si cobró en efectivo, esa plata es del negocio.
+    // Rendir = juntar las entregas sin rendir: efectivo cobrado - envíos que le corresponden = neto.
+    // Neto positivo: el cadete entrega esa plata. Neto negativo: le pagás vos. Cada pedido se rinde una sola vez.
+    let CR = { data: null, history: [], open: null, sel: {}, fees: {}, received: '', touched: false };
+    const crDate = d => String(d || '').length === 10 ? String(d).slice(8) + '/' + String(d).slice(5, 7) : '';
+    const crToday = () => new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10);
+    function crMsg(text, ok) {
+      const m = document.getElementById('cr-msg'); if (!m) return;
+      m.textContent = text || ''; m.className = 'text-xs font-semibold ' + (text ? (ok ? 'text-emerald-400' : 'text-rose-400') : 'hidden');
+    }
+    const crHeaders = () => ({ Authorization: 'Bearer ' + currentStaffSession.token });
+    async function openCouriersTab() {
+      if (currentStaffSession.role !== 'admin') return;
+      crMsg('');
+      const body = document.getElementById('cr-body'); if (!body) return;
+      if (!isBackendConnected() || !currentStaffSession.token) { body.innerHTML = '<div class="p-6 rounded-xl bg-zinc-900 border border-dashed border-zinc-700 text-center text-xs text-zinc-400">Las rendiciones se guardan en el servidor. Entrá con el servidor conectado para usarlas.</div>'; return; }
+      if (!CR.data) body.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">⏳ Calculando lo que tiene cada cadete…</div>';
+      const [pend, hist] = await Promise.all([apiRequest('COURIER_SETTLE', { headers: crHeaders() }, '/pending'), apiRequest('COURIER_SETTLE', { headers: crHeaders() }, '/history')]);
+      if (!pend || pend.success === false || !Array.isArray(pend.couriers)) {
+        body.innerHTML = `<div class="p-6 rounded-xl bg-rose-950/40 border border-rose-900 text-center text-xs text-rose-300">${escapeHtml((pend && pend.error) || 'No pude traer las rendiciones.')} <button type="button" onclick="openCouriersTab()" class="ml-2 px-3 py-1.5 rounded-lg bg-zinc-800 text-white font-bold">Reintentar</button></div>`;
+        return;
+      }
+      CR.data = pend; CR.history = (hist && Array.isArray(hist.settlements)) ? hist.settlements : [];
+      renderCouriers();
+    }
+    function crCourier(cid) { return CR.data && CR.data.couriers.find(c => c.id === cid); }
+    function crLineFee(l) { const v = CR.fees[l.orderId]; return v === undefined || v === '' ? l.fee : Math.max(0, Math.round(Number(v) || 0)); }
+    // Totales de lo tildado, con los envíos ajustados
+    function crCalc(c) {
+      const picked = c.lines.filter(l => CR.sel[l.orderId]);
+      const cash = picked.reduce((a, l) => a + l.cash, 0), fee = picked.reduce((a, l) => a + crLineFee(l), 0);
+      return { picked, cash, fee, net: cash - fee };
+    }
+    function crLinesHtml(c) {
+      return `<div class="overflow-x-auto"><table class="w-full text-[11px] text-left"><thead class="text-zinc-500"><tr><th class="py-1 pr-2 w-6"></th><th class="py-1 pr-2 font-semibold">Día</th><th class="py-1 pr-2 font-semibold">Pedido</th><th class="py-1 pr-2 font-semibold hidden md:table-cell">Pago</th><th class="py-1 pr-2 text-right font-semibold">Efectivo</th><th class="py-1 text-right font-semibold">Envío (suyo)</th></tr></thead><tbody class="divide-y divide-zinc-800/60 text-zinc-300">${c.lines.map(l => `<tr><td class="py-1.5 pr-2"><input type="checkbox" ${CR.sel[l.orderId] ? 'checked' : ''} onchange="crTick('${escapeHtml(l.orderId)}',this.checked,${c.id})" class="w-4 h-4" aria-label="Incluir en la rendición" /></td><td class="py-1.5 pr-2 font-code whitespace-nowrap">${escapeHtml(crDate(l.date))}</td><td class="py-1.5 pr-2"><span class="font-code">${escapeHtml(l.orderId)}</span><span class="text-zinc-500"> · ${escapeHtml(l.customer)}</span><div class="md:hidden text-[10px] ${l.cash ? 'text-emerald-300' : 'text-zinc-400'}">${escapeHtml(l.payment)}</div></td><td class="py-1.5 pr-2 hidden md:table-cell ${l.cash ? 'text-emerald-300' : 'text-zinc-400'}">${escapeHtml(l.payment)}</td><td class="py-1.5 pr-2 text-right font-code">${l.cash ? formatARS(l.cash) : '—'}</td><td class="py-1.5 text-right"><input type="number" inputmode="numeric" min="0" step="1" data-cr-fee="${escapeHtml(l.orderId)}" value="${crLineFee(l)}" oninput="crFee('${escapeHtml(l.orderId)}',this.value,${c.id})" onfocus="this.select()" class="w-20 md:w-24 bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-white text-xs font-code text-right focus:outline-none focus:border-brand-orange" />${l.freeShipping ? '<div class="text-[9px] text-amber-400">envío gratis: poné lo que le pagás</div>' : ''}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function crPanelHtml(c) {
+      return `<div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3" data-cr-panel="${c.id}">
+        <div class="flex flex-wrap items-center gap-1.5"><span class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mr-1">Incluir:</span>
+          <button type="button" onclick="crPick(${c.id},'all')" class="px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-200 text-[11px] font-semibold">Todas</button>
+          <button type="button" onclick="crPick(${c.id},'yesterday')" class="px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-200 text-[11px] font-semibold">Hasta ayer</button>
+          <button type="button" onclick="crPick(${c.id},'today')" class="px-2.5 py-1 rounded-lg bg-zinc-800 text-zinc-200 text-[11px] font-semibold">Solo hoy</button></div>
+        ${crLinesHtml(c)}
+        <div id="cr-calc-${c.id}" class="space-y-2"></div>
+      </div>`;
+    }
+    function crCalcHtml(c) {
+      const k = crCalc(c);
+      if (!k.picked.length) return '<div class="text-[11px] text-amber-400">Tildá al menos una entrega para rendir.</div>';
+      const recv = CR.touched ? Number(CR.received) || 0 : Math.max(0, k.net);
+      const diff = recv - k.net;
+      let box;
+      if (k.net >= 0) {
+        box = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+          <div><label class="block text-[10px] text-zinc-500 mb-1">Efectivo que te entregó</label><input id="cr-received" type="number" inputmode="numeric" min="0" step="1" value="${CR.touched ? escapeHtml(String(CR.received)) : k.net}" oninput="crReceived(this.value,${c.id})" onfocus="this.select()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white font-code text-sm focus:outline-none focus:border-brand-orange" /></div>
+          <div class="text-xs font-bold" id="cr-diff-${c.id}">${diff === 0 ? '<span class="text-emerald-400">Justo ✅ no falta ni sobra</span>' : (diff < 0 ? `<span class="text-rose-400">Falta ${formatARS(-diff)} ⚠️</span>` : `<span class="text-sky-400">Sobra ${formatARS(diff)}</span>`)}</div>
+          <input id="cr-note" maxlength="200" placeholder="Nota (opcional)" class="bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white text-xs focus:outline-none focus:border-brand-orange" /></div>`;
+      } else {
+        box = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end"><div class="sm:col-span-2 text-xs font-bold text-amber-300">Le tenés que pagar ${formatARS(-k.net)} al cadete (sus envíos son más que el efectivo que cobró).</div><input id="cr-note" maxlength="200" placeholder="Nota (opcional)" class="bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white text-xs focus:outline-none focus:border-brand-orange" /></div>`;
+      }
+      return `<div class="grid grid-cols-3 gap-2 text-center font-code"><div class="p-2 rounded-lg bg-zinc-900"><div class="text-[9px] text-zinc-500 uppercase">Efectivo cobrado</div><div class="text-sm font-bold text-white">${formatARS(k.cash)}</div></div><div class="p-2 rounded-lg bg-zinc-900"><div class="text-[9px] text-zinc-500 uppercase">Sus envíos</div><div class="text-sm font-bold text-white">${formatARS(k.fee)}</div></div><div class="p-2 rounded-lg bg-zinc-900 border border-brand-orange/40"><div class="text-[9px] text-brand-orange uppercase">${k.net >= 0 ? 'Debe entregar' : 'Le pagás'}</div><div class="text-sm font-bold text-white">${formatARS(Math.abs(k.net))}</div></div></div>
+        ${box}
+        <div class="text-[10px] text-zinc-500">En Caja diaria ${k.net >= 0 ? 'entra' : 'sale'} lo que de verdad cambie de manos (${k.net >= 0 ? '+' : '−'}${formatARS(k.net >= 0 ? recv : -k.net)}). Una entrega rendida no vuelve a contarse.</div>
+        <button type="button" onclick="crSubmit(${c.id})" class="px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">✅ Confirmar rendición</button>`;
+    }
+    function renderCouriers() {
+      const body = document.getElementById('cr-body'), d = CR.data; if (!body || !d) return;
+      const fa = {}; CR.history.forEach(h => { fa[h.courierName] = (fa[h.courierName] || 0) + Math.min(0, h.difference || 0); });
+      const missing = Object.entries(fa).filter(([, v]) => v < 0);
+      const cards = d.couriers.map(c => {
+        const open = CR.open === c.id;
+        const net = c.net;
+        const prevMiss = CR.history.filter(h => h.courierId === c.id).reduce((a, h) => a + Math.min(0, h.difference || 0), 0);
+        return `<div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-3" data-cr-card="${c.id}">
+          <div class="flex items-start justify-between gap-3"><div><h4 class="font-bold text-white text-sm">🛵 ${escapeHtml(c.name)}</h4><div class="text-[11px] text-zinc-400">${c.count} entrega${c.count === 1 ? '' : 's'} sin rendir</div></div>
+            <div class="text-right"><div class="text-xl font-black font-code ${net >= 0 ? 'text-amber-400' : 'text-sky-400'}">${formatARS(Math.abs(net))}</div><div class="text-[10px] text-zinc-400">${net >= 0 ? 'debe entregar' : 'le tenés que pagar'}</div></div></div>
+          <div class="text-[11px] text-zinc-400 leading-relaxed">Cobró en efectivo <strong class="text-zinc-200">${formatARS(c.cashTotal)}</strong> · le corresponden por envíos <strong class="text-zinc-200">${formatARS(c.feeTotal)}</strong>.${prevMiss < 0 ? ` <span class="text-rose-400">Faltantes anteriores: ${formatARS(-prevMiss)}.</span>` : ''}</div>
+          <button type="button" onclick="crToggle(${c.id})" class="px-3 py-2 rounded-lg ${open ? 'bg-zinc-800 text-zinc-200' : 'bg-brand-orange text-black'} text-[11px] font-bold">${open ? 'Cerrar' : '🧾 Rendir / cerrar turno'}</button>
+          ${open ? crPanelHtml(c) : ''}
+        </div>`;
+      }).join('');
+      const un = d.unassigned.length ? `<div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+          <h4 class="font-bold text-amber-300 text-sm">⚠️ Entregados sin cadete asignado (${d.unassigned.length})</h4>
+          <p class="text-[11px] text-amber-200/80 leading-relaxed">Elegí quién los entregó para que entren en su rendición. El efectivo de estos pedidos sigue contando en la Caja diaria hasta que se asigne.</p>
+          ${d.unassigned.map(l => `<div class="flex flex-wrap items-center gap-2 py-1.5 border-t border-amber-500/20 text-[11px]"><span class="font-code text-zinc-200">${escapeHtml(l.orderId)}</span><span class="text-zinc-400 flex-1 min-w-[120px]">${escapeHtml(l.customer)} · ${escapeHtml(crDate(l.date))} · ${escapeHtml(l.payment)} ${formatARS(l.total)}</span><select id="cr-as-${escapeHtml(l.orderId)}" class="bg-zinc-900 border border-zinc-700 rounded-lg p-1.5 text-white text-[11px]">${d.available.map(a => `<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('')}</select><button type="button" onclick="crAssign('${escapeHtml(l.orderId)}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 font-semibold">Asignar</button></div>`).join('')}
+        </div>` : '';
+      const hist = `<div id="cr-history" class="p-4 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2"><h4 class="font-bold text-white text-sm">📒 Historial de rendiciones</h4>${missing.length ? `<span class="text-[11px] text-rose-400">Faltantes: ${missing.map(([n, v]) => escapeHtml(n) + ' ' + formatARS(-v)).join(' · ')}</span>` : ''}</div>
+          ${CR.history.length ? `<div class="divide-y divide-zinc-800/60">${CR.history.map(h => `<div class="py-2 text-[11px] flex flex-wrap items-center justify-between gap-2"><div class="min-w-0"><div class="text-zinc-200 font-semibold"><span class="font-code text-zinc-400">${escapeHtml(crDate(h.date))}</span> · ${escapeHtml(h.courierName)} · ${h.lines.length} entrega${h.lines.length === 1 ? '' : 's'}</div><div class="text-zinc-500">Efectivo ${formatARS(h.cashTotal)} − envíos ${formatARS(h.feeTotal)} = ${h.net >= 0 ? '' : '−'}${formatARS(Math.abs(h.net))}${h.note ? ' · ' + escapeHtml(h.note) : ''} · por ${escapeHtml(h.by || 'Admin')}</div></div><div class="flex items-center gap-2 shrink-0">${h.net >= 0 ? `<span class="font-code text-emerald-400">entregó ${formatARS(h.received)}</span>` : `<span class="font-code text-sky-400">se le pagó ${formatARS(-h.net)}</span>`}${h.difference ? `<span class="px-1.5 py-0.5 rounded font-bold ${h.difference < 0 ? 'bg-rose-500/15 text-rose-300' : 'bg-sky-500/15 text-sky-300'}">${h.difference < 0 ? 'faltó ' : 'sobró '}${formatARS(Math.abs(h.difference))}</span>` : ''}<button type="button" onclick="crUndo(${h.id})" class="text-rose-400" title="Anular esta rendición" aria-label="Anular rendición">🗑️</button></div></div>`).join('')}</div>` : '<div class="text-[11px] text-zinc-500 py-2">Todavía no hiciste rendiciones.</div>'}
+        </div>`;
+      body.innerHTML = `<div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 flex flex-wrap items-center gap-2 text-[11px] text-zinc-400">Se llevan las rendiciones desde el <strong class="text-zinc-200">${escapeHtml(crDate(d.startDate))}/${escapeHtml(String(d.startDate).slice(0, 4))}</strong> (las entregas anteriores no se rinden). <input id="cr-start" type="date" value="${escapeHtml(d.startDate)}" class="bg-zinc-950 border border-zinc-700 rounded-lg p-1.5 text-white text-[11px]" /><button type="button" onclick="crSetStart()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 font-semibold">Cambiar</button></div>
+        ${cards || '<div class="p-6 rounded-2xl bg-zinc-900 border border-dashed border-zinc-700 text-center text-sm text-zinc-300">Todo rendido ✅<div class="text-[11px] text-zinc-500 mt-1">Ningún cadete tiene entregas pendientes de rendir.</div></div>'}
+        ${un}${hist}`;
+      d.couriers.forEach(c => { if (CR.open === c.id) { const el = document.getElementById('cr-calc-' + c.id); if (el) el.innerHTML = crCalcHtml(c); } });
+    }
+    function crToggle(cid) {
+      if (CR.open === cid) { CR.open = null; renderCouriers(); return; }
+      CR.open = cid; CR.sel = {}; CR.fees = {}; CR.received = ''; CR.touched = false;
+      const c = crCourier(cid); if (c) c.lines.forEach(l => { CR.sel[l.orderId] = true; });
+      renderCouriers();
+    }
+    function crPick(cid, mode) {
+      const c = crCourier(cid); if (!c) return;
+      const t = crToday(), y = new Date(Date.now() - 3 * 3600 * 1000 - 86400000).toISOString().slice(0, 10);
+      c.lines.forEach(l => { CR.sel[l.orderId] = mode === 'all' || (mode === 'today' && l.date === t) || (mode === 'yesterday' && l.date <= y); });
+      CR.touched = false; renderCouriers();
+    }
+    function crRefreshCalc(cid) { const c = crCourier(cid), el = document.getElementById('cr-calc-' + cid); if (c && el) el.innerHTML = crCalcHtml(c); }
+    function crTick(orderId, on, cid) { CR.sel[orderId] = on; CR.touched = false; crRefreshCalc(cid); }
+    function crFee(orderId, v, cid) { CR.fees[orderId] = v; CR.touched = false; crRefreshCalc(cid); }
+    function crReceived(v, cid) {
+      CR.received = v; CR.touched = true;
+      const c = crCourier(cid), el = document.getElementById('cr-diff-' + cid); if (!c || !el) return;
+      const diff = (Number(v) || 0) - crCalc(c).net;
+      el.innerHTML = diff === 0 ? '<span class="text-emerald-400">Justo ✅ no falta ni sobra</span>' : (diff < 0 ? `<span class="text-rose-400">Falta ${formatARS(-diff)} ⚠️</span>` : `<span class="text-sky-400">Sobra ${formatARS(diff)}</span>`);
+    }
+    async function crSubmit(cid) {
+      const c = crCourier(cid); if (!c) return;
+      const k = crCalc(c); if (!k.picked.length) { crMsg('Tildá al menos una entrega para rendir.', false); return; }
+      const note = ((document.getElementById('cr-note') || {}).value || '').trim();
+      const recvEl = document.getElementById('cr-received');
+      const received = k.net >= 0 ? Math.max(0, Math.round(Number(recvEl ? recvEl.value : k.net) || 0)) : 0;
+      const txt = k.net >= 0 ? `${c.name} te entrega ${formatARS(received)}${received !== k.net ? (received < k.net ? ` (faltan ${formatARS(k.net - received)})` : ` (sobran ${formatARS(received - k.net)})`) : ''}.` : `Le pagás ${formatARS(-k.net)} a ${c.name}.`;
+      if (!confirm(`¿Confirmar la rendición de ${k.picked.length} entrega(s)? ${txt}`)) return;
+      const orders = k.picked.map(l => { const f = crLineFee(l); return f === l.fee ? { id: l.orderId } : { id: l.orderId, fee: f }; });
+      const res = await apiRequest('COURIER_SETTLE', { method: 'POST', headers: crHeaders(), body: JSON.stringify({ courierId: cid, orders, received, note }) }, '/settle');
+      if (!res || res.success === false) { crMsg((res && res.error) || 'No se pudo guardar la rendición.', false); return; }
+      CR.open = null; CR.sel = {}; CR.fees = {}; CR.touched = false;
+      await openCouriersTab();
+      crMsg(`Rendición guardada ✅ ${txt}${res.noCaja ? ' Ojo: no había caja abierta, así que este movimiento no entró en Caja diaria.' : ' Ya figura en Caja diaria.'}`, true);
+      if (typeof renderCashRegister === 'function') renderCashRegister();
+    }
+    async function crAssign(orderId) {
+      const sel = document.getElementById('cr-as-' + orderId); if (!sel) return;
+      const res = await apiRequest('COURIER_SETTLE', { method: 'POST', headers: crHeaders(), body: JSON.stringify({ orderId, courierId: Number(sel.value) }) }, '/assign');
+      if (!res || res.success === false) { crMsg((res && res.error) || 'No se pudo asignar.', false); return; }
+      await openCouriersTab(); crMsg('Asignado ✅', true);
+    }
+    async function crSetStart() {
+      const date = (document.getElementById('cr-start') || {}).value;
+      const res = await apiRequest('COURIER_SETTLE', { method: 'PUT', headers: crHeaders(), body: JSON.stringify({ date }) }, '/start');
+      if (!res || res.success === false) { crMsg((res && res.error) || 'No se pudo cambiar la fecha.', false); return; }
+      await openCouriersTab(); crMsg('Fecha cambiada ✅', true);
+    }
+    async function crUndo(id) {
+      if (!confirm('¿Anular esta rendición? Las entregas vuelven a quedar pendientes y la Caja diaria se corrige.')) return;
+      const res = await apiRequest('COURIER_SETTLE', { method: 'DELETE', headers: crHeaders() }, '/' + id);
+      if (!res || res.success === false) { crMsg((res && res.error) || 'No se pudo anular.', false); return; }
+      await openCouriersTab(); crMsg('Rendición anulada.', true);
+    }
+    // "Mi cuenta" del cadete: lo que tiene que entregar y lo que le corresponde por sus envíos.
+    let MY_COURIER = null;
+    async function loadMyCourier() {
+      if (!isBackendConnected() || !currentStaffSession.token || currentStaffSession.role === 'admin' || !can('orders.dispatch')) { MY_COURIER = null; return; }
+      const res = await apiRequest('COURIER_SETTLE', { headers: crHeaders() }, '/mine');
+      MY_COURIER = res && res.enabled ? res : null;
+    }
+    function myCourierCardHtml() {
+      const m = MY_COURIER; if (!m) return '';
+      const net = m.net;
+      return `<div class="p-4 rounded-2xl border border-emerald-700/40 bg-emerald-950/20 space-y-2"><div class="text-[11px] font-bold uppercase tracking-wider text-emerald-300">💰 Mi cuenta (sin rendir)</div>
+        <div class="grid grid-cols-3 gap-2 text-center"><div><div class="text-lg font-black text-white">${formatARS(m.cashTotal)}</div><div class="text-[10px] text-zinc-400">efectivo que cobré</div></div><div><div class="text-lg font-black text-white">${formatARS(m.feeTotal)}</div><div class="text-[10px] text-zinc-400">me corresponde por envíos</div></div><div><div class="text-lg font-black ${net >= 0 ? 'text-amber-300' : 'text-sky-300'}">${formatARS(Math.abs(net))}</div><div class="text-[10px] text-zinc-400">${net >= 0 ? 'tengo que entregar' : 'me tienen que pagar'}</div></div></div>
+        <div class="text-[10px] text-zinc-500 text-center">${m.count} entrega${m.count === 1 ? '' : 's'} sin rendir${m.last ? ` · última rendición: ${escapeHtml(crDate(m.last.date))}` : ''}</div></div>`;
     }
 
     // ---- Proveedor en cada producto ----
@@ -5593,7 +5781,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.6): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.7): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -6867,6 +7055,7 @@ html { scroll-behavior: smooth; }
       document.getElementById('cashreg-opening-display').textContent = formatARS(res.day.openingAmount);
       document.getElementById('cashreg-sales-display').textContent = formatARS(res.cashSalesToday);
       document.getElementById('cashreg-expenses-display').textContent = formatARS(totalExpenses);
+      const cb = document.getElementById('cashreg-courier-box'); if (cb) { cb.classList.toggle('hidden', !res.courierNet); document.getElementById('cashreg-courier-display').textContent = (res.courierNet < 0 ? '−' : '+') + formatARS(Math.abs(res.courierNet || 0)); }
       document.getElementById('cashreg-expected-display').textContent = formatARS(res.expectedCash);
 
       const list = document.getElementById('cashreg-expenses-list');
@@ -8650,7 +8839,7 @@ html { scroll-behavior: smooth; }
     // BARRA INFERIOR EN CELULAR
     // ==========================================
     const MBAR_MAIN = [['today', '🏠', 'Hoy'], ['orders', '🛵', 'Pedidos'], ['inventory', '📦', 'Productos'], ['finances', '📊', 'Finanzas']];
-    const MBAR_LABELS = { today: ['🏠', 'Hoy'], finances: ['📊', 'Finanzas'], inventory: ['📦', 'Productos'], costs: ['💲', 'Costos'], iphone: ['📱', 'iPhone'], 'smart-engine': ['🧠', 'Asesor'], orders: ['🛵', 'Pedidos'], suppliers: ['🤝', 'Proveedores'], offers: ['🏷️', 'Ofertas'], customers: ['👥', 'Clientes'], claims: ['🛡️', 'Reclamos'], 'staff-users': ['🔑', 'Usuarios'], settings: ['⚙️', 'Ajustes'] };
+    const MBAR_LABELS = { today: ['🏠', 'Hoy'], finances: ['📊', 'Finanzas'], inventory: ['📦', 'Productos'], costs: ['💲', 'Costos'], couriers: ['🛵', 'Rendición'], iphone: ['📱', 'iPhone'], 'smart-engine': ['🧠', 'Asesor'], orders: ['🛵', 'Pedidos'], suppliers: ['🤝', 'Proveedores'], offers: ['🏷️', 'Ofertas'], customers: ['👥', 'Clientes'], claims: ['🛡️', 'Reclamos'], 'staff-users': ['🔑', 'Usuarios'], settings: ['⚙️', 'Ajustes'] };
     let adminCurrentTab = '';
     function onAdminTabShown(tab) {
       adminCurrentTab = tab;

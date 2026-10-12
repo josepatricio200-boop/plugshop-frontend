@@ -777,7 +777,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v7.6</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v7.7</span>
           </div>
         </div>
 
@@ -1447,6 +1447,7 @@ html { scroll-behavior: smooth; }
         PRICING: '/api/products/pricing-config', // GET / PUT { rounding } (solo admin)
         BULK_COSTS: '/api/products/bulk-costs',  // POST { items: [{ id, cost, marginPct, price, locked }] } (solo admin)
         SUPPLIER_PAYABLES: '/api/suppliers/payables', // GET ?from&to (solo admin)
+        COURIER_SETTLE: '/api/cash-register/couriers', // /pending /history /settle /assign /start /mine (rendición de cadetes)
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
