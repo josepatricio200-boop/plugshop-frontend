@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.9</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.1</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -722,9 +722,9 @@ html { scroll-behavior: smooth; }
               </div>
 
               <div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                <span class="text-[11px] text-zinc-400 uppercase font-semibold">Envíos despachados</span>
+                <span class="text-[11px] text-zinc-400 uppercase font-semibold">Envío cobrado</span>
                 <div id="fin-shipping-ops" class="text-xl sm:text-2xl font-black text-amber-400">$0</div>
-                <span class="text-[10px] text-zinc-400 font-medium font-sans">Costo de motos</span>
+                <span class="text-[10px] text-zinc-400 font-medium font-sans">Lo que pagaron los clientes por envío (no incluye lo que le pagás al cadete)</span>
               </div>
             </div>
 
@@ -1037,6 +1037,14 @@ html { scroll-behavior: smooth; }
                       </div>
                       <input type="hidden" id="new-prod-warranty" value="Garantía Oficial 12 meses" />
                       <p id="warranty-hint" class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug"></p>
+                    </div>
+                    <div>
+                      <label class="block mb-1 text-zinc-400 font-sans">Tipo de envío *</label>
+                      <select id="new-prod-delivery" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-sans">
+                        <option value="moto">🛵 Moto (chico o mediano)</option>
+                        <option value="auto">🚗 Auto (producto grande)</option>
+                      </select>
+                      <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">Si un pedido lleva un producto en auto, todo el pedido se envía en auto. El precio de cada uno se carga en Ajustes & Zonas.</p>
                     </div>
                   </div>
 
@@ -1401,7 +1409,7 @@ html { scroll-behavior: smooth; }
           <div id="admin-tab-orders" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 class="text-lg font-bold text-white">Cola de Pedidos & Despachos en Tucumán</h3>
+                <h3 class="text-lg font-bold text-white">Pedidos & Entregas</h3>
                 <p class="text-xs text-zinc-400">Monitoreá las compras coordinadas por WhatsApp, colores elegidos, cobro y cadetería.</p>
               </div>
               <div class="flex flex-wrap gap-2 self-start">
@@ -1517,10 +1525,10 @@ html { scroll-behavior: smooth; }
               <div class="p-5 rounded-2xl bg-zinc-900 border border-brand-orange/40 space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="px-2 py-0.5 rounded text-[10px] bg-brand-orange/20 text-brand-orange font-bold uppercase font-code">Promo Transferencia</span>
-                  <span class="text-xs text-emerald-400 font-bold font-code">10% OFF</span>
+                  <span id="promo-transfer-badge" class="text-xs text-emerald-400 font-bold font-code">10% OFF</span>
                 </div>
                 <h4 class="font-bold text-white text-sm">Transferencia Directa (Alias/CVU)</h4>
-                <p class="text-xs text-zinc-400">Incentivo directo del 10% de descuento que reduce la fricción y elimina riesgos de cadetería.</p>
+                <p id="promo-transfer-text" class="text-xs text-zinc-400">Incentivo directo del 10% de descuento que reduce la fricción y elimina riesgos de cadetería.</p>
                 <div class="text-[11px] text-zinc-500 font-code">Configurable desde Ajustes</div>
               </div>
               <div class="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-3">
@@ -1530,15 +1538,15 @@ html { scroll-behavior: smooth; }
                 </div>
                 <h4 class="font-bold text-white text-sm">Efectivo en Mano</h4>
                 <p class="text-xs text-zinc-400">El comprador abona el precio de lista al cadete cuando le entrega la caja sellada.</p>
-                <div class="text-[11px] text-zinc-500 font-code">Tucumán & YB</div>
+                <div class="text-[11px] text-zinc-500 font-code" id="promo-cash-zone">Tucumán & YB</div>
               </div>
               <div class="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="px-2 py-0.5 rounded text-[10px] bg-emerald-950 text-emerald-400 font-bold uppercase font-code">Envío Bonificado</span>
-                  <span class="text-xs text-emerald-400 font-bold font-code">Superando $150k</span>
+                  <span id="promo-free-badge" class="text-xs text-emerald-400 font-bold font-code">Superando $150k</span>
                 </div>
                 <h4 class="font-bold text-white text-sm">Moto Express Sin Cargo</h4>
-                <p class="text-xs text-zinc-400">Envío en el día 100% bonificado en compras superiores al umbral establecido.</p>
+                <p id="promo-free-text" class="text-xs text-zinc-400">Envío en el día 100% bonificado en compras superiores al umbral establecido.</p>
                 <div class="text-[11px] text-zinc-500 font-code">Automático en Checkout</div>
               </div>
             </div>
@@ -1548,8 +1556,8 @@ html { scroll-behavior: smooth; }
           <div id="admin-tab-customers" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 class="text-lg font-bold text-white">Registro de Clientes & Garantías</h3>
-                <p class="text-xs text-zinc-400">Base unificada de compradores en Tucumán y Yerba Buena con historial de compras guardado.</p>
+                <h3 class="text-lg font-bold text-white">Registro de Clientes</h3>
+                <p class="text-xs text-zinc-400">Tus compradores con su historial. Tocá un nombre para abrir su ficha (pedidos, reclamos, etiquetas y notas).</p>
               </div>
             </div>
 
@@ -1561,8 +1569,8 @@ html { scroll-behavior: smooth; }
                       <th class="py-3 px-4">Cliente</th>
                       <th class="py-3 px-4">WhatsApp</th>
                       <th class="py-3 px-4">Zona / Localidad</th>
-                      <th class="py-3 px-4">Compras Realizadas</th>
-                      <th class="py-3 px-4">Total Invertido</th>
+                      <th class="py-3 px-4">Compras</th>
+                      <th class="py-3 px-4">Total gastado (cobrado)</th>
                       <th class="py-3 px-4 text-right">Contacto</th>
                     </tr>
                   </thead>
@@ -1686,6 +1694,28 @@ html { scroll-behavior: smooth; }
                   <div class="flex items-center gap-2 font-code">
                     <input type="number" id="setting-free-threshold" value="150000" step="5000" class="w-48 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
                     <span class="text-zinc-500">ARS</span>
+                  </div>
+                  <span class="block text-[10px] text-zinc-500 mt-1">Vale para los pedidos que van en moto. Para auto se configura abajo.</span>
+                </div>
+
+                <div class="p-4 rounded-xl border border-sky-500/30 bg-sky-500/5 space-y-3">
+                  <div>
+                    <div class="text-zinc-100 font-bold">🚗 Envío en auto (productos grandes)</div>
+                    <p class="text-[11px] text-zinc-400 mt-0.5">Se usa cuando el pedido lleva algún producto marcado como "Auto" (en el formulario del producto, campo "Tipo de envío"). Si el pedido lleva un producto grande, todo el pedido va en auto.</p>
+                    <p id="setting-auto-hint" class="hidden mt-1 text-[11px] text-amber-300">Todavía no cargaste estos precios: hasta que los guardes, el envío en auto cuesta lo mismo que en moto.</p>
+                  </div>
+                  <div>
+                    <label class="block mb-1 text-zinc-300 font-semibold">Envío en auto a Yerba Buena</label>
+                    <div class="flex items-center gap-2 font-code"><input type="number" id="setting-shipping-auto" value="0" step="100" min="0" class="w-48 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" /><span class="text-zinc-500">ARS</span></div>
+                  </div>
+                  <div>
+                    <label class="block mb-1 text-zinc-300 font-semibold">Envío en auto a San Miguel de Tucumán (capital)</label>
+                    <div class="flex items-center gap-2 font-code"><input type="number" id="setting-shipping-auto-smt" value="0" step="100" min="0" class="w-48 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" /><span class="text-zinc-500">ARS</span></div>
+                  </div>
+                  <div>
+                    <label class="block mb-1 text-zinc-300 font-semibold">Envío gratis en auto desde</label>
+                    <div class="flex items-center gap-2 font-code"><input type="number" id="setting-free-auto" value="0" step="5000" min="0" class="w-48 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" /><span class="text-zinc-500">ARS</span></div>
+                    <span class="block text-[10px] text-zinc-500 mt-1">Poné 0 si el envío en auto nunca es gratis (lo normal, porque es más caro para vos).</span>
                   </div>
                 </div>
 
@@ -2076,7 +2106,8 @@ html { scroll-behavior: smooth; }
       if (!res || typeof res !== 'object' || res.error) return;
       ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias', 'storeZone'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
-      ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
+      ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold', 'shippingCostAuto', 'shippingCostAutoSmt', 'freeShippingThresholdAuto'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
+      if (typeof res.shippingAutoSet === 'boolean') STORE_SETTINGS.shippingAutoSet = res.shippingAutoSet;
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
       applyStoreWhatsappLinks();
       applyBankDisplay();
@@ -3099,6 +3130,39 @@ html { scroll-behavior: smooth; }
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
+    // ---- Tipo de envío (moto / auto) y costo según la zona ----
+    // Cada producto trae su tipo de envío (moto por defecto). El pedido usa el más grande de los que lleve.
+    // Para sumar otro tipo (ej. flete) se agrega acá y en el servidor (src/shipping.js).
+    const VEHICLE_INFO = { moto: { label: 'Moto', icon: '🛵' }, auto: { label: 'Auto', icon: '🚗' } };
+    const VEHICLE_ORDER = Object.keys(VEHICLE_INFO);
+    function vehicleOfProduct(p) { return p && VEHICLE_INFO[p.deliveryClass] ? p.deliveryClass : 'moto'; }
+    function vehicleOfItems(items) {
+      return (items || []).reduce((best, it) => {
+        const v = vehicleOfProduct(PRODUCTS.find(p => p.id === it.id));
+        return VEHICLE_ORDER.indexOf(v) > VEHICLE_ORDER.indexOf(best) ? v : best;
+      }, 'moto');
+    }
+    function cartVehicle() { return vehicleOfItems(cart); }
+    // Precios del tipo de envío; lo que no se cargó cae al de moto (igual que el servidor).
+    function shipRates(vehicle) {
+      const S = STORE_SETTINGS, num = n => typeof n === 'number' && isFinite(n);
+      const motoYb = num(S.shippingCost) ? S.shippingCost : 0;
+      const motoSmt = num(S.shippingCostSmt) ? S.shippingCostSmt : motoYb;
+      if (vehicle === 'auto') {
+        const yb = num(S.shippingCostAuto) ? S.shippingCostAuto : motoYb;
+        const smt = num(S.shippingCostAutoSmt) ? S.shippingCostAutoSmt : (num(S.shippingCostAuto) ? S.shippingCostAuto : motoSmt);
+        const thr = num(S.freeShippingThresholdAuto) && S.freeShippingThresholdAuto > 0 ? S.freeShippingThresholdAuto : Infinity;
+        return { yb, smt, freeFrom: thr };
+      }
+      return { yb: motoYb, smt: motoSmt, freeFrom: num(S.freeShippingThreshold) ? S.freeShippingThreshold : Infinity };
+    }
+    function shippingFor(zone, vehicle) {
+      if (zone === 'retiro') return 0;
+      const r = shipRates(vehicle || cartVehicle());
+      return zone === 'smt' ? r.smt : r.yb;
+    }
+    function shipIsFree(subtotal, vehicle) { return subtotal >= shipRates(vehicle || cartVehicle()).freeFrom; }
+
     // ==========================================
     // 8. ADMIN OPERATIONS HUB & ARCA LEDGER
     // ==========================================
@@ -4105,7 +4169,7 @@ html { scroll-behavior: smooth; }
             <span class="text-[9px] text-zinc-500 font-medium font-code">${(p.photos || []).length} fotos</span>
           </td>
           <td class="py-3 px-4">
-            <div class="font-bold text-white font-sans">${escapeHtml(p.name)}${p.active === false ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold align-middle">PAUSADO</span>' : ''}${p.featured ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold align-middle">★</span>' : ''}${offPct(p) ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold align-middle">-${offPct(p)}%</span>` : ''}</div>
+            <div class="font-bold text-white font-sans">${escapeHtml(p.name)}${p.active === false ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold align-middle">PAUSADO</span>' : ''}${p.featured ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold align-middle">★</span>' : ''}${vehicleOfProduct(p) !== 'moto' ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-bold align-middle" title="Se envía en ${VEHICLE_INFO[vehicleOfProduct(p)].label.toLowerCase()}">${VEHICLE_INFO[vehicleOfProduct(p)].icon} ${VEHICLE_INFO[vehicleOfProduct(p)].label.toUpperCase()}</span>` : ''}${offPct(p) ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold align-middle">-${offPct(p)}%</span>` : ''}</div>
             <div class="text-[11px] text-zinc-400">${escapeHtml(p.brand)} · <span class="text-zinc-500 text-[10px]">${escapeHtml(categoryLabel(p.category))}${p.subcategory ? ' › ' + escapeHtml(categoryLabel(p.subcategory)) : ''}</span></div>
           </td>
           <td class="py-3 px-4">
@@ -4439,7 +4503,7 @@ html { scroll-behavior: smooth; }
           <td class="py-3 px-4 o-cust">
             <div class="font-semibold text-white font-sans">${escapeHtml(o.customer)}</div>
             <div class="text-[11px] text-zinc-400">${escapeHtml(o.phone)}</div>
-            <div class="mt-1 flex flex-wrap gap-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>${o.courierName ? `<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-semibold text-sky-300">🛵 ${escapeHtml(o.courierName)}</span>` : ''}</div>
+            <div class="mt-1 flex flex-wrap gap-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>${vehBadge(o)}${o.courierName ? `<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-semibold text-sky-300">🛵 ${escapeHtml(o.courierName)}</span>` : ''}</div>
             <div class="text-[10px] text-zinc-500 font-sans break-words max-w-[200px]">${escapeHtml(o.address)}</div>
           </td>
           <td class="py-3 px-4 o-items max-w-[220px]">
@@ -4472,7 +4536,6 @@ html { scroll-behavior: smooth; }
             </div>
             <div class="order-more hidden mt-1.5 flex-wrap justify-end gap-1.5">
               ${(o.status !== 'Cancelado' && canManageOrd) ? `<button onclick="openPackageLabel('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">🏷️ Etiqueta</button>` : ''}
-              <button onclick="openOrderTrackingModal('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-brand-amber text-[11px] font-bold transition-colors" title="Ver Radar y QR">QR ↗</button>
               <button onclick="addOrderNote('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 text-[11px] font-semibold" title="Nota interna (el cliente no la ve)">📝 Nota</button>
             </div>
           </td>
@@ -4566,7 +4629,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v6.9): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.1): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -4778,7 +4841,7 @@ html { scroll-behavior: smooth; }
 
           ${ppSection('Pago', `${ppRow('Forma de pago', escapeHtml(o.paymentMethod || 'Transferencia'))}${ppRow('Estado', payLine)}<div class="mt-1">${money.join('')}</div>${o.refund ? `<div class="mt-2 p-2.5 rounded-lg text-xs font-semibold ${o.refund.status === 'pendiente' ? 'bg-amber-950/40 border border-amber-800 text-amber-300' : 'bg-emerald-950/40 border border-emerald-800 text-emerald-300'}">${o.refund.status === 'pendiente' ? '💸 Reintegro pendiente ' : '✓ Reintegro devuelto '}${formatARS(o.refund.amount)}${o.refund.reason ? ' · ' + escapeHtml(o.refund.reason) : ''}${o.refund.ref ? ' · op. ' + escapeHtml(o.refund.ref) : ''}</div>` : ''}`)}
 
-          ${ppSection('Entrega', `${ppRow('Zona', escapeHtml(o.deliveryType || ''))}${ppRow('Repartidor', ppCourierSelect(o))}${o.dispatchLog ? ppRow('Salida', escapeHtml(ppWhen(o.dispatchLog.at)) + ' · ' + escapeHtml(o.dispatchLog.by || '')) : ''}${o.deliveryLog ? ppRow('Entrega', escapeHtml(ppWhen(o.deliveryLog.at)) + ' · ' + (o.deliveryLog.method === 'qr' ? 'con QR del cliente' : (o.deliveryLog.method === 'manual' ? 'marcada a mano' : 'confirmada por el cliente'))) : ''}`)}
+          ${ppSection('Entrega', `${ppRow('Zona', escapeHtml(o.deliveryType || ''))}${o.zone !== 'retiro' ? ppRow('Tipo de envío', VEHICLE_INFO[orderVeh(o)].icon + ' ' + VEHICLE_INFO[orderVeh(o)].label) : ''}${ppRow('Repartidor', ppCourierSelect(o))}${o.dispatchLog ? ppRow('Salida', escapeHtml(ppWhen(o.dispatchLog.at)) + ' · ' + escapeHtml(o.dispatchLog.by || '')) : ''}${o.deliveryLog ? ppRow('Entrega', escapeHtml(ppWhen(o.deliveryLog.at)) + ' · ' + (o.deliveryLog.method === 'qr' ? 'con QR del cliente' : (o.deliveryLog.method === 'manual' ? 'marcada a mano' : 'confirmada por el cliente'))) : ''}`)}
 
           ${ppSection('Mensaje por WhatsApp', `
             <div class="flex flex-wrap gap-1.5">${keys.map((k, i) => `<button type="button" onclick="waSend('${o.id}', '${k}')" class="px-2.5 py-1.5 rounded-lg text-[11px] font-semibold border ${i === 0 ? 'bg-emerald-500 text-black border-emerald-400' : 'bg-zinc-900 text-zinc-200 border-zinc-700 hover:bg-zinc-800'}">${tpl[k].label}</button>`).join('')}</div>
@@ -4812,13 +4875,11 @@ html { scroll-behavior: smooth; }
       const isT = MO.pay === 'transfer';
       const pct = typeof STORE_SETTINGS.transferDiscountPct === 'number' ? STORE_SETTINGS.transferDiscountPct : 10;
       const disc = isT ? Math.round(subtotal * pct / 100) : 0;
-      const base = Number(STORE_SETTINGS.shippingCost) || 0;
-      const zoneShip = MO.zone === 'smt' ? (typeof STORE_SETTINGS.shippingCostSmt === 'number' ? STORE_SETTINGS.shippingCostSmt : base) : base;
-      const free = subtotal >= (Number(STORE_SETTINGS.freeShippingThreshold) || Infinity);
-      let ship = (MO.zone === 'retiro' || free) ? 0 : zoneShip;
+      const vehicle = vehicleOfItems(MO.lines);
+      let ship = (MO.zone === 'retiro' || shipIsFree(subtotal, vehicle)) ? 0 : shippingFor(MO.zone, vehicle);
       if (MO.ship !== '' && Number.isFinite(Number(MO.ship))) ship = Math.max(0, Math.round(Number(MO.ship)));
       const extra = Math.max(0, Math.round(Number(MO.discount) || 0));
-      return { subtotal, pct, disc, ship, extra, total: Math.max(0, subtotal - disc - extra + ship) };
+      return { subtotal, pct, disc, ship, extra, vehicle, total: Math.max(0, subtotal - disc - extra + ship) };
     }
     function moSet(k, v) {
       MO[k] = v;
@@ -4836,7 +4897,7 @@ html { scroll-behavior: smooth; }
       const hint = document.getElementById('mo-cust-hint');
       if (!hint) return;
       if (c) {
-        hint.textContent = `Cliente conocido: ${c.name} · ${c.ordersCount || 0} compra(s)`;
+        hint.textContent = `Cliente conocido: ${c.name} · ${custStats(c).n} compra(s)`;
         const nm = document.getElementById('mo-name');
         if (nm && !nm.value.trim()) { nm.value = c.name; MO.name = c.name; }
       } else hint.textContent = 'Cliente nuevo: se va a crear su ficha.';
@@ -4883,7 +4944,7 @@ html { scroll-behavior: smooth; }
     function moRenderSummary() {
       const box = document.getElementById('mo-summary'); if (!box) return;
       const c = moCalc();
-      box.innerHTML = `${ppRow('Productos', formatARS(c.subtotal))}${c.disc ? ppRow(`Descuento por transferencia (${c.pct}%)`, '−' + formatARS(c.disc)) : ''}${c.extra ? ppRow('Descuento del equipo', '−' + formatARS(c.extra)) : ''}${ppRow('Envío', c.ship ? formatARS(c.ship) : 'Sin costo')}<div class="border-t border-zinc-800 mt-1 pt-1">${ppRow('Total estimado', formatARS(c.total), true)}</div><p class="text-[10px] text-zinc-500 mt-1">El servidor confirma el total final al guardar.</p>`;
+      box.innerHTML = `${ppRow('Productos', formatARS(c.subtotal))}${c.disc ? ppRow(`Descuento por transferencia (${c.pct}%)`, '−' + formatARS(c.disc)) : ''}${c.extra ? ppRow('Descuento del equipo', '−' + formatARS(c.extra)) : ''}${ppRow('Envío' + (c.vehicle !== 'moto' ? ` (${VEHICLE_INFO[c.vehicle].icon} en ${VEHICLE_INFO[c.vehicle].label.toLowerCase()})` : ''), c.ship ? formatARS(c.ship) : 'Sin costo')}<div class="border-t border-zinc-800 mt-1 pt-1">${ppRow('Total estimado', formatARS(c.total), true)}</div><p class="text-[10px] text-zinc-500 mt-1">El servidor confirma el total final al guardar.</p>`;
     }
     function renderManualOrder() {
       let wrap = document.getElementById('manual-order');
@@ -5049,7 +5110,7 @@ html { scroll-behavior: smooth; }
       const collect = routeToCollect(o);
       const addr = String(o.address || '').replace(/^[^(]*\(/, '').replace(/\)$/, '') || o.address || '';
       return `<div class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-1.5">
-        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-bold text-white">${i + 1}. ${escapeHtml(o.customer)} <span class="font-code text-[11px] text-zinc-400">#${escapeHtml(o.id)}</span></div><div class="text-xs text-zinc-300">📍 ${escapeHtml(o.address || '')}</div></div>${ppBadge(o.status)}</div>
+        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-bold text-white">${i + 1}. ${escapeHtml(o.customer)} <span class="font-code text-[11px] text-zinc-400">#${escapeHtml(o.id)}</span> ${vehBadge(o)}</div><div class="text-xs text-zinc-300">📍 ${escapeHtml(o.address || '')}</div></div>${ppBadge(o.status)}</div>
         <div class="text-[11px] text-zinc-400">${escapeHtml(o.items || '')}</div>
         ${collect ? `<div class="text-sm font-black text-amber-300">💵 Cobrar ${formatARS(collect)} en efectivo</div>` : '<div class="text-[11px] font-semibold text-emerald-400">✓ Ya pagado</div>'}
         ${(o.notes || []).map(n => `<div class="text-[11px] text-amber-200">📝 ${escapeHtml(n.text)}</div>`).join('')}
@@ -5083,7 +5144,7 @@ html { scroll-behavior: smooth; }
       const w = window.open('', '_blank');
       if (!w) { alert('El navegador bloqueó la ventana de impresión. Permitila e intentá de nuevo.'); return; }
       const fecha = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' });
-      w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Hoja de ruta</title><style>body{font:14px/1.4 system-ui,sans-serif;margin:12mm;color:#111}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:18px 0 6px;border-bottom:2px solid #111;padding-bottom:3px}.s{border:1px solid #999;border-radius:6px;padding:8px;margin:6px 0;page-break-inside:avoid}.c{font-weight:700}small{color:#555}@media print{button{display:none}}</style></head><body><h1>PLUGSHOP · Hoja de ruta</h1><small>${escapeHtml(fecha)}</small>${groups.map(g => `<h2>${escapeHtml(g.name)} (${g.orders.length})</h2>${g.orders.map((o, i) => `<div class="s"><b>${i + 1}. ${escapeHtml(o.customer)}</b> · #${escapeHtml(o.id)}<br>📍 ${escapeHtml(o.address || '')}<br>📞 ${escapeHtml(o.phone)}<br>${escapeHtml(o.items || '')}<br>${routeToCollect(o) ? `<span class="c">COBRAR ${formatARS(routeToCollect(o))} (efectivo)</span>` : 'Ya pagado'}${(o.notes || []).map(n => '<br>Nota: ' + escapeHtml(n.text)).join('')}</div>`).join('')}`).join('') || '<p>No hay entregas pendientes.</p>'}<p><button onclick="print()">Imprimir</button></p>`);
+      w.document.write(`<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Hoja de ruta</title><style>body{font:14px/1.4 system-ui,sans-serif;margin:12mm;color:#111}h1{font-size:20px;margin:0 0 4px}h2{font-size:16px;margin:18px 0 6px;border-bottom:2px solid #111;padding-bottom:3px}.s{border:1px solid #999;border-radius:6px;padding:8px;margin:6px 0;page-break-inside:avoid}.c{font-weight:700}small{color:#555}@media print{button{display:none}}</style></head><body><h1>PLUGSHOP · Hoja de ruta</h1><small>${escapeHtml(fecha)}</small>${groups.map(g => `<h2>${escapeHtml(g.name)} (${g.orders.length})</h2>${g.orders.map((o, i) => `<div class="s"><b>${i + 1}. ${escapeHtml(o.customer)}</b> · #${escapeHtml(o.id)}${orderVeh(o) !== 'moto' ? ' · <b>' + VEHICLE_INFO[orderVeh(o)].icon + ' ' + VEHICLE_INFO[orderVeh(o)].label.toUpperCase() + '</b>' : ''}<br>📍 ${escapeHtml(o.address || '')}<br>📞 ${escapeHtml(o.phone)}<br>${escapeHtml(o.items || '')}<br>${routeToCollect(o) ? `<span class="c">COBRAR ${formatARS(routeToCollect(o))} (efectivo)</span>` : 'Ya pagado'}${(o.notes || []).map(n => '<br>Nota: ' + escapeHtml(n.text)).join('')}</div>`).join('')}`).join('') || '<p>No hay entregas pendientes.</p>'}<p><button onclick="print()">Imprimir</button></p>`);
       w.document.close();
     }
 
@@ -5197,7 +5258,7 @@ html { scroll-behavior: smooth; }
       const row = (icon, title, sub, click) => `<button type="button" onclick="${click}" class="w-full text-left px-3 py-2 hover:bg-zinc-800 flex items-center gap-2.5 text-xs"><span class="text-base">${icon}</span><span class="min-w-0"><span class="block text-white font-semibold truncate">${title}</span><span class="block text-zinc-400 truncate">${sub}</span></span></button>`;
       let html = '';
       if (orders.length) html += '<div class="px-3 pt-2 pb-1 text-[10px] uppercase font-bold text-zinc-500">Pedidos</div>' + orders.map(o => row('🧾', `#${escapeHtml(o.id)} · ${escapeHtml(o.customer)}`, `${escapeHtml(o.status)} · ${formatARS(o.total || 0)}`, `gsearchGo('order','${o.id}')`)).join('');
-      if (custs.length) html += '<div class="px-3 pt-2 pb-1 text-[10px] uppercase font-bold text-zinc-500">Clientes</div>' + custs.map(c => row('👤', escapeHtml(c.name), `${escapeHtml(c.phone)} · ${c.ordersCount || 0} compra(s)`, `gsearchGo('customer','${normalizeArPhone(c.phone)}')`)).join('');
+      if (custs.length) html += '<div class="px-3 pt-2 pb-1 text-[10px] uppercase font-bold text-zinc-500">Clientes</div>' + custs.map(c => row('👤', escapeHtml(c.name), `${escapeHtml(c.phone)} · ${custStats(c).n} compra(s)`, `gsearchGo('customer','${normalizeArPhone(c.phone)}')`)).join('');
       if (prods.length) html += '<div class="px-3 pt-2 pb-1 text-[10px] uppercase font-bold text-zinc-500">Productos</div>' + prods.map(p => row('📦', escapeHtml(p.name), `${formatARS(p.price)} · stock ${escapeHtml(p.stock)}`, `gsearchGo('product','${p.id}')`)).join('');
       box.innerHTML = html || '<div class="px-3 py-3 text-xs text-zinc-400">No encontré nada con eso.</div>';
       box.classList.remove('hidden');
@@ -5217,6 +5278,19 @@ html { scroll-behavior: smooth; }
     // ---------- Ficha de cliente ----------
     let CFICHA = null;
     const CUST_TAG_PRESETS = ['VIP', 'Mayorista', 'Revendedor', 'Puntual', 'Moroso', 'Pide factura'];
+    // Compras y total gastado de un cliente: salen de sus pedidos reales (sin los cancelados y
+    // contando solo lo cobrado, igual que Finanzas). Sin permiso para ver pedidos, se usa lo guardado.
+    // Tipo de envío del pedido (los viejos, sin dato, van en moto). Solo se destaca el que NO es moto.
+    function orderVeh(o) { return VEHICLE_INFO[o && o.vehicle] ? o.vehicle : 'moto'; }
+    function vehBadge(o) {
+      const v = orderVeh(o);
+      return v === 'moto' ? '' : `<span class="px-2 py-0.5 rounded bg-amber-950 border border-amber-700 text-[10px] font-bold text-amber-300" title="Producto grande: va en ${VEHICLE_INFO[v].label.toLowerCase()}">${VEHICLE_INFO[v].icon} ${VEHICLE_INFO[v].label.toUpperCase()}</span>`;
+    }
+    function custStats(c) {
+      if (!(typeof can === 'function' && can('orders.view')) || !ADMIN_ORDERS.length) return { n: Number(c.ordersCount) || 0, spent: Number(c.totalSpent) || 0 };
+      const valid = ADMIN_ORDERS.filter(o => samePhone(o.phone, c.phone) && o.status !== 'Cancelado');
+      return { n: valid.length, spent: valid.filter(orderCollected).reduce((a, o) => a + orderNetTotal(o), 0) };
+    }
     function custOrders(c) { return ADMIN_ORDERS.filter(o => samePhone(o.phone, c.phone)); }
     function openCustomerFicha(phoneKey) {
       const c = CUSTOMERS.find(x => samePhone(x.phone, phoneKey));
@@ -5314,7 +5388,7 @@ html { scroll-behavior: smooth; }
         { id: 'legal', auto: true, ok: legalOk, label: 'Datos legales completos (razón social, CUIT, domicilio, email)', hint: 'Todavía tienen [COMPLETAR] en los textos legales de la tienda.' },
         { id: 'bank', auto: true, ok: aliasOk && cbuOk, label: 'Alias y CBU son los de tu cuenta', hint: 'Están los datos de ejemplo. Cargá los tuyos en Ajustes → Datos de cobro.' },
         { id: 'products', auto: true, ok: active.length >= 1 && noPhoto === 0, label: 'Productos reales cargados, todos con foto', hint: active.length ? `${noPhoto} producto(s) activos sin foto.` : 'No hay productos activos.' },
-        { id: 'pin', ok: !!man.pin, label: 'Cambié el PIN del administrador', hint: 'Ajustes → Seguridad. Usá uno que nadie conozca.' },
+        { id: 'pin', ok: !!man.pin, label: 'Cambié el PIN del administrador', hint: 'En Ajustes & Zonas → "Cambiar el PIN de administrador". Usá uno que nadie conozca.' },
         { id: 'test', ok: !!man.test, label: 'Hice un pedido de prueba completo (pedir → pagar → despachar → entregar)', hint: '' },
         { id: 'clean', ok: !!man.clean, label: 'Borré los pedidos, clientes y reclamos de prueba', hint: '' },
         { id: 'lawyer', ok: !!man.lawyer, label: 'Un abogado revisó los textos legales', hint: '' },
@@ -5394,12 +5468,13 @@ html { scroll-behavior: smooth; }
       const box = document.getElementById('today-cards');
       if (!box) return;
       const role = (currentStaffSession && currentStaffSession.role) || 'admin';
-      const can = t => tabAllowedForRole(t, role);
+      const canTab = t => tabAllowedForRole(t, role);
       const cards = [];
-      const add = (n, icon, label, hint, tab, quick, tone) => { if (n > 0 && can(tab)) cards.push({ n, icon, label, hint, tab, quick, tone }); };
+      const add = (n, icon, label, hint, tab, quick, tone) => { if (n > 0 && canTab(tab)) cards.push({ n, icon, label, hint, tab, quick, tone }); };
       const live = ADMIN_ORDERS.filter(o => !['Entregado', 'Cancelado'].includes(o.status));
-      const transferPending = live.filter(o => o.isBancarizado && PENDING_PAY.includes(o.status)).length;
-      const cashToPrepare = live.filter(o => !o.isBancarizado && PENDING_PAY.includes(o.status)).length;
+      const canConfirm = role === 'admin' || can('orders.manage');
+      const transferPending = canConfirm ? live.filter(o => o.isBancarizado && PENDING_PAY.includes(o.status)).length : 0;
+      const cashToPrepare = canConfirm ? live.filter(o => !o.isBancarizado && PENDING_PAY.includes(o.status)).length : 0;
       add(transferPending, '💳', 'Transferencias por confirmar', 'Revisá que la plata esté en tu cuenta y confirmá el pago.', 'orders', 'toCollect', 'amber');
       add(cashToPrepare, '💵', 'Pedidos en efectivo por preparar', 'Se cobran al entregar. Pasalos a "En preparación" cuando los armes.', 'orders', 'active', 'amber');
       add(live.filter(o => o.status === 'En preparación').length, '📦', 'Para preparar y despachar', 'Cobrados y listos para armar.', 'orders', 'En preparación', 'orange');
@@ -5466,8 +5541,8 @@ html { scroll-behavior: smooth; }
           <td class="py-3 px-4 font-bold text-white font-sans"><button type="button" onclick="openCustomerFicha('${normalizeArPhone(c.phone)}')" class="text-left underline decoration-dotted underline-offset-2 hover:text-brand-orange" title="Abrir la ficha del cliente">${escapeHtml(c.name)}</button>${c.registered ? ' <span class="text-[10px] text-emerald-400 font-code">✓ Registrado</span>' : ''}${(c.tags || []).map(t => ` <span class="px-1.5 py-0.5 rounded-full bg-brand-orange/15 text-brand-orange text-[10px] font-semibold">${escapeHtml(t)}</span>`).join('')}</td>
           <td class="py-3 px-4 text-zinc-300">${escapeHtml(c.phone)}</td>
           <td class="py-3 px-4 text-zinc-400 font-sans">${escapeHtml(c.zone)}</td>
-          <td class="py-3 px-4 font-semibold text-white font-sans">${c.ordersCount} compras</td>
-          <td class="py-3 px-4 font-bold text-brand-amber">${formatARS(c.totalSpent)}</td>
+          <td class="py-3 px-4 font-semibold text-white font-sans">${custStats(c).n} compras</td>
+          <td class="py-3 px-4 font-bold text-brand-amber">${formatARS(custStats(c).spent)}</td>
           <td class="py-3 px-4 text-right font-sans">
             <button onclick="openCustomerFicha('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-zinc-100 hover:bg-white text-black text-[10px] font-bold">📋 Ficha</button>
             <button onclick="window.open(waLink('${c.phone}'), '_blank')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-semibold">
@@ -5497,10 +5572,29 @@ html { scroll-behavior: smooth; }
       if (zoneInput && document.activeElement !== zoneInput) zoneInput.value = storeZoneName();
 
       if (brandsInput && document.activeElement !== brandsInput) brandsInput.value = typeof STORE_SETTINGS.featuredBrands === 'string' ? STORE_SETTINGS.featuredBrands : DEFAULT_BRANDS;
+      { // Tarjetas de Ofertas: muestran lo que está configurado en Ajustes (antes decían siempre 10% y $150k)
+        const pct = typeof STORE_SETTINGS.transferDiscountPct === 'number' ? STORE_SETTINGS.transferDiscountPct : 10;
+        const thr = Number(STORE_SETTINGS.freeShippingThreshold) || 0;
+        const set = (id, t) => { const el = document.getElementById(id); if (el) el.textContent = t; };
+        set('promo-transfer-badge', pct + '% OFF');
+        set('promo-transfer-text', `Incentivo directo del ${pct}% de descuento que reduce la fricción y elimina riesgos de cadetería.`);
+        set('promo-free-badge', thr ? 'Superando ' + formatARS(thr) : 'Sin mínimo');
+        set('promo-free-text', thr ? `Envío bonificado en compras desde ${formatARS(thr)}.` : 'Envío bonificado en todas las compras.');
+        set('promo-cash-zone', storeZoneName());
+      }
       if (discountInput) discountInput.value = STORE_SETTINGS.transferDiscountPct || 10;
       if (shipInput) shipInput.value = STORE_SETTINGS.shippingCost;
       if (shipSmtInput) shipSmtInput.value = typeof STORE_SETTINGS.shippingCostSmt === 'number' ? STORE_SETTINGS.shippingCostSmt : STORE_SETTINGS.shippingCost;
       if (freeInput) freeInput.value = STORE_SETTINGS.freeShippingThreshold;
+      { // Envío en auto: lo que no se cargó muestra el precio de moto y avisa
+        const ra = shipRates('auto');
+        const aY = document.getElementById('setting-shipping-auto'), aS = document.getElementById('setting-shipping-auto-smt'), aF = document.getElementById('setting-free-auto');
+        if (aY && document.activeElement !== aY) aY.value = ra.yb;
+        if (aS && document.activeElement !== aS) aS.value = ra.smt;
+        if (aF && document.activeElement !== aF) aF.value = isFinite(ra.freeFrom) ? ra.freeFrom : 0;
+        const ah = document.getElementById('setting-auto-hint');
+        if (ah) ah.classList.toggle('hidden', STORE_SETTINGS.shippingAutoSet !== false || !PRODUCTS.some(p => vehicleOfProduct(p) === 'auto'));
+      }
       if (waInput) waInput.value = STORE_SETTINGS.whatsappNumber;
       if (pinInput) pinInput.value = ADMIN_PIN;
       if (aliasInput) aliasInput.value = STORE_SETTINGS.bankAlias || 'PlugShop.store.ar';
@@ -6347,6 +6441,7 @@ html { scroll-behavior: smooth; }
       set('new-prod-cost', p.cost || Math.round((p.price || 0) * 0.6));
       set('new-prod-compare', p.compareAtPrice || '');
       document.getElementById('new-prod-featured').checked = p.featured === true;
+      set('new-prod-delivery', vehicleOfProduct(p));
       set('new-prod-specs', p.specs || '');
       set('new-prod-keywords', p.keywords || '');
       set('new-prod-colors', (p.colors || []).join(', '));
@@ -6432,6 +6527,7 @@ html { scroll-behavior: smooth; }
 
       const payload = {
         name, brand, category, subcategory, type, warranty, warrantyMonths: warrantyMonthsVal, warrantyBy, stock, stockByColor, specs, keywords, featured,
+        deliveryClass: (document.getElementById('new-prod-delivery') || { value: 'moto' }).value,
         ...(iphData || {}),
         colors: colors.length > 0 ? colors : ['Único'], photos,
         badge: type === 'original' ? '100% ORIGINAL' : 'PLUG SELECCIÓN'
@@ -6716,6 +6812,9 @@ html { scroll-behavior: smooth; }
         shippingCost: parseFloat(val('setting-shipping-cost')),
         shippingCostSmt: parseFloat(val('setting-shipping-smt')),
         freeShippingThreshold: parseFloat(val('setting-free-threshold')),
+        shippingCostAuto: parseFloat(val('setting-shipping-auto')),
+        shippingCostAutoSmt: parseFloat(val('setting-shipping-auto-smt')),
+        freeShippingThresholdAuto: parseFloat(val('setting-free-auto')),
         whatsappNumber: val('setting-whatsapp-num'),
         bankAlias: val('setting-alias'),
         bankCbu: val('setting-cbu'),

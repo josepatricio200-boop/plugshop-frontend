@@ -777,7 +777,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v6.9</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v7.1</span>
           </div>
         </div>
 
@@ -1143,7 +1143,7 @@ html { scroll-behavior: smooth; }
     <!-- Free Shipping Milestone Tracker -->
     <div class="p-4 bg-zinc-900/40 border-b border-zinc-800/60 text-xs font-code">
       <div class="flex items-center justify-between mb-1.5">
-        <span class="text-zinc-400">Envío Gratis en Tucumán & YB:</span>
+        <span id="shipping-tracker-label" class="text-zinc-400">Envío Gratis en Tucumán & YB:</span>
         <span id="shipping-tracker-badge" class="font-bold text-brand-amber">Faltan $150.000</span>
       </div>
       <div class="w-full h-2 rounded-full bg-zinc-800 overflow-hidden">
@@ -1214,6 +1214,7 @@ html { scroll-behavior: smooth; }
             <span class="font-bold text-white text-sm">2. Zona de Entrega (Tucumán & Yerba Buena)</span>
             <span class="text-[10px] text-emerald-400 font-code">✓ Entregas en el día</span>
           </div>
+          <p id="chk-vehicle-note" class="hidden text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2"></p>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             
             <!-- Yerba Buena -->
@@ -1520,7 +1521,8 @@ html { scroll-behavior: smooth; }
       if (!res || typeof res !== 'object' || res.error) return;
       ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias', 'storeZone'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
-      ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
+      ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold', 'shippingCostAuto', 'shippingCostAutoSmt', 'freeShippingThresholdAuto'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
+      if (typeof res.shippingAutoSet === 'boolean') STORE_SETTINGS.shippingAutoSet = res.shippingAutoSet;
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
       applyStoreWhatsappLinks();
       applyBankDisplay();
@@ -2250,6 +2252,7 @@ html { scroll-behavior: smooth; }
               <span class="truncate">${escapeHtml(kind)}${months ? ' · ' + escapeHtml(months) + '<span class="hidden sm:inline"> de garantía</span>' : ''}${colorsTxt}</span>
             </div>
             ${stockLabel ? `<div class="mt-1">${stockLabel}</div>` : ''}
+            ${vehicleOfProduct(product) !== 'moto' ? `<div class="mt-1 text-[10px] sm:text-[11px] text-zinc-400">${VEHICLE_INFO[vehicleOfProduct(product)].icon} Se entrega en ${VEHICLE_INFO[vehicleOfProduct(product)].label.toLowerCase()}</div>` : ''}
 
             <div class="mt-auto pt-2.5 sm:pt-4">
               ${offPct(product) ? `<div class="text-[10px] sm:text-[11px] text-rose-300 line-through font-semibold">Antes ${formatARS(product.compareAtPrice)}</div>` : ''}
@@ -3161,13 +3164,23 @@ html { scroll-behavior: smooth; }
       const trackerBar = document.getElementById('shipping-tracker-bar');
       const trackerBadge = document.getElementById('shipping-tracker-badge');
 
-      if (subtotal >= STORE_SETTINGS.freeShippingThreshold) {
+      const trackerBox = trackerBar.parentElement, trackerLabel = document.getElementById('shipping-tracker-label');
+      const cartVeh = cartVehicle(), cartRates = shipRates(cartVeh);
+      if (trackerLabel) trackerLabel.textContent = cartVeh === 'moto' ? 'Envío Gratis en Tucumán & YB:' : `${VEHICLE_INFO[cartVeh].icon} Tu pedido va en ${VEHICLE_INFO[cartVeh].label.toLowerCase()} (producto grande):`;
+      if (!isFinite(cartRates.freeFrom)) {
+        // Este tipo de envío no tiene "gratis": se muestra lo que cuesta, sin barra de progreso.
+        trackerBox.style.display = 'none';
+        trackerBadge.textContent = `Envío desde ${formatARS(cartRates.yb)}`;
+        trackerBadge.className = 'font-bold text-brand-amber font-code';
+      } else if (subtotal >= cartRates.freeFrom) {
+        trackerBox.style.display = '';
         trackerBar.style.width = '100%';
         trackerBadge.textContent = '¡Tenés Envío Gratis en Tucumán!';
         trackerBadge.className = 'font-bold text-emerald-400 font-code';
       } else {
-        const diff = STORE_SETTINGS.freeShippingThreshold - subtotal;
-        const pct = Math.min(100, Math.round((subtotal / STORE_SETTINGS.freeShippingThreshold) * 100));
+        trackerBox.style.display = '';
+        const diff = cartRates.freeFrom - subtotal;
+        const pct = Math.min(100, Math.round((subtotal / cartRates.freeFrom) * 100));
         trackerBar.style.width = `${pct}%`;
         trackerBadge.textContent = `Faltan ${formatARS(diff)}`;
         trackerBadge.className = 'font-bold text-brand-amber font-code';
@@ -3285,7 +3298,13 @@ html { scroll-behavior: smooth; }
       if (!chkTotalPreview) return;
 
       const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-      const isFreeShipping = subtotal >= STORE_SETTINGS.freeShippingThreshold;
+      const vehicle = cartVehicle();
+      const isFreeShipping = shipIsFree(subtotal, vehicle);
+      const vNote = document.getElementById('chk-vehicle-note');
+      if (vNote) {
+        vNote.classList.toggle('hidden', vehicle === 'moto');
+        vNote.textContent = `${VEHICLE_INFO[vehicle].icon} Tu pedido incluye un producto grande: se entrega en ${VEHICLE_INFO[vehicle].label.toLowerCase()}, con tarifa propia.`;
+      }
       const zoneEl = document.querySelector('input[name="chk-zone"]:checked');
       const selectedZone = zoneEl ? zoneEl.value : 'yb';
 
@@ -3296,8 +3315,8 @@ html { scroll-behavior: smooth; }
 
       if (chkBreakdownSubtotal) chkBreakdownSubtotal.textContent = formatARS(subtotal);
 
-      if (feeYb) feeYb.textContent = isFreeShipping ? '¡Gratis!' : `+${formatARS(shippingFor('yb'))}`;
-      if (feeSmt) feeSmt.textContent = isFreeShipping ? '¡Gratis!' : `+${formatARS(shippingFor('smt'))}`;
+      if (feeYb) feeYb.textContent = isFreeShipping ? '¡Gratis!' : `+${formatARS(shippingFor('yb', vehicle))}`;
+      if (feeSmt) feeSmt.textContent = isFreeShipping ? '¡Gratis!' : `+${formatARS(shippingFor('smt', vehicle))}`;
 
       let shippingCost = 0;
       if (selectedZone === 'retiro') {
@@ -3314,7 +3333,7 @@ html { scroll-behavior: smooth; }
             chkBreakdownShipping.className = 'font-semibold text-emerald-400 font-code';
           }
         } else {
-          shippingCost = shippingFor(selectedZone);
+          shippingCost = shippingFor(selectedZone, vehicle);
           if (chkBreakdownShipping) {
             chkBreakdownShipping.textContent = `+${formatARS(shippingCost)}`;
             chkBreakdownShipping.className = 'font-semibold text-brand-amber font-code';
@@ -3355,12 +3374,38 @@ html { scroll-behavior: smooth; }
       chkTotalPreview.textContent = formatARS(finalTotal);
     }
 
-    // ---- Costo de envío según la zona ----
-    function shippingFor(zone) {
-      if (zone === 'retiro') return 0;
-      const smt = STORE_SETTINGS.shippingCostSmt;
-      return zone === 'smt' && typeof smt === 'number' ? smt : STORE_SETTINGS.shippingCost;
+    // ---- Tipo de envío (moto / auto) y costo según la zona ----
+    // Cada producto trae su tipo de envío (moto por defecto). El pedido usa el más grande de los que lleve.
+    // Para sumar otro tipo (ej. flete) se agrega acá y en el servidor (src/shipping.js).
+    const VEHICLE_INFO = { moto: { label: 'Moto', icon: '🛵' }, auto: { label: 'Auto', icon: '🚗' } };
+    const VEHICLE_ORDER = Object.keys(VEHICLE_INFO);
+    function vehicleOfProduct(p) { return p && VEHICLE_INFO[p.deliveryClass] ? p.deliveryClass : 'moto'; }
+    function vehicleOfItems(items) {
+      return (items || []).reduce((best, it) => {
+        const v = vehicleOfProduct(PRODUCTS.find(p => p.id === it.id));
+        return VEHICLE_ORDER.indexOf(v) > VEHICLE_ORDER.indexOf(best) ? v : best;
+      }, 'moto');
     }
+    function cartVehicle() { return vehicleOfItems(cart); }
+    // Precios del tipo de envío; lo que no se cargó cae al de moto (igual que el servidor).
+    function shipRates(vehicle) {
+      const S = STORE_SETTINGS, num = n => typeof n === 'number' && isFinite(n);
+      const motoYb = num(S.shippingCost) ? S.shippingCost : 0;
+      const motoSmt = num(S.shippingCostSmt) ? S.shippingCostSmt : motoYb;
+      if (vehicle === 'auto') {
+        const yb = num(S.shippingCostAuto) ? S.shippingCostAuto : motoYb;
+        const smt = num(S.shippingCostAutoSmt) ? S.shippingCostAutoSmt : (num(S.shippingCostAuto) ? S.shippingCostAuto : motoSmt);
+        const thr = num(S.freeShippingThresholdAuto) && S.freeShippingThresholdAuto > 0 ? S.freeShippingThresholdAuto : Infinity;
+        return { yb, smt, freeFrom: thr };
+      }
+      return { yb: motoYb, smt: motoSmt, freeFrom: num(S.freeShippingThreshold) ? S.freeShippingThreshold : Infinity };
+    }
+    function shippingFor(zone, vehicle) {
+      if (zone === 'retiro') return 0;
+      const r = shipRates(vehicle || cartVehicle());
+      return zone === 'smt' ? r.smt : r.yb;
+    }
+    function shipIsFree(subtotal, vehicle) { return subtotal >= shipRates(vehicle || cartVehicle()).freeFrom; }
 
     // ---- Cupones ----
     function couponMsg(text, ok) {
@@ -3487,9 +3532,10 @@ html { scroll-behavior: smooth; }
       }
 
       const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
-      const isFreeShipping = subtotal >= STORE_SETTINGS.freeShippingThreshold;
+      const vehicle = cartVehicle();
+      const isFreeShipping = shipIsFree(subtotal, vehicle);
       const isRetiro = selectedZone === 'retiro';
-      const shippingCost = (!isRetiro && !isFreeShipping) ? shippingFor(selectedZone) : 0;
+      const shippingCost = (!isRetiro && !isFreeShipping) ? shippingFor(selectedZone, vehicle) : 0;
       
       const isTransfer = paymentMethod === 'transferencia';
       const discountPct = isTransfer ? (STORE_SETTINGS.transferDiscountPct || 10) : 0;
@@ -3573,6 +3619,7 @@ html { scroll-behavior: smooth; }
         coupon: couponAmount > 0 ? couponCode : '',
         couponAmount,
         shippingCost,
+        vehicle,
         total: grandTotal,
         status: 'Pago pendiente',
         paid: false,
@@ -3617,7 +3664,7 @@ html { scroll-behavior: smooth; }
         `${couponAmount > 0 ? `🎟️ *Cupón ${couponCode}:* -${formatARS(couponAmount)}\n` : ''}` +
         `${isTransfer ? `🏦 *Alias:* ${STORE_SETTINGS.bankAlias || 'PlugShop.store.ar'}\n` : ''}` +
         `${isTransfer && STORE_SETTINGS.bankCbu ? `🔢 *CVU/CBU:* ${STORE_SETTINGS.bankCbu}\n` : ''}` +
-        `🛵 *Logística:* ${isRetiro ? 'Retiro sin cargo' : (shippingCost > 0 ? `+${formatARS(shippingCost)}` : 'Envío Gratis')}\n\n` +
+        `${VEHICLE_INFO[vehicle].icon} *Logística${vehicle === 'moto' ? '' : ' (envío en ' + VEHICLE_INFO[vehicle].label.toLowerCase() + ')'}:* ${isRetiro ? 'Retiro sin cargo' : (shippingCost > 0 ? `+${formatARS(shippingCost)}` : 'Envío Gratis')}\n\n` +
         `*PRODUCTOS & COLORES SELECCIONADOS:*\n${itemsText}\n\n` +
         `💰 *TOTAL FINAL:* ${formatARS(grandTotal)}\n` +
         `--------------------------------\n` +
