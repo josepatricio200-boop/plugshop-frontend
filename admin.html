@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.7</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.8</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -623,6 +623,7 @@ html { scroll-behavior: smooth; }
 
               <!-- Caja abierta: resumen, gastos, cierre -->
               <div id="cashreg-open-view" class="hidden space-y-4">
+                <button type="button" onclick="switchAdminTab('couriers')" class="w-full sm:w-auto px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-[11px] font-bold text-left">🛵 Ir a Rendición de Cadetes (lo que te entregan o le pagás a los cadetes)</button>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 font-code text-center">
                   <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
                     <div class="text-[10px] text-zinc-400 uppercase">Apertura</div>
@@ -1885,7 +1886,7 @@ html { scroll-behavior: smooth; }
   </nav>
   <div id="admin-more-sheet" class="hidden fixed inset-0 z-[65] md:!hidden" role="dialog" aria-label="Más secciones">
     <div class="absolute inset-0 bg-black/60" onclick="closeAdminMore()"></div>
-    <div class="absolute bottom-0 inset-x-0 rounded-t-2xl bg-zinc-900 border-t border-white/10 p-3 pb-6 space-y-1" style="padding-bottom:calc(4.5rem + env(safe-area-inset-bottom))">
+    <div id="admin-more-panel" class="absolute bottom-0 inset-x-0 rounded-t-2xl bg-zinc-900 border-t border-white/10 p-3 pb-6 space-y-1 overflow-y-auto overscroll-contain" style="max-height:88vh;max-height:88dvh;-webkit-overflow-scrolling:touch;padding-bottom:calc(4.5rem + env(safe-area-inset-bottom))">
       <div class="text-[11px] uppercase tracking-wider text-zinc-500 font-bold px-2 py-1">Más secciones</div>
       <div id="admin-more-items" class="grid grid-cols-1 gap-1"></div>
     </div>
@@ -5781,7 +5782,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.7): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.8): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
