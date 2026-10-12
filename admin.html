@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.9</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.0</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -1008,10 +1008,11 @@ html { scroll-behavior: smooth; }
                     </div>
                     <div id="new-prod-supplier-box">
                       <label class="block mb-1 text-zinc-400 font-sans">Proveedor</label>
-                      <select id="new-prod-supplier" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-sans">
+                      <select id="new-prod-supplier" onchange="syncPickupCheck()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-sans">
                         <option value="">Sin proveedor (stock propio)</option>
                       </select>
                       <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">A quién le comprás este producto. Sirve para las cuentas por pagar y para la edición masiva de costos.</p>
+                      <label class="mt-2 flex items-start gap-2 text-xs text-zinc-300 font-sans cursor-pointer"><input type="checkbox" id="new-prod-pickup" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>🧳 Se retira en el proveedor</b><br><span class="text-[10px] text-zinc-500 leading-snug">No lo tengo en el local: cuando entra un pedido ya cobrado, el cadete lo va a buscar al proveedor y recién después se embala.</span></span></label>
                     </div>
                   </div>
 
@@ -1406,6 +1407,7 @@ html { scroll-behavior: smooth; }
 
             <div id="refunds-card" class="hidden p-4 rounded-xl bg-amber-950/30 border border-amber-700/50 space-y-3 text-xs"></div>
             <div id="returns-card" class="hidden p-4 rounded-xl bg-sky-950/30 border border-sky-700/50 space-y-3 text-xs"></div>
+            <div id="orders-pickups-box" class="hidden"></div>
 
             <div id="orders-quick" class="flex flex-wrap gap-2 text-xs">
               <button type="button" data-quick="active" onclick="setOrdersQuick('active')" class="quick-chip px-3 py-1.5 rounded-full border border-zinc-700 text-zinc-300 font-semibold">Todos los activos <span class="qn text-zinc-500"></span></button>
@@ -2277,6 +2279,7 @@ html { scroll-behavior: smooth; }
       const headers = { Authorization: 'Bearer ' + currentStaffSession.token };
       const tasks = [loadSettingsFromServer(), loadAnnouncements(), loadClaims(), loadAudit(), loadCoupons()];
 
+      if (can('orders.pickup')) tasks.push(loadPickups());
       if (can('orders.view')) {
         tasks.push(apiRequest('ORDERS', { headers }).then(res => {
           if (Array.isArray(res)) { ADMIN_ORDERS = res; ADMIN_SYNC_OK = true; }
@@ -2332,8 +2335,8 @@ html { scroll-behavior: smooth; }
     // Permisos por usuario (los manda el servidor al entrar y se refrescan con /api/auth/me).
     // Estos son los "de fábrica" de cada rol: sirven de respaldo si la sesión no trae la lista.
     const PERM_DEFAULTS = {
-      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'orders.pack', 'orders.create', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
-      cadete: ['orders.view', 'orders.dispatch'],
+      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'orders.pack', 'orders.pickup', 'orders.create', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
+      cadete: ['orders.view', 'orders.dispatch', 'orders.pickup'],
       reposicion: ['products.manage', 'insights.view'],
       logistica: ['suppliers.view']
     };
@@ -3427,8 +3430,8 @@ html { scroll-behavior: smooth; }
     // Lo que se ve depende de los permisos del rol: Embalar (orders.pack), Entregas (orders.dispatch), Stock (products.manage).
     const APP_PREF_KEY = 'plugshop_app_mode_v1', APP_TICKS_KEY = 'plugshop_pack_ticks_v1';
     let APP_TAB = 'home', APP_TIMER = null, APP_STOCK_Q = '', APP_STOCK_LOW = false, APP_STOCK_TIMERS = {};
-    function appCaps() { return { pack: can('orders.pack'), deliver: can('orders.dispatch'), stock: can('products.manage') }; }
-    function appAvailable() { const c = appCaps(); return !!(isAdminAuthenticated && (c.pack || c.deliver || c.stock)); }
+    function appCaps() { return { pack: can('orders.pack'), deliver: can('orders.dispatch'), stock: can('products.manage'), pickup: can('orders.pickup') }; }
+    function appAvailable() { const c = appCaps(); return !!(isAdminAuthenticated && (c.pack || c.deliver || c.stock || c.pickup)); }
     function appPref() { try { return localStorage.getItem(APP_PREF_KEY) || ''; } catch (e) { return ''; } }
     function appDefault() {
       if (currentStaffSession.role === 'admin' || window.innerWidth >= 768) return false;
@@ -3451,6 +3454,7 @@ html { scroll-behavior: smooth; }
     }
     function appTabs() {
       const c = appCaps(), t = [['home', '🏠', 'Inicio']];
+      if (c.pickup) t.push(['pickup', '🧳', 'Retiros']);
       if (c.pack) t.push(['pack', '📦', 'Embalar']);
       if (c.deliver) t.push(['deliver', '🛵', 'Entregas']);
       if (c.stock) t.push(['stock', '📥', 'Stock']);
@@ -3464,11 +3468,11 @@ html { scroll-behavior: smooth; }
     }
     // Pedidos que se están preparando (los más viejos primero; los ya embalados al final).
     function appPackList() {
-      return ADMIN_ORDERS.filter(o => o.status === 'En preparación').sort((a, b) => (!!a.packedAt - !!b.packedAt) || ((a.createdAt || 0) - (b.createdAt || 0)));
+      return ADMIN_ORDERS.filter(o => o.status === 'En preparación' && !ordPickupPending(o)).sort((a, b) => (!!a.packedAt - !!b.packedAt) || ((a.createdAt || 0) - (b.createdAt || 0)));
     }
     function appDeliverList() {
       const list = routeGroups().flatMap(g => g.orders);
-      const rank = o => o.status === 'Despachado' ? 0 : (o.packedAt ? 1 : 2);
+      const rank = o => o.status === 'Despachado' ? 0 : (o.packedAt ? 1 : (ordPickupPending(o) ? 3 : 2));
       return list.sort((a, b) => rank(a) - rank(b) || ((a.createdAt || 0) - (b.createdAt || 0)));
     }
     function appTicks() { try { return JSON.parse(localStorage.getItem(APP_TICKS_KEY) || '{}') || {}; } catch (e) { return {}; } }
@@ -3489,7 +3493,7 @@ html { scroll-behavior: smooth; }
       const lines = appOrderLines(o), ticks = new Set(appTicks()[o.id] || []);
       const done = lines.filter((_, i) => ticks.has(i)).length, packed = !!o.packedAt;
       return `<div class="rounded-2xl border ${packed ? 'border-emerald-700 bg-emerald-950/30' : 'border-zinc-800 bg-zinc-900'} p-3.5 space-y-3">
-        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-black text-white truncate">${escapeHtml(o.customer)}</div><div class="text-[11px] text-zinc-400 font-code">#${escapeHtml(o.id)}</div></div><div class="flex flex-wrap justify-end gap-1">${vehBadge(o)}${/retiro/i.test(o.deliveryType || '') ? '<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-bold text-sky-300">RETIRA</span>' : ''}</div></div>
+        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-black text-white truncate">${escapeHtml(o.customer)}</div><div class="text-[11px] text-zinc-400 font-code">#${escapeHtml(o.id)}</div></div><div class="flex flex-wrap justify-end gap-1">${ordPickupDone(o) ? '<span class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-[10px] font-bold text-emerald-300">🧳 RETIRADO</span>' : ''}${vehBadge(o)}${/retiro/i.test(o.deliveryType || '') ? '<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-bold text-sky-300">RETIRA</span>' : ''}</div></div>
         <div class="space-y-1.5">${lines.map((l, i) => `<label class="flex items-center gap-3 p-2.5 rounded-xl ${ticks.has(i) || packed ? 'bg-emerald-950/40 text-emerald-200' : 'bg-zinc-950 text-zinc-100'} text-sm cursor-pointer"><input type="checkbox" ${ticks.has(i) || packed ? 'checked' : ''} ${packed ? 'disabled' : ''} onchange="appTick('${escapeHtml(o.id)}', ${i}, this.checked)" class="w-6 h-6 accent-emerald-500 shrink-0"><span class="${ticks.has(i) || packed ? 'line-through opacity-70' : ''}">${escapeHtml(l)}</span></label>`).join('') || '<div class="text-xs text-zinc-400">Sin detalle de productos.</div>'}</div>
         ${(o.notes || []).map(n => `<div class="text-[12px] text-amber-200">📝 ${escapeHtml(n.text)}</div>`).join('')}
         ${packed ? `<div class="text-xs font-bold text-emerald-300">✅ Embalado por ${escapeHtml(o.packedBy || 'el equipo')} · ${escapeHtml(ppWhen(o.packedAt))}</div>` : `<div class="text-[11px] text-zinc-400">${done} de ${lines.length} productos listos</div>`}
@@ -3605,24 +3609,27 @@ html { scroll-behavior: smooth; }
       const delivs = caps.deliver ? appDeliverList() : [];
       const onWay = delivs.filter(o => o.status === 'Despachado').length;
       const low = caps.stock ? lowStockItems(PRODUCTS).length : 0;
-      const badge = (t) => t === 'pack' ? packTodo : (t === 'deliver' ? delivs.length : (t === 'stock' ? low : 0));
+      const badge = (t) => t === 'pickup' ? PICKUPS.items : t === 'pack' ? packTodo : (t === 'deliver' ? delivs.length : (t === 'stock' ? low : 0));
       const tile = (tab, icon, n, label, tone) => `<button type="button" onclick="appGo('${tab}')" class="p-4 rounded-2xl border ${tone} text-left active:scale-[0.98] transition"><div class="text-3xl">${icon}</div><div class="mt-2 text-3xl font-black text-white">${n}</div><div class="text-xs font-semibold text-zinc-300">${label}</div></button>`;
       let body = '';
       if (ADMIN_LOADING) {
         body = '<div class="text-center text-sm text-zinc-400 py-14">⏳ Cargando lo último del servidor…</div>';
       } else if (APP_TAB === 'home') {
         body = (caps.deliver && !can('orders.manage') ? myCourierCardHtml() : '') + `<div class="grid grid-cols-2 gap-3">
+          ${caps.pickup ? tile('pickup', '🧳', PICKUPS.items, 'para retirar en proveedores', 'border-violet-600/50 bg-violet-950/20') : ''}
           ${caps.pack ? tile('pack', '📦', packTodo, 'para embalar', 'border-amber-600/50 bg-amber-950/20') : ''}
           ${caps.deliver ? tile('deliver', '🛵', delivs.length, 'entregas' + (onWay ? ` (${onWay} en camino)` : ''), 'border-sky-600/50 bg-sky-950/20') : ''}
           ${caps.stock ? tile('stock', '⚠️', low, 'con stock bajo', 'border-rose-600/50 bg-rose-950/20') : ''}
           ${caps.stock ? `<button type="button" onclick="appNewProdOpen()" class="p-4 rounded-2xl border border-emerald-600/50 bg-emerald-950/20 text-left active:scale-[0.98] transition"><div class="text-3xl">➕</div><div class="mt-2 text-base font-black text-white leading-tight">Cargar producto nuevo</div><div class="text-xs text-zinc-300 mt-0.5">con foto del celular</div></button>` : ''}
         </div><p class="text-[11px] text-zinc-500 text-center pt-2">Tocá un cuadro para empezar. Si necesitás todo el panel, usá "🖥️ Panel completo" arriba.</p>`;
+      } else if (APP_TAB === 'pickup') {
+        body = (PICKUPS.items ? `<p class="text-xs text-zinc-400">Estos productos no están en el local. Hacé un viaje por proveedor: tildá lo que retirás (y, si querés, poné lo que pagaste de verdad). Después el pedido pasa a embalar.</p>` : '') + pkBoardHtml(true);
       } else if (APP_TAB === 'pack') {
         const list = appPackList();
         body = list.length ? `<p class="text-xs text-zinc-400">Tildá cada producto a medida que lo ponés en la caja. Después imprimí la etiqueta y marcá "Ya está embalado".</p>` + list.map(appPackCard).join('') : '<div class="text-center text-sm text-zinc-400 py-14">No hay pedidos para embalar. 🎉</div>';
       } else if (APP_TAB === 'deliver') {
         const mine = !can('orders.manage');
-        body = (mine ? myCourierCardHtml() : '') + (delivs.length ? `<p class="text-xs text-zinc-400">${mine ? 'Tus entregas. ' : ''}Primero las que ya están en camino. "Salida" cuando retirás el paquete y "Entregar" con el QR del cliente.</p>` + delivs.map((o, i) => `<div class="space-y-1"><div class="text-[11px] font-bold ${o.status === 'Despachado' ? 'text-sky-300' : (o.packedAt ? 'text-emerald-300' : 'text-amber-300')}">${o.status === 'Despachado' ? '🛵 En camino' : (o.packedAt ? '✅ Embalado, listo para retirar' : '⏳ Todavía falta embalar')}</div>${routeStop(o, i)}</div>`).join('') : `<div class="text-center text-sm text-zinc-400 py-14">${mine ? 'No tenés entregas asignadas por ahora.' : 'No hay entregas pendientes.'}</div>`);
+        body = (mine ? myCourierCardHtml() : '') + (delivs.length ? `<p class="text-xs text-zinc-400">${mine ? 'Tus entregas. ' : ''}Primero las que ya están en camino. "Salida" cuando retirás el paquete y "Entregar" con el QR del cliente.</p>` + delivs.map((o, i) => `<div class="space-y-1"><div class="text-[11px] font-bold ${o.status === 'Despachado' ? 'text-sky-300' : (o.packedAt ? 'text-emerald-300' : (ordPickupPending(o) ? 'text-sky-300' : 'text-amber-300'))}">${o.status === 'Despachado' ? '🛵 En camino' : (o.packedAt ? '✅ Embalado, listo para retirar' : (ordPickupPending(o) ? '🧳 Falta retirar en el proveedor' : '⏳ Todavía falta embalar'))}</div>${routeStop(o, i)}</div>`).join('') : `<div class="text-center text-sm text-zinc-400 py-14">${mine ? 'No tenés entregas asignadas por ahora.' : 'No hay entregas pendientes.'}</div>`);
       } else if (APP_TAB === 'stock') {
         const q = APP_STOCK_Q.trim().toLowerCase();
         let list = PRODUCTS.filter(p => !q || [p.name, p.brand, p.category].join(' ').toLowerCase().includes(q));
@@ -3631,7 +3638,7 @@ html { scroll-behavior: smooth; }
           <label class="flex items-center gap-2 text-xs text-zinc-300"><input type="checkbox" ${APP_STOCK_LOW ? 'checked' : ''} onchange="APP_STOCK_LOW = this.checked; renderApp()" class="w-5 h-5 accent-orange-500"> Solo stock bajo (3 o menos)</label>
           <div id="app-stock-list" class="space-y-2.5">${list.slice(0, 40).map(appStockCard).join('') || '<div class="text-center text-sm text-zinc-400 py-10">No encontré productos.</div>'}</div>${list.length > 40 ? '<p class="text-[11px] text-zinc-500 text-center">Mostrando 40: buscá por nombre para afinar.</p>' : ''}`;
       }
-      const titles = { home: 'Inicio', pack: 'Embalar pedidos', deliver: 'Mis entregas', stock: 'Stock y productos' };
+      const titles = { home: 'Inicio', pickup: 'Retiros', pack: 'Embalar pedidos', deliver: 'Mis entregas', stock: 'Stock y productos' };
       v.innerHTML = `<header class="shrink-0 flex items-center justify-between gap-2 px-3 py-2.5 border-b border-zinc-800 bg-zinc-950">
           <div class="min-w-0"><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">PLUGSHOP · ${escapeHtml(currentStaffSession.roleName || currentStaffSession.role)}</div><div class="text-base font-black text-white truncate">${titles[APP_TAB]}${currentStaffSession.name ? ' <span class="text-xs font-semibold text-zinc-400">· ' + escapeHtml(currentStaffSession.name) + '</span>' : ''}</div></div>
           <div class="flex items-center gap-1.5 shrink-0"><button type="button" id="app-refresh" onclick="appRefresh()" aria-label="Actualizar" class="w-11 h-11 rounded-xl bg-zinc-800 active:bg-zinc-700 text-lg">🔄</button><button type="button" onclick="appSetMode(false)" class="h-11 px-3 rounded-xl bg-zinc-800 active:bg-zinc-700 text-zinc-200 text-[11px] font-bold leading-tight">🖥️ Panel<br>completo</button><button type="button" onclick="appRemove(); logoutStaff()" aria-label="Cerrar sesión" class="w-11 h-11 rounded-xl bg-zinc-800 active:bg-rose-950 text-lg">🚪</button></div></header>
@@ -3815,7 +3822,14 @@ html { scroll-behavior: smooth; }
     }
 
     // ---- Proveedor en cada producto ----
-    function fillProductSupplierSelect(selectedId) {
+    function syncPickupCheck() {
+      const sel = document.getElementById('new-prod-supplier'), ck = document.getElementById('new-prod-pickup');
+      if (!sel || !ck) return;
+      if (!sel.value) ck.checked = false;
+      ck.disabled = !sel.value;
+      const lb = ck.closest('label'); if (lb) lb.classList.toggle('opacity-50', !sel.value);
+    }
+    function fillProductSupplierSelect(selectedId, pickup) {
       const box = document.getElementById('new-prod-supplier-box'), sel = document.getElementById('new-prod-supplier');
       if (!sel || !box) return;
       const keep = selectedId === undefined ? sel.value : String(selectedId == null ? '' : selectedId);
@@ -3824,11 +3838,14 @@ html { scroll-behavior: smooth; }
       box.classList.toggle('hidden', !(role === 'admin' || role === 'reposicion') || !list.length);
       sel.innerHTML = '<option value="">Sin proveedor (stock propio)</option>' + list.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
       sel.value = list.some(s => String(s.id) === keep) ? keep : '';
+      const ck = document.getElementById('new-prod-pickup'); if (ck && pickup !== undefined) ck.checked = pickup === true;
+      syncPickupCheck();
     }
     function supplierFieldPayload() {
       const box = document.getElementById('new-prod-supplier-box'), sel = document.getElementById('new-prod-supplier');
       if (!sel || !box || box.classList.contains('hidden')) return {};
-      return { supplierId: sel.value ? Number(sel.value) : null };
+      const ck = document.getElementById('new-prod-pickup');
+      return { supplierId: sel.value ? Number(sel.value) : null, pickupAtSupplier: !!(sel.value && ck && ck.checked) };
     }
     function supplierNameOf(id) {
       const s = (SUPPLIERS || []).find(x => x && x.id != null && x.id === id);
@@ -5323,7 +5340,7 @@ html { scroll-behavior: smooth; }
           </td>
           <td class="py-3 px-4">
             <div class="font-bold text-white font-sans">${escapeHtml(p.name)}${p.active === false ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold align-middle">PAUSADO</span>' : ''}${p.featured ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold align-middle">★</span>' : ''}${vehicleOfProduct(p) !== 'moto' ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-bold align-middle" title="Se envía en ${VEHICLE_INFO[vehicleOfProduct(p)].label.toLowerCase()}">${VEHICLE_INFO[vehicleOfProduct(p)].icon} ${VEHICLE_INFO[vehicleOfProduct(p)].label.toUpperCase()}</span>` : ''}${offPct(p) ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold align-middle">-${offPct(p)}%</span>` : ''}</div>
-            <div class="text-[11px] text-zinc-400">${escapeHtml(p.brand)}${supplierNameOf(p.supplierId) ? ' · 🤝 ' + escapeHtml(supplierNameOf(p.supplierId)) : ''} · <span class="text-zinc-500 text-[10px]">${escapeHtml(categoryLabel(p.category))}${p.subcategory ? ' › ' + escapeHtml(categoryLabel(p.subcategory)) : ''}</span></div>
+            <div class="text-[11px] text-zinc-400">${escapeHtml(p.brand)}${supplierNameOf(p.supplierId) ? ' · 🤝 ' + escapeHtml(supplierNameOf(p.supplierId)) : ''}${p.pickupAtSupplier ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-bold align-middle">🧳 SE RETIRA</span>' : ''} · <span class="text-zinc-500 text-[10px]">${escapeHtml(categoryLabel(p.category))}${p.subcategory ? ' › ' + escapeHtml(categoryLabel(p.subcategory)) : ''}</span></div>
           </td>
           <td class="py-3 px-4">
             <div>${colorsBadges}</div>
@@ -5634,6 +5651,7 @@ html { scroll-behavior: smooth; }
       if (!ordersTable) return;
       const list = filteredAdminOrders();
       renderOrdersQuick();
+      renderOrdersPickups();
       const lbl = document.getElementById('orders-count-label');
       if (lbl) lbl.textContent = `Mostrando ${list.length} de ${ADMIN_ORDERS.length} pedidos`;
       ordersTable.innerHTML = list.map(o => {
@@ -5656,7 +5674,7 @@ html { scroll-behavior: smooth; }
           <td class="py-3 px-4 o-cust">
             <div class="font-semibold text-white font-sans">${escapeHtml(o.customer)}</div>
             <div class="text-[11px] text-zinc-400">${escapeHtml(o.phone)}</div>
-            <div class="mt-1 flex flex-wrap gap-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>${vehBadge(o)}${(o.courierName && !(canManageOrd && o.zone !== 'retiro' && !['Entregado', 'Cancelado'].includes(o.status))) ? `<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-semibold text-sky-300">🛵 ${escapeHtml(o.courierName)}</span>` : ''}</div>
+            <div class="mt-1 flex flex-wrap gap-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>${vehBadge(o)}${ordPickupPending(o) ? '<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-700 text-[10px] font-bold text-sky-300">🧳 Falta retirar</span>' : (ordPickupDone(o) && o.status === 'En preparación' ? '<span class="px-2 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-[10px] font-semibold text-emerald-300">🧳 Retirado</span>' : '')}${(o.courierName && !(canManageOrd && o.zone !== 'retiro' && !['Entregado', 'Cancelado'].includes(o.status))) ? `<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-semibold text-sky-300">🛵 ${escapeHtml(o.courierName)}</span>` : ''}</div>
             ${(canManageOrd && o.zone !== 'retiro' && !['Entregado', 'Cancelado'].includes(o.status)) ? `<div class="mt-1.5 flex items-center gap-1.5 o-courier"><span class="text-[10px] font-semibold text-sky-300 whitespace-nowrap">🛵 Cadete:</span>${ppCourierSelect(o, 'bg-zinc-900 border border-sky-800 rounded-lg px-2 py-1 text-[11px] text-white max-w-[150px]')}</div>` : ''}
             <div class="text-[10px] text-zinc-500 font-sans break-words max-w-[200px]">${escapeHtml(o.address)}</div>
           </td>
@@ -5682,7 +5700,7 @@ html { scroll-behavior: smooth; }
           <td class="py-3 px-4 text-right font-sans o-actions">
             <div class="flex flex-wrap justify-end items-center gap-1.5">
               <button type="button" onclick="openOrderFicha('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-black text-[11px] font-bold">📋 Ficha</button>
-              ${(o.status === 'En preparación' && canScan) ? `<button onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📷 Salida</button>` : ''}
+              ${(o.status === 'En preparación' && canScan && !ordPickupPending(o)) ? `<button onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📷 Salida</button>` : ''}
               ${(o.status === 'Despachado' && canScan) ? `<button onclick="openScanModal('handover', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📲 Entregar</button>` : ''}
               ${(o.proof || o.hasProof) ? `<button onclick="openProofModal('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[11px] font-semibold">🧾 Comprobante</button>` : ''}
               <button onclick="sendOrderUpdateWhatsApp('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800 text-[11px] font-semibold transition-colors" title="Abre WhatsApp con el mensaje que corresponde al estado del pedido">WhatsApp</button>
@@ -5783,7 +5801,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.9): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v8.0): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -5806,6 +5824,77 @@ html { scroll-behavior: smooth; }
     const ppBadge = st => `<span class="inline-block px-2 py-0.5 rounded-full border text-[10px] font-bold ${PP_TONE[st] || 'bg-zinc-800 text-zinc-300 border-zinc-700'}">${escapeHtml(st || '')}</span>`;
     const ppIsTransfer = o => !!(o && (o.isBancarizado || (o.paymentMethod && String(o.paymentMethod).includes('Transferencia'))));
     const ppFindOrder = id => ADMIN_ORDERS.find(x => x.id === id);
+
+    // ---------- Retiros en proveedor ----------
+    // Productos que no están en el local: con el pedido ya cobrado, el cadete los retira en el proveedor
+    // (un viaje por proveedor) y recién después el pedido se embala. El costo real que pagó alimenta las cuentas por pagar.
+    let PICKUPS = { suppliers: [], items: 0, units: 0 }, PK_SEL = {}, PK_COST = {}, PK_BUSY = false;
+    const pkKey = (orderId, line) => orderId + '|' + line;
+    const ordPickupPending = o => !!(o && o.status === 'En preparación' && Array.isArray(o.lines) && o.lines.some(l => l && l.pickup && !l.pickedAt));
+    const ordPickupDone = o => !!(o && Array.isArray(o.lines) && o.lines.some(l => l && l.pickup) && !o.lines.some(l => l && l.pickup && !l.pickedAt));
+    async function loadPickups() {
+      if (!isBackendConnected() || !currentStaffSession.token || !can('orders.pickup')) return;
+      const r = await apiRequest('ORDERS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/pickups');
+      if (r && Array.isArray(r.suppliers)) PICKUPS = r;
+    }
+    function pkBoardHtml(app) {
+      const big = app ? 'py-3 text-sm' : 'py-2 text-xs', chk = app ? 'w-6 h-6' : 'w-4 h-4';
+      if (!PICKUPS.suppliers.length) return `<div class="text-center ${app ? 'text-sm py-14' : 'text-xs py-4'} text-zinc-400">No hay nada para retirar en proveedores. 🎉</div>`;
+      return PICKUPS.suppliers.map(g => {
+        const picked = g.items.filter(i => PK_SEL[pkKey(i.orderId, i.line)]).length;
+        const phone = String(g.phone || '').replace(/[^\d+]/g, '');
+        return `<div class="rounded-2xl border border-sky-800/60 bg-zinc-900 p-3.5 space-y-3" data-pk-supplier="${g.id}">
+          <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-black text-white">🤝 ${escapeHtml(g.name)}</div><div class="text-[11px] text-zinc-400">${g.count} producto(s) · ${g.units} unidad(es)${g.contact ? ' · ' + escapeHtml(g.contact) : ''}${g.leadDays ? ' · ' + escapeHtml(g.leadDays) : ''}</div></div>
+          ${phone ? `<a href="tel:${phone}" class="shrink-0 px-3 py-2 rounded-xl bg-zinc-800 text-zinc-100 text-xs font-bold">📞 Llamar</a>` : ''}</div>
+          <div class="space-y-1.5">${g.items.map(i => { const k = pkKey(i.orderId, i.line), on = !!PK_SEL[k];
+            return `<div class="rounded-xl ${on ? 'bg-emerald-950/40' : 'bg-zinc-950'} p-2.5"><label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" ${on ? 'checked' : ''} onchange="pkToggle('${escapeHtml(k)}', this.checked)" class="${chk} accent-emerald-500 shrink-0"><span class="min-w-0 text-sm ${on ? 'text-emerald-200' : 'text-zinc-100'}"><b>${i.qty}× ${escapeHtml(i.name)}</b>${i.color && i.color !== 'Único' ? ' · ' + escapeHtml(i.color) : ''}<span class="block text-[11px] text-zinc-400">Pedido #${escapeHtml(i.orderId)}${i.customer ? ' · ' + escapeHtml(i.customer) : ''}${i.unitCost ? ' · costo previsto ' + formatARS(i.unitCost) + ' c/u' : ''}</span></span></label>
+              ${on ? `<div class="mt-2 flex items-center gap-2 pl-9"><span class="text-[11px] text-zinc-400 shrink-0">Costo real c/u</span><input type="number" inputmode="numeric" min="0" value="${escapeHtml(PK_COST[k] !== undefined ? PK_COST[k] : '')}" placeholder="${i.unitCost || 'opcional'}" oninput="PK_COST['${escapeHtml(k)}'] = this.value" class="w-28 bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1.5 text-sm text-white focus:outline-none focus:border-brand-orange"></div>` : ''}</div>`; }).join('')}</div>
+          <div class="grid grid-cols-2 gap-2">
+            <button type="button" onclick="pkAll(${g.id}, ${picked !== g.items.length})" class="${big} rounded-xl bg-zinc-800 active:bg-zinc-700 text-zinc-100 font-bold">${picked === g.items.length ? 'Destildar todo' : 'Tildar todo'}</button>
+            <button type="button" ${picked && !PK_BUSY ? '' : 'disabled'} onclick="pkConfirm(${g.id})" class="${big} rounded-xl ${picked ? 'bg-emerald-500 active:bg-emerald-400 text-black' : 'bg-zinc-800 text-zinc-500'} font-black">✅ Ya los retiré${picked ? ' (' + picked + ')' : ''}</button>
+          </div></div>`;
+      }).join('');
+    }
+    function pkRerender() {
+      renderOrdersPickups();
+      if (document.getElementById('app-view')) renderApp();
+    }
+    function renderOrdersPickups() {
+      const box = document.getElementById('orders-pickups-box'); if (!box) return;
+      const show = can('orders.pickup') && PICKUPS.items > 0;
+      box.classList.toggle('hidden', !show);
+      if (!show) { box.innerHTML = ''; return; }
+      box.innerHTML = `<details open class="rounded-xl border border-sky-700/50 bg-sky-950/20"><summary class="cursor-pointer select-none px-4 py-3 text-sm font-bold text-sky-200">🧳 Retiros en Proveedor · ${PICKUPS.items} producto(s) para ir a buscar <span class="text-[11px] font-normal text-sky-300/80">(el pedido se embala recién cuando está todo retirado)</span></summary><div class="p-3 pt-0 grid gap-3 md:grid-cols-2">${pkBoardHtml(false)}</div></details>`;
+    }
+    function pkToggle(key, on) { if (on) PK_SEL[key] = true; else { delete PK_SEL[key]; delete PK_COST[key]; } pkRerender(); }
+    function pkAll(sid, on) {
+      const g = PICKUPS.suppliers.find(x => x.id === sid); if (!g) return;
+      g.items.forEach(i => { const k = pkKey(i.orderId, i.line); if (on) PK_SEL[k] = true; else { delete PK_SEL[k]; delete PK_COST[k]; } });
+      pkRerender();
+    }
+    async function pkSend(items) {
+      if (!ppLive()) { alert('Para marcar retiros tenés que estar conectado al servidor.'); return false; }
+      PK_BUSY = true; pkRerender();
+      const res = await apiRequest('ORDERS', { method: 'POST', headers: ppAuth(), body: JSON.stringify({ items }) }, '/pickups/mark');
+      PK_BUSY = false;
+      if (!res || res.success === false || !Array.isArray(res.orders)) { alert((res && res.error) || 'No se pudo guardar. Probá de nuevo.'); pkRerender(); return false; }
+      res.orders.forEach(n => { const o = ADMIN_ORDERS.find(x => x.id === n.id); if (o) Object.assign(o, n); });
+      items.forEach(i => { const k = pkKey(i.orderId, i.line); delete PK_SEL[k]; delete PK_COST[k]; });
+      await loadPickups();
+      if (typeof refreshAdminUI === 'function') refreshAdminUI();
+      pkRerender();
+      return true;
+    }
+    async function pkConfirm(sid) {
+      const g = PICKUPS.suppliers.find(x => x.id === sid); if (!g) return;
+      const items = g.items.filter(i => PK_SEL[pkKey(i.orderId, i.line)]).map(i => {
+        const c = PK_COST[pkKey(i.orderId, i.line)];
+        return { orderId: i.orderId, line: i.line, ...(c !== undefined && String(c).trim() !== '' ? { unitCost: Number(c) } : {}) };
+      });
+      if (!items.length) { alert('Tildá lo que retiraste.'); return; }
+      await pkSend(items);
+    }
+    async function pkMarkOne(orderId, line, picked) { await pkSend([{ orderId, line, picked }]); }
 
     // ---------- Repartidores ----------
     let COURIERS = [];
@@ -5914,6 +6003,11 @@ html { scroll-behavior: smooth; }
     function ppSection(title, body) {
       return `<section class="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-4"><h4 class="text-[11px] uppercase tracking-wider font-bold text-zinc-400 mb-2">${title}</h4>${body}</section>`;
     }
+    function ficPickupHtml(o, l, i) {
+      if (!l || !l.pickup) return '';
+      if (l.pickedAt) return `<div class="text-[11px] text-emerald-300 mt-0.5">🧳 Retirado en el proveedor${l.pickedBy ? ' por ' + escapeHtml(l.pickedBy) : ''}${l.plannedCost !== undefined ? ' · costo real ' + formatARS(l.unitCost) : ''} ${(can('orders.pickup') && !o.packedAt && o.status === 'En preparación') ? `<button type="button" onclick="pkMarkOne('${escapeHtml(o.id)}', ${i}, false)" class="ml-1 underline text-zinc-400">deshacer</button>` : ''}</div>`;
+      return `<div class="text-[11px] text-sky-300 mt-0.5">🧳 Falta retirar en el proveedor ${(can('orders.pickup') && o.status === 'En preparación') ? `<button type="button" onclick="pkMarkOne('${escapeHtml(o.id)}', ${i}, true)" class="ml-1 px-2 py-0.5 rounded bg-sky-900 text-sky-100 font-bold">Marcar retirado</button>` : ''}</div>`;
+    }
     function renderOrderFicha() {
       if (!FICHA_ID) return;
       const o = ppFindOrder(FICHA_ID);
@@ -5949,7 +6043,7 @@ html { scroll-behavior: smooth; }
       if (hasProof && canManage && ['Comprobante enviado', 'Pago pendiente', 'Comprobante rechazado'].includes(o.status)) btn('bg-sky-500 hover:bg-sky-400 text-black', `openProofModal('${o.id}')`, '🧾 Ver comprobante');
       if (canManage && transfer && o.paid === false && ['Pago pendiente', 'Comprobante enviado', 'Comprobante rechazado'].includes(o.status)) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `updateOrderStatus('${o.id}', 'En preparación')`, '✓ Confirmar pago');
       if (!transfer && canManage && ['Pago pendiente'].includes(o.status)) btn('bg-orange-500 hover:bg-orange-400 text-black', `updateOrderStatus('${o.id}', 'En preparación')`, '📦 Pasar a preparación');
-      if (o.status === 'En preparación' && canScan) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `openScanModal('dispatch', '${o.id}')`, '📷 Registrar salida');
+      if (o.status === 'En preparación' && canScan && !ordPickupPending(o)) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `openScanModal('dispatch', '${o.id}')`, '📷 Registrar salida');
       if (o.status === 'Despachado' && canScan) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `openScanModal('handover', '${o.id}')`, '📲 Entregar (QR del cliente)');
       if (o.status !== 'Cancelado' && canManage) btn('bg-zinc-800 hover:bg-zinc-700 text-zinc-100', `openPackageLabel('${o.id}')`, '🏷️ Etiqueta');
       btn('bg-zinc-800 hover:bg-zinc-700 text-amber-200', `addOrderNote('${o.id}')`, '📝 Nota');
@@ -5959,7 +6053,7 @@ html { scroll-behavior: smooth; }
       const keys = waMenuKeys(o), tpl = waTemplates(o);
       const custKnown = typeof CUSTOMERS !== 'undefined' && CUSTOMERS.some(c => samePhone(c.phone, o.phone));
       const productsHtml = lines
-        ? `<div class="divide-y divide-zinc-800">${lines.map(l => `<div class="flex items-start justify-between gap-3 py-1.5 text-xs"><div><div class="text-white font-semibold">${escapeHtml(l.qty)}× ${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">Color: ${escapeHtml(l.color || 'Único')} · ${formatARS(l.unitPrice)} c/u</div></div><div class="text-zinc-100 font-bold">${formatARS((l.qty || 0) * (l.unitPrice || 0))}</div></div>`).join('')}</div>`
+        ? `<div class="divide-y divide-zinc-800">${lines.map(l => `<div class="flex items-start justify-between gap-3 py-1.5 text-xs"><div><div class="text-white font-semibold">${escapeHtml(l.qty)}× ${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">Color: ${escapeHtml(l.color || 'Único')} · ${formatARS(l.unitPrice)} c/u</div>${ficPickupHtml(o, l, lines.indexOf(l))}</div><div class="text-zinc-100 font-bold">${formatARS((l.qty || 0) * (l.unitPrice || 0))}</div></div>`).join('')}</div>`
         : `<div class="text-xs text-zinc-200">${escapeHtml(o.items || '')}</div>`;
       const money = [];
       if (subtotal !== null) money.push(ppRow('Productos', formatARS(subtotal)));
@@ -6272,7 +6366,7 @@ html { scroll-behavior: smooth; }
           <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr + ', Tucumán, Argentina')}" target="_blank" rel="noopener" class="px-2.5 py-1.5 rounded-lg bg-sky-950 border border-sky-800 text-sky-300 text-[11px] font-bold">🗺️ Mapa</a>
           <a href="tel:+549${normalizeArPhone(o.phone)}" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 text-[11px] font-bold">📞 Llamar</a>
           <button type="button" onclick="waSend('${o.id}', '${o.status === 'Despachado' ? 'despachado' : 'preparando'}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-300 text-[11px] font-bold">💬 Avisar</button>
-          ${o.status === 'En preparación' && (can('orders.dispatch') || can('orders.manage')) ? `<button type="button" onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500 text-black text-[11px] font-bold">📷 Salida</button>` : ''}
+          ${o.status === 'En preparación' && !ordPickupPending(o) && (can('orders.dispatch') || can('orders.manage')) ? `<button type="button" onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500 text-black text-[11px] font-bold">📷 Salida</button>` : ''}
           ${o.status === 'Despachado' && (can('orders.dispatch') || can('orders.manage')) ? `<button type="button" onclick="openScanModal('handover', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500 text-black text-[11px] font-bold">📲 Entregar</button>` : ''}
           <button type="button" onclick="openOrderFicha('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 text-zinc-100 text-[11px] font-bold">📋 Ficha</button>
         </div></div>`;
@@ -7674,7 +7768,7 @@ html { scroll-behavior: smooth; }
       set('new-prod-compare', p.compareAtPrice || '');
       document.getElementById('new-prod-featured').checked = p.featured === true;
       set('new-prod-delivery', vehicleOfProduct(p));
-      fillProductSupplierSelect(p.supplierId);
+      fillProductSupplierSelect(p.supplierId, p.pickupAtSupplier === true);
       set('new-prod-specs', p.specs || '');
       set('new-prod-keywords', p.keywords || '');
       set('new-prod-colors', (p.colors || []).join(', '));
@@ -7706,7 +7800,7 @@ html { scroll-behavior: smooth; }
     function cancelEditProduct(goBack) {
       const wasEditing = editingProductId !== null;
       editingProductId = null;
-      fillProductSupplierSelect('');
+      fillProductSupplierSelect('', false);
       const form = document.getElementById('admin-new-product-form');
       form.reset();
       onProdCategoryChange();
