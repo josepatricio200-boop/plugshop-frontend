@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.2</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.3</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -869,7 +869,7 @@ html { scroll-behavior: smooth; }
                 <span class="text-[11px] text-zinc-400 font-code">Fotos mínimas: 2 + Colores a elección</span>
               </div>
 
-              <form id="admin-new-product-form" onsubmit="handleCreateProductWithPhotos(event)" class="space-y-5 text-xs">
+              <form id="admin-new-product-form" onsubmit="handleCreateProductWithPhotos(event)" onreset="setTimeout(syncSingleColorUI, 0)" class="space-y-5 text-xs">
                 <div id="edit-mode-banner" class="hidden p-3 rounded-lg bg-brand-orange/10 border border-brand-orange/40 text-brand-amber font-semibold"></div>
                 
                 <!-- Basic Info Grid -->
@@ -922,6 +922,7 @@ html { scroll-behavior: smooth; }
                 <!-- Colors & Specs Row -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
+                    <label class="flex items-start gap-2 mb-2 text-[11px] text-zinc-200 cursor-pointer font-sans"><input type="checkbox" id="new-prod-single-color" onchange="toggleSingleColor()" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>Este producto viene en un solo color</b> (omitir colores)<br><span class="text-[10px] text-zinc-500">El cliente no ve selector de color: ni en la ficha, ni en el carrito, ni en el pedido.</span></span></label>
                     <label class="block mb-1 text-brand-amber font-semibold">🎨 Colores Disponibles (separados por coma) *</label>
                     <input required type="text" id="new-prod-colors" oninput="renderColorStockInputs()" value="Negro, Azul, Rojo, Camuflado" placeholder="Ej. Negro, Blanco, Azul, Rojo" class="w-full bg-zinc-950 border border-brand-orange/40 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
                     <span class="text-[10px] text-zinc-400 block mt-1">El cliente podrá seleccionar su color preferido antes de agregar al carrito.</span>
@@ -5385,6 +5386,28 @@ html { scroll-behavior: smooth; }
       ANNOUNCEMENTS = ANNOUNCEMENTS.filter(a => a.id !== id); renderAnnouncements();
     }
 
+    // ---- Producto de un solo color: se guarda como "Único" y la tienda no muestra colores ----
+    let SAVED_COLORS_TEXT = '';
+    function syncSingleColorUI() {
+      const ck = document.getElementById('new-prod-single-color'), inp = document.getElementById('new-prod-colors');
+      if (!ck || !inp) return;
+      inp.disabled = ck.checked; inp.required = !ck.checked;
+      inp.classList.toggle('opacity-50', ck.checked);
+    }
+    function toggleSingleColor(force) {
+      const ck = document.getElementById('new-prod-single-color'), inp = document.getElementById('new-prod-colors');
+      if (!ck || !inp) return;
+      if (force !== undefined) ck.checked = !!force;
+      if (ck.checked) {
+        const cur = inp.value.trim();
+        if (cur && cur !== 'Único') SAVED_COLORS_TEXT = cur;
+        inp.value = 'Único';
+      } else if (inp.value.trim() === 'Único') inp.value = SAVED_COLORS_TEXT;
+      syncSingleColorUI();
+      renderColorStockInputs();
+    }
+    const isSingleColor = p => !!p && (!Array.isArray(p.colors) || p.colors.length === 0 || (p.colors.length === 1 && p.colors[0] === 'Único'));
+
     // ---- Stock por color en el formulario de producto ----
     function parseColorsField() {
       const colors = (document.getElementById('new-prod-colors').value || '').split(',').map(c => c.trim()).filter(Boolean);
@@ -5905,7 +5928,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v8.2): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v8.3): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -6157,7 +6180,7 @@ html { scroll-behavior: smooth; }
       const keys = waMenuKeys(o), tpl = waTemplates(o);
       const custKnown = typeof CUSTOMERS !== 'undefined' && CUSTOMERS.some(c => samePhone(c.phone, o.phone));
       const productsHtml = lines
-        ? `<div class="divide-y divide-zinc-800">${lines.map(l => `<div class="flex items-start justify-between gap-3 py-1.5 text-xs"><div><div class="text-white font-semibold">${escapeHtml(l.qty)}× ${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">Color: ${escapeHtml(l.color || 'Único')} · ${formatARS(l.unitPrice)} c/u</div>${ficPickupHtml(o, l, lines.indexOf(l))}</div><div class="text-zinc-100 font-bold">${formatARS((l.qty || 0) * (l.unitPrice || 0))}</div></div>`).join('')}</div>`
+        ? `<div class="divide-y divide-zinc-800">${lines.map(l => `<div class="flex items-start justify-between gap-3 py-1.5 text-xs"><div><div class="text-white font-semibold">${escapeHtml(l.qty)}× ${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">${l.color && l.color !== 'Único' ? 'Color: ' + escapeHtml(l.color) + ' · ' : ''}${formatARS(l.unitPrice)} c/u</div>${ficPickupHtml(o, l, lines.indexOf(l))}</div><div class="text-zinc-100 font-bold">${formatARS((l.qty || 0) * (l.unitPrice || 0))}</div></div>`).join('')}</div>`
         : `<div class="text-xs text-zinc-200">${escapeHtml(o.items || '')}</div>`;
       const money = [];
       if (subtotal !== null) money.push(ppRow('Productos', formatARS(subtotal)));
@@ -7884,6 +7907,7 @@ html { scroll-behavior: smooth; }
       set('new-prod-specs', p.specs || ''); updateSpecsCount();
       set('new-prod-keywords', p.keywords || '');
       set('new-prod-colors', (p.colors || []).join(', '));
+      toggleSingleColor(isSingleColor(p));
       const note = document.getElementById('color-stock-note');
       if (p.stockByColor) { renderColorStockInputs(p.stockByColor); note.classList.add('hidden'); }
       else {

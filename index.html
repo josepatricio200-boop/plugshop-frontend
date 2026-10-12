@@ -777,7 +777,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v8.2</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v8.3</span>
           </div>
         </div>
 
@@ -795,7 +795,7 @@ html { scroll-behavior: smooth; }
 
   <!-- Quick View, Photo Gallery & Color Variant Selector Modal -->
   <div id="product-detail-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
-    <div class="relative w-full max-w-2xl bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+    <div class="relative w-full max-w-2xl lg:max-w-6xl bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
       <div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/90">
         <div class="flex items-center gap-2">
           <span id="detail-modal-type-badge"></span>
@@ -805,11 +805,11 @@ html { scroll-behavior: smooth; }
       </div>
 
       <div class="p-6 overflow-y-auto space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr] gap-6 items-start">
           
           <!-- Photos Column -->
           <div class="space-y-3">
-            <div id="gallery-main-view" class="h-64 sm:h-72 rounded-2xl bg-zinc-900/90 border border-white/[0.08] flex items-center justify-center p-4 overflow-hidden relative shadow-inner"></div>
+            <div id="gallery-main-view" class="h-64 sm:h-72 lg:h-[56vh] lg:min-h-[380px] rounded-2xl bg-zinc-900/90 border border-white/[0.08] flex items-center justify-center p-4 overflow-hidden relative shadow-inner"></div>
             <div id="gallery-thumbnails-row" class="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-1"></div>
           </div>
 
@@ -2345,6 +2345,8 @@ html { scroll-behavior: smooth; }
       document.getElementById('gallery-installments').textContent = `🔥 ${discountPct}% OFF pagando por Transferencia · Entrega en el día`;
 
       renderGalleryColorPills(colors);
+      const colorsBox = document.getElementById('gallery-colors-box');
+      if (colorsBox) colorsBox.classList.toggle('hidden', isSingleColor(prod));
 
       updateGalleryStock();
 
@@ -2435,7 +2437,7 @@ html { scroll-behavior: smooth; }
         stockStatusEl.className = 'text-xs font-bold text-emerald-400 font-code';
         addBtn.disabled = false;
         addBtn.className = 'w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-extrabold text-xs shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2';
-        addBtn.innerHTML = `<span>Agregar al Carrito (Color: <span id="gallery-btn-color-label" class="font-code">${activeGallerySelectedColor}</span>)</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>`;
+        addBtn.innerHTML = `<span>Agregar al Carrito${isSingleColor(prod) ? '' : ` (Color: <span id="gallery-btn-color-label" class="font-code">${escapeHtml(activeGallerySelectedColor)}</span>)`}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>`;
         addBtn.onclick = () => {
           addToCart(prod.id, activeGallerySelectedColor);
           closeProductGallery();
@@ -2464,7 +2466,7 @@ html { scroll-behavior: smooth; }
 
       const mainView = document.getElementById('gallery-main-view');
       const many = photos.length > 1;
-      mainView.innerHTML = `<button type="button" onclick="openLightbox(${activeGalleryPhotoIndex})" aria-label="Ver la foto en grande" class="w-full h-full flex items-center justify-center cursor-zoom-in">${renderVisualElement(activePhoto, 'w-full h-full object-contain max-h-64 rounded-xl', 'text-8xl select-none')}</button>
+      mainView.innerHTML = `<button type="button" onclick="openLightbox(${activeGalleryPhotoIndex})" aria-label="Ver la foto en grande" class="w-full h-full flex items-center justify-center cursor-zoom-in">${renderVisualElement(activePhoto, 'w-full h-full object-contain max-h-64 lg:max-h-full rounded-xl', 'text-8xl select-none')}</button>
         <span class="pointer-events-none absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/60 text-[10px] font-bold text-zinc-100">🔍 Tocá para ampliar${many ? ' · ' + (activeGalleryPhotoIndex + 1) + '/' + photos.length : ''}</span>
         ${many ? `<button type="button" onclick="stepGalleryPhoto(-1)" aria-label="Foto anterior" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white text-xl leading-none">‹</button><button type="button" onclick="stepGalleryPhoto(1)" aria-label="Foto siguiente" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white text-xl leading-none">›</button>` : ''}`;
 
@@ -3325,7 +3327,7 @@ html { scroll-behavior: smooth; }
             <div class="flex-1 min-w-0">
               <h4 class="text-xs font-bold text-white truncate">${escapeHtml(item.name)}</h4>
               <div class="flex items-center gap-1.5 mt-0.5 font-code">
-                <span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-brand-amber font-semibold">🎨 ${escapeHtml(item.selectedColor || 'Único')}</span>
+                ${(item.selectedColor && item.selectedColor !== 'Único') ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-brand-amber font-semibold">🎨 ${escapeHtml(item.selectedColor)}</span>` : ''}
                 <span class="text-xs text-brand-orange font-bold">${formatARS(item.price * item.qty)}</span>
               </div>
               ${isAtMaxStock ? '<span class="text-[9px] text-amber-400 font-semibold block mt-0.5 font-code">Tope de stock disponible</span>' : ''}
@@ -3663,7 +3665,7 @@ html { scroll-behavior: smooth; }
       if (Date.now() - lastCheckoutAt < 5000) return; // doble toque
       lastCheckoutAt = Date.now();
       let orderNumber = generateOrderId();
-      const itemsList = cart.map(i => `${i.qty}x ${i.name} (Color: ${i.selectedColor || 'Único'})`).join(', ');
+      const itemsList = cart.map(i => `${i.qty}x ${i.name}${i.selectedColor && i.selectedColor !== 'Único' ? ` (Color: ${i.selectedColor})` : ''}`).join(', ');
 
       const zoneNameMap = {
         'yb': 'Yerba Buena Express',
@@ -3768,7 +3770,7 @@ html { scroll-behavior: smooth; }
       saveStorage(STORAGE_KEYS.CUSTOMERS, CUSTOMERS);
 
       const trackingUrl = window.location.origin + window.location.pathname + '#track=' + orderNumber;
-      const itemsText = cart.map(i => `• ${i.qty}x ${i.name}\n  ↳ Color: ${i.selectedColor || 'Único'} (${formatARS(i.price * i.qty)})`).join('\n');
+      const itemsText = cart.map(i => `• ${i.qty}x ${i.name}\n  ↳ ${i.selectedColor && i.selectedColor !== 'Único' ? 'Color: ' + i.selectedColor + ' ' : ''}(${formatARS(i.price * i.qty)})`).join('\n');
 
       const messageRaw = `*NUEVA ORDEN ${orderNumber} EN PLUGSHOP*\n` +
         `--------------------------------\n` +
@@ -3804,6 +3806,7 @@ html { scroll-behavior: smooth; }
 
     // ---- Reclamos y garantías (panel) ----
     let CLAIMS = [];
+    const isSingleColor = p => !!p && (!Array.isArray(p.colors) || p.colors.length === 0 || (p.colors.length === 1 && p.colors[0] === 'Único'));
 
     function getStatusBadgeClass(status) {
       if (status === 'Entregado') return 'bg-emerald-950 text-emerald-400 border border-emerald-800';
