@@ -777,7 +777,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v7.2</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v7.3</span>
           </div>
         </div>
 
@@ -1645,7 +1645,7 @@ html { scroll-behavior: smooth; }
     // Permisos por usuario (los manda el servidor al entrar y se refrescan con /api/auth/me).
     // Estos son los "de fábrica" de cada rol: sirven de respaldo si la sesión no trae la lista.
     const PERM_DEFAULTS = {
-      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'orders.create', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
+      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'orders.pack', 'orders.create', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
       cadete: ['orders.view', 'orders.dispatch'],
       reposicion: ['products.manage', 'insights.view'],
       logistica: ['suppliers.view']

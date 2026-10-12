@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.2</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.3</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -468,6 +468,7 @@ html { scroll-behavior: smooth; }
           <div id="gsearch-results" class="hidden absolute left-0 right-0 top-full mt-1 z-30 max-h-[60vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-xl shadow-2xl"></div>
         </div>
         <div class="flex items-center gap-2">
+          <button type="button" id="app-toggle-btn" onclick="appSetMode(true)" class="hidden px-2.5 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 border border-sky-800 text-sky-300 text-xs font-semibold items-center gap-1.5 transition-all" title="Vista simple con botones grandes para el celular">📱 Modo app</button>
           <button type="button" id="wa-send-btn" onclick="openWaSend()" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-800 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-all" title="Mandate reportes, listas de precios o avisos a tu WhatsApp">
             <span>📲 Enviarme</span>
           </button>
@@ -2271,7 +2272,7 @@ html { scroll-behavior: smooth; }
     // Permisos por usuario (los manda el servidor al entrar y se refrescan con /api/auth/me).
     // Estos son los "de fábrica" de cada rol: sirven de respaldo si la sesión no trae la lista.
     const PERM_DEFAULTS = {
-      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'orders.create', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
+      vendedor: ['orders.view', 'orders.dispatch', 'orders.manage', 'orders.pack', 'orders.create', 'refunds.manage', 'cash.manage', 'claims.manage', 'customers.manage', 'insights.view'],
       cadete: ['orders.view', 'orders.dispatch'],
       reposicion: ['products.manage', 'insights.view'],
       logistica: ['suppliers.view']
@@ -2399,7 +2400,7 @@ html { scroll-behavior: smooth; }
       if (me && me.success && Array.isArray(me.perms)) {
         const changed = JSON.stringify(me.perms) !== JSON.stringify(currentStaffSession.perms || null);
         currentStaffSession.perms = me.perms; currentStaffSession.role = me.role || currentStaffSession.role; if (me.roleName) currentStaffSession.roleName = me.roleName; if (me.staffId) currentStaffSession.staffId = me.staffId;
-        if (changed) { applyRoleTabVisibility(); if (typeof refreshAdminUI === 'function') refreshAdminUI(); }
+        if (changed) { applyRoleTabVisibility(); if (typeof refreshAdminUI === 'function') refreshAdminUI(); appModeSync(); }
       }
     }
 
@@ -3245,14 +3246,17 @@ html { scroll-behavior: smooth; }
 
       // El panel se muestra enseguida con lo que ya había; cuando llegan
       // los datos reales del servidor, se vuelve a dibujar solo.
+      appModeSync();
       await refreshMyPerms();
       await syncAdminDataFromServer();
       refreshAdminUI();
       applyRoleTabVisibility();
+      appModeSync();
       if (typeof startAdminWatch === 'function') startAdminWatch();
     }
 
     function closeAdminModal() {
+      appRemove();
       document.getElementById('admin-modal').classList.add('hidden');
       document.getElementById('admin-modal').classList.remove('flex');
     }
@@ -3287,6 +3291,231 @@ html { scroll-behavior: smooth; }
         const workspace = document.getElementById('admin-main-workspace');
         if (workspace) workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    }
+
+    // ---- Modo app (celular): vista simple y de botones grandes para cadete, embalaje y reposición ----
+    // Se prende solo en el celular para quien no gestiona cobros ni clientes; cualquiera lo puede
+    // activar/desactivar desde el botón "📱 Modo app" (queda guardado en ese navegador).
+    // Lo que se ve depende de los permisos del rol: Embalar (orders.pack), Entregas (orders.dispatch), Stock (products.manage).
+    const APP_PREF_KEY = 'plugshop_app_mode_v1', APP_TICKS_KEY = 'plugshop_pack_ticks_v1';
+    let APP_TAB = 'home', APP_TIMER = null, APP_STOCK_Q = '', APP_STOCK_LOW = false, APP_STOCK_TIMERS = {};
+    function appCaps() { return { pack: can('orders.pack'), deliver: can('orders.dispatch'), stock: can('products.manage') }; }
+    function appAvailable() { const c = appCaps(); return !!(isAdminAuthenticated && (c.pack || c.deliver || c.stock)); }
+    function appPref() { try { return localStorage.getItem(APP_PREF_KEY) || ''; } catch (e) { return ''; } }
+    function appDefault() {
+      if (currentStaffSession.role === 'admin' || window.innerWidth >= 768) return false;
+      return !['orders.manage', 'cash.manage', 'customers.manage', 'claims.manage'].some(p => can(p));
+    }
+    function appWanted() { const p = appPref(); return appAvailable() && (p === 'on' || (p !== 'off' && appDefault())); }
+    function appSetMode(on) {
+      try { localStorage.setItem(APP_PREF_KEY, on ? 'on' : 'off'); } catch (e) { /* sin almacenamiento */ }
+      appModeSync();
+    }
+    function appModeSync() {
+      const btn = document.getElementById('app-toggle-btn');
+      if (btn) btn.classList.toggle('hidden', !appAvailable());
+      if (appWanted()) { if (!document.getElementById('app-view')) APP_TAB = 'home'; renderApp(); } else appRemove();
+    }
+    function appRemove() {
+      const e = document.getElementById('app-view'); if (e) e.remove();
+      const mb = document.getElementById('admin-mbar'); if (mb) mb.style.removeProperty('display');
+      if (APP_TIMER) { clearInterval(APP_TIMER); APP_TIMER = null; }
+    }
+    function appTabs() {
+      const c = appCaps(), t = [['home', '🏠', 'Inicio']];
+      if (c.pack) t.push(['pack', '📦', 'Embalar']);
+      if (c.deliver) t.push(['deliver', '🛵', 'Entregas']);
+      if (c.stock) t.push(['stock', '📥', 'Stock']);
+      return t;
+    }
+    function appGo(tab) { APP_TAB = tab; renderApp(); const v = document.getElementById('app-scroll'); if (v) v.scrollTop = 0; }
+    async function appRefresh() {
+      const b = document.getElementById('app-refresh'); if (b) b.textContent = '⏳';
+      try { await syncAdminDataFromServer(); } catch (e) { /* sin conexión: queda lo que había */ }
+      renderApp();
+    }
+    // Pedidos que se están preparando (los más viejos primero; los ya embalados al final).
+    function appPackList() {
+      return ADMIN_ORDERS.filter(o => o.status === 'En preparación').sort((a, b) => (!!a.packedAt - !!b.packedAt) || ((a.createdAt || 0) - (b.createdAt || 0)));
+    }
+    function appDeliverList() {
+      const list = routeGroups().flatMap(g => g.orders);
+      const rank = o => o.status === 'Despachado' ? 0 : (o.packedAt ? 1 : 2);
+      return list.sort((a, b) => rank(a) - rank(b) || ((a.createdAt || 0) - (b.createdAt || 0)));
+    }
+    function appTicks() { try { return JSON.parse(localStorage.getItem(APP_TICKS_KEY) || '{}') || {}; } catch (e) { return {}; } }
+    function appSaveTicks(t) { try { localStorage.setItem(APP_TICKS_KEY, JSON.stringify(t)); } catch (e) { /* sin almacenamiento */ } }
+    function appTick(id, i, on) {
+      const t = appTicks(); const set = new Set(t[id] || []);
+      if (on) set.add(i); else set.delete(i);
+      t[id] = [...set];
+      const live = new Set(ADMIN_ORDERS.map(o => o.id)); Object.keys(t).forEach(k => { if (!live.has(k)) delete t[k]; });
+      appSaveTicks(t);
+      renderApp();
+    }
+    function appOrderLines(o) {
+      if (Array.isArray(o.lines) && o.lines.length) return o.lines.map(l => `${l.qty}× ${l.name}${l.color && l.color !== 'Único' ? ' · ' + l.color : ''}`);
+      return String(o.items || '').split(/,\s*(?=\d+x )/).filter(Boolean);
+    }
+    function appPackCard(o) {
+      const lines = appOrderLines(o), ticks = new Set(appTicks()[o.id] || []);
+      const done = lines.filter((_, i) => ticks.has(i)).length, packed = !!o.packedAt;
+      return `<div class="rounded-2xl border ${packed ? 'border-emerald-700 bg-emerald-950/30' : 'border-zinc-800 bg-zinc-900'} p-3.5 space-y-3">
+        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-black text-white truncate">${escapeHtml(o.customer)}</div><div class="text-[11px] text-zinc-400 font-code">#${escapeHtml(o.id)}</div></div><div class="flex flex-wrap justify-end gap-1">${vehBadge(o)}${/retiro/i.test(o.deliveryType || '') ? '<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-bold text-sky-300">RETIRA</span>' : ''}</div></div>
+        <div class="space-y-1.5">${lines.map((l, i) => `<label class="flex items-center gap-3 p-2.5 rounded-xl ${ticks.has(i) || packed ? 'bg-emerald-950/40 text-emerald-200' : 'bg-zinc-950 text-zinc-100'} text-sm cursor-pointer"><input type="checkbox" ${ticks.has(i) || packed ? 'checked' : ''} ${packed ? 'disabled' : ''} onchange="appTick('${escapeHtml(o.id)}', ${i}, this.checked)" class="w-6 h-6 accent-emerald-500 shrink-0"><span class="${ticks.has(i) || packed ? 'line-through opacity-70' : ''}">${escapeHtml(l)}</span></label>`).join('') || '<div class="text-xs text-zinc-400">Sin detalle de productos.</div>'}</div>
+        ${(o.notes || []).map(n => `<div class="text-[12px] text-amber-200">📝 ${escapeHtml(n.text)}</div>`).join('')}
+        ${packed ? `<div class="text-xs font-bold text-emerald-300">✅ Embalado por ${escapeHtml(o.packedBy || 'el equipo')} · ${escapeHtml(ppWhen(o.packedAt))}</div>` : `<div class="text-[11px] text-zinc-400">${done} de ${lines.length} productos listos</div>`}
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="openPackageLabel('${escapeHtml(o.id)}')" class="py-3 rounded-xl bg-zinc-800 active:bg-zinc-700 text-zinc-100 text-sm font-bold">🏷️ Etiqueta</button>
+          ${packed ? `<button type="button" onclick="appPack('${escapeHtml(o.id)}', false)" class="py-3 rounded-xl bg-zinc-800 active:bg-zinc-700 text-zinc-300 text-sm font-bold">↩️ Deshacer</button>` : `<button type="button" onclick="appPack('${escapeHtml(o.id)}', true)" class="py-3 rounded-xl bg-emerald-500 active:bg-emerald-400 text-black text-sm font-black">✅ Ya está embalado</button>`}
+        </div></div>`;
+    }
+    async function appPack(id, on) {
+      const o = ADMIN_ORDERS.find(x => x.id === id); if (!o) return;
+      if (on) {
+        const lines = appOrderLines(o), ticks = new Set(appTicks()[id] || []);
+        const missing = lines.filter((_, i) => !ticks.has(i)).length;
+        if (missing && !confirm(`Te faltan tildar ${missing} producto(s). ¿Marcarlo como embalado igual?`)) return;
+      }
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('ORDERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ packed: on }) }, '/' + id + '/packed');
+        if (!res || res.success === false || !res.order) { alert((res && res.error) || 'No se pudo guardar. Probá de nuevo.'); return; }
+        Object.assign(o, res.order);
+        if (!on) { delete o.packedAt; delete o.packedBy; }
+      } else if (on) { o.packedAt = Date.now(); o.packedBy = currentStaffSession.name || 'Equipo'; } else { delete o.packedAt; delete o.packedBy; }
+      renderApp();
+    }
+    function appStockCard(p) {
+      const colors = p.stockByColor ? (p.colors || Object.keys(p.stockByColor)) : null;
+      const row = (label, color, n) => `<div class="flex items-center justify-between gap-2 py-1.5"><div class="text-sm text-zinc-200 truncate">${escapeHtml(label)}</div><div class="flex items-center gap-2 shrink-0">
+          <button type="button" aria-label="Restar uno" onclick="appStock(${p.id}, ${color === null ? 'null' : `'${escapeHtml(color).replace(/'/g, '&#39;')}'`}, -1)" class="w-11 h-11 rounded-xl bg-zinc-800 active:bg-zinc-700 text-xl font-black text-white">−</button>
+          <div class="w-10 text-center text-lg font-black ${n <= 0 ? 'text-rose-400' : (n <= 3 ? 'text-amber-300' : 'text-white')}">${n}</div>
+          <button type="button" aria-label="Sumar uno" onclick="appStock(${p.id}, ${color === null ? 'null' : `'${escapeHtml(color).replace(/'/g, '&#39;')}'`}, 1)" class="w-11 h-11 rounded-xl bg-emerald-600 active:bg-emerald-500 text-xl font-black text-white">+</button></div></div>`;
+      return `<div class="rounded-2xl border border-zinc-800 bg-zinc-900 p-3.5"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-sm font-black text-white">${escapeHtml(p.name)}</div><div class="text-[11px] text-zinc-400">${escapeHtml(p.brand || '')}${p.active === false ? ' · <span class="text-amber-300 font-bold">PAUSADO</span>' : ''}</div></div><div id="app-stock-st-${p.id}" class="text-[11px] font-bold text-emerald-400"></div></div>
+        <div class="mt-1 divide-y divide-zinc-800">${colors ? colors.map(c => row(c, c, Number(p.stockByColor[c]) || 0)).join('') : row('Stock', null, Number(p.stock) || 0)}</div></div>`;
+    }
+    function appStock(pid, color, delta) {
+      const p = PRODUCTS.find(x => x.id === pid); if (!p) return;
+      if (color !== null && p.stockByColor) {
+        p.stockByColor[color] = Math.max(0, (Number(p.stockByColor[color]) || 0) + delta);
+        p.stock = Object.values(p.stockByColor).reduce((a, n) => a + (Number(n) || 0), 0);
+      } else p.stock = Math.max(0, (Number(p.stock) || 0) + delta);
+      renderApp();
+      const st = document.getElementById('app-stock-st-' + pid); if (st) { st.className = 'text-[11px] font-bold text-amber-300'; st.textContent = 'Guardando…'; }
+      clearTimeout(APP_STOCK_TIMERS[pid]);
+      APP_STOCK_TIMERS[pid] = setTimeout(() => appStockSave(pid), 700);
+    }
+    async function appStockSave(pid) {
+      const p = PRODUCTS.find(x => x.id === pid); if (!p) return;
+      let ok = true;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const body = p.stockByColor ? { stockByColor: p.stockByColor } : { stock: p.stock };
+        const res = await apiRequest('PRODUCTS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify(body) }, '/' + pid);
+        ok = !!(res && res.success !== false && res.id);
+      } else saveStorage(STORAGE_KEYS.PRODUCTS, PRODUCTS);
+      const st = document.getElementById('app-stock-st-' + pid);
+      if (st) { st.className = 'text-[11px] font-bold ' + (ok ? 'text-emerald-400' : 'text-rose-400'); st.textContent = ok ? '✓ Guardado' : 'No se pudo guardar'; }
+    }
+    function appNewProdOpen() {
+      let w = document.getElementById('app-newprod');
+      if (!w) { w = document.createElement('div'); w.id = 'app-newprod'; w.className = 'fixed inset-0 z-[56] bg-black/80 flex items-end sm:items-center justify-center'; document.body.appendChild(w); }
+      const admin = currentStaffSession.role === 'admin';
+      const inp = 'w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-3 text-base text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange';
+      w.innerHTML = `<div class="w-full max-w-md max-h-[94vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-t-3xl sm:rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between"><h3 class="text-base font-black text-white">➕ Producto nuevo</h3><button type="button" onclick="appNewProdClose()" aria-label="Cerrar" class="w-10 h-10 rounded-xl bg-zinc-800 text-zinc-200">✕</button></div>
+        <label class="block text-xs font-bold text-zinc-400">Foto<input id="apn-photo" type="file" accept="image/*" capture="environment" class="mt-1 block w-full text-sm text-zinc-300 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:bg-brand-orange file:text-black file:font-bold"></label>
+        <input id="apn-name" maxlength="120" placeholder="Nombre del producto *" class="${inp}">
+        <input id="apn-brand" maxlength="60" placeholder="Marca" class="${inp}">
+        <select id="apn-cat" class="${inp}">${CATEGORIES.filter(c => !c.parent && c.active !== false).map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml((c.icon ? c.icon + ' ' : '') + c.name)}</option>`).join('')}</select>
+        <div class="grid grid-cols-2 gap-2"><input id="apn-stock" type="number" inputmode="numeric" min="0" placeholder="Cantidad *" class="${inp}"><input id="apn-price" type="number" inputmode="numeric" min="0" placeholder="${admin ? 'Precio de lista *' : 'Precio (opcional)'}" class="${inp}"></div>
+        ${admin ? '' : '<p class="text-[11px] text-amber-300">Queda pausado hasta que el administrador revise el precio y lo active.</p>'}
+        <div id="apn-msg" class="text-xs font-bold text-rose-400"></div>
+        <button type="button" id="apn-save" onclick="appNewProdSave()" class="w-full py-3.5 rounded-xl bg-emerald-500 active:bg-emerald-400 text-black text-base font-black">Guardar producto</button></div>`;
+    }
+    function appNewProdClose() { const w = document.getElementById('app-newprod'); if (w) w.remove(); }
+    async function appNewProdSave() {
+      const v = id => (document.getElementById(id) || {}).value || '';
+      const msg = document.getElementById('apn-msg'), btn = document.getElementById('apn-save');
+      const name = v('apn-name').trim(), stock = Math.floor(Number(v('apn-stock'))), price = Math.max(0, Number(v('apn-price')) || 0);
+      const admin = currentStaffSession.role === 'admin';
+      if (name.length < 2) { msg.textContent = 'Escribí el nombre del producto.'; return; }
+      if (!Number.isFinite(stock) || stock < 0 || v('apn-stock') === '') { msg.textContent = 'Poné la cantidad que tenés.'; return; }
+      if (admin && !(price > 0)) { msg.textContent = 'Poné el precio de lista.'; return; }
+      btn.disabled = true; btn.textContent = 'Guardando…'; msg.textContent = '';
+      const photos = [];
+      const file = (document.getElementById('apn-photo') || {}).files && document.getElementById('apn-photo').files[0];
+      if (file) {
+        try {
+          const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = URL.createObjectURL(file); });
+          if (isBackendConnected() && currentStaffSession.token) photos.push(await uploadPhotoToCloudinary(await canvasToBlob(resizeToCanvas(img, 1000), 0.85)));
+          else photos.push(resizeToCanvas(img, 600).toDataURL('image/jpeg', 0.82));
+        } catch (e) { msg.textContent = 'No se pudo subir la foto (' + (e.message || 'error') + '). Probá de nuevo o guardalo sin foto.'; btn.disabled = false; btn.textContent = 'Guardar producto'; return; }
+      }
+      const payload = { name, brand: v('apn-brand').trim(), category: v('apn-cat'), stock, price, colors: ['Único'], photos, type: 'seleccion', warrantyMonths: 6, warrantyBy: 'tienda', warranty: 'Garantía PlugShop 6 meses', badge: 'PLUG SELECCIÓN', active: admin };
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('PRODUCTS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify(payload) });
+        if (!res || res.success === false || !res.id) { msg.textContent = (res && res.error) || 'No se pudo guardar.'; btn.disabled = false; btn.textContent = 'Guardar producto'; return; }
+        PRODUCTS.unshift(res);
+      } else { PRODUCTS.unshift({ ...payload, id: Date.now() }); saveStorage(STORAGE_KEYS.PRODUCTS, PRODUCTS); }
+      appNewProdClose(); APP_STOCK_Q = ''; renderApp();
+    }
+    function renderApp() {
+      if (!appAvailable()) { appRemove(); return; }
+      let v = document.getElementById('app-view');
+      if (!v) {
+        v = document.createElement('div');
+        v.id = 'app-view';
+        v.className = 'fixed inset-0 z-[54] bg-zinc-950 flex flex-col';
+        v.setAttribute('role', 'main');
+        document.body.appendChild(v);
+      }
+      const mbar = document.getElementById('admin-mbar'); if (mbar) mbar.style.setProperty('display', 'none', 'important');
+      const tabs = appTabs();
+      if (!tabs.some(t => t[0] === APP_TAB)) APP_TAB = 'home';
+      const caps = appCaps();
+      const packTodo = caps.pack ? appPackList().filter(o => !o.packedAt).length : 0;
+      const delivs = caps.deliver ? appDeliverList() : [];
+      const onWay = delivs.filter(o => o.status === 'Despachado').length;
+      const low = caps.stock ? lowStockItems(PRODUCTS).length : 0;
+      const badge = (t) => t === 'pack' ? packTodo : (t === 'deliver' ? delivs.length : (t === 'stock' ? low : 0));
+      const tile = (tab, icon, n, label, tone) => `<button type="button" onclick="appGo('${tab}')" class="p-4 rounded-2xl border ${tone} text-left active:scale-[0.98] transition"><div class="text-3xl">${icon}</div><div class="mt-2 text-3xl font-black text-white">${n}</div><div class="text-xs font-semibold text-zinc-300">${label}</div></button>`;
+      let body = '';
+      if (APP_TAB === 'home') {
+        body = `<div class="grid grid-cols-2 gap-3">
+          ${caps.pack ? tile('pack', '📦', packTodo, 'para embalar', 'border-amber-600/50 bg-amber-950/20') : ''}
+          ${caps.deliver ? tile('deliver', '🛵', delivs.length, 'entregas' + (onWay ? ` (${onWay} en camino)` : ''), 'border-sky-600/50 bg-sky-950/20') : ''}
+          ${caps.stock ? tile('stock', '⚠️', low, 'con stock bajo', 'border-rose-600/50 bg-rose-950/20') : ''}
+          ${caps.stock ? `<button type="button" onclick="appNewProdOpen()" class="p-4 rounded-2xl border border-emerald-600/50 bg-emerald-950/20 text-left active:scale-[0.98] transition"><div class="text-3xl">➕</div><div class="mt-2 text-base font-black text-white leading-tight">Cargar producto nuevo</div><div class="text-xs text-zinc-300 mt-0.5">con foto del celular</div></button>` : ''}
+        </div><p class="text-[11px] text-zinc-500 text-center pt-2">Tocá un cuadro para empezar. Si necesitás todo el panel, usá "🖥️ Panel completo" arriba.</p>`;
+      } else if (APP_TAB === 'pack') {
+        const list = appPackList();
+        body = list.length ? `<p class="text-xs text-zinc-400">Tildá cada producto a medida que lo ponés en la caja. Después imprimí la etiqueta y marcá "Ya está embalado".</p>` + list.map(appPackCard).join('') : '<div class="text-center text-sm text-zinc-400 py-14">No hay pedidos para embalar. 🎉</div>';
+      } else if (APP_TAB === 'deliver') {
+        const mine = !can('orders.manage');
+        body = delivs.length ? `<p class="text-xs text-zinc-400">${mine ? 'Tus entregas. ' : ''}Primero las que ya están en camino. "Salida" cuando retirás el paquete y "Entregar" con el QR del cliente.</p>` + delivs.map((o, i) => `<div class="space-y-1"><div class="text-[11px] font-bold ${o.status === 'Despachado' ? 'text-sky-300' : (o.packedAt ? 'text-emerald-300' : 'text-amber-300')}">${o.status === 'Despachado' ? '🛵 En camino' : (o.packedAt ? '✅ Embalado, listo para retirar' : '⏳ Todavía falta embalar')}</div>${routeStop(o, i)}</div>`).join('') : `<div class="text-center text-sm text-zinc-400 py-14">${mine ? 'No tenés entregas asignadas por ahora.' : 'No hay entregas pendientes.'}</div>`;
+      } else if (APP_TAB === 'stock') {
+        const q = APP_STOCK_Q.trim().toLowerCase();
+        let list = PRODUCTS.filter(p => !q || [p.name, p.brand, p.category].join(' ').toLowerCase().includes(q));
+        if (APP_STOCK_LOW) { const lowIds = new Set(lowStockItems(PRODUCTS).map(x => x.id)); list = list.filter(p => lowIds.has(p.id)); }
+        body = `<div class="flex gap-2"><input id="app-stock-q" type="search" value="${escapeHtml(APP_STOCK_Q)}" placeholder="🔍 Buscar producto" oninput="APP_STOCK_Q = this.value; appStockFilter()" class="flex-1 min-w-0 bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-3 text-base text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange"><button type="button" onclick="appNewProdOpen()" class="px-4 rounded-xl bg-emerald-500 text-black font-black text-sm">➕ Nuevo</button></div>
+          <label class="flex items-center gap-2 text-xs text-zinc-300"><input type="checkbox" ${APP_STOCK_LOW ? 'checked' : ''} onchange="APP_STOCK_LOW = this.checked; renderApp()" class="w-5 h-5 accent-orange-500"> Solo stock bajo (3 o menos)</label>
+          <div id="app-stock-list" class="space-y-2.5">${list.slice(0, 40).map(appStockCard).join('') || '<div class="text-center text-sm text-zinc-400 py-10">No encontré productos.</div>'}</div>${list.length > 40 ? '<p class="text-[11px] text-zinc-500 text-center">Mostrando 40: buscá por nombre para afinar.</p>' : ''}`;
+      }
+      const titles = { home: 'Inicio', pack: 'Embalar pedidos', deliver: 'Mis entregas', stock: 'Stock y productos' };
+      v.innerHTML = `<header class="shrink-0 flex items-center justify-between gap-2 px-3 py-2.5 border-b border-zinc-800 bg-zinc-950">
+          <div class="min-w-0"><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">PLUGSHOP · ${escapeHtml(currentStaffSession.roleName || currentStaffSession.role)}</div><div class="text-base font-black text-white truncate">${titles[APP_TAB]}${currentStaffSession.name ? ' <span class="text-xs font-semibold text-zinc-400">· ' + escapeHtml(currentStaffSession.name) + '</span>' : ''}</div></div>
+          <div class="flex items-center gap-1.5 shrink-0"><button type="button" id="app-refresh" onclick="appRefresh()" aria-label="Actualizar" class="w-11 h-11 rounded-xl bg-zinc-800 active:bg-zinc-700 text-lg">🔄</button><button type="button" onclick="appSetMode(false)" class="h-11 px-3 rounded-xl bg-zinc-800 active:bg-zinc-700 text-zinc-200 text-[11px] font-bold leading-tight">🖥️ Panel<br>completo</button><button type="button" onclick="appRemove(); logoutStaff()" aria-label="Cerrar sesión" class="w-11 h-11 rounded-xl bg-zinc-800 active:bg-rose-950 text-lg">🚪</button></div></header>
+        <div id="app-scroll" class="flex-1 overflow-y-auto p-3 space-y-3">${body}</div>
+        <nav class="shrink-0 grid border-t border-zinc-800 bg-zinc-950 pb-[env(safe-area-inset-bottom)]" style="grid-template-columns:repeat(${tabs.length},minmax(0,1fr))">${tabs.map(([k, ic, lb]) => `<button type="button" onclick="appGo('${k}')" aria-current="${APP_TAB === k ? 'page' : 'false'}" class="relative py-2.5 flex flex-col items-center gap-0.5 ${APP_TAB === k ? 'text-brand-orange' : 'text-zinc-400'}"><span class="text-2xl leading-none">${ic}</span><span class="text-[11px] font-bold">${lb}</span>${badge(k) ? `<span class="absolute top-1 right-[calc(50%-26px)] min-w-[18px] h-[18px] px-1 rounded-full bg-brand-orange text-black text-[10px] font-black flex items-center justify-center">${badge(k)}</span>` : ''}</button>`).join('')}</nav>`;
+      if (!APP_TIMER) APP_TIMER = setInterval(() => { if (document.getElementById('app-view') && !document.hidden && !document.getElementById('scan-modal') && !document.getElementById('app-newprod') && !(document.activeElement && document.activeElement.tagName === 'INPUT')) appRefresh(); }, 60000);
+    }
+    // El buscador de stock redibuja solo la lista (para no perder el foco del teclado).
+    function appStockFilter() {
+      const box = document.getElementById('app-stock-list'); if (!box) return;
+      const q = APP_STOCK_Q.trim().toLowerCase();
+      let list = PRODUCTS.filter(p => !q || [p.name, p.brand, p.category].join(' ').toLowerCase().includes(q));
+      if (APP_STOCK_LOW) { const lowIds = new Set(lowStockItems(PRODUCTS).map(x => x.id)); list = list.filter(p => lowIds.has(p.id)); }
+      box.innerHTML = list.slice(0, 40).map(appStockCard).join('') || '<div class="text-center text-sm text-zinc-400 py-10">No encontré productos.</div>';
     }
 
     // ---- Proveedores: ver, agregar, editar y borrar (solo el administrador carga y cambia) ----
@@ -4906,7 +5135,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.2): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.3): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -7650,6 +7879,7 @@ html { scroll-behavior: smooth; }
     }
 
     function showLogin(message) {
+      if (typeof appRemove === 'function') appRemove();
       const screen = document.getElementById('login-screen');
       screen.classList.remove('hidden');
       screen.classList.add('flex');
