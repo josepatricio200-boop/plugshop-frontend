@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.8</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.9</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -5656,7 +5656,8 @@ html { scroll-behavior: smooth; }
           <td class="py-3 px-4 o-cust">
             <div class="font-semibold text-white font-sans">${escapeHtml(o.customer)}</div>
             <div class="text-[11px] text-zinc-400">${escapeHtml(o.phone)}</div>
-            <div class="mt-1 flex flex-wrap gap-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>${vehBadge(o)}${o.courierName ? `<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-semibold text-sky-300">🛵 ${escapeHtml(o.courierName)}</span>` : ''}</div>
+            <div class="mt-1 flex flex-wrap gap-1"><span class="px-2 py-0.5 rounded bg-zinc-800 text-[10px] font-medium text-zinc-300">${escapeHtml(o.deliveryType)}</span>${vehBadge(o)}${(o.courierName && !(canManageOrd && o.zone !== 'retiro' && !['Entregado', 'Cancelado'].includes(o.status))) ? `<span class="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-[10px] font-semibold text-sky-300">🛵 ${escapeHtml(o.courierName)}</span>` : ''}</div>
+            ${(canManageOrd && o.zone !== 'retiro' && !['Entregado', 'Cancelado'].includes(o.status)) ? `<div class="mt-1.5 flex items-center gap-1.5 o-courier"><span class="text-[10px] font-semibold text-sky-300 whitespace-nowrap">🛵 Cadete:</span>${ppCourierSelect(o, 'bg-zinc-900 border border-sky-800 rounded-lg px-2 py-1 text-[11px] text-white max-w-[150px]')}</div>` : ''}
             <div class="text-[10px] text-zinc-500 font-sans break-words max-w-[200px]">${escapeHtml(o.address)}</div>
           </td>
           <td class="py-3 px-4 o-items max-w-[220px]">
@@ -5670,7 +5671,7 @@ html { scroll-behavior: smooth; }
           <td class="py-3 px-4 o-status">
             <select onchange="updateOrderStatus('${o.id}', this.value)" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer font-sans">
               ${[['Pago pendiente', 'Pago pendiente'], ['Comprobante enviado', 'Comprobante enviado'], ['Comprobante rechazado', 'Comprobante rechazado'], ['En preparación', 'En preparación'], ['Despachado', 'Despachado (En moto)'], ['Entregado', 'Entregado'], ['Cancelado', 'Cancelado']]
-                .filter(([v]) => canManageOrd || v === o.status || (o.status === 'En preparación' && v === 'Despachado') || (o.status === 'Despachado' && v === 'Entregado'))
+                .filter(([v]) => canManageOrd || v === o.status || (o.status === 'En preparación' && v === 'Despachado') || (o.status === 'Despachado' && v === 'Entregado' && o.hasDeliveryCode === false))
                 .map(([v, l]) => `<option value="${v}" ${o.status === v ? 'selected' : ''}>${l}</option>`).join('')}
             </select>
             ${(o.isBancarizado && o.paid === false && o.status !== 'Cancelado') ? `<div class="text-[10px] mt-1 ${(o.proof || o.hasProof) ? 'text-sky-400' : 'text-amber-400'}">${(o.proof || o.hasProof) ? '🧾 Comprobante recibido' : '⏳ Sin comprobante'}</div>` : (o.paid ? '<div class="text-[10px] mt-1 text-emerald-400">✓ Pago confirmado</div>' : '')}
@@ -5782,7 +5783,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.8): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.9): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -6318,7 +6319,7 @@ html { scroll-behavior: smooth; }
       const manager = can('orders.manage'), scan = manager || can('orders.dispatch');
       box.innerHTML = `<span class="font-bold text-white">${sel.length} seleccionado(s)</span>
         ${manager && COURIERS.length ? `<select id="bulk-courier" aria-label="Asignar repartidor a la selección" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1.5 text-xs text-white"><option value="">Asignar a…</option>${COURIERS.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('')}</select><button type="button" onclick="bulkAssign()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">Asignar</button>` : ''}
-        ${scan ? `<button type="button" onclick="bulkStatus('Despachado')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 border border-sky-800 text-sky-300 font-semibold">🛵 Pasar a en camino</button><button type="button" onclick="bulkStatus('Entregado')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-300 font-semibold">✅ Marcar entregados</button>` : ''}
+        ${scan ? `<button type="button" onclick="bulkStatus('Despachado')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 border border-sky-800 text-sky-300 font-semibold">🛵 Pasar a en camino</button>${manager ? `<button type="button" onclick="bulkStatus('Entregado')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-300 font-semibold">✅ Marcar entregados</button>` : ''}` : ''}
         <button type="button" onclick="openRoute(selectedOrders().map(o => o.id))" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">🗺️ Hoja de ruta</button>
         <button type="button" onclick="exportSelectedOrders()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">⬇️ Exportar</button>
         <button type="button" onclick="clearOrderSel()" class="px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-semibold">Quitar selección</button>`;
