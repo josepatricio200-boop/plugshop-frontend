@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.7</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.8</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -548,7 +548,7 @@ html { scroll-behavior: smooth; }
             </div>
             <div data-nav-group="fin" class="space-y-1">
               <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">💰 Finanzas y Configuración</div>
-              <button onclick="switchAdminTab('finances')" id="tab-btn-finances" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <button onclick="openFinSection('cash')" id="tab-btn-finances" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5">
                 <span class="text-sm">📊</span>
                 <span>Finanzas & Registro ARCA</span>
@@ -578,7 +578,7 @@ html { scroll-behavior: smooth; }
               </span>
               <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold font-code">IA</span>
             </button>
-              <button onclick="openSection('finances', 'sec-sales')" id="nav-sales-report" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <button onclick="openFinSection('sales')" id="nav-sales-report" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">📊</span><span>Reportes de ventas</span></span>
               <span class="text-[10px] text-zinc-600">↗</span>
             </button>
@@ -611,7 +611,7 @@ html { scroll-behavior: smooth; }
 
           <!-- TAB 1: FINANZAS & REGISTRO ARCA-READY -->
           <div id="admin-tab-finances" class="space-y-6">
-            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-cash')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">💵 Caja diaria</button><button type="button" onclick="goSection('sec-sales')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">📊 Reportes de ventas</button><button type="button" onclick="goSection('sec-mono')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Monotributo</button><button type="button" onclick="goSection('sec-sim')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Simulador de margen</button></div>
+            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" role="tablist" aria-label="Secciones de Finanzas"><button type="button" role="tab" data-fin-btn="cash" onclick="setFinSection('cash')" class="fin-sub-btn shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold">💵 Caja diaria</button><button type="button" role="tab" data-fin-btn="sales" onclick="setFinSection('sales')" class="fin-sub-btn shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold">📊 Reportes de ventas</button><button type="button" role="tab" data-fin-btn="mono" onclick="setFinSection('mono')" class="fin-sub-btn shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold">🧾 Monotributo</button><button type="button" role="tab" data-fin-btn="sim" onclick="setFinSection('sim')" class="fin-sub-btn shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold">🧮 Simulador de margen</button></div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 class="text-lg font-bold text-white">Tablero Financiero & Registro Histórico ARCA-Ready</h3>
@@ -625,6 +625,7 @@ html { scroll-behavior: smooth; }
             </div>
 
             <!-- CAJA DIARIA -->
+            <div data-fin-pane="cash" class="space-y-6">
             <div id="cashreg-no-backend" class="hidden p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300">
               ⚠️ La caja diaria necesita el backend conectado, para que el registro de apertura/cierre quede guardado de verdad y no se pueda editar después.
             </div>
@@ -685,6 +686,9 @@ html { scroll-behavior: smooth; }
               </div>
             </div>
 
+            </div>
+
+            <div data-fin-pane="sales" class="hidden space-y-6">
             <!-- Período de las tarjetas (y de los reportes de abajo) -->
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <div class="text-xs text-zinc-400">Solo cuenta lo que ya cobraste (no los pedidos cancelados ni los que esperan el pago).</div>
@@ -746,9 +750,11 @@ html { scroll-behavior: smooth; }
               <p id="rep-note" class="text-[10px] text-zinc-500">No cuenta los pedidos cancelados. La ganancia es ventas menos envío menos costo de la mercadería.</p>
             </div>
 
+            </div>
+
             <!-- Detail Breakdown & ARCA Projection -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <div class="lg:col-span-7 p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
+            <div>
+              <div data-fin-pane="mono" class="hidden p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
                 <div class="flex items-center justify-between">
                   <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-mono" style="scroll-margin-top:72px">Historial Desglosado para Monotributo</h4>
                   <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-semibold font-code">Proyección ARCA</span>
@@ -789,7 +795,7 @@ html { scroll-behavior: smooth; }
               </div>
 
               <!-- Fast Profit Calculator -->
-              <div class="lg:col-span-5 p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
+              <div data-fin-pane="sim" class="hidden max-w-xl p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-sim" style="scroll-margin-top:72px">Simulador Rápido de Margen</h4>
                 <div class="space-y-3 text-xs">
                   <div>
@@ -2241,9 +2247,29 @@ html { scroll-behavior: smooth; }
       const el = document.getElementById(secId);
       if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    function openSection(tab, secId) {
-      switchAdminTab(tab);
-      setTimeout(() => goSection(secId), 60);
+    // Finanzas tiene sus propias secciones (Caja / Reportes / Monotributo / Simulador):
+    // cada botón muestra SOLO su sección, no baja por una página larga.
+    let FIN_SECTION = 'cash';
+    function setFinSection(id) {
+      if (!['cash', 'sales', 'mono', 'sim'].includes(id)) id = 'cash';
+      FIN_SECTION = id;
+      document.querySelectorAll('[data-fin-pane]').forEach(p => p.classList.toggle('hidden', p.dataset.finPane !== id));
+      document.querySelectorAll('[data-fin-btn]').forEach(b => {
+        const on = b.dataset.finBtn === id;
+        b.className = 'fin-sub-btn shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ' + (on ? 'bg-brand-orange/15 border-brand-orange text-brand-orange' : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300 hover:text-white');
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      syncFinNav();
+    }
+    function openFinSection(id) { switchAdminTab('finances'); setFinSection(id); }
+    // En el menú lateral, "Reportes de ventas" y "Finanzas" se marcan según la sección abierta.
+    function syncFinNav() {
+      const fin = document.getElementById('tab-btn-finances'), sales = document.getElementById('nav-sales-report');
+      const onFin = !document.getElementById('admin-tab-finances').classList.contains('hidden');
+      const ON = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 shadow-sm transition-all';
+      const OFF = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all';
+      if (fin) fin.className = onFin && FIN_SECTION !== 'sales' ? ON : OFF;
+      if (sales) sales.className = onFin && FIN_SECTION === 'sales' ? ON : OFF;
     }
     function tabAllowedForRole(tabName, role) {
       if (role === 'admin') return true;
@@ -3111,6 +3137,7 @@ html { scroll-behavior: smooth; }
         }
       });
 
+      if (tabName === 'finances') setFinSection(FIN_SECTION); else syncFinNav();
       if (tabName === 'smart-engine') { renderEngineTab(); loadInsights(); }
       if (typeof onAdminTabShown === 'function') onAdminTabShown(tabName);
       if (tabName === 'iphone') loadIphoneAdmin();
@@ -4530,7 +4557,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v6.7): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v6.8): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -7491,7 +7518,7 @@ html { scroll-behavior: smooth; }
         const item = t => {
           const isSales = t === 'sales-report';
           const lab = isSales ? ['📊', 'Reportes de ventas'] : MBAR_LABELS[t];
-          const go = isSales ? "closeAdminMore();openSection('finances','sec-sales')" : `closeAdminMore();switchAdminTab('${t}')`;
+          const go = isSales ? "closeAdminMore();openFinSection('sales')" : `closeAdminMore();switchAdminTab('${t}')`;
           return `<button type="button" onclick="${go}" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left ${adminCurrentTab === t ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/60 text-zinc-200'}"><span class="text-lg">${lab[0]}</span>${lab[1]}</button>`;
         };
         more.innerHTML = ADMIN_NAV_GROUPS.map(g => {

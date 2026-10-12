@@ -777,7 +777,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v6.7</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v6.8</span>
           </div>
         </div>
 
@@ -2895,6 +2895,9 @@ html { scroll-behavior: smooth; }
       }
       if (btn) btn.disabled = false;
       if (!ok) return;
+      // Ya está verificado = ya está registrado: se recuerdan nombre y WhatsApp (solo si eligió
+      // mantener la sesión) para completar el próximo pedido solos.
+      if (remember && myOrders[0] && myOrders[0].customer && !loadStorage(PROFILE_KEY, null)) saveStorage(PROFILE_KEY, { name: String(myOrders[0].customer).slice(0, 80), phone });
       // El teléfono no queda escrito en la pantalla.
       document.getElementById('cust-phone-input').value = '';
       document.getElementById('cust-order-input').value = '';
@@ -3654,19 +3657,12 @@ html { scroll-behavior: smooth; }
     const PROFILE_KEY = 'PLUGSHOP_CUSTOMER_PROFILE';
 
     function renderRegisterCard() {
-      const profile = loadStorage(PROFILE_KEY, null);
+      // Con la cuenta ya verificada (pase de billetera) la persona YA está registrada:
+      // no se le pide registrarse. Solo se guarda su nombre y WhatsApp en el celular
+      // para completar el pedido solos. Sin sesión tampoco se muestra el formulario.
       const card = document.getElementById('cust-register-card');
-      // La tarjeta de registro (y el teléfono guardado) solo se ven con la cuenta ya verificada.
-      if (card) card.classList.toggle('hidden', !walletToken);
-      const form = document.getElementById('cust-register-form');
-      const done = document.getElementById('cust-register-done');
-      if (!form || !done) return;
-      form.classList.toggle('hidden', !!profile);
-      done.classList.toggle('hidden', !profile);
-      if (profile) {
-        document.getElementById('cust-register-done-text').textContent = walletToken ? `✓ Registrado como ${profile.name} (${profile.phone})` : '';
-        applyProfileToCheckout();
-      }
+      if (card) card.classList.add('hidden');
+      if (walletToken && loadStorage(PROFILE_KEY, null)) applyProfileToCheckout();
     }
 
     function applyProfileToCheckout() {
