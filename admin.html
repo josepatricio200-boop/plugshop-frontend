@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.4</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.5</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -504,6 +504,9 @@ html { scroll-behavior: smooth; }
               <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">📦 Catálogo e Inventario</div>
               <button onclick="switchAdminTab('inventory')" id="tab-btn-inventory" data-nav-tab="inventory" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">📦</span><span>Productos & Variantes</span></span><span id="badge-products-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">8</span>
+            </button>
+              <button onclick="switchAdminTab('costs')" id="tab-btn-costs" data-nav-tab="costs" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">💲</span><span>Edición masiva de costos</span></span>
             </button>
             </div>
             <div data-nav-group="fin" class="space-y-1">
@@ -995,6 +998,13 @@ html { scroll-behavior: smooth; }
                       </select>
                       <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">Si un pedido lleva un producto en auto, todo el pedido se envía en auto. El precio de cada uno se carga en Ajustes & Zonas.</p>
                     </div>
+                    <div id="new-prod-supplier-box">
+                      <label class="block mb-1 text-zinc-400 font-sans">Proveedor</label>
+                      <select id="new-prod-supplier" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-sans">
+                        <option value="">Sin proveedor (stock propio)</option>
+                      </select>
+                      <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">A quién le comprás este producto. Sirve para las cuentas por pagar y para la edición masiva de costos.</p>
+                    </div>
                   </div>
 
                   <!-- Live Rentability Bar Indicator -->
@@ -1433,8 +1443,48 @@ html { scroll-behavior: smooth; }
             </div>
           </div>
 
+          <!-- TAB: EDICIÓN MASIVA DE COSTOS (solo administrador) -->
+          <div id="admin-tab-costs" class="hidden space-y-4">
+            <div>
+              <h3 class="text-lg font-bold text-white">Edición masiva de costos</h3>
+              <p class="text-xs text-zinc-400">Cambiá el costo de muchos productos de una vez, como en una planilla. Cada producto tiene su propio margen (no por categoría) y el precio se recalcula solo. Con Enter o las flechas bajás a la fila de abajo.</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-zinc-900 border border-white/[0.08] grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+              <select id="cs-supplier" onchange="csRender()" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange"></select>
+              <input id="cs-search" oninput="csRender()" placeholder="Buscar producto o marca" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <select id="cs-rounding" onchange="csSetRounding(this.value)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" aria-label="Redondeo del precio">
+                <option value="999">Redondeo: termina en 999 (ej. $39.999)</option>
+                <option value="500">Redondeo: múltiplo de $500</option>
+                <option value="1000">Redondeo: múltiplo de $1.000</option>
+                <option value="none">Sin redondeo</option>
+              </select>
+              <label class="flex items-center gap-2 text-zinc-300"><input id="cs-only" type="checkbox" onchange="csRender()" class="w-4 h-4" /> Ver solo los que cambié</label>
+              <div class="sm:col-span-4 flex flex-wrap items-center gap-2">
+                <span class="text-zinc-400">Subir / bajar el costo de los que veo:</span>
+                <input id="cs-adj" type="number" step="0.1" placeholder="% (ej. 8 o -5)" class="w-32 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white font-code focus:outline-none focus:border-brand-orange" />
+                <button type="button" onclick="csAdjust()" class="px-3 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">Aplicar</button>
+                <button type="button" onclick="csReround()" class="px-3 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-semibold">Aplicar redondeo</button>
+              </div>
+            </div>
+            <div id="cs-msg" class="hidden text-xs font-semibold"></div>
+            <div class="text-[11px] text-zinc-500" id="cs-info"></div>
+            <div class="rounded-2xl bg-zinc-900 border border-white/[0.08] overflow-x-auto">
+              <table class="w-full text-left block md:table">
+                <thead class="hidden md:table-header-group text-[10px] uppercase tracking-wider text-zinc-500 border-b border-zinc-800"><tr><th class="py-2 px-3 font-bold">Producto</th><th class="py-2 px-1.5 font-bold">Costo $</th><th class="py-2 px-1.5 font-bold">Margen %</th><th class="py-2 px-1.5 font-bold">Precio $</th><th class="py-2 px-1 font-bold text-center" title="Candado">🔒</th><th class="py-2 px-3 font-bold text-right">Ganancia</th></tr></thead>
+                <tbody id="cs-body" class="block md:table-row-group divide-y divide-zinc-800/60"></tbody>
+              </table>
+            </div>
+            <div class="sticky bottom-16 md:bottom-2 z-10 p-3 rounded-2xl bg-zinc-950/95 border border-white/[0.1] backdrop-blur flex flex-wrap items-center justify-between gap-2">
+              <span id="cs-count" class="text-xs text-zinc-300 font-semibold">Sin cambios</span>
+              <div class="flex gap-2"><button type="button" id="cs-discard" onclick="csDiscard()" class="hidden px-3 py-2.5 rounded-lg bg-zinc-800 text-zinc-200 text-xs font-semibold">Descartar</button><button type="button" id="cs-save" onclick="csSave()" disabled class="opacity-40 px-4 py-2.5 rounded-lg bg-brand-orange text-black text-xs font-bold">Guardar cambios</button></div>
+            </div>
+            <p class="text-[10px] text-zinc-500 leading-snug">🔒 Con el candado el precio queda fijo aunque cambies el costo (se recalcula el margen). Si escribís un precio a mano, el candado se pone solo. Los pedidos que ya hiciste no cambian.</p>
+          </div>
+
           <!-- TAB 5: PROVEEDORES -->
           <div id="admin-tab-suppliers" class="hidden space-y-6">
+            <div data-sec-chips="suppliers" class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex md:hidden gap-1.5 overflow-x-auto" role="tablist" aria-label="Secciones"></div>
+            <div data-sec-pane="suppliers:dir" class="space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 class="text-lg font-bold text-white">Directorio de Proveedores & Mayoristas <span id="suppliers-count" class="ml-1 text-xs font-code text-zinc-400"></span></h3>
@@ -1451,10 +1501,27 @@ html { scroll-behavior: smooth; }
               <input id="sup-lead" maxlength="60" placeholder="Plazo (ej. 3 días a Tucumán)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
               <input id="sup-category" maxlength="80" placeholder="Qué te vende (ej. Cargadores y cables)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
               <input id="sup-rating" maxlength="20" placeholder="Tu puntaje (ej. 4.5 ★) — opcional" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <div class="sm:col-span-2">
+                <label class="block mb-1 text-zinc-400">¿Cómo le pagás?</label>
+                <select id="sup-term" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange">
+                  <option value="after">Retiro y pago después</option>
+                  <option value="before">Pago antes de poder retirar</option>
+                </select>
+                <p class="text-[10px] text-zinc-500 mt-1 leading-snug">"Pago después": le debés desde que el pedido sale en camino. "Pago antes": le debés desde que el pedido está confirmado y en preparación.</p>
+              </div>
               <div id="sup-msg" class="hidden sm:col-span-2 text-[11px] font-semibold text-rose-400"></div>
               <div class="sm:col-span-2 flex gap-2"><button type="submit" class="px-4 py-2.5 rounded-lg bg-brand-orange hover:bg-orange-500 text-black font-bold">Guardar proveedor</button><button type="button" onclick="closeSupplierForm()" class="px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold">Cancelar</button></div>
             </form>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="suppliers-cards-grid"></div>
+            </div>
+            <div data-sec-pane="suppliers:pay" class="hidden space-y-5">
+              <div>
+                <h3 class="text-lg font-bold text-white">Cuentas por pagar a proveedores</h3>
+                <p class="text-xs text-zinc-400">Lo que le debés a cada proveedor, calculado con el costo de lo que vendiste. Anotá cada pago que hacés y el saldo se actualiza solo.</p>
+              </div>
+              <div id="pay-msg" class="hidden text-xs font-semibold"></div>
+              <div id="pay-body" class="space-y-4"></div>
+            </div>
           </div>
 
           <!-- TAB 6: OFERTAS & DESCUENTOS -->
@@ -2021,6 +2088,9 @@ html { scroll-behavior: smooth; }
         CUSTOMERS: '/api/customers',           // GET / POST / PUT/DELETE /:telefono (editar y borrar la ficha)
         STAFF_USERS: '/api/staff-users',       // GET / POST / PUT / DELETE (solo admin)
         SUPPLIERS: '/api/suppliers',           // GET (admin y logística)
+        PRICING: '/api/products/pricing-config', // GET / PUT { rounding } (solo admin)
+        BULK_COSTS: '/api/products/bulk-costs',  // POST { items: [{ id, cost, marginPct, price, locked }] } (solo admin)
+        SUPPLIER_PAYABLES: '/api/suppliers/payables', // GET ?from&to (solo admin)
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
@@ -2225,6 +2295,7 @@ html { scroll-behavior: smooth; }
     const ADMIN_TAB_ROLES = {
       'today': ['admin', 'vendedor', 'cadete', 'reposicion', 'logistica'],
       'finances': ['admin'],
+      'costs': ['admin'],
       'inventory': ['admin', 'reposicion'],
       'iphone': ['admin'],
       'smart-engine': ['admin'],
@@ -2268,6 +2339,7 @@ html { scroll-behavior: smooth; }
         { id: 'claims', tab: 'claims', icon: '🛡️', label: 'Reclamos & Garantías' }] },
       { id: 'catalog', icon: '📦', label: 'Catálogo e Inventario', items: [
         { id: 'inventory', tab: 'inventory', icon: '📦', label: 'Productos & Variantes' },
+        { id: 'costs', tab: 'costs', icon: '💲', label: 'Edición masiva de costos' },
         { id: 'iphone', tab: 'iphone', icon: '📱', label: 'Sección iPhone' }] },
       { id: 'fin', icon: '💰', label: 'Logística y Finanzas', items: [
         { id: 'cash', tab: 'finances', fin: 'cash', icon: '💵', label: 'Caja diaria' },
@@ -2300,6 +2372,7 @@ html { scroll-behavior: smooth; }
     // Productos, Ofertas y Ajustes también se dividen en vistas (una a la vez), con submenú en el menú lateral.
     const TAB_SECS = {
       inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía'], ['iphone', '📱', 'Sección iPhone', 'iphone']] },
+      suppliers: { def: 'dir', items: [['dir', '📇', 'Directorio'], ['pay', '💳', 'Cuentas por pagar', null, true]] },
       offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['promos', '🏷️', 'Promos y pagos']] },
       settings: { flat: true, def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
     };
@@ -2313,23 +2386,24 @@ html { scroll-behavior: smooth; }
           const sub = document.createElement('div');
           sub.id = 'sub-' + tab; sub.dataset.subFor = tab;
           sub.className = 'hidden ml-4 pl-2 border-l border-zinc-800 space-y-0.5';
-          sub.innerHTML = cfg.items.map(([k, ic, lb, ext]) => ext
+          sub.innerHTML = cfg.items.map(([k, ic, lb, ext, adm]) => ext
             ? `<button type="button" data-sec-ext="${ext}" data-nav-tab="${ext}" onclick="switchAdminTab('${ext}')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between"><span>${ic} ${lb}</span><span id="badge-iphone-state" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-bold font-code">oculta</span></button>`
-            : `<button type="button" data-sec-nav="${tab}:${k}" onclick="openTabSection('${tab}', '${k}')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">${ic} ${lb}</button>`).join('');
+            : `<button type="button" ${adm ? 'data-admin-only="1"' : ''} data-sec-nav="${tab}:${k}" onclick="openTabSection('${tab}', '${k}')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">${ic} ${lb}</button>`).join('');
           btn.insertAdjacentElement('afterend', sub);
         }
         const chips = document.querySelector(`[data-sec-chips="${tab}"]`);
-        if (chips && !chips.children.length) chips.innerHTML = cfg.items.map(([k, ic, lb, ext]) => ext
+        if (chips && !chips.children.length) chips.innerHTML = cfg.items.map(([k, ic, lb, ext, adm]) => ext
           ? `<button type="button" role="tab" data-sec-ext-chip="${ext}" onclick="switchAdminTab('${ext}')" class="shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ${SEC_CHIP_OFF}">${ic} ${lb}</button>`
-          : `<button type="button" role="tab" data-sec-btn="${tab}:${k}" onclick="setTabSection('${tab}', '${k}')" class="shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ${SEC_CHIP_OFF}">${ic} ${lb}</button>`).join('');
+          : `<button type="button" role="tab" ${adm ? 'data-admin-only="1"' : ''} data-sec-btn="${tab}:${k}" onclick="setTabSection('${tab}', '${k}')" class="shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ${SEC_CHIP_OFF}">${ic} ${lb}</button>`).join('');
       });
     }
     function setTabSection(tab, key) {
       const cfg = TAB_SECS[tab]; if (!cfg) return;
-      if (!cfg.items.some(i => i[0] === key)) key = cfg.def;
+      if (!cfg.items.some(i => i[0] === key) || (cfg.items.find(i => i[0] === key)[4] && currentStaffSession.role !== 'admin')) key = cfg.def;
       SEC_NOW[tab] = key;
       document.querySelectorAll(`[data-sec-pane^="${tab}:"]`).forEach(p => p.classList.toggle('hidden', p.dataset.secPane !== tab + ':' + key));
       syncTabNav();
+      if (tab === 'suppliers' && key === 'pay') openPayables();
     }
     function openTabSection(tab, key) { switchAdminTab(tab); setTabSection(tab, key); }
     const NAV_TOP_ON = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 shadow-sm transition-all';
@@ -2426,6 +2500,7 @@ html { scroll-behavior: smooth; }
         if (btn) btn.style.display = ok ? '' : 'none';
         document.querySelectorAll(`[data-nav-tab="${t}"]`).forEach(b => { b.style.display = ok ? '' : 'none'; });
       });
+      document.querySelectorAll('[data-admin-only]').forEach(b => { b.style.display = currentStaffSession.role === 'admin' ? '' : 'none'; });
       // Un grupo del menú sin ninguna pestaña permitida no se muestra.
       document.querySelectorAll('[data-nav-group]').forEach(g => {
         const any = [...g.querySelectorAll('button.admin-tab-btn')].some(b => b.style.display !== 'none');
@@ -3289,7 +3364,8 @@ html { scroll-behavior: smooth; }
     }
 
     function switchAdminTab(tabName) {
-      const allTabs = ['today', 'finances', 'inventory', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'claims', 'staff-users', 'settings'];
+      if (tabName === 'costs' && currentStaffSession.role !== 'admin') return; // solo el administrador cambia costos
+      const allTabs = ['today', 'finances', 'inventory', 'costs', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'claims', 'staff-users', 'settings'];
       
       allTabs.forEach(t => {
         const tabEl = document.getElementById(`admin-tab-${t}`);
@@ -3311,6 +3387,7 @@ html { scroll-behavior: smooth; }
       if (tabName === 'smart-engine') { renderEngineTab(); loadInsights(); }
       if (typeof onAdminTabShown === 'function') onAdminTabShown(tabName);
       if (tabName === 'iphone') loadIphoneAdmin();
+      if (tabName === 'costs') openCostsTab();
 
       // En celular el menú y el contenido quedan apilados en una sola
       // columna; después de elegir una pestaña, bajamos la vista hasta el
@@ -3548,10 +3625,346 @@ html { scroll-behavior: smooth; }
       box.innerHTML = list.slice(0, 40).map(appStockCard).join('') || '<div class="text-center text-sm text-zinc-400 py-10">No encontré productos.</div>';
     }
 
+    // ---- Proveedor en cada producto ----
+    function fillProductSupplierSelect(selectedId) {
+      const box = document.getElementById('new-prod-supplier-box'), sel = document.getElementById('new-prod-supplier');
+      if (!sel || !box) return;
+      const keep = selectedId === undefined ? sel.value : String(selectedId == null ? '' : selectedId);
+      const role = currentStaffSession.role;
+      const list = (SUPPLIERS || []).filter(s => s && s.id != null);
+      box.classList.toggle('hidden', !(role === 'admin' || role === 'reposicion') || !list.length);
+      sel.innerHTML = '<option value="">Sin proveedor (stock propio)</option>' + list.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join('');
+      sel.value = list.some(s => String(s.id) === keep) ? keep : '';
+    }
+    function supplierFieldPayload() {
+      const box = document.getElementById('new-prod-supplier-box'), sel = document.getElementById('new-prod-supplier');
+      if (!sel || !box || box.classList.contains('hidden')) return {};
+      return { supplierId: sel.value ? Number(sel.value) : null };
+    }
+    function supplierNameOf(id) {
+      const s = (SUPPLIERS || []).find(x => x && x.id != null && x.id === id);
+      return s ? s.name : '';
+    }
+
+    // ---- Edición masiva de costos (solo administrador) ----
+    // Se cambia el costo (o el margen, o el precio) de muchos productos en una tabla tipo Excel.
+    // El margen es POR PRODUCTO (nunca por categoría). La cuenta es la misma que hace el servidor
+    // (backend/src/pricing.js): precio = costo + margen, redondeado. El precio que queda guardado
+    // lo calcula el servidor.
+    const COSTS_MAX_ROWS = 300;
+    let COSTS = { rows: {}, rounding: '999' };
+    function csRound(v, mode) {
+      const p = Number(v);
+      if (!Number.isFinite(p) || p <= 0) return 0;
+      if (mode === '999') return Math.max(999, Math.ceil(p / 1000) * 1000 - 1);
+      if (mode === '500') return Math.ceil(p / 500) * 500;
+      if (mode === '1000') return Math.ceil(p / 1000) * 1000;
+      return Math.round(p);
+    }
+    function csPriceFor(cost, m, mode) {
+      const c = Number(cost), mm = Number(m);
+      if (!Number.isFinite(c) || c <= 0 || m == null || !Number.isFinite(mm) || mm < 0) return null;
+      return csRound(c * (1 + mm / 100), mode);
+    }
+    function csMarginOf(cost, price) {
+      const c = Number(cost), p = Number(price);
+      if (!Number.isFinite(c) || c <= 0 || !Number.isFinite(p) || p < 0) return null;
+      return Math.round((p / c - 1) * 1000) / 10;
+    }
+    function csRow(p) {
+      if (!COSTS.rows[p.id]) {
+        const cost = Number(p.cost) || 0, price = Number(p.price) || 0;
+        const margin = p.marginPct != null && Number.isFinite(Number(p.marginPct)) ? Number(p.marginPct) : csMarginOf(cost, price);
+        const o = { cost, margin, price, locked: p.priceLocked === true };
+        COSTS.rows[p.id] = { id: p.id, ...o, manual: false, orig: { ...o } };
+      }
+      return COSTS.rows[p.id];
+    }
+    function csChanged(r) { const o = r.orig; return r.cost !== o.cost || r.price !== o.price || r.locked !== o.locked || r.margin !== o.margin; }
+    function csApply(r, field, val) {
+      const mode = COSTS.rounding;
+      if (field === 'cost') {
+        r.cost = Math.max(0, Math.round(val));
+        if (r.locked || r.manual) r.margin = csMarginOf(r.cost, r.price);
+        else if (r.margin != null) { const np = csPriceFor(r.cost, r.margin, mode); if (np) r.price = np; }
+        else r.margin = csMarginOf(r.cost, r.price);
+      } else if (field === 'margin') {
+        r.margin = Math.round(Math.max(0, val) * 10) / 10; r.locked = false; r.manual = false;
+        const np = csPriceFor(r.cost, r.margin, mode); if (np) r.price = np;
+      } else if (field === 'price') {
+        r.price = Math.max(0, Math.round(val));
+        if (r.cost > 0) { r.locked = true; r.manual = false; r.margin = csMarginOf(r.cost, r.price); } else r.manual = true;
+      }
+    }
+    function csVisible() {
+      const sf = (document.getElementById('cs-supplier') || {}).value || '';
+      const q = ((document.getElementById('cs-search') || {}).value || '').trim().toLowerCase();
+      const only = !!(document.getElementById('cs-only') || {}).checked;
+      return PRODUCTS.filter(p => {
+        if (sf === 'none' ? p.supplierId : (sf && String(p.supplierId) !== sf)) return false;
+        if (q && ![p.name, p.brand, p.category].join(' ').toLowerCase().includes(q)) return false;
+        if (only && !csChanged(csRow(p))) return false;
+        return true;
+      }).sort((a, b) => String(a.brand + a.name).localeCompare(String(b.brand + b.name), 'es'));
+    }
+    function csRowHtml(p) {
+      const r = csRow(p), sn = supplierNameOf(p.supplierId);
+      const inp = (f, v, step, cls) => `<input type="number" inputmode="decimal" min="0" step="${step}" data-cs-f="${f}" data-cs-id="${p.id}" value="${v == null ? '' : v}" oninput="csInput(this)" onfocus="this.select()" onkeydown="csKey(event,this)" class="w-full ${cls} bg-zinc-950 border border-zinc-700 rounded px-2 py-1.5 text-white text-xs font-code focus:outline-none focus:border-brand-orange" />`;
+      const lb = t => `<span class="md:hidden block text-[10px] text-zinc-500 mb-0.5">${t}</span>`;
+      return `<tr data-cs-row="${p.id}" class="grid grid-cols-[1fr_1fr_1.3fr_auto] gap-x-2 gap-y-1 p-3 md:p-0 md:table-row ${csChanged(r) ? 'bg-brand-orange/10' : ''}">
+        <td class="col-span-4 md:col-auto md:py-2 md:px-3 md:min-w-[150px]"><div class="font-bold text-white text-xs leading-tight">${escapeHtml(p.name)}</div><div class="text-[10px] text-zinc-400">${escapeHtml(p.brand || '')}${sn ? ' · 🤝 ' + escapeHtml(sn) : ''}</div></td>
+        <td class="md:py-2 md:px-1.5 md:w-28">${lb('Costo $')}${inp('cost', r.cost || '', 1, 'md:min-w-[84px]')}</td>
+        <td class="md:py-2 md:px-1.5 md:w-24">${lb('Margen %')}${inp('margin', r.margin, 0.1, 'md:min-w-[64px]')}</td>
+        <td class="md:py-2 md:px-1.5 md:w-32">${lb('Precio $')}${inp('price', r.price, 1, 'md:min-w-[92px]')}</td>
+        <td class="self-end md:py-2 md:px-1 md:w-10 text-center"><button type="button" data-cs-lock="${p.id}" onclick="csToggleLock(${p.id})" class="w-9 h-9 rounded-lg text-base ${r.locked ? 'bg-amber-500/20' : 'bg-zinc-800 opacity-60'}" title="Candado: con el candado el precio queda fijo y no cambia cuando cambiás el costo" aria-label="Candado de precio">${r.locked ? '🔒' : '🔓'}</button></td>
+        <td class="col-span-4 md:col-auto md:py-2 md:px-3 text-right font-code text-xs whitespace-nowrap" data-cs-gain></td>
+      </tr>`;
+    }
+    function csGainHtml(r) {
+      const pre = '<span class="md:hidden text-zinc-500 font-sans">Ganancia: </span>';
+      if (!(r.cost > 0)) return pre + '<span class="text-zinc-500">sin costo</span>';
+      const g = r.price - r.cost;
+      return pre + `<span class="${g >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold">${g < 0 ? '-' : ''}${formatARS(Math.abs(g))}</span>`;
+    }
+    function csRender() {
+      const body = document.getElementById('cs-body'); if (!body) return;
+      const list = csVisible();
+      body.innerHTML = list.slice(0, COSTS_MAX_ROWS).map(csRowHtml).join('') || '<tr><td colspan="6" class="py-8 text-center text-xs text-zinc-400">No hay productos con ese filtro.</td></tr>';
+      body.querySelectorAll('tr[data-cs-row]').forEach(tr => { const r = COSTS.rows[tr.dataset.csRow]; const g = tr.querySelector('[data-cs-gain]'); if (r && g) g.innerHTML = csGainHtml(r); });
+      const info = document.getElementById('cs-info');
+      if (info) info.textContent = list.length > COSTS_MAX_ROWS ? `Mostrando ${COSTS_MAX_ROWS} de ${list.length} productos. Filtrá por proveedor o buscá para ver el resto.` : `${list.length} producto${list.length === 1 ? '' : 's'}`;
+      csUpdateBar();
+    }
+    function csUpdateBar() {
+      const n = Object.values(COSTS.rows).filter(csChanged).length;
+      const t = document.getElementById('cs-count'); if (t) t.textContent = n ? `${n} producto${n === 1 ? '' : 's'} con cambios sin guardar` : 'Sin cambios';
+      const b = document.getElementById('cs-save'); if (b) { b.disabled = !n; b.classList.toggle('opacity-40', !n); }
+      const d = document.getElementById('cs-discard'); if (d) d.classList.toggle('hidden', !n);
+    }
+    function csRefreshRow(id, except) {
+      const tr = document.querySelector(`tr[data-cs-row="${id}"]`), r = COSTS.rows[id]; if (!tr || !r) return;
+      tr.querySelectorAll('input[data-cs-f]').forEach(el => {
+        if (el.dataset.csF === except) return;
+        const v = el.dataset.csF === 'cost' ? (r.cost || '') : r[el.dataset.csF];
+        el.value = v == null ? '' : v;
+      });
+      const lock = tr.querySelector('[data-cs-lock]');
+      if (lock) { lock.textContent = r.locked ? '🔒' : '🔓'; lock.className = `w-9 h-9 rounded-lg text-base ${r.locked ? 'bg-amber-500/20' : 'bg-zinc-800 opacity-60'}`; }
+      const g = tr.querySelector('[data-cs-gain]'); if (g) g.innerHTML = csGainHtml(r);
+      tr.classList.toggle('bg-brand-orange/10', csChanged(r));
+    }
+    function csInput(el) {
+      const p = PRODUCTS.find(x => String(x.id) === el.dataset.csId); if (!p) return;
+      const raw = String(el.value).trim();
+      const r = csRow(p), f = el.dataset.csF;
+      if (raw === '') { if (f !== 'cost') return; csApply(r, 'cost', 0); }
+      else { const n = Number(raw.replace(',', '.')); if (!Number.isFinite(n) || n < 0) return; csApply(r, f, n); }
+      csRefreshRow(p.id, f); csUpdateBar();
+    }
+    function csToggleLock(id) {
+      const p = PRODUCTS.find(x => x.id === id); if (!p) return;
+      const r = csRow(p);
+      if (!r.locked && !(r.cost > 0)) return;
+      r.locked = !r.locked;
+      if (!r.locked) { r.manual = false; const np = csPriceFor(r.cost, r.margin, COSTS.rounding); if (np) r.price = np; }
+      csRefreshRow(id); csUpdateBar();
+    }
+    // Enter / flechas: pasar a la celda de arriba o de abajo (como en una planilla).
+    function csKey(e, el) {
+      if (e.key !== 'Enter' && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      e.preventDefault();
+      const all = Array.from(document.querySelectorAll(`#cs-body input[data-cs-f="${el.dataset.csF}"]`));
+      const i = all.indexOf(el), nx = all[i + (e.key === 'ArrowUp' ? -1 : 1)];
+      if (nx) nx.focus();
+    }
+    function csMsg(text, ok) {
+      const m = document.getElementById('cs-msg'); if (!m) return;
+      m.textContent = text || ''; m.className = 'text-xs font-semibold ' + (text ? (ok ? 'text-emerald-400' : 'text-rose-400') : 'hidden');
+    }
+    function csFillSupplierFilter() {
+      const sel = document.getElementById('cs-supplier'); if (!sel) return;
+      const cur = sel.value;
+      const cnt = id => PRODUCTS.filter(p => String(p.supplierId) === String(id)).length;
+      const none = PRODUCTS.filter(p => !p.supplierId).length;
+      sel.innerHTML = `<option value="">Todos los proveedores (${PRODUCTS.length})</option>` + (SUPPLIERS || []).filter(s => s && s.id != null).map(s => `<option value="${s.id}">${escapeHtml(s.name)} (${cnt(s.id)})</option>`).join('') + `<option value="none">Sin proveedor (${none})</option>`;
+      sel.value = Array.from(sel.options).some(o => o.value === cur) ? cur : '';
+    }
+    async function openCostsTab() {
+      if (currentStaffSession.role !== 'admin') return;
+      csMsg('');
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('PRICING', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
+        if (res && ['none', '999', '500', '1000'].includes(res.rounding)) COSTS.rounding = res.rounding;
+      }
+      const rs = document.getElementById('cs-rounding'); if (rs) rs.value = COSTS.rounding;
+      csFillSupplierFilter(); csRender();
+    }
+    async function csSetRounding(v) {
+      COSTS.rounding = v;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('PRICING', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ rounding: v }) });
+        if (!res || res.success === false) { csMsg((res && res.error) || 'No se pudo guardar el redondeo.', false); return; }
+      }
+      csMsg('Redondeo guardado. Se usa para los precios que calcules de ahora en más. Para aplicarlo a los productos que ves, tocá "Aplicar redondeo".', true);
+    }
+    function csAdjust() {
+      const raw = String((document.getElementById('cs-adj') || {}).value || '').replace(',', '.').trim();
+      const pct = Number(raw);
+      if (!raw || !Number.isFinite(pct) || pct === 0 || pct < -90 || pct > 500) { csMsg('Escribí un porcentaje, por ejemplo 8 para subir 8% o -5 para bajar 5%.', false); return; }
+      let n = 0;
+      csVisible().forEach(p => { const r = csRow(p); if (r.cost > 0) { csApply(r, 'cost', r.cost * (1 + pct / 100)); n++; } });
+      csRender();
+      csMsg(n ? `Listo: ${pct > 0 ? 'subí' : 'bajé'} el costo ${Math.abs(pct)}% de ${n} producto${n === 1 ? '' : 's'}. Revisá la tabla y tocá "Guardar cambios". Los que tienen candado 🔒 conservan su precio.` : 'Ninguno de los que ves tiene costo cargado.', n > 0);
+    }
+    function csReround() {
+      let n = 0;
+      csVisible().forEach(p => {
+        const r = csRow(p); if (r.locked || r.manual || !(r.cost > 0) || r.margin == null) return;
+        const np = csPriceFor(r.cost, r.margin, COSTS.rounding); if (np && np !== r.price) { r.price = np; n++; }
+      });
+      csRender();
+      csMsg(n ? `Redondeé el precio de ${n} producto${n === 1 ? '' : 's'}. Revisá y tocá "Guardar cambios".` : 'Ya estaban redondeados (o tienen candado / no tienen costo).', n > 0);
+    }
+    function csDiscard() { COSTS.rows = {}; csMsg(''); csRender(); }
+    async function csSave() {
+      const rows = Object.values(COSTS.rows).filter(csChanged);
+      if (!rows.length) return;
+      const items = rows.map(r => {
+        const it = { id: r.id, cost: r.cost, locked: r.locked };
+        if (r.margin != null) it.marginPct = r.margin;
+        if (r.locked || r.manual) it.price = r.price;
+        return it;
+      });
+      const btn = document.getElementById('cs-save'); if (btn) { btn.disabled = true; btn.textContent = 'Guardando…'; }
+      let done = false, msg = '';
+      if (isBackendConnected() && currentStaffSession.token) {
+        const headers = { Authorization: 'Bearer ' + currentStaffSession.token };
+        let updated = 0;
+        for (let i = 0; i < items.length; i += 500) {
+          const res = await apiRequest('BULK_COSTS', { method: 'POST', headers, body: JSON.stringify({ items: items.slice(i, i + 500) }) });
+          if (!res || res.success === false) { msg = (res && res.error) || 'No hubo conexión con el servidor. No se guardó nada de este tramo; probá de nuevo.'; break; }
+          updated += res.updated || 0;
+          if (i + 500 >= items.length) done = true;
+        }
+        if (done) {
+          const full = await apiRequest('PRODUCTS', { headers }, '/full');
+          if (Array.isArray(full)) PRODUCTS = full.map(sanitizeProduct);
+          msg = `Guardado: se actualizaron ${updated} producto${updated === 1 ? '' : 's'}. Los pedidos que ya hiciste no cambian (guardan el costo y el precio de ese momento).`;
+        }
+      } else {
+        rows.forEach(r => { const p = PRODUCTS.find(x => x.id === r.id); if (p) { p.cost = r.cost; p.price = r.price; p.marginPct = r.margin; p.priceLocked = r.locked; } });
+        done = true; msg = `Guardado en este navegador (${rows.length} producto${rows.length === 1 ? '' : 's'}). Sin conexión con el servidor no queda para los clientes.`;
+      }
+      if (btn) btn.textContent = 'Guardar cambios';
+      if (done) { COSTS.rows = {}; try { renderInventoryTable(); } catch (e) {} csFillSupplierFilter(); csRender(); }
+      csMsg(msg, done);
+      csUpdateBar();
+    }
+
+    // ---- Cuentas por pagar a proveedores (solo administrador) ----
+    let PAY = { period: 'week', data: null, open: {}, payFor: null };
+    function payRange(period) {
+      const ar = new Date(Date.now() - 3 * 3600 * 1000), iso = ar.toISOString().slice(0, 10);
+      if (period === 'month') return [iso.slice(0, 8) + '01', iso];
+      if (period === 'week') { const dow = (ar.getUTCDay() + 6) % 7; return [new Date(ar.getTime() - dow * 86400000).toISOString().slice(0, 10), iso]; }
+      return ['', ''];
+    }
+    function payMsg(text, ok) {
+      const m = document.getElementById('pay-msg'); if (!m) return;
+      m.textContent = text || ''; m.className = 'text-xs font-semibold ' + (text ? (ok ? 'text-emerald-400' : 'text-rose-400') : 'hidden');
+    }
+    async function openPayables() {
+      if (currentStaffSession.role !== 'admin') return;
+      payMsg('');
+      await loadPayables();
+    }
+    async function loadPayables() {
+      const body = document.getElementById('pay-body'); if (!body) return;
+      if (!isBackendConnected() || !currentStaffSession.token) { body.innerHTML = '<div class="p-6 rounded-xl bg-zinc-900 border border-dashed border-zinc-700 text-center text-xs text-zinc-400">Las cuentas por pagar se calculan en el servidor. Entrá con el servidor conectado para verlas.</div>'; return; }
+      if (!PAY.data) body.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">⏳ Calculando lo que le debés a cada proveedor…</div>';
+      const [f, t] = payRange(PAY.period);
+      const qs = f ? `?from=${f}&to=${t}` : '';
+      const res = await apiRequest('SUPPLIER_PAYABLES', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, qs);
+      if (!res || res.success === false || !Array.isArray(res.suppliers)) {
+        body.innerHTML = `<div class="p-6 rounded-xl bg-rose-950/40 border border-rose-900 text-center text-xs text-rose-300">${escapeHtml((res && res.error) || 'No pude traer las cuentas.')} <button type="button" onclick="loadPayables()" class="ml-2 px-3 py-1.5 rounded-lg bg-zinc-800 text-white font-bold">Reintentar</button></div>`;
+        return;
+      }
+      PAY.data = res; renderPayables();
+    }
+    function paySetPeriod(p) { PAY.period = p; PAY.data = null; loadPayables(); }
+    function payLinesHtml(lines) {
+      if (!lines.length) return '<div class="text-[11px] text-zinc-500 py-2">No hay ventas en este período.</div>';
+      return `<div class="overflow-x-auto"><table class="w-full text-[11px] text-left"><thead class="text-zinc-500"><tr><th class="py-1 pr-2 font-semibold">Día</th><th class="py-1 pr-2 font-semibold">Pedido</th><th class="py-1 pr-2 font-semibold">Producto</th><th class="py-1 pr-2 text-right font-semibold">Costo</th><th class="py-1 text-right font-semibold">Subtotal</th></tr></thead><tbody class="divide-y divide-zinc-800/60 text-zinc-300">${lines.map(l => `<tr><td class="py-1 pr-2 font-code whitespace-nowrap">${escapeHtml(l.date.slice(8) + '/' + l.date.slice(5, 7))}</td><td class="py-1 pr-2 font-code">${escapeHtml(String(l.orderId))}</td><td class="py-1 pr-2">${escapeHtml(l.name)}${l.color && l.color !== 'Único' ? ' · ' + escapeHtml(l.color) : ''} ×${l.qty}</td><td class="py-1 pr-2 text-right font-code">${l.noCost ? '<span class="text-amber-400">sin costo</span>' : formatARS(l.unitCost)}</td><td class="py-1 text-right font-code font-bold">${formatARS(l.subtotal)}</td></tr>`).join('')}</tbody></table></div>`;
+    }
+    function renderPayables() {
+      const body = document.getElementById('pay-body'), d = PAY.data; if (!body || !d) return;
+      const chip = (k, lb) => `<button type="button" onclick="paySetPeriod('${k}')" class="px-3 py-1.5 rounded-lg text-[11px] font-bold ${PAY.period === k ? 'bg-brand-orange text-black' : 'bg-zinc-800 text-zinc-300'}">${lb}</button>`;
+      const owing = d.suppliers.reduce((a, s) => a + Math.max(0, s.balance), 0);
+      const today = payRange('week')[1];
+      const cards = d.suppliers.slice().sort((a, b) => b.balance - a.balance).map(s => {
+        const st = s.balance > 0 ? `<div class="text-xl font-black text-amber-400 font-code">${formatARS(s.balance)}</div><div class="text-[10px] text-zinc-400">le debés</div>` : (s.balance < 0 ? `<div class="text-xl font-black text-sky-400 font-code">${formatARS(-s.balance)}</div><div class="text-[10px] text-zinc-400">a tu favor</div>` : `<div class="text-sm font-black text-emerald-400">Al día ✅</div>`);
+        const open = PAY.open[s.id], payOpen = PAY.payFor === s.id;
+        return `<div class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-3" data-pay-card="${s.id}">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0"><h4 class="font-bold text-white text-sm">${escapeHtml(s.name)}</h4>
+              <span class="inline-block mt-1 text-[10px] px-2 py-0.5 rounded font-bold ${s.paymentTerm === 'before' ? 'bg-sky-500/15 text-sky-300' : 'bg-emerald-500/15 text-emerald-300'}">${s.paymentTerm === 'before' ? '💳 Pago antes de retirar' : '⏳ Retiro y pago después'}</span></div>
+            <div class="text-right shrink-0">${st}</div>
+          </div>
+          <div class="text-[11px] text-zinc-400 leading-relaxed">${PAY.period === 'all' ? '' : `En este período vendiste mercadería suya por <strong class="text-white">${formatARS(s.periodOwed)}</strong> (${s.periodUnits} unidad${s.periodUnits === 1 ? '' : 'es'}). `}Total debido <strong class="text-zinc-200">${formatARS(s.owed)}</strong> · ya pagado <strong class="text-zinc-200">${formatARS(s.paid)}</strong>.</div>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="payTogglePay(${s.id})" class="px-3 py-2 rounded-lg bg-brand-orange hover:bg-orange-500 text-black text-[11px] font-bold">💸 Registrar pago</button>
+            <button type="button" onclick="payToggleDetail(${s.id})" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">${open ? 'Ocultar detalle' : 'Ver detalle'}</button>
+          </div>
+          ${payOpen ? `<div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+            <input id="pay-amt-${s.id}" type="number" inputmode="numeric" min="1" step="1" value="${s.balance > 0 ? s.balance : ''}" placeholder="Monto $" class="bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white font-code focus:outline-none focus:border-brand-orange" />
+            <input id="pay-date-${s.id}" type="date" value="${today}" class="bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+            <input id="pay-note-${s.id}" maxlength="120" placeholder="Nota (ej. transferencia)" class="bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+            <div class="flex gap-2"><button type="button" onclick="registerSupplierPayment(${s.id})" class="flex-1 px-3 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold">Guardar pago</button><button type="button" onclick="payTogglePay(${s.id})" class="px-3 py-2.5 rounded-lg bg-zinc-800 text-zinc-200 font-semibold">✕</button></div>
+          </div>` : ''}
+          ${open ? `<div class="space-y-3">
+            <div><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mb-1">Lo que vendiste de este proveedor${PAY.period === 'all' ? '' : ' en el período'}</div>${payLinesHtml(s.lines)}</div>
+            <div><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold mb-1">Pagos anotados</div>${s.payments.length ? s.payments.map(p => `<div class="flex items-center justify-between gap-2 py-1 text-[11px] border-b border-zinc-800/60"><span class="text-zinc-300"><span class="font-code">${escapeHtml(p.date.slice(8) + '/' + p.date.slice(5, 7) + '/' + p.date.slice(0, 4))}</span>${p.note ? ' · ' + escapeHtml(p.note) : ''}</span><span class="flex items-center gap-2"><strong class="font-code text-emerald-400">${formatARS(p.amount)}</strong><button type="button" onclick="deleteSupplierPayment(${s.id},${p.id})" class="text-rose-400" title="Borrar este pago" aria-label="Borrar pago">🗑️</button></span></div>`).join('') : '<div class="text-[11px] text-zinc-500">Todavía no anotaste pagos.</div>'}</div>
+          </div>` : ''}
+        </div>`;
+      }).join('');
+      const un = d.unassigned;
+      const unCard = un && un.count ? `<div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+          <h4 class="font-bold text-amber-300 text-sm">⚠️ Sin proveedor asignado</h4>
+          <p class="text-[11px] text-amber-200/80 leading-relaxed">Vendiste mercadería por <strong>${formatARS(un.owed)}</strong> (a costo) de productos que no tienen proveedor. No sé a quién se la debés. Asignales el proveedor en Productos y entran solos en la cuenta que corresponda.</p>
+          <button type="button" onclick="payToggleDetail('un')" class="px-3 py-2 rounded-lg bg-zinc-800 text-zinc-200 text-[11px] font-semibold">${PAY.open.un ? 'Ocultar detalle' : 'Ver cuáles son'}</button>
+          ${PAY.open.un ? payLinesHtml(un.lines) : ''}
+        </div>` : '';
+      body.innerHTML = `<div class="flex flex-wrap items-center gap-2">${chip('week', 'Esta semana')}${chip('month', 'Este mes')}${chip('all', 'Todo')}</div>
+        <div class="p-4 rounded-2xl bg-zinc-900 border border-white/[0.08] flex items-center justify-between gap-3"><div><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">Total que le debés a tus proveedores</div><div class="text-2xl font-black text-white font-code">${formatARS(owing)}</div></div><div class="text-[11px] text-zinc-400 max-w-[55%] text-right leading-snug">Con "Retiro y pago después" se debe desde que el pedido sale en camino. Con "Pago antes" se debe desde que el pedido está confirmado. Los cancelados no cuentan.</div></div>
+        ${unCard}
+        ${cards || '<div class="p-6 rounded-xl bg-zinc-900 border border-dashed border-zinc-700 text-center text-xs text-zinc-400">Todavía no cargaste proveedores. Agregalos en "Directorio".</div>'}`;
+    }
+    function payToggleDetail(id) { PAY.open[id] = !PAY.open[id]; renderPayables(); }
+    function payTogglePay(id) { PAY.payFor = PAY.payFor === id ? null : id; renderPayables(); }
+    async function registerSupplierPayment(sid) {
+      const amount = Math.round(Number((document.getElementById('pay-amt-' + sid) || {}).value));
+      const date = (document.getElementById('pay-date-' + sid) || {}).value || '';
+      const note = ((document.getElementById('pay-note-' + sid) || {}).value || '').trim();
+      if (!Number.isFinite(amount) || amount <= 0) { payMsg('Escribí el monto que pagaste.', false); return; }
+      const res = await apiRequest('SUPPLIERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ amount, date, note }) }, '/' + sid + '/payments');
+      if (!res || res.success === false) { payMsg((res && res.error) || 'No se pudo anotar el pago.', false); return; }
+      PAY.payFor = null; PAY.open[sid] = true;
+      payMsg('Pago anotado ✅', true);
+      await loadPayables();
+    }
+    async function deleteSupplierPayment(sid, pid) {
+      if (!confirm('¿Borrar este pago? El saldo vuelve a subir.')) return;
+      const res = await apiRequest('SUPPLIERS', { method: 'DELETE', headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/' + sid + '/payments/' + pid);
+      if (!res || res.success === false) { payMsg((res && res.error) || 'No se pudo borrar.', false); return; }
+      payMsg('Pago borrado.', true);
+      await loadPayables();
+    }
+
     // ---- Proveedores: ver, agregar, editar y borrar (solo el administrador carga y cambia) ----
     function renderSuppliers() {
       const grid = document.getElementById('suppliers-cards-grid'); if (!grid) return;
       const isAdmin = currentStaffSession.role === 'admin';
+      fillProductSupplierSelect();
       const cnt = document.getElementById('suppliers-count'); if (cnt) cnt.textContent = `(${SUPPLIERS.length})`;
       const sb = document.getElementById('badge-suppliers-count'); if (sb) sb.textContent = SUPPLIERS.length === 1 ? '1 cargado' : `${SUPPLIERS.length} cargados`;
       const addBtn = document.getElementById('supplier-add-btn'); if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
@@ -3562,6 +3975,7 @@ html { scroll-behavior: smooth; }
             <h4 class="font-bold text-white text-xs">${escapeHtml(s.name)}</h4>
             ${s.rating ? `<span class="px-2 py-0.5 rounded bg-zinc-800 text-brand-amber font-bold text-[10px] font-code">${escapeHtml(s.rating)}</span>` : ''}
           </div>
+          <div><span class="text-[10px] px-2 py-0.5 rounded font-bold ${s.paymentTerm === 'before' ? 'bg-sky-500/15 text-sky-300' : 'bg-emerald-500/15 text-emerald-300'}">${s.paymentTerm === 'before' ? '💳 Pago antes de retirar' : '⏳ Retiro y pago después'}</span></div>
           <p class="text-[11px] text-zinc-400">${escapeHtml(s.category || '')}</p>
           <div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[11px] flex justify-between gap-2 font-code">
             <span class="text-zinc-400">Plazo: <strong class="text-white">${escapeHtml(s.leadDays || '—')}</strong></span>
@@ -3583,6 +3997,7 @@ html { scroll-behavior: smooth; }
       const set = (id, v) => { document.getElementById(id).value = v || ''; };
       set('sup-id', s && s.id !== undefined ? s.id : (s ? 'idx' + i : '')); set('sup-name', s && s.name); set('sup-contact', s && s.contact); set('sup-phone', s && s.phone);
       set('sup-lead', s && s.leadDays); set('sup-category', s && s.category); set('sup-rating', s && s.rating);
+      document.getElementById('sup-term').value = (s && s.paymentTerm === 'before') ? 'before' : 'after';
       document.getElementById('sup-form-title').textContent = s ? 'Editar proveedor' : 'Nuevo proveedor';
       document.getElementById('sup-msg').classList.add('hidden');
       f.classList.remove('hidden'); f.dataset.idx = s ? String(i) : '';
@@ -3592,7 +4007,7 @@ html { scroll-behavior: smooth; }
     async function saveSupplier(e) {
       if (e) e.preventDefault();
       const val = id => document.getElementById(id).value.trim();
-      const body = { name: val('sup-name'), contact: val('sup-contact'), phone: val('sup-phone'), leadDays: val('sup-lead'), category: val('sup-category'), rating: val('sup-rating') };
+      const body = { name: val('sup-name'), contact: val('sup-contact'), phone: val('sup-phone'), leadDays: val('sup-lead'), category: val('sup-category'), rating: val('sup-rating'), paymentTerm: document.getElementById('sup-term').value };
       const msg = document.getElementById('sup-msg'), f = document.getElementById('supplier-form');
       const idx = f.dataset.idx === '' ? -1 : Number(f.dataset.idx);
       const cur = idx >= 0 ? SUPPLIERS[idx] : null;
@@ -4706,7 +5121,7 @@ html { scroll-behavior: smooth; }
           </td>
           <td class="py-3 px-4">
             <div class="font-bold text-white font-sans">${escapeHtml(p.name)}${p.active === false ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold align-middle">PAUSADO</span>' : ''}${p.featured ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold align-middle">★</span>' : ''}${vehicleOfProduct(p) !== 'moto' ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-bold align-middle" title="Se envía en ${VEHICLE_INFO[vehicleOfProduct(p)].label.toLowerCase()}">${VEHICLE_INFO[vehicleOfProduct(p)].icon} ${VEHICLE_INFO[vehicleOfProduct(p)].label.toUpperCase()}</span>` : ''}${offPct(p) ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold align-middle">-${offPct(p)}%</span>` : ''}</div>
-            <div class="text-[11px] text-zinc-400">${escapeHtml(p.brand)} · <span class="text-zinc-500 text-[10px]">${escapeHtml(categoryLabel(p.category))}${p.subcategory ? ' › ' + escapeHtml(categoryLabel(p.subcategory)) : ''}</span></div>
+            <div class="text-[11px] text-zinc-400">${escapeHtml(p.brand)}${supplierNameOf(p.supplierId) ? ' · 🤝 ' + escapeHtml(supplierNameOf(p.supplierId)) : ''} · <span class="text-zinc-500 text-[10px]">${escapeHtml(categoryLabel(p.category))}${p.subcategory ? ' › ' + escapeHtml(categoryLabel(p.subcategory)) : ''}</span></div>
           </td>
           <td class="py-3 px-4">
             <div>${colorsBadges}</div>
@@ -5165,7 +5580,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.4): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.5): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -7055,6 +7470,7 @@ html { scroll-behavior: smooth; }
       set('new-prod-compare', p.compareAtPrice || '');
       document.getElementById('new-prod-featured').checked = p.featured === true;
       set('new-prod-delivery', vehicleOfProduct(p));
+      fillProductSupplierSelect(p.supplierId);
       set('new-prod-specs', p.specs || '');
       set('new-prod-keywords', p.keywords || '');
       set('new-prod-colors', (p.colors || []).join(', '));
@@ -7084,6 +7500,7 @@ html { scroll-behavior: smooth; }
 
     function cancelEditProduct() {
       editingProductId = null;
+      fillProductSupplierSelect('');
       const form = document.getElementById('admin-new-product-form');
       form.reset();
       onProdCategoryChange();
@@ -7141,6 +7558,7 @@ html { scroll-behavior: smooth; }
       const payload = {
         name, brand, category, subcategory, type, warranty, warrantyMonths: warrantyMonthsVal, warrantyBy, stock, stockByColor, specs, keywords, featured,
         deliveryClass: (document.getElementById('new-prod-delivery') || { value: 'moto' }).value,
+        ...(supplierFieldPayload()),
         ...(iphData || {}),
         colors: colors.length > 0 ? colors : ['Único'], photos,
         badge: type === 'original' ? '100% ORIGINAL' : 'PLUG SELECCIÓN'
@@ -8216,7 +8634,7 @@ html { scroll-behavior: smooth; }
     // BARRA INFERIOR EN CELULAR
     // ==========================================
     const MBAR_MAIN = [['today', '🏠', 'Hoy'], ['orders', '🛵', 'Pedidos'], ['inventory', '📦', 'Productos'], ['finances', '📊', 'Finanzas']];
-    const MBAR_LABELS = { today: ['🏠', 'Hoy'], finances: ['📊', 'Finanzas'], inventory: ['📦', 'Productos'], iphone: ['📱', 'iPhone'], 'smart-engine': ['🧠', 'Asesor'], orders: ['🛵', 'Pedidos'], suppliers: ['🤝', 'Proveedores'], offers: ['🏷️', 'Ofertas'], customers: ['👥', 'Clientes'], claims: ['🛡️', 'Reclamos'], 'staff-users': ['🔑', 'Usuarios'], settings: ['⚙️', 'Ajustes'] };
+    const MBAR_LABELS = { today: ['🏠', 'Hoy'], finances: ['📊', 'Finanzas'], inventory: ['📦', 'Productos'], costs: ['💲', 'Costos'], iphone: ['📱', 'iPhone'], 'smart-engine': ['🧠', 'Asesor'], orders: ['🛵', 'Pedidos'], suppliers: ['🤝', 'Proveedores'], offers: ['🏷️', 'Ofertas'], customers: ['👥', 'Clientes'], claims: ['🛡️', 'Reclamos'], 'staff-users': ['🔑', 'Usuarios'], settings: ['⚙️', 'Ajustes'] };
     let adminCurrentTab = '';
     function onAdminTabShown(tab) {
       adminCurrentTab = tab;
