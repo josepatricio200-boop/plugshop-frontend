@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.1</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.2</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -468,6 +468,9 @@ html { scroll-behavior: smooth; }
           <div id="gsearch-results" class="hidden absolute left-0 right-0 top-full mt-1 z-30 max-h-[60vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-xl shadow-2xl"></div>
         </div>
         <div class="flex items-center gap-2">
+          <button type="button" id="wa-send-btn" onclick="openWaSend()" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 border border-emerald-800 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-all" title="Mandate reportes, listas de precios o avisos a tu WhatsApp">
+            <span>📲 Enviarme</span>
+          </button>
           <button id="btn-simulate-sale" onclick="simulateCustomerOrder()" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium flex items-center gap-1.5 transition-all font-code">
             <span>⚡ Simular Venta</span>
           </button>
@@ -519,7 +522,7 @@ html { scroll-behavior: smooth; }
                 <span class="text-sm">🤝</span>
                 <span>Proveedores</span>
               </span>
-              <span class="text-[10px] text-zinc-500 font-code">4 activos</span>
+              <span id="badge-suppliers-count" class="text-[10px] text-zinc-500 font-code"></span>
             </button>
               <button onclick="switchAdminTab('iphone')" id="tab-btn-iphone" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5">
@@ -826,8 +829,9 @@ html { scroll-behavior: smooth; }
 
           <!-- TAB 2: PRODUCTOS, VARIANTES DE COLOR & FOTOS -->
           <div id="admin-tab-inventory" class="hidden space-y-6">
-            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-cats')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Categorías</button><button type="button" onclick="goSection('sec-newprod')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Cargar producto</button><button type="button" onclick="goSection('sec-inv')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Inventario activo</button></div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div data-sec-chips="inventory" class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex md:hidden gap-1.5 overflow-x-auto" role="tablist" aria-label="Secciones"></div>
+<div data-sec-pane="inventory:inv" class="space-y-6">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 class="text-lg font-bold text-white">Inventario, Variantes de Color & Ganancias</h3>
                 <p class="text-xs text-zinc-400">Cargá colores disponibles, adjuntá fotos directamente y calculá márgenes en tiempo real.</p>
@@ -844,63 +848,42 @@ html { scroll-behavior: smooth; }
                 </label>
               </div>
             </div>
-
-            <!-- Stock bajo -->
-            <div id="low-stock-card" class="hidden p-4 rounded-2xl bg-rose-950/30 border border-rose-500/40 space-y-2 text-xs">
+<div id="low-stock-card" class="hidden p-4 rounded-2xl bg-rose-950/30 border border-rose-500/40 space-y-2 text-xs">
               <div class="font-bold text-rose-300 flex items-center gap-2">⚠️ Reponer pronto <span id="low-stock-count" class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-200 font-code"></span></div>
               <div id="low-stock-list" class="flex flex-wrap gap-1.5"></div>
             </div>
-
-            <!-- Categorías y subcategorías -->
-            <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
-              <div>
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-cats" style="scroll-margin-top:72px">
-                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  Categorías y Subcategorías
-                </h4>
-                <p class="text-[11px] text-zinc-400 mt-1">Pausar una categoría oculta de la tienda todos sus productos, sin borrarlos. Para borrar una categoría tiene que estar vacía.</p>
+<div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-inv" style="scroll-margin-top:72px">Inventario Activo con Colores & Galería</h4>
+                <button id="btn-reset-catalog" onclick="resetToInitialCatalog()" class="text-[11px] text-zinc-400 hover:text-brand-amber underline font-code">
+                  Restablecer catálogo demo
+                </button>
               </div>
-              <div id="admin-categories-list" class="space-y-1.5 text-xs"></div>
-              <button type="button" id="btn-suggested-cats" onclick="addSuggestedCategories()" class="hidden px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold">✨ Agregar categorías sugeridas (Celulares, Accesorios y nombres en español)</button>
-              <form id="admin-category-form" onsubmit="createCategoryFromForm(event)" class="hidden flex-wrap items-end gap-2 text-xs pt-3 border-t border-zinc-800">
-                <div>
-                  <label class="block mb-1 text-zinc-400">Ícono</label>
-                  <input type="text" id="new-cat-icon" maxlength="8" readonly placeholder="Elegir" title="Tocá para elegir un ícono" onclick="openIconPicker(this, e => { this.value = e; })" class="w-20 cursor-pointer bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white text-center text-lg focus:outline-none focus:border-brand-orange" />
+
+              <input type="search" id="inventory-search" oninput="renderInventoryTable()" placeholder="🔍 Buscar producto por nombre, marca o categoría..." aria-label="Buscar en el inventario" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange font-code" />
+              
+              <div class="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950 font-code">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left text-xs">
+                    <thead class="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider">
+                      <tr>
+                        <th class="py-3 px-4">Fotos</th>
+                        <th class="py-3 px-4">Producto & Marca</th>
+                        <th class="py-3 px-4">🎨 Colores</th>
+                        <th class="py-3 px-4">Costo / Margen</th>
+                        <th class="py-3 px-4">Precio Lista</th>
+                        <th class="py-3 px-4">Stock</th>
+                        <th class="py-3 px-4 text-right">Acción</th>
+                      </tr>
+                    </thead>
+                    <tbody id="admin-inventory-table-body" class="divide-y divide-zinc-800/60 text-zinc-300"></tbody>
+                  </table>
                 </div>
-                <div class="flex-1 min-w-[140px]">
-                  <label class="block mb-1 text-zinc-400">Nombre *</label>
-                  <input required type="text" id="new-cat-name" maxlength="40" placeholder="Ej. Hogar, Aspiradoras" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
-                </div>
-                <div class="min-w-[160px]">
-                  <label class="block mb-1 text-zinc-400">Dentro de</label>
-                  <select id="new-cat-parent" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange"></select>
-                </div>
-                <button type="submit" class="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold transition-colors">+ Agregar</button>
-              </form>
-              <div id="category-msg" class="hidden text-[11px] font-semibold text-rose-400"></div>
+              </div>
             </div>
-
-            <!-- Garantía en lote -->
-            <details class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] text-xs">
-              <summary class="cursor-pointer text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>🛡️ Cambiar la garantía de varios productos juntos</summary>
-              <div class="mt-4 space-y-3">
-                <p class="text-[11px] text-zinc-400">Elegí a qué productos (por categoría, marca o línea) y qué garantía darles. Solo se toca la garantía. En productos nuevos la ley pide mínimo 6 meses; los 3 meses son solo para usados (se cargan uno por uno).</p>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                  <div><label class="block mb-1 text-zinc-400">Categoría</label><select id="bulk-w-cat" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="">— Cualquiera —</option></select></div>
-                  <div><label class="block mb-1 text-zinc-400">Marca (contiene)</label><input id="bulk-w-brand" maxlength="60" placeholder="Ej. Samsung" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white" /></div>
-                  <div><label class="block mb-1 text-zinc-400">Línea</label><select id="bulk-w-type" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="">— Cualquiera —</option><option value="original">Originales</option><option value="seleccion">PlugShop Selección</option></select></div>
-                  <div><label class="block mb-1 text-zinc-400">Nueva garantía *</label><select id="bulk-w-months" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="12">1 año (12 meses)</option><option value="6">6 meses</option></select></div>
-                  <div><label class="block mb-1 text-zinc-400">La da</label><select id="bulk-w-by" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="">No cambiar</option><option value="marca">La marca</option><option value="tienda">PlugShop</option></select></div>
-                </div>
-                <div class="flex items-center gap-3 flex-wrap">
-                  <button type="button" onclick="applyBulkWarranty()" class="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold">Aplicar garantía</button>
-                  <span id="bulk-w-msg" class="hidden text-[11px] font-semibold"></span>
-                </div>
-              </div>
-            </details>
-
-            <!-- Form: Nuevo Producto con Colores, Fotos y Margen en Vivo -->
-            <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-5">
+</div>
+<div data-sec-pane="inventory:new" class="space-y-6">
+<div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-5">
               <div class="flex items-center justify-between flex-wrap gap-2">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-newprod" style="scroll-margin-top:72px">
                   <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
@@ -1174,37 +1157,54 @@ html { scroll-behavior: smooth; }
                 </div>
               </form>
             </div>
-
-            <!-- Active Products Table -->
-            <div class="space-y-3">
-              <div class="flex items-center justify-between">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-inv" style="scroll-margin-top:72px">Inventario Activo con Colores & Galería</h4>
-                <button id="btn-reset-catalog" onclick="resetToInitialCatalog()" class="text-[11px] text-zinc-400 hover:text-brand-amber underline font-code">
-                  Restablecer catálogo demo
-                </button>
+</div>
+<div data-sec-pane="inventory:cats" class="space-y-6">
+<div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
+              <div>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-cats" style="scroll-margin-top:72px">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  Categorías y Subcategorías
+                </h4>
+                <p class="text-[11px] text-zinc-400 mt-1">Pausar una categoría oculta de la tienda todos sus productos, sin borrarlos. Para borrar una categoría tiene que estar vacía.</p>
               </div>
-
-              <input type="search" id="inventory-search" oninput="renderInventoryTable()" placeholder="🔍 Buscar producto por nombre, marca o categoría..." aria-label="Buscar en el inventario" class="w-full bg-zinc-900 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange font-code" />
-              
-              <div class="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950 font-code">
-                <div class="overflow-x-auto">
-                  <table class="w-full text-left text-xs">
-                    <thead class="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase text-[10px] tracking-wider">
-                      <tr>
-                        <th class="py-3 px-4">Fotos</th>
-                        <th class="py-3 px-4">Producto & Marca</th>
-                        <th class="py-3 px-4">🎨 Colores</th>
-                        <th class="py-3 px-4">Costo / Margen</th>
-                        <th class="py-3 px-4">Precio Lista</th>
-                        <th class="py-3 px-4">Stock</th>
-                        <th class="py-3 px-4 text-right">Acción</th>
-                      </tr>
-                    </thead>
-                    <tbody id="admin-inventory-table-body" class="divide-y divide-zinc-800/60 text-zinc-300"></tbody>
-                  </table>
+              <div id="admin-categories-list" class="space-y-1.5 text-xs"></div>
+              <button type="button" id="btn-suggested-cats" onclick="addSuggestedCategories()" class="hidden px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold">✨ Agregar categorías sugeridas (Celulares, Accesorios y nombres en español)</button>
+              <form id="admin-category-form" onsubmit="createCategoryFromForm(event)" class="hidden flex-wrap items-end gap-2 text-xs pt-3 border-t border-zinc-800">
+                <div>
+                  <label class="block mb-1 text-zinc-400">Ícono</label>
+                  <input type="text" id="new-cat-icon" maxlength="8" readonly placeholder="Elegir" title="Tocá para elegir un ícono" onclick="openIconPicker(this, e => { this.value = e; })" class="w-20 cursor-pointer bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white text-center text-lg focus:outline-none focus:border-brand-orange" />
+                </div>
+                <div class="flex-1 min-w-[140px]">
+                  <label class="block mb-1 text-zinc-400">Nombre *</label>
+                  <input required type="text" id="new-cat-name" maxlength="40" placeholder="Ej. Hogar, Aspiradoras" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                </div>
+                <div class="min-w-[160px]">
+                  <label class="block mb-1 text-zinc-400">Dentro de</label>
+                  <select id="new-cat-parent" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange"></select>
+                </div>
+                <button type="submit" class="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold transition-colors">+ Agregar</button>
+              </form>
+              <div id="category-msg" class="hidden text-[11px] font-semibold text-rose-400"></div>
+            </div>
+<details class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] text-xs">
+              <summary class="cursor-pointer text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>🛡️ Cambiar la garantía de varios productos juntos</summary>
+              <div class="mt-4 space-y-3">
+                <p class="text-[11px] text-zinc-400">Elegí a qué productos (por categoría, marca o línea) y qué garantía darles. Solo se toca la garantía. En productos nuevos la ley pide mínimo 6 meses; los 3 meses son solo para usados (se cargan uno por uno).</p>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  <div><label class="block mb-1 text-zinc-400">Categoría</label><select id="bulk-w-cat" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="">— Cualquiera —</option></select></div>
+                  <div><label class="block mb-1 text-zinc-400">Marca (contiene)</label><input id="bulk-w-brand" maxlength="60" placeholder="Ej. Samsung" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white" /></div>
+                  <div><label class="block mb-1 text-zinc-400">Línea</label><select id="bulk-w-type" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="">— Cualquiera —</option><option value="original">Originales</option><option value="seleccion">PlugShop Selección</option></select></div>
+                  <div><label class="block mb-1 text-zinc-400">Nueva garantía *</label><select id="bulk-w-months" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="12">1 año (12 meses)</option><option value="6">6 meses</option></select></div>
+                  <div><label class="block mb-1 text-zinc-400">La da</label><select id="bulk-w-by" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white"><option value="">No cambiar</option><option value="marca">La marca</option><option value="tienda">PlugShop</option></select></div>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap">
+                  <button type="button" onclick="applyBulkWarranty()" class="px-4 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold">Aplicar garantía</button>
+                  <span id="bulk-w-msg" class="hidden text-[11px] font-semibold"></span>
                 </div>
               </div>
-            </div>
+            </details>
+</div>
+
 
           </div>
 
@@ -1470,18 +1470,31 @@ html { scroll-behavior: smooth; }
           <div id="admin-tab-suppliers" class="hidden space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 class="text-lg font-bold text-white">Directorio de Proveedores & Mayoristas</h3>
+                <h3 class="text-lg font-bold text-white">Directorio de Proveedores & Mayoristas <span id="suppliers-count" class="ml-1 text-xs font-code text-zinc-400"></span></h3>
                 <p class="text-xs text-zinc-400">Tiempos de reposición hacia Tucumán y contactos directos.</p>
               </div>
+              <button type="button" id="supplier-add-btn" onclick="openSupplierForm()" class="px-4 py-2.5 rounded-xl bg-brand-orange hover:bg-orange-500 text-black text-xs font-bold">➕ Agregar proveedor</button>
             </div>
+            <form id="supplier-form" onsubmit="saveSupplier(event)" class="hidden p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <input type="hidden" id="sup-id" value="" />
+              <div class="sm:col-span-2 text-sm font-bold text-white" id="sup-form-title">Nuevo proveedor</div>
+              <input required id="sup-name" maxlength="100" placeholder="Nombre del proveedor *" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input id="sup-contact" maxlength="100" placeholder="Persona de contacto (ej. Esteban R.)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input id="sup-phone" maxlength="40" inputmode="tel" placeholder="WhatsApp (ej. 11 4455 8899)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input id="sup-lead" maxlength="60" placeholder="Plazo (ej. 3 días a Tucumán)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input id="sup-category" maxlength="80" placeholder="Qué te vende (ej. Cargadores y cables)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input id="sup-rating" maxlength="20" placeholder="Tu puntaje (ej. 4.5 ★) — opcional" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <div id="sup-msg" class="hidden sm:col-span-2 text-[11px] font-semibold text-rose-400"></div>
+              <div class="sm:col-span-2 flex gap-2"><button type="submit" class="px-4 py-2.5 rounded-lg bg-brand-orange hover:bg-orange-500 text-black font-bold">Guardar proveedor</button><button type="button" onclick="closeSupplierForm()" class="px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold">Cancelar</button></div>
+            </form>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="suppliers-cards-grid"></div>
           </div>
 
           <!-- TAB 6: OFERTAS & DESCUENTOS -->
           <div id="admin-tab-offers" class="hidden space-y-6">
-            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-ann')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Anuncios</button><button type="button" onclick="goSection('sec-coupons')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Cupones</button><button type="button" onclick="goSection('sec-promos')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Promos y formas de pago</button></div>
-            <!-- Anuncios para la campanita de los clientes -->
-            <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
+            <div data-sec-chips="offers" class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex md:hidden gap-1.5 overflow-x-auto" role="tablist" aria-label="Secciones"></div>
+<div data-sec-pane="offers:ann" class="space-y-6">
+<div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
               <div>
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-ann" style="scroll-margin-top:72px"><span class="w-2 h-2 rounded-full bg-brand-orange"></span>Anuncios a clientes (campanita)</h4>
                 <p class="text-[11px] text-zinc-400 mt-1">Lo que escribas acá le aparece a todos los clientes en la campanita de la tienda: promos, novedades, días sin envíos. Los avisos de pedidos (confirmado, en camino, cancelado) se mandan solos.</p>
@@ -1495,9 +1508,9 @@ html { scroll-behavior: smooth; }
               <div id="announcement-msg" class="hidden text-[11px] font-semibold text-rose-400"></div>
               <div id="announcements-list" class="space-y-1.5 text-xs"></div>
             </div>
-
-            <!-- Cupones de descuento -->
-            <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
+</div>
+<div data-sec-pane="offers:coupons" class="space-y-6">
+<div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
               <div>
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-coupons" style="scroll-margin-top:72px"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Cupones de descuento</h4>
                 <p class="text-[11px] text-zinc-400 mt-1">El cliente escribe el código en el checkout y se descuenta solo. Se suma al descuento por transferencia. Dejá en 0 lo que no quieras limitar.</p>
@@ -1514,14 +1527,15 @@ html { scroll-behavior: smooth; }
               <div id="coupon-msg" class="hidden text-[11px] font-semibold text-rose-400"></div>
               <div id="coupons-list" class="space-y-1.5 text-xs"></div>
             </div>
-
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+</div>
+<div data-sec-pane="offers:promos" class="space-y-6">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 class="text-lg font-bold text-white" id="sec-promos" style="scroll-margin-top:72px">Ofertas & Promociones Activas</h3>
                 <p class="text-xs text-zinc-400">Descuentos y beneficios de entrega aplicables al catálogo.</p>
               </div>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="p-5 rounded-2xl bg-zinc-900 border border-brand-orange/40 space-y-3">
                 <div class="flex items-center justify-between">
                   <span class="px-2 py-0.5 rounded text-[10px] bg-brand-orange/20 text-brand-orange font-bold uppercase font-code">Promo Transferencia</span>
@@ -1550,6 +1564,8 @@ html { scroll-behavior: smooth; }
                 <div class="text-[11px] text-zinc-500 font-code">Automático en Checkout</div>
               </div>
             </div>
+</div>
+
           </div>
 
           <!-- TAB 7: REGISTRO DE CLIENTES -->
@@ -1633,6 +1649,9 @@ html { scroll-behavior: smooth; }
                 </div>
               </div>
 
+              <!-- Roles del equipo: los de fábrica y los que creás vos -->
+              <div id="roles-card" class="bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-5 space-y-4"></div>
+
               <!-- Staff list -->
               <div class="border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950 font-code">
                 <div class="overflow-x-auto">
@@ -1655,8 +1674,9 @@ html { scroll-behavior: smooth; }
 
           <!-- TAB 8: AJUSTES & ZONAS -->
           <div id="admin-tab-settings" class="hidden space-y-6">
-            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-rates')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Tarifas y cobros</button><button type="button" onclick="goSection('sec-backup')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Copia de seguridad</button><button type="button" onclick="goSection('sec-audit')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Registro de cambios</button></div>
-            <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
+            <div data-sec-chips="settings" class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex md:hidden gap-1.5 overflow-x-auto" role="tablist" aria-label="Secciones"></div>
+<div data-sec-pane="settings:rates" class="space-y-6">
+<div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
               <div>
                 <h4 class="text-sm font-bold text-white" id="sec-rates" style="scroll-margin-top:72px">Tarifas de Logística, Datos de Cobro & Descuentos</h4>
                 <p class="text-xs text-zinc-400">Configurá tarifas de envío para Yerba Buena y Capital, el descuento por transferencia, tu Alias, CBU y el PIN del staff.</p>
@@ -1768,7 +1788,9 @@ html { scroll-behavior: smooth; }
                 </div>
               </div>
             </div>
-            <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
+</div>
+<div data-sec-pane="settings:backup" class="space-y-6">
+<div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
               <div class="flex items-center justify-between gap-3 flex-wrap">
                 <div class="min-w-0">
                   <h4 class="text-sm font-bold text-white" id="sec-backup" style="scroll-margin-top:72px">💾 Copia de seguridad</h4>
@@ -1778,7 +1800,9 @@ html { scroll-behavior: smooth; }
               </div>
               <div id="backup-msg" class="hidden text-[11px] font-semibold"></div>
             </div>
-            <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
+</div>
+<div data-sec-pane="settings:audit" class="space-y-6">
+<div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
               <div class="flex items-center justify-between gap-2">
                 <div>
                   <h4 class="text-sm font-bold text-white" id="sec-audit" style="scroll-margin-top:72px">Registro de cambios</h4>
@@ -1788,6 +1812,8 @@ html { scroll-behavior: smooth; }
               </div>
               <div id="audit-list" class="space-y-1 text-[11px] max-h-96 overflow-y-auto"></div>
             </div>
+</div>
+
           </div>
 
         </main>
@@ -2274,13 +2300,59 @@ html { scroll-behavior: smooth; }
       { id: 'kpi', icon: '📈', label: 'Análisis y Métricas', tabs: ['smart-engine'] }
     ];
     function navTabAllowed(t, role) { return tabAllowedForRole(t, role); }
-    // Salta a una sección dentro de una pestaña.
-    function goSection(secId) {
-      const el = document.getElementById(secId);
-      if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
     // Finanzas tiene sus propias secciones (Caja / Reportes / Monotributo / Simulador):
     // cada botón muestra SOLO su sección, no baja por una página larga.
+    // Productos, Ofertas y Ajustes también se dividen en vistas (una a la vez), con submenú en el menú lateral.
+    const TAB_SECS = {
+      inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía']] },
+      offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['promos', '🏷️', 'Promos y pagos']] },
+      settings: { def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
+    };
+    const SEC_NOW = {};
+    const SEC_CHIP_ON = 'bg-brand-orange/15 border-brand-orange text-brand-orange', SEC_CHIP_OFF = 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300';
+    function renderTabSubmenus() {
+      Object.keys(TAB_SECS).forEach(tab => {
+        const btn = document.getElementById('tab-btn-' + tab);
+        if (!btn) return;
+        if (!document.getElementById('sub-' + tab)) {
+          const sub = document.createElement('div');
+          sub.id = 'sub-' + tab; sub.dataset.subFor = tab;
+          sub.className = 'hidden ml-4 pl-2 border-l border-zinc-800 space-y-0.5';
+          sub.innerHTML = TAB_SECS[tab].items.map(([k, ic, lb]) => `<button type="button" data-sec-nav="${tab}:${k}" onclick="openTabSection('${tab}', '${k}')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">${ic} ${lb}</button>`).join('');
+          btn.insertAdjacentElement('afterend', sub);
+        }
+        const chips = document.querySelector(`[data-sec-chips="${tab}"]`);
+        if (chips && !chips.children.length) chips.innerHTML = TAB_SECS[tab].items.map(([k, ic, lb]) => `<button type="button" role="tab" data-sec-btn="${tab}:${k}" onclick="setTabSection('${tab}', '${k}')" class="shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold">${ic} ${lb}</button>`).join('');
+      });
+    }
+    function setTabSection(tab, key) {
+      const cfg = TAB_SECS[tab]; if (!cfg) return;
+      if (!cfg.items.some(i => i[0] === key)) key = cfg.def;
+      SEC_NOW[tab] = key;
+      document.querySelectorAll(`[data-sec-pane^="${tab}:"]`).forEach(p => p.classList.toggle('hidden', p.dataset.secPane !== tab + ':' + key));
+      syncTabNav();
+    }
+    function openTabSection(tab, key) { switchAdminTab(tab); setTabSection(tab, key); }
+    function syncTabNav() {
+      renderTabSubmenus();
+      Object.keys(TAB_SECS).forEach(tab => {
+        const el = document.getElementById('admin-tab-' + tab);
+        const on = !!el && !el.classList.contains('hidden');
+        const sub = document.getElementById('sub-' + tab);
+        if (sub) sub.classList.toggle('hidden', !on);
+        const cur = SEC_NOW[tab] || TAB_SECS[tab].def;
+        document.querySelectorAll(`[data-sec-nav^="${tab}:"]`).forEach(b => {
+          const act = on && b.dataset.secNav === tab + ':' + cur;
+          b.className = 'w-full text-left px-3 py-2 rounded-lg text-xs ' + (act ? 'font-bold text-brand-orange bg-brand-orange/10' : 'font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900');
+          if (act) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+        });
+        document.querySelectorAll(`[data-sec-btn^="${tab}:"]`).forEach(b => {
+          const act = b.dataset.secBtn === tab + ':' + cur;
+          b.className = 'shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ' + (act ? SEC_CHIP_ON : SEC_CHIP_OFF);
+          b.setAttribute('aria-selected', act ? 'true' : 'false');
+        });
+      });
+    }
     let FIN_SECTION = 'cash';
     function setFinSection(id) {
       if (!['cash', 'sales', 'mono', 'sim'].includes(id)) id = 'cash';
@@ -2326,7 +2398,7 @@ html { scroll-behavior: smooth; }
       const me = await apiRequest('AUTH_ME', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
       if (me && me.success && Array.isArray(me.perms)) {
         const changed = JSON.stringify(me.perms) !== JSON.stringify(currentStaffSession.perms || null);
-        currentStaffSession.perms = me.perms; currentStaffSession.role = me.role || currentStaffSession.role; if (me.staffId) currentStaffSession.staffId = me.staffId;
+        currentStaffSession.perms = me.perms; currentStaffSession.role = me.role || currentStaffSession.role; if (me.roleName) currentStaffSession.roleName = me.roleName; if (me.staffId) currentStaffSession.staffId = me.staffId;
         if (changed) { applyRoleTabVisibility(); if (typeof refreshAdminUI === 'function') refreshAdminUI(); }
       }
     }
@@ -2342,7 +2414,7 @@ html { scroll-behavior: smooth; }
       });
       // Un grupo del menú sin ninguna pestaña permitida no se muestra.
       document.querySelectorAll('[data-nav-group]').forEach(g => {
-        const any = [...g.querySelectorAll('button:not([data-fin-nav])')].some(b => b.style.display !== 'none');
+        const any = [...g.querySelectorAll('button:not([data-fin-nav]):not([data-sec-nav])')].some(b => b.style.display !== 'none');
         g.style.display = any ? '' : 'none';
       });
 
@@ -2355,7 +2427,7 @@ html { scroll-behavior: smooth; }
       };
       const labelEl = document.getElementById('staff-session-label');
       if (labelEl) {
-        labelEl.innerHTML = `${roleLabels[currentStaffSession.role] || currentStaffSession.role}: <strong>${escapeHtml(currentStaffSession.name || '')}</strong>`;
+        labelEl.innerHTML = `${escapeHtml(currentStaffSession.roleName || roleLabels[currentStaffSession.role] || currentStaffSession.role)}: <strong>${escapeHtml(currentStaffSession.name || '')}</strong>`;
       }
     }
 
@@ -2676,14 +2748,6 @@ html { scroll-behavior: smooth; }
         leadDays: '48 hs express',
         category: 'Teclados, Mouse & Periféricos',
         rating: '4.7 ★'
-      },
-      {
-        name: 'Volta Power Solutions',
-        contact: 'Carlos B.',
-        phone: '351 444 9900',
-        leadDays: '3 días a Tucumán',
-        category: 'Cargadores GaN, Cables & Baterías',
-        rating: '5.0 ★'
       }
     ]; // cupón del checkout: { code, label, amount, base }
     let isAdminAuthenticated = false;
@@ -3211,6 +3275,7 @@ html { scroll-behavior: smooth; }
       });
 
       if (tabName === 'finances') setFinSection(FIN_SECTION); else syncFinNav();
+      if (TAB_SECS[tabName]) setTabSection(tabName, SEC_NOW[tabName] || TAB_SECS[tabName].def); else syncTabNav();
       if (tabName === 'smart-engine') { renderEngineTab(); loadInsights(); }
       if (typeof onAdminTabShown === 'function') onAdminTabShown(tabName);
       if (tabName === 'iphone') loadIphoneAdmin();
@@ -3222,6 +3287,218 @@ html { scroll-behavior: smooth; }
         const workspace = document.getElementById('admin-main-workspace');
         if (workspace) workspace.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+    }
+
+    // ---- Proveedores: ver, agregar, editar y borrar (solo el administrador carga y cambia) ----
+    function renderSuppliers() {
+      const grid = document.getElementById('suppliers-cards-grid'); if (!grid) return;
+      const isAdmin = currentStaffSession.role === 'admin';
+      const cnt = document.getElementById('suppliers-count'); if (cnt) cnt.textContent = `(${SUPPLIERS.length})`;
+      const sb = document.getElementById('badge-suppliers-count'); if (sb) sb.textContent = SUPPLIERS.length === 1 ? '1 cargado' : `${SUPPLIERS.length} cargados`;
+      const addBtn = document.getElementById('supplier-add-btn'); if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
+      if (!SUPPLIERS.length) { grid.innerHTML = `<div class="md:col-span-2 p-6 rounded-xl bg-zinc-900 border border-dashed border-zinc-700 text-center text-xs text-zinc-400">Todavía no cargaste proveedores.${isAdmin ? ' Tocá "➕ Agregar proveedor".' : ''}</div>`; return; }
+      grid.innerHTML = SUPPLIERS.map((s, i) => `
+        <div class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <h4 class="font-bold text-white text-xs">${escapeHtml(s.name)}</h4>
+            ${s.rating ? `<span class="px-2 py-0.5 rounded bg-zinc-800 text-brand-amber font-bold text-[10px] font-code">${escapeHtml(s.rating)}</span>` : ''}
+          </div>
+          <p class="text-[11px] text-zinc-400">${escapeHtml(s.category || '')}</p>
+          <div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[11px] flex justify-between gap-2 font-code">
+            <span class="text-zinc-400">Plazo: <strong class="text-white">${escapeHtml(s.leadDays || '—')}</strong></span>
+            <span class="text-zinc-400">Contacto: <strong class="text-zinc-300 font-sans">${escapeHtml(s.contact || '—')}</strong></span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="window.open(waLink('${escapeHtml(String(s.phone || '').replace(/[^0-9+]/g, ''))}'), '_blank')" class="flex-1 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors"><span>💬 Abrir Pedido Mayorista</span></button>
+            ${isAdmin ? `<button type="button" onclick="openSupplierForm(${i})" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold" title="Editar">✏️</button><button type="button" onclick="deleteSupplier(${i})" class="px-3 py-1.5 rounded-lg bg-rose-950 hover:bg-rose-900 border border-rose-900 text-rose-300 text-[11px] font-semibold" title="Borrar">🗑️</button>` : ''}
+          </div>
+        </div>`).join('');
+    }
+    async function reloadSuppliers() {
+      const res = await apiRequest('SUPPLIERS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } });
+      if (Array.isArray(res)) SUPPLIERS = res;
+    }
+    function openSupplierForm(i) {
+      const f = document.getElementById('supplier-form'); if (!f) return;
+      const s = typeof i === 'number' ? SUPPLIERS[i] : null;
+      const set = (id, v) => { document.getElementById(id).value = v || ''; };
+      set('sup-id', s && s.id !== undefined ? s.id : (s ? 'idx' + i : '')); set('sup-name', s && s.name); set('sup-contact', s && s.contact); set('sup-phone', s && s.phone);
+      set('sup-lead', s && s.leadDays); set('sup-category', s && s.category); set('sup-rating', s && s.rating);
+      document.getElementById('sup-form-title').textContent = s ? 'Editar proveedor' : 'Nuevo proveedor';
+      document.getElementById('sup-msg').classList.add('hidden');
+      f.classList.remove('hidden'); f.dataset.idx = s ? String(i) : '';
+      document.getElementById('sup-name').focus();
+    }
+    function closeSupplierForm() { const f = document.getElementById('supplier-form'); if (f) f.classList.add('hidden'); }
+    async function saveSupplier(e) {
+      if (e) e.preventDefault();
+      const val = id => document.getElementById(id).value.trim();
+      const body = { name: val('sup-name'), contact: val('sup-contact'), phone: val('sup-phone'), leadDays: val('sup-lead'), category: val('sup-category'), rating: val('sup-rating') };
+      const msg = document.getElementById('sup-msg'), f = document.getElementById('supplier-form');
+      const idx = f.dataset.idx === '' ? -1 : Number(f.dataset.idx);
+      const cur = idx >= 0 ? SUPPLIERS[idx] : null;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('SUPPLIERS', { method: cur ? 'PUT' : 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify(body) }, cur ? '/' + cur.id : '');
+        if (!res || res.success === false || !res.name) { msg.textContent = (res && res.error) || 'No se pudo guardar. Probá de nuevo.'; msg.classList.remove('hidden'); return; }
+        await reloadSuppliers();
+      } else if (cur) SUPPLIERS[idx] = { ...cur, ...body }; else SUPPLIERS.push(body);
+      closeSupplierForm(); renderSuppliers();
+    }
+    async function deleteSupplier(i) {
+      const s = SUPPLIERS[i]; if (!s) return;
+      if (!confirm(`¿Borrar a "${s.name}" del directorio?`)) return;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('SUPPLIERS', { method: 'DELETE', headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/' + s.id);
+        if (!res || res.success === false) { alert((res && res.error) || 'No se pudo borrar.'); return; }
+      }
+      if (isBackendConnected() && currentStaffSession.token) await reloadSuppliers(); else SUPPLIERS.splice(i, 1);
+      renderSuppliers();
+    }
+
+    // ---- Enviarme reportes, listas de precios y avisos a mi WhatsApp ----
+    // Arma el mensaje y abre WhatsApp con el chat de tu número; vos tocás "Enviar".
+    // (Mandarlo solo, sin tocar nada, requiere la API paga de WhatsApp Business.)
+    const OWNER_WA_KEY = 'plugshop_owner_wa_v1';
+    function ownerWa() { try { return localStorage.getItem(OWNER_WA_KEY) || ''; } catch (e) { return ''; } }
+    function ownerWaTarget() { return ownerWa() || STORE_SETTINGS.whatsappNumber || ''; }
+    const WA_REPORTS = [
+      { key: 'day', icon: '☀️', label: 'Resumen de hoy', hint: 'Cobrado, pedidos y pendientes del día', admin: true },
+      { key: 'week', icon: '📈', label: 'Ventas de los últimos 7 días', hint: 'Ventas, ganancia estimada y lo más vendido', admin: true },
+      { key: 'todo', icon: '🔔', label: 'Pendientes', hint: 'Pagos por confirmar, pedidos por preparar y stock bajo', admin: false },
+      { key: 'prices', icon: '💲', label: 'Lista de precios', hint: 'Todos los productos con precio de lista y por transferencia', admin: false },
+      { key: 'free', icon: '✍️', label: 'Mensaje libre', hint: 'Escribí una nota o recordatorio para vos', admin: false }
+    ];
+    let WA_KEY = 'day';
+    function waTodayLabel() { return new Date().toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' }); }
+    function waPriceRows() {
+      const pct = typeof STORE_SETTINGS.transferDiscountPct === 'number' ? STORE_SETTINGS.transferDiscountPct : 10;
+      const list = PRODUCTS.filter(p => p.active !== false && Number(p.price) > 0);
+      const groups = new Map();
+      list.forEach(p => { const k = categoryLabel(p.category) || 'Otros'; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(p); });
+      return { pct, groups, total: list.length };
+    }
+    function waReportText(key) {
+      const f = formatARS, nl = '\n';
+      const isAdmin = currentStaffSession.role === 'admin';
+      if (key === 'day' || key === 'week') {
+        const days = key === 'day' ? 1 : 7;
+        const since = periodSince(days);
+        const st = finStats(ADMIN_ORDERS, since);
+        const rep = buildSalesReport(ADMIN_ORDERS, since);
+        const news = ADMIN_ORDERS.filter(o => o.status !== 'Cancelado' && (o.createdAt || 0) >= since).length;
+        const live = ADMIN_ORDERS.filter(o => !['Entregado', 'Cancelado'].includes(o.status));
+        let t = `*PLUGSHOP · ${key === 'day' ? 'Resumen de hoy' : 'Ventas de los últimos 7 días'}*${nl}${waTodayLabel()}${nl}${nl}`;
+        t += `💰 Cobrado: *${f(st.collected)}*${nl}   · Transferencias: ${f(st.bank)}${nl}   · Efectivo: ${f(st.cash)}${nl}`;
+        t += `🧾 Pedidos ${key === 'day' ? 'nuevos' : 'del período'}: ${news}${nl}`;
+        if (key === 'week') {
+          t += `📊 Ganancia estimada: ${f(rep.profit)}${nl}🎟️ Ticket promedio: ${f(rep.avgTicket)}${nl}`;
+          const top = Object.values(rep.products).sort((a, b) => b.qty - a.qty).slice(0, 5);
+          if (top.length) t += `${nl}*Lo más vendido*${nl}` + top.map((x, i) => `${i + 1}. ${x.name} · ${x.qty} u.`).join(nl) + nl;
+        }
+        t += `${nl}⏳ Por cobrar: ${st.pendingCount} pedido(s) · ${f(st.pending)}${nl}`;
+        t += `📦 Para preparar: ${live.filter(o => o.status === 'En preparación').length} · 🛵 En camino: ${live.filter(o => o.status === 'Despachado').length}${nl}`;
+        const low = lowStockItems(PRODUCTS).length;
+        if (low) t += `⚠️ Stock bajo: ${low} producto(s)${nl}`;
+        return t.trim();
+      }
+      if (key === 'todo') {
+        const live = ADMIN_ORDERS.filter(o => !['Entregado', 'Cancelado'].includes(o.status));
+        const pay = live.filter(o => PENDING_PAY.includes(o.status));
+        const prep = live.filter(o => o.status === 'En preparación');
+        const low = lowStockItems(PRODUCTS);
+        const line = o => `• ${o.customer} · ${f(o.total)} (#${o.id})`;
+        let t = `*PLUGSHOP · Pendientes*${nl}${waTodayLabel()}${nl}${nl}`;
+        t += `💳 *Por cobrar / confirmar (${pay.length})*${nl}${pay.slice(0, 15).map(line).join(nl) || '— nada pendiente'}${nl}${nl}`;
+        t += `📦 *Para preparar y despachar (${prep.length})*${nl}${prep.slice(0, 15).map(line).join(nl) || '— nada pendiente'}${nl}${nl}`;
+        t += `⚠️ *Stock bajo (${low.length})*${nl}${low.slice(0, 15).map(x => `• ${x.name}${x.color && x.color !== 'Único' ? ' (' + x.color + ')' : ''}: ${x.stock}`).join(nl) || '— todo en orden'}`;
+        return t.trim();
+      }
+      if (key === 'prices') {
+        const { pct, groups, total } = waPriceRows();
+        let t = `*PLUGSHOP · Lista de precios*${nl}${waTodayLabel()}${nl}Precio de lista | con ${pct}% OFF por transferencia${nl}`;
+        groups.forEach((items, cat) => {
+          t += `${nl}*${cat}*${nl}` + items.map(p => `• ${p.name}${Number(p.stock) <= 0 ? ' (sin stock)' : ''}: ${f(p.price)} | ${f(Math.round(p.price * (1 - pct / 100)))}`).join(nl) + nl;
+        });
+        return total ? t.trim() : '*PLUGSHOP · Lista de precios*\nTodavía no hay productos activos.';
+      }
+      return '';
+    }
+    function waPriceCsv() {
+      const { pct } = waPriceRows();
+      const q = v => `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+      let csv = `Categoria,Producto,Marca,Precio_lista_ARS,Precio_transferencia_${pct}pct_ARS,Stock\n`;
+      PRODUCTS.filter(p => p.active !== false).forEach(p => {
+        csv += [q(categoryLabel(p.category)), q(p.name), q(p.brand), Number(p.price) || 0, Math.round((Number(p.price) || 0) * (1 - pct / 100)), Number(p.stock) || 0].join(',') + '\n';
+      });
+      return csv;
+    }
+    function waDownloadPrices() {
+      const blob = new Blob(['﻿' + waPriceCsv()], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'plugshop-lista-de-precios.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+    }
+    function openWaSend() {
+      const isAdmin = currentStaffSession.role === 'admin';
+      if (!(isAdmin || can('orders.manage'))) { alert('Esta función es del administrador y de quien gestiona los pedidos.'); return; }
+      let wrap = document.getElementById('wa-send');
+      if (!wrap) {
+        wrap = document.createElement('div');
+        wrap.id = 'wa-send';
+        wrap.className = 'fixed inset-0 z-[58] bg-black/80 flex items-center justify-center p-2 sm:p-4';
+        wrap.setAttribute('role', 'dialog'); wrap.setAttribute('aria-modal', 'true'); wrap.setAttribute('aria-label', 'Enviarme por WhatsApp');
+        wrap.addEventListener('click', e => { if (e.target === wrap) closeWaSend(); });
+        document.body.appendChild(wrap);
+      }
+      WA_KEY = isAdmin ? 'day' : 'todo';
+      renderWaSend();
+    }
+    function closeWaSend() { const e = document.getElementById('wa-send'); if (e) e.remove(); }
+    function waSetKey(k) { WA_KEY = k; const t = document.getElementById('wa-text'); if (k === 'free' && t) t.value = ''; renderWaSend(); }
+    function waSaveNumber(v) {
+      try { localStorage.setItem(OWNER_WA_KEY, String(v || '').trim()); } catch (e) { /* sin almacenamiento: queda el del local */ }
+      const t = document.getElementById('wa-target-note'); if (t) t.textContent = ownerWa() ? 'Guardado en este navegador.' : 'Vacío: se usa el WhatsApp del local (Ajustes).';
+      waSyncLink();
+    }
+    function waSyncLink() {
+      const a = document.getElementById('wa-open'); if (!a) return;
+      const txt = (document.getElementById('wa-text') || {}).value || '';
+      a.href = waLink(ownerWaTarget(), txt);
+      a.classList.toggle('opacity-50', !txt.trim());
+    }
+    async function waCopy() {
+      const txt = (document.getElementById('wa-text') || {}).value || '';
+      try { await navigator.clipboard.writeText(txt); const b = document.getElementById('wa-copy'); if (b) { b.textContent = '✓ Copiado'; setTimeout(() => { if (b) b.textContent = '📋 Copiar'; }, 1800); } } catch (e) { alert('No pude copiar. Seleccioná el texto y copialo a mano.'); }
+    }
+    function renderWaSend() {
+      const wrap = document.getElementById('wa-send'); if (!wrap) return;
+      const isAdmin = currentStaffSession.role === 'admin';
+      const list = WA_REPORTS.filter(r => isAdmin || !r.admin);
+      if (!list.some(r => r.key === WA_KEY)) WA_KEY = list[0].key;
+      const text = WA_KEY === 'free' ? ((document.getElementById('wa-text') || {}).value || '') : waReportText(WA_KEY);
+      wrap.innerHTML = `<div class="w-full max-w-2xl max-h-[94vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-2xl shadow-2xl">
+        <div class="sticky top-0 z-10 bg-zinc-950/95 backdrop-blur border-b border-zinc-800 p-4 flex items-center justify-between gap-3">
+          <div><h3 class="text-base font-black text-white">📲 Enviarme por WhatsApp</h3><p class="text-[11px] text-zinc-400">Elegí qué querés recibir, revisá el mensaje y tocá el botón verde. Se abre WhatsApp listo para enviar.</p></div>
+          <button type="button" onclick="closeWaSend()" aria-label="Cerrar" class="w-9 h-9 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200">✕</button>
+        </div>
+        <div class="p-4 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">${list.map(r => `<button type="button" onclick="waSetKey('${r.key}')" aria-pressed="${r.key === WA_KEY}" class="text-left p-3 rounded-xl border ${r.key === WA_KEY ? 'border-brand-orange bg-brand-orange/10' : 'border-zinc-800 bg-zinc-900 hover:bg-zinc-800'}"><div class="text-xs font-bold ${r.key === WA_KEY ? 'text-brand-orange' : 'text-white'}">${r.icon} ${r.label}</div><div class="text-[10px] text-zinc-400 mt-0.5">${r.hint}</div></button>`).join('')}</div>
+          <div>
+            <label class="block text-[11px] font-bold text-zinc-400 mb-1" for="wa-target">Mi número de WhatsApp (adonde llega)</label>
+            <input id="wa-target" type="tel" inputmode="tel" value="${escapeHtml(ownerWa())}" placeholder="${escapeHtml(STORE_SETTINGS.whatsappNumber || 'Ej. 381 555 1234')}" oninput="waSaveNumber(this.value)" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange" />
+            <p id="wa-target-note" class="text-[10px] text-zinc-500 mt-1">${ownerWa() ? 'Guardado en este navegador.' : 'Vacío: se usa el WhatsApp del local (Ajustes).'}</p>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-zinc-400 mb-1" for="wa-text">Mensaje (podés editarlo)</label>
+            <textarea id="wa-text" rows="${WA_KEY === 'prices' ? 12 : 9}" oninput="waSyncLink()" placeholder="Escribí acá tu nota…" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2.5 text-xs text-white font-code focus:outline-none focus:border-brand-orange"></textarea>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a id="wa-open" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-black">📲 Abrir WhatsApp</a>
+            <button type="button" id="wa-copy" onclick="waCopy()" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm font-bold">📋 Copiar</button>
+            ${WA_KEY === 'prices' ? '<button type="button" onclick="waDownloadPrices()" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-100 text-sm font-bold">⬇️ Planilla (Excel/CSV)</button>' : ''}
+          </div>
+          ${WA_KEY === 'prices' ? '<p class="text-[10px] text-zinc-500">WhatsApp no deja adjuntar archivos desde acá: el mensaje lleva la lista en texto. Si la querés como planilla, tocá "Planilla" y adjuntala a mano en el chat.</p>' : ''}
+        </div></div>`;
+      const ta = document.getElementById('wa-text'); ta.value = text; waSyncLink();
     }
 
     // ---- Categorías: panel ----
@@ -4629,7 +4906,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.1): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.2): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -5515,24 +5792,7 @@ html { scroll-behavior: smooth; }
 
       renderOrdersTable();
 
-      // Suppliers Grid
-      const suppliersGrid = document.getElementById('suppliers-cards-grid');
-      suppliersGrid.innerHTML = SUPPLIERS.map(s => `
-        <div class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2.5">
-          <div class="flex items-center justify-between">
-            <h4 class="font-bold text-white text-xs">${s.name}</h4>
-            <span class="px-2 py-0.5 rounded bg-zinc-800 text-brand-amber font-bold text-[10px] font-code">${s.rating}</span>
-          </div>
-          <p class="text-[11px] text-zinc-400">${s.category}</p>
-          <div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[11px] flex justify-between font-code">
-            <span class="text-zinc-400">Plazo: <strong class="text-white">${s.leadDays}</strong></span>
-            <span class="text-zinc-400">Contacto: <strong class="text-zinc-300 font-sans">${s.contact}</strong></span>
-          </div>
-          <button onclick="window.open(waLink('${s.phone}'), '_blank')" class="w-full py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-750 text-zinc-200 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors">
-            <span>💬 Abrir Pedido Mayorista</span>
-          </button>
-        </div>
-      `).join('');
+      renderSuppliers();
 
       // CRM Table
       const custTable = document.getElementById('admin-customers-table-body');
@@ -5640,18 +5900,25 @@ html { scroll-behavior: smooth; }
 
       if (badge) badge.textContent = users.length;
 
-      const roleLabels = { admin: 'Admin', vendedor: 'Vendedor', reposicion: 'Reposición', cadete: 'Cadete', logistica: 'Logística' };
       STAFF_USERS_LIST = users;
-      if (!STAFF_PERMS) {
+      {
         const pr = await apiRequest('STAFF_USERS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/permissions');
         if (pr && Array.isArray(pr.catalog)) STAFF_PERMS = pr;
+      }
+      await loadStaffRoles();
+      renderRolesCard();
+      const roleSel = document.getElementById('staff-new-role');
+      if (roleSel) {
+        const keep = roleSel.value;
+        roleSel.innerHTML = ROLE_HINTS_OPTIONS() + (STAFF_ROLES.custom.length ? `<optgroup label="Mis roles">${STAFF_ROLES.custom.map(r => `<option value="${escapeHtml(r.id)}">${escapeHtml(r.name)}</option>`).join('')}</optgroup>` : '');
+        if ([...roleSel.options].some(o => o.value === keep)) roleSel.value = keep;
       }
 
       tbody.innerHTML = users.map(u => `
         <tr class="hover:bg-zinc-900/60 transition-colors">
           <td class="py-3 px-4 font-bold text-white font-sans">${escapeHtml(u.name)}</td>
           <td class="py-3 px-4 text-zinc-300">${escapeHtml(u.username)}</td>
-          <td class="py-3 px-4 text-zinc-300">${escapeHtml(roleLabels[u.role] || u.role)}</td>
+          <td class="py-3 px-4 text-zinc-300">${u.role === 'admin' ? 'Admin' : `<select aria-label="Rol de ${escapeHtml(u.name)}" onchange="changeUserRole(${u.id}, this.value)" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-[11px] text-white font-sans">${staffRoleOptions(u.role)}</select>`}</td>
           <td class="py-3 px-4">
             <span class="px-2 py-0.5 rounded text-[10px] font-bold ${u.active ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}">
               ${u.active ? 'ACTIVO' : 'INACTIVO'}
@@ -5669,6 +5936,80 @@ html { scroll-behavior: smooth; }
         </tr>
         <tr id="perms-row-${u.id}" class="hidden bg-zinc-900/40"><td colspan="5" class="p-4 font-sans" id="perms-box-${u.id}"></td></tr>
       `).join('') || `<tr><td colspan="5" class="py-4 px-4 text-zinc-500 text-center">Todavía no creaste usuarios de equipo.</td></tr>`;
+    }
+
+    // ---- Roles: los de fábrica y los que crea el administrador ----
+    let STAFF_ROLES = { builtin: [], custom: [] };
+    function ROLE_HINTS_OPTIONS() {
+      return '<option value="vendedor">Vendedor — pedidos y clientes</option><option value="reposicion">Reposición — carga de stock</option><option value="cadete">Cadete — logística de entregas</option><option value="logistica">Logística — proveedores</option>';
+    }
+    function staffRoleOptions(current) {
+      const b = ['vendedor', 'reposicion', 'cadete', 'logistica'].map(id => { const r = STAFF_ROLES.builtin.find(x => x.id === id); return `<option value="${id}" ${current === id ? 'selected' : ''}>${escapeHtml(r ? r.name : id)}</option>`; }).join('');
+      const c = STAFF_ROLES.custom.map(r => `<option value="${escapeHtml(r.id)}" ${current === r.id ? 'selected' : ''}>${escapeHtml(r.name)}</option>`).join('');
+      return b + (c ? `<optgroup label="Mis roles">${c}</optgroup>` : '');
+    }
+    async function loadStaffRoles() {
+      const res = await apiRequest('STAFF_USERS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/roles');
+      if (res && Array.isArray(res.builtin)) STAFF_ROLES = { builtin: res.builtin, custom: Array.isArray(res.custom) ? res.custom : [] };
+    }
+    function permLabel(key) { const p = STAFF_PERMS && STAFF_PERMS.catalog.find(x => x.key === key); return p ? p.label.replace(/\s*\(.*\)\s*$/, '') : key; }
+    function renderRolesCard(editId) {
+      const box = document.getElementById('roles-card'); if (!box) return;
+      const roleRow = (r, custom) => `<div class="p-3 rounded-xl border border-zinc-800 bg-zinc-950/60 flex flex-wrap items-start justify-between gap-2">
+          <div class="min-w-0"><div class="text-xs font-bold text-white">${escapeHtml(r.name)} ${custom ? '' : '<span class="ml-1 text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-semibold">de fábrica</span>'}</div>
+          <div class="text-[10px] text-zinc-400 mt-0.5">${r.perms.length} permiso(s) · ${r.users || 0} usuario(s)</div>
+          <div class="text-[10px] text-zinc-500 mt-1">${r.perms.slice(0, 6).map(permLabel).map(escapeHtml).join(' · ')}${r.perms.length > 6 ? ' …' : ''}</div></div>
+          ${custom ? `<div class="flex gap-1.5"><button type="button" onclick="renderRolesCard('${escapeHtml(r.id)}')" class="px-2.5 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-semibold">✏️ Editar</button><button type="button" onclick="deleteRole('${escapeHtml(r.id)}')" class="px-2.5 py-1 rounded bg-rose-950/60 hover:bg-rose-900 text-rose-400 text-[10px] font-semibold">Borrar</button></div>` : ''}
+        </div>`;
+      const editing = editId && editId !== 'new' ? STAFF_ROLES.custom.find(r => r.id === editId) : null;
+      let form = '';
+      if (editId) {
+        const on = new Set(editing ? editing.perms : []);
+        const groups = {};
+        ((STAFF_PERMS && STAFF_PERMS.catalog) || []).forEach(p => { (groups[p.group] = groups[p.group] || []).push(p); });
+        form = `<div class="p-4 rounded-xl border border-brand-orange/40 bg-zinc-950 space-y-3" id="role-form" data-edit="${editing ? escapeHtml(editing.id) : ''}">
+          <div class="text-xs font-bold text-white">${editing ? 'Editar rol' : 'Crear un rol nuevo'}</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input id="role-name" maxlength="40" value="${editing ? escapeHtml(editing.name) : ''}" placeholder="Nombre del rol (ej. Embalaje, Encargado de depósito)" class="px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange" />
+            ${editing ? '' : `<select id="role-copy" onchange="roleCopyFrom(this.value)" class="px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-white focus:outline-none focus:border-brand-orange"><option value="">Empezar desde cero</option>${STAFF_ROLES.builtin.map(r => `<option value="${r.id}">Copiar permisos de: ${escapeHtml(r.name)}</option>`).join('')}${STAFF_ROLES.custom.map(r => `<option value="${escapeHtml(r.id)}">Copiar permisos de: ${escapeHtml(r.name)}</option>`).join('')}</select>`}
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3">${Object.keys(groups).map(g => `<div class="space-y-1.5"><div class="text-[10px] uppercase tracking-wider text-zinc-500 font-bold">${escapeHtml(g)}</div>${groups[g].map(p => `<label class="flex items-start gap-2 text-xs text-zinc-200 cursor-pointer"><input type="checkbox" data-rperm="${escapeHtml(p.key)}" ${on.has(p.key) ? 'checked' : ''} class="mt-0.5 w-4 h-4 accent-orange-500" /><span>${escapeHtml(p.label)}</span></label>`).join('')}</div>`).join('')}</div>
+          <div class="flex items-center gap-2 flex-wrap"><button type="button" onclick="saveRole()" class="px-4 py-2 rounded-lg bg-brand-orange hover:opacity-90 text-black font-extrabold text-xs">Guardar rol</button><button type="button" onclick="renderRolesCard()" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold">Cancelar</button><span id="role-msg" class="text-[11px] font-semibold text-rose-400"></span></div>
+        </div>`;
+      }
+      box.innerHTML = `<div class="flex flex-wrap items-center justify-between gap-2"><div><h4 class="text-sm font-bold text-white">Roles del equipo</h4><p class="text-[11px] text-zinc-400">Un rol es un conjunto de permisos con nombre (ej. "Embalaje"). Creá los tuyos y asignalos al crear el usuario o desde la tabla. Si cambiás un rol, rige al instante para todos los que lo tienen.</p></div>
+        <button type="button" onclick="renderRolesCard('new')" class="px-3.5 py-2 rounded-xl bg-brand-orange hover:opacity-90 text-black font-extrabold text-xs">➕ Crear rol</button></div>
+        ${form}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${STAFF_ROLES.custom.map(r => roleRow(r, true)).join('')}${STAFF_ROLES.builtin.map(r => roleRow(r, false)).join('')}</div>`;
+    }
+    function roleCopyFrom(id) {
+      const all = [...STAFF_ROLES.builtin, ...STAFF_ROLES.custom];
+      const r = all.find(x => x.id === id);
+      const on = new Set(r ? r.perms : []);
+      document.querySelectorAll('#role-form input[data-rperm]').forEach(cb => { cb.checked = on.has(cb.dataset.rperm); });
+    }
+    async function saveRole() {
+      const form = document.getElementById('role-form'); if (!form) return;
+      const name = document.getElementById('role-name').value.trim();
+      const perms = [...form.querySelectorAll('input[data-rperm]:checked')].map(cb => cb.dataset.rperm);
+      const msg = document.getElementById('role-msg');
+      if (name.length < 2) { msg.textContent = 'Escribí un nombre para el rol.'; return; }
+      const editId = form.dataset.edit;
+      const res = await apiRequest('STAFF_USERS', { method: editId ? 'PUT' : 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ name, perms }) }, '/roles' + (editId ? '/' + editId : ''));
+      if (!res || res.success === false || !res.id) { msg.textContent = (res && res.error) || 'No se pudo guardar el rol.'; return; }
+      await renderStaffUsersTable();
+    }
+    async function deleteRole(id) {
+      const r = STAFF_ROLES.custom.find(x => x.id === id); if (!r) return;
+      if (!confirm(`¿Borrar el rol "${r.name}"?`)) return;
+      const res = await apiRequest('STAFF_USERS', { method: 'DELETE', headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/roles/' + id);
+      if (!res || res.success === false) { alert((res && res.error) || 'No se pudo borrar.'); return; }
+      await renderStaffUsersTable();
+    }
+    async function changeUserRole(id, role) {
+      const res = await apiRequest('STAFF_USERS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ role }) }, '/' + id);
+      if (!res || res.success === false || !res.id) alert((res && res.error) || 'No se pudo cambiar el rol.');
+      await renderStaffUsersTable();
     }
 
     // ---- Permisos por usuario: el administrador prende o apaga cada acción ----
@@ -7293,7 +7634,7 @@ html { scroll-behavior: smooth; }
     function saveStaffSession() {
       try {
         if (currentStaffSession.token) sessionStorage.setItem(STAFF_SESSION_KEY, JSON.stringify({
-          role: currentStaffSession.role, name: currentStaffSession.name, token: currentStaffSession.token, staffId: currentStaffSession.staffId || null
+          role: currentStaffSession.role, roleName: currentStaffSession.roleName || '', name: currentStaffSession.name, token: currentStaffSession.token, staffId: currentStaffSession.staffId || null
         }));
       } catch (e) {}
     }
@@ -7301,8 +7642,8 @@ html { scroll-behavior: smooth; }
     function loadSavedStaffSession() {
       try {
         const s = JSON.parse(sessionStorage.getItem(STAFF_SESSION_KEY) || 'null');
-        if (s && typeof s.token === 'string' && s.token && Object.prototype.hasOwnProperty.call(ROLE_LABELS, s.role)) {
-          return { role: s.role, name: String(s.name || '').slice(0, 60), token: s.token, staffId: Number.isInteger(s.staffId) ? s.staffId : null };
+        if (s && typeof s.token === 'string' && s.token && /^[a-z0-9_]{1,40}$/.test(String(s.role))) { // incluye los roles propios (r_algo); el servidor valida igual
+          return { role: s.role, roleName: String(s.roleName || '').slice(0, 40), name: String(s.name || '').slice(0, 60), token: s.token, staffId: Number.isInteger(s.staffId) ? s.staffId : null };
         }
       } catch (e) {}
       return null;
