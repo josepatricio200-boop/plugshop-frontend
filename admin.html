@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.3</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v7.4</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -490,103 +490,68 @@ html { scroll-behavior: smooth; }
           <div class="space-y-4">
             <div data-nav-group="ops" class="space-y-1">
               <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">🛒 Operaciones y Ventas</div>
-              <button onclick="switchAdminTab('today')" id="tab-btn-today" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5"><span class="text-base">🏠</span><span>Hoy</span></span>
-              <span id="badge-today-count" class="text-[10px] text-zinc-500 font-code"></span>
+              <button onclick="switchAdminTab('today')" id="tab-btn-today" data-nav-tab="today" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🏠</span><span>Hoy</span></span><span id="badge-today-count" class="text-[10px] text-zinc-500 font-code"></span>
             </button>
-              <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🛵</span>
-                <span>Pedidos & Entregas</span>
-              </span>
-              <span id="badge-orders-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">3</span>
+              <button onclick="switchAdminTab('orders')" id="tab-btn-orders" data-nav-tab="orders" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🛵</span><span>Pedidos & Entregas</span></span><span id="badge-orders-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">3</span>
             </button>
-              <button onclick="switchAdminTab('claims')" id="tab-btn-claims" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🛡️</span>
-                <span>Reclamos & Garantías</span>
-              </span>
-              <span id="badge-claims-count" class="text-[10px] text-zinc-500 font-code">0</span>
+              <button onclick="switchAdminTab('claims')" id="tab-btn-claims" data-nav-tab="claims" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🛡️</span><span>Reclamos & Garantías</span></span><span id="badge-claims-count" class="text-[10px] text-zinc-500 font-code">0</span>
             </button>
             </div>
             <div data-nav-group="catalog" class="space-y-1">
               <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">📦 Catálogo e Inventario</div>
-              <button onclick="switchAdminTab('inventory')" id="tab-btn-inventory" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">📦</span>
-                <span>Productos & Variantes</span>
-              </span>
-              <span id="badge-products-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">8</span>
+              <button onclick="switchAdminTab('inventory')" id="tab-btn-inventory" data-nav-tab="inventory" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">📦</span><span>Productos & Variantes</span></span><span id="badge-products-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">8</span>
             </button>
-              <button onclick="switchAdminTab('suppliers')" id="tab-btn-suppliers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🤝</span>
-                <span>Proveedores</span>
-              </span>
-              <span id="badge-suppliers-count" class="text-[10px] text-zinc-500 font-code"></span>
+            </div>
+            <div data-nav-group="fin" class="space-y-1">
+              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">💰 Logística y Finanzas</div>
+              <button onclick="openFinSection('cash')"  data-nav-tab="finances" data-fin-nav="cash" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">💵</span><span>Caja diaria</span></span>
             </button>
-              <button onclick="switchAdminTab('iphone')" id="tab-btn-iphone" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">📱</span>
-                <span>iPhone</span>
-              </span>
-              <span id="badge-iphone-state" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-bold font-code">oculta</span>
+              <button onclick="switchAdminTab('suppliers')" id="tab-btn-suppliers" data-nav-tab="suppliers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🤝</span><span>Proveedores</span></span><span id="badge-suppliers-count" class="text-[10px] text-zinc-500 font-code"></span>
+            </button>
+              <button onclick="openFinSection('mono')"  data-nav-tab="finances" data-fin-nav="mono" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🧾</span><span>Monotributo</span></span>
             </button>
             </div>
             <div data-nav-group="crm" class="space-y-1">
               <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">👥 Clientes y Marketing</div>
-              <button onclick="switchAdminTab('customers')" id="tab-btn-customers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">👥</span>
-                <span>Registro de Clientes</span>
-              </span>
-              <span id="badge-cust-count" class="text-[10px] text-zinc-500 font-code">4</span>
+              <button onclick="switchAdminTab('customers')" id="tab-btn-customers" data-nav-tab="customers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">👥</span><span>Registro de Clientes</span></span><span id="badge-cust-count" class="text-[10px] text-zinc-500 font-code">4</span>
             </button>
-              <button onclick="switchAdminTab('offers')" id="tab-btn-offers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🏷️</span>
-                <span>Ofertas & Promos</span>
-              </span>
-              <span class="text-[10px] text-amber-400 font-code">2 activas</span>
-            </button>
-            </div>
-            <div data-nav-group="fin" class="space-y-1">
-              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">💰 Finanzas y Configuración</div>
-              <button onclick="openFinSection(FIN_SECTION)" id="tab-btn-finances" aria-expanded="false" aria-controls="fin-submenu" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">📊</span>
-                <span>Finanzas & Registro ARCA</span>
-              </span>
-              <span id="fin-chevron" class="text-[10px] text-zinc-500 transition-transform">▸</span>
-            </button>
-              <div id="fin-submenu" class="hidden ml-4 pl-2 border-l border-zinc-800 space-y-0.5">
-                <button type="button" data-fin-nav="cash" onclick="openFinSection('cash')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">💵 Caja diaria</button>
-                <button type="button" data-fin-nav="sales" onclick="openFinSection('sales')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">📊 Reportes de ventas</button>
-                <button type="button" data-fin-nav="mono" onclick="openFinSection('mono')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">🧾 Monotributo</button>
-                <button type="button" data-fin-nav="sim" onclick="openFinSection('sim')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">🧮 Simulador de margen</button>
-              </div>
-              <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">⚙️</span>
-                <span>Ajustes & Zonas</span>
-              </span>
-            </button>
-              <button onclick="switchAdminTab('staff-users')" id="tab-btn-staff-users" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🔑</span>
-                <span>Usuarios & Permisos</span>
-              </span>
-              <span id="badge-staff-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">0</span>
+              <button onclick="switchAdminTab('offers')" id="tab-btn-offers" data-nav-tab="offers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🏷️</span><span>Ofertas & Promos</span></span><span class="text-[10px] text-amber-400 font-code">2 activas</span>
             </button>
             </div>
             <div data-nav-group="kpi" class="space-y-1">
               <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">📈 Análisis y Métricas</div>
-              <button onclick="switchAdminTab('smart-engine')" id="tab-btn-smart-engine" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🧠</span>
-                <span>Motor Inteligente</span>
-              </span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold font-code">IA</span>
+              <button onclick="openFinSection('sales')"  data-nav-tab="finances" data-fin-nav="sales" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">📊</span><span>Reportes de ventas</span></span>
+            </button>
+              <button onclick="openFinSection('sim')"  data-nav-tab="finances" data-fin-nav="sim" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🧮</span><span>Simulador de margen</span></span>
+            </button>
+              <button onclick="switchAdminTab('smart-engine')" id="tab-btn-smart-engine" data-nav-tab="smart-engine" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🧠</span><span>Motor Inteligente</span></span>
+            </button>
+            </div>
+            <div data-nav-group="cfg" class="space-y-1">
+              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">⚙️ Configuración del sistema</div>
+              <button onclick="openTabSection('settings','rates')"  data-nav-tab="settings" data-sec-nav="settings:rates" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🚚</span><span>Tarifas y cobros</span></span>
+            </button>
+              <button onclick="switchAdminTab('staff-users')" id="tab-btn-staff-users" data-nav-tab="staff-users" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🔑</span><span>Usuarios & Permisos</span></span><span id="badge-staff-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">0</span>
+            </button>
+              <button onclick="openTabSection('settings','backup')"  data-nav-tab="settings" data-sec-nav="settings:backup" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">💾</span><span>Copia de seguridad</span></span>
+            </button>
+              <button onclick="openTabSection('settings','audit')"  data-nav-tab="settings" data-sec-nav="settings:audit" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">📜</span><span>Registro de cambios</span></span>
             </button>
             </div>
           </div>
@@ -1212,6 +1177,7 @@ html { scroll-behavior: smooth; }
           <!-- TAB 3: MOTOR INTELIGENTE (datos reales) -->
           <!-- ===== Pestaña iPhone (sellados y usados) ===== -->
           <div id="admin-tab-iphone" class="hidden space-y-6">
+            <button type="button" onclick="openTabSection('inventory', 'inv')" class="text-xs font-semibold text-zinc-400 hover:text-white">← Volver a Productos & Variantes</button>
             <div>
               <h3 class="text-lg font-bold text-white">📱 Sección iPhone</h3>
               <p class="text-xs text-zinc-400">Sellados y usados. Mientras la sección esté apagada, tus clientes no ven nada y nadie puede comprar estos equipos. Preparala tranquilo y prendela cuando quieras.</p>
@@ -2214,7 +2180,9 @@ html { scroll-behavior: smooth; }
     // (pedidos, productos con costo, clientes, proveedores) y los vuelca
     // en las mismas variables que usa todo el panel, para no tener que
     // reescribir cómo se renderiza cada pestaña.
+    let ADMIN_SYNC_OK = false;
     async function syncAdminDataFromServer() {
+      ADMIN_SYNC_OK = false;
       if (!isBackendConnected() || !currentStaffSession.token) return;
       const role = currentStaffSession.role;
       const headers = { Authorization: 'Bearer ' + currentStaffSession.token };
@@ -2222,7 +2190,7 @@ html { scroll-behavior: smooth; }
 
       if (can('orders.view')) {
         tasks.push(apiRequest('ORDERS', { headers }).then(res => {
-          if (Array.isArray(res)) ADMIN_ORDERS = res;
+          if (Array.isArray(res)) { ADMIN_ORDERS = res; ADMIN_SYNC_OK = true; }
         }));
         tasks.push(loadCouriers());
       }
@@ -2294,36 +2262,66 @@ html { scroll-behavior: smooth; }
     };
     // Cómo se agrupa el menú del panel (las pestañas son las mismas de siempre, solo ordenadas).
     const ADMIN_NAV_GROUPS = [
-      { id: 'ops', icon: '🛒', label: 'Operaciones y Ventas', tabs: ['today', 'orders', 'claims'] },
-      { id: 'catalog', icon: '📦', label: 'Catálogo e Inventario', tabs: ['inventory', 'suppliers', 'iphone'] },
-      { id: 'crm', icon: '👥', label: 'Clientes y Marketing', tabs: ['customers', 'offers'] },
-      { id: 'fin', icon: '💰', label: 'Finanzas y Configuración', tabs: ['finances', 'settings', 'staff-users'] },
-      { id: 'kpi', icon: '📈', label: 'Análisis y Métricas', tabs: ['smart-engine'] }
+      { id: 'ops', icon: '🛒', label: 'Operaciones y Ventas', items: [
+        { id: 'today', tab: 'today', icon: '🏠', label: 'Hoy' },
+        { id: 'orders', tab: 'orders', icon: '🛵', label: 'Pedidos & Entregas' },
+        { id: 'claims', tab: 'claims', icon: '🛡️', label: 'Reclamos & Garantías' }] },
+      { id: 'catalog', icon: '📦', label: 'Catálogo e Inventario', items: [
+        { id: 'inventory', tab: 'inventory', icon: '📦', label: 'Productos & Variantes' },
+        { id: 'iphone', tab: 'iphone', icon: '📱', label: 'Sección iPhone' }] },
+      { id: 'fin', icon: '💰', label: 'Logística y Finanzas', items: [
+        { id: 'cash', tab: 'finances', fin: 'cash', icon: '💵', label: 'Caja diaria' },
+        { id: 'suppliers', tab: 'suppliers', icon: '🤝', label: 'Proveedores' },
+        { id: 'mono', tab: 'finances', fin: 'mono', icon: '🧾', label: 'Monotributo' }] },
+      { id: 'crm', icon: '👥', label: 'Clientes y Marketing', items: [
+        { id: 'customers', tab: 'customers', icon: '👥', label: 'Registro de Clientes' },
+        { id: 'offers', tab: 'offers', icon: '🏷️', label: 'Ofertas & Promos' }] },
+      { id: 'kpi', icon: '📈', label: 'Análisis y Métricas', items: [
+        { id: 'sales', tab: 'finances', fin: 'sales', icon: '📊', label: 'Reportes de ventas' },
+        { id: 'sim', tab: 'finances', fin: 'sim', icon: '🧮', label: 'Simulador de margen' },
+        { id: 'smart-engine', tab: 'smart-engine', icon: '🧠', label: 'Motor Inteligente' }] },
+      { id: 'cfg', icon: '⚙️', label: 'Configuración del sistema', items: [
+        { id: 'rates', tab: 'settings', sec: 'rates', icon: '🚚', label: 'Tarifas y cobros' },
+        { id: 'staff-users', tab: 'staff-users', icon: '🔑', label: 'Usuarios & Permisos' },
+        { id: 'backup', tab: 'settings', sec: 'backup', icon: '💾', label: 'Copia de seguridad' },
+        { id: 'audit', tab: 'settings', sec: 'audit', icon: '📜', label: 'Registro de cambios' }] }
     ];
+    // Qué hace cada ítem del menú y si es el que está abierto ahora.
+    function navItemGo(it) { return it.fin ? `openFinSection('${it.fin}')` : (it.sec ? `openTabSection('${it.tab}','${it.sec}')` : `switchAdminTab('${it.tab}')`); }
+    function navItemOn(it, curTab) {
+      if (curTab !== it.tab) return false;
+      if (it.fin) return FIN_SECTION === it.fin;
+      if (it.sec) return (SEC_NOW[it.tab] || TAB_SECS[it.tab].def) === it.sec;
+      return true;
+    }
     function navTabAllowed(t, role) { return tabAllowedForRole(t, role); }
     // Finanzas tiene sus propias secciones (Caja / Reportes / Monotributo / Simulador):
     // cada botón muestra SOLO su sección, no baja por una página larga.
     // Productos, Ofertas y Ajustes también se dividen en vistas (una a la vez), con submenú en el menú lateral.
     const TAB_SECS = {
-      inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía']] },
+      inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía'], ['iphone', '📱', 'Sección iPhone', 'iphone']] },
       offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['promos', '🏷️', 'Promos y pagos']] },
-      settings: { def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
+      settings: { flat: true, def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
     };
     const SEC_NOW = {};
     const SEC_CHIP_ON = 'bg-brand-orange/15 border-brand-orange text-brand-orange', SEC_CHIP_OFF = 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300';
     function renderTabSubmenus() {
       Object.keys(TAB_SECS).forEach(tab => {
+        const cfg = TAB_SECS[tab];
         const btn = document.getElementById('tab-btn-' + tab);
-        if (!btn) return;
-        if (!document.getElementById('sub-' + tab)) {
+        if (btn && !cfg.flat && !document.getElementById('sub-' + tab)) {
           const sub = document.createElement('div');
           sub.id = 'sub-' + tab; sub.dataset.subFor = tab;
           sub.className = 'hidden ml-4 pl-2 border-l border-zinc-800 space-y-0.5';
-          sub.innerHTML = TAB_SECS[tab].items.map(([k, ic, lb]) => `<button type="button" data-sec-nav="${tab}:${k}" onclick="openTabSection('${tab}', '${k}')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">${ic} ${lb}</button>`).join('');
+          sub.innerHTML = cfg.items.map(([k, ic, lb, ext]) => ext
+            ? `<button type="button" data-sec-ext="${ext}" data-nav-tab="${ext}" onclick="switchAdminTab('${ext}')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center justify-between"><span>${ic} ${lb}</span><span id="badge-iphone-state" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-bold font-code">oculta</span></button>`
+            : `<button type="button" data-sec-nav="${tab}:${k}" onclick="openTabSection('${tab}', '${k}')" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold">${ic} ${lb}</button>`).join('');
           btn.insertAdjacentElement('afterend', sub);
         }
         const chips = document.querySelector(`[data-sec-chips="${tab}"]`);
-        if (chips && !chips.children.length) chips.innerHTML = TAB_SECS[tab].items.map(([k, ic, lb]) => `<button type="button" role="tab" data-sec-btn="${tab}:${k}" onclick="setTabSection('${tab}', '${k}')" class="shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold">${ic} ${lb}</button>`).join('');
+        if (chips && !chips.children.length) chips.innerHTML = cfg.items.map(([k, ic, lb, ext]) => ext
+          ? `<button type="button" role="tab" data-sec-ext-chip="${ext}" onclick="switchAdminTab('${ext}')" class="shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ${SEC_CHIP_OFF}">${ic} ${lb}</button>`
+          : `<button type="button" role="tab" data-sec-btn="${tab}:${k}" onclick="setTabSection('${tab}', '${k}')" class="shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ${SEC_CHIP_OFF}">${ic} ${lb}</button>`).join('');
       });
     }
     function setTabSection(tab, key) {
@@ -2334,25 +2332,43 @@ html { scroll-behavior: smooth; }
       syncTabNav();
     }
     function openTabSection(tab, key) { switchAdminTab(tab); setTabSection(tab, key); }
+    const NAV_TOP_ON = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 shadow-sm transition-all';
+    const NAV_TOP_OFF = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all';
     function syncTabNav() {
       renderTabSubmenus();
+      const shown = t => { const el = document.getElementById('admin-tab-' + t); return !!el && !el.classList.contains('hidden'); };
       Object.keys(TAB_SECS).forEach(tab => {
-        const el = document.getElementById('admin-tab-' + tab);
-        const on = !!el && !el.classList.contains('hidden');
+        const cfg = TAB_SECS[tab];
+        const on = shown(tab);
+        const exts = cfg.items.filter(i => i[3]).map(i => i[3]);
+        const onExt = exts.some(shown);
         const sub = document.getElementById('sub-' + tab);
-        if (sub) sub.classList.toggle('hidden', !on);
-        const cur = SEC_NOW[tab] || TAB_SECS[tab].def;
+        if (sub) sub.classList.toggle('hidden', !(on || onExt));
+        const cur = SEC_NOW[tab] || cfg.def;
         document.querySelectorAll(`[data-sec-nav^="${tab}:"]`).forEach(b => {
           const act = on && b.dataset.secNav === tab + ':' + cur;
-          b.className = 'w-full text-left px-3 py-2 rounded-lg text-xs ' + (act ? 'font-bold text-brand-orange bg-brand-orange/10' : 'font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900');
+          if (b.dataset.flat) b.className = act ? NAV_TOP_ON : NAV_TOP_OFF;
+          else b.className = 'w-full text-left px-3 py-2 rounded-lg text-xs ' + (act ? 'font-bold text-brand-orange bg-brand-orange/10' : 'font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900');
+          if (act) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+        });
+        document.querySelectorAll('[data-sec-ext]').forEach(b => {
+          const act = shown(b.dataset.secExt);
+          b.className = 'w-full text-left px-3 py-2 rounded-lg text-xs flex items-center justify-between ' + (act ? 'font-bold text-brand-orange bg-brand-orange/10' : 'font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900');
           if (act) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
         });
         document.querySelectorAll(`[data-sec-btn^="${tab}:"]`).forEach(b => {
-          const act = b.dataset.secBtn === tab + ':' + cur;
+          const act = on && b.dataset.secBtn === tab + ':' + cur;
           b.className = 'shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ' + (act ? SEC_CHIP_ON : SEC_CHIP_OFF);
           b.setAttribute('aria-selected', act ? 'true' : 'false');
         });
+        document.querySelectorAll('[data-sec-ext-chip]').forEach(b => {
+          const act = shown(b.dataset.secExtChip);
+          b.className = 'shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ' + (act ? SEC_CHIP_ON : SEC_CHIP_OFF);
+        });
       });
+      // En la sección iPhone, "Productos & Variantes" queda marcado (iPhone vive adentro de Productos).
+      const invBtn = document.getElementById('tab-btn-inventory');
+      if (invBtn && shown('iphone')) invBtn.className = NAV_TOP_ON;
     }
     let FIN_SECTION = 'cash';
     function setFinSection(id) {
@@ -2371,18 +2387,12 @@ html { scroll-behavior: smooth; }
       syncFinNav();
     }
     function openFinSection(id) { switchAdminTab('finances'); setFinSection(id); }
-    // Menú lateral: "Finanzas" se despliega con sus 4 secciones y se marca la que está abierta.
+    // Menú lateral: Caja diaria, Monotributo, Reportes y Simulador son vistas de Finanzas repartidas en el menú; se marca la abierta.
     function syncFinNav() {
-      const fin = document.getElementById('tab-btn-finances'), sub = document.getElementById('fin-submenu');
-      if (!fin || !sub) return;
-      const onFin = !document.getElementById('admin-tab-finances').classList.contains('hidden');
-      fin.className = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs ' + (onFin ? 'font-bold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 shadow-sm' : 'font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900') + ' transition-all';
-      fin.setAttribute('aria-expanded', onFin ? 'true' : 'false');
-      sub.classList.toggle('hidden', !onFin);
-      const ch = document.getElementById('fin-chevron'); if (ch) ch.textContent = onFin ? '▾' : '▸';
-      sub.querySelectorAll('[data-fin-nav]').forEach(b => {
+      const onFin = !!document.getElementById('admin-tab-finances') && !document.getElementById('admin-tab-finances').classList.contains('hidden');
+      document.querySelectorAll('[data-fin-nav]').forEach(b => {
         const on = onFin && b.dataset.finNav === FIN_SECTION;
-        b.className = 'w-full text-left px-3 py-2 rounded-lg text-xs ' + (on ? 'font-bold text-brand-orange bg-brand-orange/10' : 'font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900');
+        b.className = on ? NAV_TOP_ON : NAV_TOP_OFF;
         if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
       });
     }
@@ -2408,14 +2418,17 @@ html { scroll-behavior: smooth; }
     // no debería ver. En modo demo local (sin backend) todo el mundo entra
     // como "admin", así que esto no cambia nada hasta que conectes la API.
     function applyRoleTabVisibility() {
+      const waBtn = document.getElementById('wa-send-btn');
+      if (waBtn) waBtn.style.display = currentStaffSession.role === 'admin' ? '' : 'none';
       Object.keys(ADMIN_TAB_ROLES).forEach(t => {
+        const ok = tabAllowedForRole(t, currentStaffSession.role);
         const btn = document.getElementById(`tab-btn-${t}`);
-        if (!btn) return;
-        btn.style.display = tabAllowedForRole(t, currentStaffSession.role) ? '' : 'none';
+        if (btn) btn.style.display = ok ? '' : 'none';
+        document.querySelectorAll(`[data-nav-tab="${t}"]`).forEach(b => { b.style.display = ok ? '' : 'none'; });
       });
       // Un grupo del menú sin ninguna pestaña permitida no se muestra.
       document.querySelectorAll('[data-nav-group]').forEach(g => {
-        const any = [...g.querySelectorAll('button:not([data-fin-nav]):not([data-sec-nav])')].some(b => b.style.display !== 'none');
+        const any = [...g.querySelectorAll('button.admin-tab-btn')].some(b => b.style.display !== 'none');
         g.style.display = any ? '' : 'none';
       });
 
@@ -3231,9 +3244,19 @@ html { scroll-behavior: smooth; }
     // ==========================================
     // 8. ADMIN OPERATIONS HUB & ARCA LEDGER
     // ==========================================
+    // Mientras llegan los datos reales del servidor no se muestran los pedidos guardados
+    // en este navegador (podían estar viejos: pedidos ya resueltos que "aparecían y desaparecían").
+    let ADMIN_LOADING = false;
+    async function adminRetrySync() {
+      ADMIN_LOADING = true; refreshAdminUI();
+      try { await syncAdminDataFromServer(); } finally { ADMIN_LOADING = false; }
+      refreshAdminUI(); appModeSync();
+    }
     async function openAdminModal() {
       applyStaffModeUi();
       expireUnpaidOrders();
+      const liveBackend = isBackendConnected() && !!currentStaffSession.token;
+      if (liveBackend) { ADMIN_LOADING = true; ADMIN_ORDERS = []; }
       refreshAdminUI();
       applyRoleTabVisibility();
       const firstTab = Object.keys(ADMIN_TAB_ROLES).find(t => tabAllowedForRole(t, currentStaffSession.role)) || 'finances';
@@ -3247,8 +3270,12 @@ html { scroll-behavior: smooth; }
       // El panel se muestra enseguida con lo que ya había; cuando llegan
       // los datos reales del servidor, se vuelve a dibujar solo.
       appModeSync();
-      await refreshMyPerms();
-      await syncAdminDataFromServer();
+      try {
+        await refreshMyPerms();
+        await syncAdminDataFromServer();
+      } finally {
+        ADMIN_LOADING = false;
+      }
       refreshAdminUI();
       applyRoleTabVisibility();
       appModeSync();
@@ -3267,19 +3294,20 @@ html { scroll-behavior: smooth; }
       allTabs.forEach(t => {
         const tabEl = document.getElementById(`admin-tab-${t}`);
         const btnEl = document.getElementById(`tab-btn-${t}`);
-        if (!tabEl || !btnEl) return;
+        if (!tabEl) return;
 
         if (t === tabName) {
           tabEl.classList.remove('hidden');
-          btnEl.className = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 shadow-sm transition-all';
+          if (btnEl) btnEl.className = NAV_TOP_ON;
         } else {
           tabEl.classList.add('hidden');
-          btnEl.className = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all';
+          if (btnEl) btnEl.className = NAV_TOP_OFF;
         }
       });
 
       if (tabName === 'finances') setFinSection(FIN_SECTION); else syncFinNav();
       if (TAB_SECS[tabName]) setTabSection(tabName, SEC_NOW[tabName] || TAB_SECS[tabName].def); else syncTabNav();
+      // La sección iPhone se abre desde adentro de Productos & Variantes y lleva un botón para volver.
       if (tabName === 'smart-engine') { renderEngineTab(); loadInsights(); }
       if (typeof onAdminTabShown === 'function') onAdminTabShown(tabName);
       if (tabName === 'iphone') loadIphoneAdmin();
@@ -3480,7 +3508,9 @@ html { scroll-behavior: smooth; }
       const badge = (t) => t === 'pack' ? packTodo : (t === 'deliver' ? delivs.length : (t === 'stock' ? low : 0));
       const tile = (tab, icon, n, label, tone) => `<button type="button" onclick="appGo('${tab}')" class="p-4 rounded-2xl border ${tone} text-left active:scale-[0.98] transition"><div class="text-3xl">${icon}</div><div class="mt-2 text-3xl font-black text-white">${n}</div><div class="text-xs font-semibold text-zinc-300">${label}</div></button>`;
       let body = '';
-      if (APP_TAB === 'home') {
+      if (ADMIN_LOADING) {
+        body = '<div class="text-center text-sm text-zinc-400 py-14">⏳ Cargando lo último del servidor…</div>';
+      } else if (APP_TAB === 'home') {
         body = `<div class="grid grid-cols-2 gap-3">
           ${caps.pack ? tile('pack', '📦', packTodo, 'para embalar', 'border-amber-600/50 bg-amber-950/20') : ''}
           ${caps.deliver ? tile('deliver', '🛵', delivs.length, 'entregas' + (onWay ? ` (${onWay} en camino)` : ''), 'border-sky-600/50 bg-sky-950/20') : ''}
@@ -3668,7 +3698,7 @@ html { scroll-behavior: smooth; }
     }
     function openWaSend() {
       const isAdmin = currentStaffSession.role === 'admin';
-      if (!(isAdmin || can('orders.manage'))) { alert('Esta función es del administrador y de quien gestiona los pedidos.'); return; }
+      if (!isAdmin) { alert('Esta función es solo del administrador.'); return; }
       let wrap = document.getElementById('wa-send');
       if (!wrap) {
         wrap = document.createElement('div');
@@ -5135,7 +5165,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v7.3): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v7.4): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -5970,8 +6000,21 @@ html { scroll-behavior: smooth; }
       if (tab === 'orders' && quick) setOrdersQuick(quick);
     }
     function renderTodayTab() {
-      renderTodayExtras();
       const box = document.getElementById('today-cards');
+      if (ADMIN_LOADING) {
+        const ex = document.getElementById('today-extras'); if (ex) ex.innerHTML = '';
+        const mi = document.getElementById('today-mine'); if (mi) mi.innerHTML = '';
+        const ok = document.getElementById('today-allok'); if (ok) ok.classList.add('hidden');
+        if (box) box.innerHTML = '<div class="col-span-full rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 text-center text-sm text-zinc-400">⏳ Cargando lo último del servidor…</div>';
+        return;
+      }
+      if (isBackendConnected() && currentStaffSession.token && can('orders.view') && !ADMIN_SYNC_OK) {
+        const ex = document.getElementById('today-extras'); if (ex) ex.innerHTML = '';
+        const ok = document.getElementById('today-allok'); if (ok) ok.classList.add('hidden');
+        if (box) box.innerHTML = '<div class="col-span-full rounded-2xl border border-amber-700/50 bg-amber-950/20 p-5 text-sm text-amber-200">⚠️ No pude traer los pedidos del servidor (puede estar despertando o sin señal). <button type="button" onclick="adminRetrySync()" class="ml-1 underline font-bold">Reintentar</button></div>';
+        return;
+      }
+      renderTodayExtras();
       if (!box) return;
       const role = (currentStaffSession && currentStaffSession.role) || 'admin';
       const canTab = t => tabAllowedForRole(t, role);
@@ -8193,15 +8236,9 @@ html { scroll-behavior: smooth; }
       bar.classList.remove('hidden');
       const more = document.getElementById('admin-more-items');
       if (more) {
-        const mainIds = main.map(([m]) => m);
-        const item = t => {
-          const lab = MBAR_LABELS[t];
-          const go = `closeAdminMore();switchAdminTab('${t}')`;
-          return `<button type="button" onclick="${go}" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left ${adminCurrentTab === t ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/60 text-zinc-200'}"><span class="text-lg">${lab[0]}</span>${lab[1]}</button>`;
-        };
         more.innerHTML = ADMIN_NAV_GROUPS.map(g => {
-          const tabs = g.tabs.filter(t => !mainIds.includes(t) && navTabAllowed(t, currentStaffSession.role));
-          return tabs.length ? `<div class="pt-2 pb-0.5 px-1 text-[11px] uppercase font-bold tracking-wider text-zinc-500">${g.icon} ${g.label}</div>` + tabs.map(item).join('') : '';
+          const its = g.items.filter(it => !['today', 'orders', 'inventory'].includes(it.id) && navTabAllowed(it.tab, currentStaffSession.role));
+          return its.length ? `<div class="pt-2 pb-0.5 px-1 text-[11px] uppercase font-bold tracking-wider text-zinc-500">${g.icon} ${g.label}</div>` + its.map(it => `<button type="button" onclick="closeAdminMore();${navItemGo(it)}" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left ${navItemOn(it, adminCurrentTab) ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/60 text-zinc-200'}"><span class="text-lg">${it.icon}</span>${it.label}</button>`).join('') : '';
         }).join('');
       }
     }
