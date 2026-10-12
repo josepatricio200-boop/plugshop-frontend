@@ -443,7 +443,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.5</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v6.6</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -466,99 +466,106 @@ html { scroll-behavior: smooth; }
         
         <!-- LEFT SIDEBAR WITH TABS -->
         <aside class="hidden md:flex w-full md:w-64 bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-800/80 p-3 sm:p-4 flex-col justify-between shrink-0 md:overflow-y-auto">
-          <div class="space-y-1">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-zinc-500 px-3 py-1.5 font-code">Módulos de Gestión</div>
-
-            <!-- Tab Buttons -->
-            <button onclick="switchAdminTab('today')" id="tab-btn-today" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+          <div class="space-y-4">
+            <div data-nav-group="ops" class="space-y-1">
+              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">🛒 Operaciones y Ventas</div>
+              <button onclick="switchAdminTab('today')" id="tab-btn-today" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-base">🏠</span><span>Hoy</span></span>
               <span id="badge-today-count" class="text-[10px] text-zinc-500 font-code"></span>
             </button>
-            <button onclick="switchAdminTab('finances')" id="tab-btn-finances" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">📊</span>
-                <span>Finanzas & Registro ARCA</span>
-              </span>
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            </button>
-
-            <button onclick="switchAdminTab('inventory')" id="tab-btn-inventory" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">📦</span>
-                <span>Productos & Variantes</span>
-              </span>
-              <span id="badge-products-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">8</span>
-            </button>
-
-            <button onclick="switchAdminTab('iphone')" id="tab-btn-iphone" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">📱</span>
-                <span>iPhone</span>
-              </span>
-              <span id="badge-iphone-state" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-bold font-code">oculta</span>
-            </button>
-
-            <button onclick="switchAdminTab('smart-engine')" id="tab-btn-smart-engine" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🧠</span>
-                <span>Motor Inteligente</span>
-              </span>
-              <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold font-code">IA</span>
-            </button>
-
-            <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5">
                 <span class="text-sm">🛵</span>
                 <span>Pedidos & Entregas</span>
               </span>
               <span id="badge-orders-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">3</span>
             </button>
-
-            <button onclick="switchAdminTab('suppliers')" id="tab-btn-suppliers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🤝</span>
-                <span>Proveedores</span>
-              </span>
-              <span class="text-[10px] text-zinc-500 font-code">4 activos</span>
-            </button>
-
-            <button onclick="switchAdminTab('offers')" id="tab-btn-offers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">🏷️</span>
-                <span>Ofertas & Promos</span>
-              </span>
-              <span class="text-[10px] text-amber-400 font-code">2 activas</span>
-            </button>
-
-            <button onclick="switchAdminTab('customers')" id="tab-btn-customers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5">
-                <span class="text-sm">👥</span>
-                <span>Registro de Clientes</span>
-              </span>
-              <span id="badge-cust-count" class="text-[10px] text-zinc-500 font-code">4</span>
-            </button>
-            <button onclick="switchAdminTab('claims')" id="tab-btn-claims" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <button onclick="switchAdminTab('claims')" id="tab-btn-claims" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5">
                 <span class="text-sm">🛡️</span>
                 <span>Reclamos & Garantías</span>
               </span>
               <span id="badge-claims-count" class="text-[10px] text-zinc-500 font-code">0</span>
             </button>
-
-            <button onclick="switchAdminTab('staff-users')" id="tab-btn-staff-users" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+            </div>
+            <div data-nav-group="catalog" class="space-y-1">
+              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">📦 Catálogo e Inventario</div>
+              <button onclick="switchAdminTab('inventory')" id="tab-btn-inventory" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5">
+                <span class="text-sm">📦</span>
+                <span>Productos & Variantes</span>
+              </span>
+              <span id="badge-products-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">8</span>
+            </button>
+              <button onclick="switchAdminTab('suppliers')" id="tab-btn-suppliers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5">
+                <span class="text-sm">🤝</span>
+                <span>Proveedores</span>
+              </span>
+              <span class="text-[10px] text-zinc-500 font-code">4 activos</span>
+            </button>
+              <button onclick="switchAdminTab('iphone')" id="tab-btn-iphone" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5">
+                <span class="text-sm">📱</span>
+                <span>iPhone</span>
+              </span>
+              <span id="badge-iphone-state" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 font-bold font-code">oculta</span>
+            </button>
+            </div>
+            <div data-nav-group="crm" class="space-y-1">
+              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">👥 Clientes y Marketing</div>
+              <button onclick="switchAdminTab('customers')" id="tab-btn-customers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5">
+                <span class="text-sm">👥</span>
+                <span>Registro de Clientes</span>
+              </span>
+              <span id="badge-cust-count" class="text-[10px] text-zinc-500 font-code">4</span>
+            </button>
+              <button onclick="switchAdminTab('offers')" id="tab-btn-offers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5">
+                <span class="text-sm">🏷️</span>
+                <span>Ofertas & Promos</span>
+              </span>
+              <span class="text-[10px] text-amber-400 font-code">2 activas</span>
+            </button>
+            </div>
+            <div data-nav-group="fin" class="space-y-1">
+              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">💰 Finanzas y Configuración</div>
+              <button onclick="switchAdminTab('finances')" id="tab-btn-finances" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5">
+                <span class="text-sm">📊</span>
+                <span>Finanzas & Registro ARCA</span>
+              </span>
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            </button>
+              <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5">
+                <span class="text-sm">⚙️</span>
+                <span>Ajustes & Zonas</span>
+              </span>
+            </button>
+              <button onclick="switchAdminTab('staff-users')" id="tab-btn-staff-users" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5">
                 <span class="text-sm">🔑</span>
                 <span>Usuarios & Permisos</span>
               </span>
               <span id="badge-staff-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">0</span>
             </button>
-
-            <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+            </div>
+            <div data-nav-group="kpi" class="space-y-1">
+              <div class="px-3 pb-1 text-[10px] uppercase font-bold tracking-wider text-zinc-500">📈 Análisis y Métricas</div>
+              <button onclick="switchAdminTab('smart-engine')" id="tab-btn-smart-engine" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5">
-                <span class="text-sm">⚙️</span>
-                <span>Ajustes & Zonas</span>
+                <span class="text-sm">🧠</span>
+                <span>Motor Inteligente</span>
               </span>
+              <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold font-code">IA</span>
             </button>
+              <button onclick="openSection('finances', 'sec-sales')" id="nav-sales-report" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">📊</span><span>Reportes de ventas</span></span>
+              <span class="text-[10px] text-zinc-600">↗</span>
+            </button>
+            </div>
           </div>
 
           <!-- Bottom Session Info -->
@@ -585,6 +592,7 @@ html { scroll-behavior: smooth; }
 
           <!-- TAB 1: FINANZAS & REGISTRO ARCA-READY -->
           <div id="admin-tab-finances" class="space-y-6">
+            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-cash')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">💵 Caja diaria</button><button type="button" onclick="goSection('sec-sales')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">📊 Reportes de ventas</button><button type="button" onclick="goSection('sec-mono')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Monotributo</button><button type="button" onclick="goSection('sec-sim')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Simulador de margen</button></div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 class="text-lg font-bold text-white">Tablero Financiero & Registro Histórico ARCA-Ready</h3>
@@ -603,7 +611,7 @@ html { scroll-behavior: smooth; }
             </div>
             <div id="cashreg-card" class="bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-5 space-y-4">
               <div class="flex items-center justify-between">
-                <h4 class="text-sm font-bold text-white">💵 Caja Diaria</h4>
+                <h4 class="text-sm font-bold text-white" id="sec-cash" style="scroll-margin-top:72px">💵 Caja Diaria</h4>
                 <span id="cashreg-status-badge" class="text-[10px] px-2 py-0.5 rounded font-bold font-code bg-zinc-800 text-zinc-400">Cargando...</span>
               </div>
 
@@ -698,7 +706,7 @@ html { scroll-behavior: smooth; }
             <!-- Reportes de ventas -->
             <div class="p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
               <div class="flex items-center justify-between gap-2 flex-wrap">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider">📊 Reportes de ventas</h4>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-sales" style="scroll-margin-top:72px">📊 Reportes de ventas</h4>
                 <select id="report-period" onchange="setFinPeriod(this.value)" class="bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white font-code focus:outline-none focus:border-brand-orange">
                   <option value="1">Hoy</option><option value="7">Últimos 7 días</option><option value="30" selected>Últimos 30 días</option><option value="0">Todo el historial</option>
                 </select>
@@ -723,7 +731,7 @@ html { scroll-behavior: smooth; }
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div class="lg:col-span-7 p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
                 <div class="flex items-center justify-between">
-                  <h4 class="text-xs font-bold text-white uppercase tracking-wider">Historial Desglosado para Monotributo</h4>
+                  <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-mono" style="scroll-margin-top:72px">Historial Desglosado para Monotributo</h4>
                   <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-semibold font-code">Proyección ARCA</span>
                 </div>
                 
@@ -763,7 +771,7 @@ html { scroll-behavior: smooth; }
 
               <!-- Fast Profit Calculator -->
               <div class="lg:col-span-5 p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Simulador Rápido de Margen</h4>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-sim" style="scroll-margin-top:72px">Simulador Rápido de Margen</h4>
                 <div class="space-y-3 text-xs">
                   <div>
                     <label class="block text-zinc-400 mb-1 font-code">Costo de Compra Proveedor (ARS)</label>
@@ -791,6 +799,7 @@ html { scroll-behavior: smooth; }
 
           <!-- TAB 2: PRODUCTOS, VARIANTES DE COLOR & FOTOS -->
           <div id="admin-tab-inventory" class="hidden space-y-6">
+            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-cats')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Categorías</button><button type="button" onclick="goSection('sec-newprod')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Cargar producto</button><button type="button" onclick="goSection('sec-inv')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Inventario activo</button></div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h3 class="text-lg font-bold text-white">Inventario, Variantes de Color & Ganancias</h3>
@@ -818,7 +827,7 @@ html { scroll-behavior: smooth; }
             <!-- Categorías y subcategorías -->
             <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
               <div>
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-cats" style="scroll-margin-top:72px">
                   <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                   Categorías y Subcategorías
                 </h4>
@@ -866,7 +875,7 @@ html { scroll-behavior: smooth; }
             <!-- Form: Nuevo Producto con Colores, Fotos y Margen en Vivo -->
             <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-5">
               <div class="flex items-center justify-between flex-wrap gap-2">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-newprod" style="scroll-margin-top:72px">
                   <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
                   Cargar Nuevo Producto con Colores y Análisis de Ganancia
                 </h4>
@@ -1134,7 +1143,7 @@ html { scroll-behavior: smooth; }
             <!-- Active Products Table -->
             <div class="space-y-3">
               <div class="flex items-center justify-between">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider">Inventario Activo con Colores & Galería</h4>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-inv" style="scroll-margin-top:72px">Inventario Activo con Colores & Galería</h4>
                 <button id="btn-reset-catalog" onclick="resetToInitialCatalog()" class="text-[11px] text-zinc-400 hover:text-brand-amber underline font-code">
                   Restablecer catálogo demo
                 </button>
@@ -1427,10 +1436,11 @@ html { scroll-behavior: smooth; }
 
           <!-- TAB 6: OFERTAS & DESCUENTOS -->
           <div id="admin-tab-offers" class="hidden space-y-6">
+            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-ann')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Anuncios</button><button type="button" onclick="goSection('sec-coupons')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Cupones</button><button type="button" onclick="goSection('sec-promos')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Promos y formas de pago</button></div>
             <!-- Anuncios para la campanita de los clientes -->
             <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
               <div>
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-brand-orange"></span>Anuncios a clientes (campanita)</h4>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-ann" style="scroll-margin-top:72px"><span class="w-2 h-2 rounded-full bg-brand-orange"></span>Anuncios a clientes (campanita)</h4>
                 <p class="text-[11px] text-zinc-400 mt-1">Lo que escribas acá le aparece a todos los clientes en la campanita de la tienda: promos, novedades, días sin envíos. Los avisos de pedidos (confirmado, en camino, cancelado) se mandan solos.</p>
               </div>
               <form id="announcement-form" onsubmit="createAnnouncement(event)" class="grid grid-cols-1 sm:grid-cols-6 gap-2 text-xs">
@@ -1446,7 +1456,7 @@ html { scroll-behavior: smooth; }
             <!-- Cupones de descuento -->
             <div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
               <div>
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Cupones de descuento</h4>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-coupons" style="scroll-margin-top:72px"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Cupones de descuento</h4>
                 <p class="text-[11px] text-zinc-400 mt-1">El cliente escribe el código en el checkout y se descuenta solo. Se suma al descuento por transferencia. Dejá en 0 lo que no quieras limitar.</p>
               </div>
               <form id="coupon-form" onsubmit="createCoupon(event)" class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
@@ -1464,7 +1474,7 @@ html { scroll-behavior: smooth; }
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h3 class="text-lg font-bold text-white">Ofertas & Promociones Activas</h3>
+                <h3 class="text-lg font-bold text-white" id="sec-promos" style="scroll-margin-top:72px">Ofertas & Promociones Activas</h3>
                 <p class="text-xs text-zinc-400">Descuentos y beneficios de entrega aplicables al catálogo.</p>
               </div>
             </div>
@@ -1602,9 +1612,10 @@ html { scroll-behavior: smooth; }
 
           <!-- TAB 8: AJUSTES & ZONAS -->
           <div id="admin-tab-settings" class="hidden space-y-6">
+            <div class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex gap-1.5 overflow-x-auto" aria-label="Ir a una sección"><button type="button" onclick="goSection('sec-rates')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Tarifas y cobros</button><button type="button" onclick="goSection('sec-backup')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Copia de seguridad</button><button type="button" onclick="goSection('sec-audit')" class="shrink-0 px-3 py-1.5 rounded-full bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white text-[11px] font-semibold">Registro de cambios</button></div>
             <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
               <div>
-                <h4 class="text-sm font-bold text-white">Tarifas de Logística, Datos de Cobro & Descuentos</h4>
+                <h4 class="text-sm font-bold text-white" id="sec-rates" style="scroll-margin-top:72px">Tarifas de Logística, Datos de Cobro & Descuentos</h4>
                 <p class="text-xs text-zinc-400">Configurá tarifas de envío para Yerba Buena y Capital, el descuento por transferencia, tu Alias, CBU y el PIN del staff.</p>
               </div>
 
@@ -1695,7 +1706,7 @@ html { scroll-behavior: smooth; }
             <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
               <div class="flex items-center justify-between gap-3 flex-wrap">
                 <div class="min-w-0">
-                  <h4 class="text-sm font-bold text-white">💾 Copia de seguridad</h4>
+                  <h4 class="text-sm font-bold text-white" id="sec-backup" style="scroll-margin-top:72px">💾 Copia de seguridad</h4>
                   <p class="text-xs text-zinc-400">Descarga un archivo con productos, pedidos, clientes, cupones y reclamos. Hacela una vez por semana y guardala en tu Drive o en tu compu. Tiene datos de clientes: no la compartas. No incluye PINs.</p>
                 </div>
                 <button id="btn-backup" onclick="downloadBackup()" class="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold shrink-0">Descargar copia</button>
@@ -1705,7 +1716,7 @@ html { scroll-behavior: smooth; }
             <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
               <div class="flex items-center justify-between gap-2">
                 <div>
-                  <h4 class="text-sm font-bold text-white">Registro de cambios</h4>
+                  <h4 class="text-sm font-bold text-white" id="sec-audit" style="scroll-margin-top:72px">Registro de cambios</h4>
                   <p class="text-xs text-zinc-400">Quién cambió precios, estados de pedidos, ajustes y usuarios. Los últimos 300 movimientos.</p>
                 </div>
                 <button onclick="loadAudit()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold shrink-0">Actualizar</button>
@@ -2187,6 +2198,25 @@ html { scroll-behavior: smooth; }
       'customers': ['customers.manage'],
       'claims': ['claims.manage']
     };
+    // Cómo se agrupa el menú del panel (las pestañas son las mismas de siempre, solo ordenadas).
+    const ADMIN_NAV_GROUPS = [
+      { id: 'ops', icon: '🛒', label: 'Operaciones y Ventas', tabs: ['today', 'orders', 'claims'] },
+      { id: 'catalog', icon: '📦', label: 'Catálogo e Inventario', tabs: ['inventory', 'suppliers', 'iphone'] },
+      { id: 'crm', icon: '👥', label: 'Clientes y Marketing', tabs: ['customers', 'offers'] },
+      { id: 'fin', icon: '💰', label: 'Finanzas y Configuración', tabs: ['finances', 'settings', 'staff-users'] },
+      { id: 'kpi', icon: '📈', label: 'Análisis y Métricas', tabs: ['smart-engine', 'sales-report'] }
+    ];
+    // "sales-report" no es una pestaña: es un atajo a Reportes de ventas (dentro de Finanzas).
+    function navTabAllowed(t, role) { return t === 'sales-report' ? tabAllowedForRole('finances', role) : tabAllowedForRole(t, role); }
+    // Salta a una sección dentro de una pestaña.
+    function goSection(secId) {
+      const el = document.getElementById(secId);
+      if (el && el.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function openSection(tab, secId) {
+      switchAdminTab(tab);
+      setTimeout(() => goSection(secId), 60);
+    }
     function tabAllowedForRole(tabName, role) {
       if (role === 'admin') return true;
       const need = TAB_PERMS[tabName];
@@ -2213,6 +2243,13 @@ html { scroll-behavior: smooth; }
         const btn = document.getElementById(`tab-btn-${t}`);
         if (!btn) return;
         btn.style.display = tabAllowedForRole(t, currentStaffSession.role) ? '' : 'none';
+      });
+      const sales = document.getElementById('nav-sales-report');
+      if (sales) sales.style.display = tabAllowedForRole('finances', currentStaffSession.role) ? '' : 'none';
+      // Un grupo del menú sin ninguna pestaña permitida no se muestra.
+      document.querySelectorAll('[data-nav-group]').forEach(g => {
+        const any = [...g.querySelectorAll('button')].some(b => b.style.display !== 'none');
+        g.style.display = any ? '' : 'none';
       });
 
       const resetBtn = document.getElementById('btn-reset-catalog');
@@ -6587,7 +6624,19 @@ html { scroll-behavior: smooth; }
         (rest.length ? btn(rest.includes(adminCurrentTab), 'openAdminMore()', '☰', 'Más', 0) : '');
       bar.classList.remove('hidden');
       const more = document.getElementById('admin-more-items');
-      if (more) more.innerHTML = rest.map(t => `<button type="button" onclick="closeAdminMore();switchAdminTab('${t}')" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left ${adminCurrentTab === t ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/60 text-zinc-200'}"><span class="text-lg">${MBAR_LABELS[t][0]}</span>${MBAR_LABELS[t][1]}</button>`).join('');
+      if (more) {
+        const mainIds = main.map(([m]) => m);
+        const item = t => {
+          const isSales = t === 'sales-report';
+          const lab = isSales ? ['📊', 'Reportes de ventas'] : MBAR_LABELS[t];
+          const go = isSales ? "closeAdminMore();openSection('finances','sec-sales')" : `closeAdminMore();switchAdminTab('${t}')`;
+          return `<button type="button" onclick="${go}" class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-left ${adminCurrentTab === t ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/60 text-zinc-200'}"><span class="text-lg">${lab[0]}</span>${lab[1]}</button>`;
+        };
+        more.innerHTML = ADMIN_NAV_GROUPS.map(g => {
+          const tabs = g.tabs.filter(t => !mainIds.includes(t) && navTabAllowed(t, currentStaffSession.role));
+          return tabs.length ? `<div class="pt-2 pb-0.5 px-1 text-[11px] uppercase font-bold tracking-wider text-zinc-500">${g.icon} ${g.label}</div>` + tabs.map(item).join('') : '';
+        }).join('');
+      }
     }
     function openAdminMore() { const s = document.getElementById('admin-more-sheet'); if (s) s.classList.remove('hidden'); }
     function closeAdminMore() { const s = document.getElementById('admin-more-sheet'); if (s) s.classList.add('hidden'); }
