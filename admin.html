@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.3</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.4</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -3247,12 +3247,12 @@ html { scroll-behavior: smooth; }
     // 4. CUSTOMER PORTAL
     // ==========================================
 
-    /* ===== DATOS LEGALES DEL VENDEDOR — COMPLETAR ANTES DE PUBLICAR ===== */
+    /* ===== DATOS LEGALES DEL VENDEDOR ===== */
     const LEGAL_DATA = {
-      razonSocial: '[COMPLETAR: nombre o razón social]',
-      cuit: '[COMPLETAR: CUIT]',
-      domicilio: '[COMPLETAR: domicilio, San Miguel de Tucumán]',
-      email: '[COMPLETAR: email de contacto]',
+      razonSocial: 'José Patricio Rodriguez',
+      cuit: '20-35811384-3',
+      domicilio: 'Simón Bolívar 158, San Miguel de Tucumán',
+      email: 'plugshop.arg@gmail.com',
       actualizado: '7 de octubre de 2026'
     };
 
@@ -5928,7 +5928,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v8.3): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v8.4): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -6767,7 +6767,7 @@ html { scroll-behavior: smooth; }
         { id: 'test', ok: !!man.test, label: 'Hice un pedido de prueba completo (pedir → pagar → despachar → entregar)', hint: '' },
         { id: 'clean', ok: !!man.clean, label: 'Borré los pedidos, clientes y reclamos de prueba', hint: '' },
         { id: 'lawyer', ok: !!man.lawyer, label: 'Un abogado revisó los textos legales', hint: '' },
-        { id: 'banner', ok: !!man.banner, label: 'Saqué el cartel de "Versión piloto"', hint: 'Se quita en una actualización de la tienda.' }
+        { id: 'banner', auto: true, ok: !document.getElementById('pilot-banner'), label: 'Saqué el cartel de "Versión piloto"', hint: '' }
       ];
     }
     function weekdayShort(d) { return ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][d.getDay()]; }
