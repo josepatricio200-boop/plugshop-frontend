@@ -481,7 +481,7 @@ html { scroll-behavior: smooth; }
         </nav>
 
         <!-- Campanita de avisos -->
-        <button onclick="toggleNotifPanel()" id="notif-bell" aria-label="Avisos" class="relative flex items-center px-2.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white transition-all">
+        <button onclick="toggleNotifPanel()" id="notif-bell" aria-label="Avisos" class="relative hidden items-center px-2.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300 hover:text-white transition-all">
           <svg class="w-4 h-4 text-brand-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2c0 .5-.2 1-.6 1.4L4 17h5m6 0a3 3 0 11-6 0m6 0H9"/></svg>
           <span id="notif-badge" class="hidden absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-orange text-black text-[10px] font-bold items-center justify-center"></span>
         </button>
@@ -499,7 +499,7 @@ html { scroll-behavior: smooth; }
         </button>
 
         <!-- Modo claro / oscuro -->
-        <button type="button" data-theme-btn onclick="toggleTheme()" aria-label="Cambiar a modo claro" title="Modo claro" class="theme-btn hidden sm:inline-flex bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300">☀️</button>
+        <button type="button" id="header-theme-btn" data-theme-btn onclick="toggleTheme()" aria-label="Cambiar a modo claro" title="Modo claro" class="theme-btn inline-flex bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300">☀️</button>
 
         <!-- Cart Button -->
         <button id="open-cart-btn" aria-label="Ver carrito de compras" class="relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white text-black font-semibold text-xs transition-transform active:scale-95 hover:bg-zinc-200 shadow-md">
@@ -799,9 +799,10 @@ html { scroll-behavior: smooth; }
   <div id="product-detail-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="relative w-full max-w-2xl lg:max-w-6xl bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
       <div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/90">
-        <div class="flex items-center gap-2">
-          <span id="detail-modal-type-badge"></span>
-          <span id="detail-modal-brand" class="text-xs text-zinc-400 font-semibold font-code"></span>
+        <div class="flex items-center gap-1.5 flex-wrap min-w-0 pr-2">
+          <span id="detail-modal-type-badge" class="inline-flex"></span>
+          <span id="detail-modal-brand" class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-extrabold bg-brand-orange/15 text-brand-orange border border-brand-orange/40"></span>
+          <span id="detail-modal-cat" class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-semibold bg-zinc-800 text-zinc-200 border border-zinc-700"></span>
         </div>
         <button onclick="closeProductGallery()" aria-label="Cerrar galería" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">✕</button>
       </div>
@@ -916,7 +917,10 @@ html { scroll-behavior: smooth; }
   <div id="notif-panel" class="hidden fixed top-[68px] right-3 left-3 sm:left-auto sm:w-96 z-[60] max-h-[75vh] flex-col bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden">
     <div class="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
       <span class="text-sm font-bold text-white">Avisos</span>
-      <button onclick="closeNotifPanel()" aria-label="Cerrar avisos" class="text-zinc-400 hover:text-white text-sm px-2">✕</button>
+      <span class="flex items-center gap-1.5">
+        <button type="button" data-theme-btn onclick="toggleTheme()" aria-label="Cambiar a modo claro" title="Modo claro" class="theme-btn bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/60 text-zinc-300">☀️</button>
+        <button onclick="closeNotifPanel()" aria-label="Cerrar avisos" class="text-zinc-400 hover:text-white text-sm px-2">✕</button>
+      </span>
     </div>
     <div id="notif-body" class="overflow-y-auto p-3 space-y-2 text-xs"></div>
   </div>
@@ -2324,12 +2328,14 @@ html { scroll-behavior: smooth; }
       const isOrig = prod.type === 'original';
       const typeBadge = document.getElementById('detail-modal-type-badge');
       typeBadge.innerHTML = isIphoneProd(prod)
-        ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-950 text-sky-300 border border-sky-800 font-code">📱 ${isUsedIphone(prod) ? 'iPhone usado' : 'iPhone sellado'}</span>`
+        ? `<span class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-bold bg-sky-950 text-sky-300 border border-sky-800">📱 ${isUsedIphone(prod) ? 'iPhone usado' : 'iPhone sellado'}</span>`
         : isOrig
-        ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-950 text-cyan-400 border border-cyan-800 font-code">🏅 Original</span>`
-        : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950 text-amber-400 border border-amber-800 font-code">⚡ PlugShop Selección</span>`;
+        ? `<span class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">🏅 Original</span>`
+        : `<span class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-bold bg-amber-950 text-amber-400 border border-amber-800">⚡ PlugShop Selección</span>`;
 
       document.getElementById('detail-modal-brand').textContent = prod.brand;
+      { const catTxt = [categoryLabel(prod.category), prod.subcategory ? categoryLabel(prod.subcategory) : ''].filter(Boolean).join(' › ');
+        const ce = document.getElementById('detail-modal-cat'); ce.textContent = catTxt; ce.classList.toggle('hidden', !catTxt); }
       document.getElementById('gallery-title').textContent = prod.name;
       renderGalleryDesc(prod.specs);
       document.getElementById('gallery-warranty').textContent = prod.warranty;
@@ -2953,6 +2959,7 @@ html { scroll-behavior: smooth; }
     function walletSet(token, remember) {
       walletToken = token;
       if (remember) walletRemembered = true;
+      try { syncBellVisibility(); } catch (e) {}
       if (walletRemembered) {
         saveStorage(WALLET_KEY, { t: token, exp: Date.now() + 90 * 86400000 });
         try { sessionStorage.removeItem(WALLET_KEY); } catch (e) {}
@@ -2965,6 +2972,7 @@ html { scroll-behavior: smooth; }
       walletToken = ''; walletRemembered = false; localOwnedIds = [];
       try { sessionStorage.removeItem(WALLET_KEY); } catch (e) {}
       try { localStorage.removeItem(WALLET_KEY); } catch (e) {}
+      try { syncBellVisibility(); } catch (e) {}
     }
 
     function accessError(msg) {
@@ -4047,7 +4055,21 @@ html { scroll-behavior: smooth; }
       const d = Math.round(h / 24);
       return `hace ${d} día${d === 1 ? '' : 's'}`;
     }
+    // La campanita solo se muestra cuando sirve: el cliente ya verificó sus pedidos (tiene pase) o hay un anuncio vigente.
+    // Mientras no se ve, en su lugar va el botón de modo claro/oscuro; con la campanita, ese botón pasa al panel de avisos en el celular.
+    function syncBellVisibility() {
+      const bell = document.getElementById('notif-bell');
+      const th = document.getElementById('header-theme-btn');
+      const hasAnn = typeof notifState !== 'undefined' && notifState && Array.isArray(notifState.announcements) && notifState.announcements.length > 0;
+      const show = !!walletToken || hasAnn;
+      if (bell) { bell.classList.toggle('hidden', !show); bell.classList.toggle('flex', show); }
+      if (th) {
+        th.classList.remove('hidden', 'inline-flex', 'sm:inline-flex');
+        if (show) th.classList.add('hidden', 'sm:inline-flex'); else th.classList.add('inline-flex');
+      }
+    }
     function updateNotifBadge() {
+      syncBellVisibility();
       const b = document.getElementById('notif-badge');
       if (!b) return;
       const n = notifUnreadCount();
@@ -5045,6 +5067,7 @@ html { scroll-behavior: smooth; }
     // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
       walletInit();
+      syncBellVisibility();
       renderCategoryPills();
       renderProducts();
       updateCartUI();
