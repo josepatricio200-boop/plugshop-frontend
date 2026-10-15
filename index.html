@@ -568,6 +568,11 @@ html { scroll-behavior: smooth; }
     </div>
   </section>
 
+  <!-- Campañas / promociones por fecha (Día de la Madre, etc.) -->
+  <section id="promos-section" class="hidden pt-8 sm:pt-12 scroll-mt-16" aria-label="Promociones">
+    <div id="promos-box" class="max-w-7xl 2xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 space-y-5"></div>
+  </section>
+
   <!-- Catalog Section -->
   <section id="catalogo" class="py-10 sm:py-20 scroll-mt-16">
     <div class="max-w-7xl 2xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8">
@@ -774,7 +779,7 @@ html { scroll-behavior: smooth; }
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">PLUGSHOP</div>
           <div class="text-zinc-500 text-[11px] pt-2 font-code">
-            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v8.7</span>
+            © 2026 PLUGSHOP · Argentina <span class="opacity-60">· v8.8</span>
           </div>
         </div>
 
@@ -850,6 +855,7 @@ html { scroll-behavior: smooth; }
                 </div>
                 <div id="gallery-compare" class="hidden text-xs text-rose-300 font-semibold font-code mt-0.5"></div>
                 <span id="gallery-installments" class="text-xs text-emerald-400 font-medium">🔥 10% OFF abonando por Transferencia</span>
+                <div id="gallery-delay" class="hidden mt-2 text-[11px] leading-snug text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2"></div>
               </div>
 
               <button id="gallery-add-btn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-extrabold text-xs shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2">
@@ -1166,6 +1172,7 @@ html { scroll-behavior: smooth; }
     </div>
 
     <div id="cart-items-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+    <div id="cart-delay-note" class="hidden mx-4 mb-3 text-[11px] leading-snug text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2"></div>
 
     <div class="p-5 border-t border-zinc-800 bg-black/90 space-y-4">
       <div class="space-y-1.5 text-xs">
@@ -1226,8 +1233,9 @@ html { scroll-behavior: smooth; }
         <div class="space-y-3">
           <div class="flex items-center justify-between">
             <span class="font-bold text-white text-sm">2. Zona de Entrega (Tucumán & Yerba Buena)</span>
-            <span class="text-[10px] text-emerald-400 font-code">✓ Entregas en el día</span>
+            <span id="chk-same-day" class="text-[10px] text-emerald-400 font-code">✓ Entregas en el día</span>
           </div>
+          <p id="chk-delay-note" class="hidden text-[11px] text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2"></p>
           <p id="chk-vehicle-note" class="hidden text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2"></p>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             
@@ -1465,6 +1473,7 @@ html { scroll-behavior: smooth; }
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
+        PROMOTIONS: '/api/promotions',         // GET público: campañas vigentes; admin: /all, POST/PUT/DELETE
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
         INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
         BACKUP: '/api/backup',                 // GET (solo admin): copia de seguridad completa
@@ -1651,6 +1660,7 @@ html { scroll-behavior: smooth; }
         PRODUCTS = res.map(sanitizeProduct);
         renderProducts();
         updateCartUI();
+        if (PROMOS.length) renderPromos();
       }
     }
 
@@ -1723,6 +1733,7 @@ html { scroll-behavior: smooth; }
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
+        delayNotice: p.delayNotice === true, delayDaysMin: Number.isInteger(Number(p.delayDaysMin)) && Number(p.delayDaysMin) >= 1 ? Number(p.delayDaysMin) : null, delayDaysMax: Number.isInteger(Number(p.delayDaysMax)) && Number(p.delayDaysMax) >= 1 ? Number(p.delayDaysMax) : null,
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
         accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
         warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
@@ -2267,6 +2278,7 @@ html { scroll-behavior: smooth; }
               <span class="truncate">${escapeHtml(kind)}${months ? ' · ' + escapeHtml(months) + '<span class="hidden sm:inline"> de garantía</span>' : ''}${colorsTxt}</span>
             </div>
             ${stockLabel ? `<div class="mt-1">${stockLabel}</div>` : ''}
+            ${delayInfo(product) ? `<div data-delay-badge class="mt-1 text-[10px] sm:text-[11px] text-amber-300 font-semibold">⏳ Puede demorar ${delayInfo(product).text}</div>` : ''}
             ${vehicleOfProduct(product) !== 'moto' ? `<div class="mt-1 text-[10px] sm:text-[11px] text-zinc-400">${VEHICLE_INFO[vehicleOfProduct(product)].icon} Se entrega en ${VEHICLE_INFO[vehicleOfProduct(product)].label.toLowerCase()}</div>` : ''}
 
             <div class="mt-auto pt-2.5 sm:pt-4">
@@ -2339,7 +2351,10 @@ html { scroll-behavior: smooth; }
         galCmp.textContent = offPct(prod) ? `🏷️ Antes ${formatARS(prod.compareAtPrice)} · -${offPct(prod)}% de rebaja` : '';
         galCmp.classList.toggle('hidden', !offPct(prod));
       }
-      document.getElementById('gallery-installments').textContent = `🔥 ${discountPct}% OFF pagando por Transferencia · Entrega en el día`;
+      const galDelay = delayInfo(prod);
+      document.getElementById('gallery-installments').textContent = `🔥 ${discountPct}% OFF pagando por Transferencia` + (galDelay ? '' : ' · Entrega en el día');
+      const galDelayBox = document.getElementById('gallery-delay');
+      if (galDelayBox) { galDelayBox.classList.toggle('hidden', !galDelay); if (galDelay) galDelayBox.innerHTML = `⏳ <b>Puede demorar ${galDelay.text}.</b> Este producto no lo tenemos en el local o llega de fuera de Tucumán. Te confirmamos el día exacto por WhatsApp antes de enviarlo.`; }
 
       renderGalleryColorPills(colors);
       const colorsBox = document.getElementById('gallery-colors-box');
@@ -3328,6 +3343,7 @@ html { scroll-behavior: smooth; }
                 <span class="text-xs text-brand-orange font-bold">${formatARS(item.price * item.qty)}</span>
               </div>
               ${isAtMaxStock ? '<span class="text-[9px] text-amber-400 font-semibold block mt-0.5 font-code">Tope de stock disponible</span>' : ''}
+              ${delayInfo(prod) ? `<span class="text-[10px] text-amber-300 font-semibold block mt-0.5">⏳ Demora ${delayInfo(prod).text}</span>` : ''}
             </div>
             <div class="flex items-center gap-2 bg-black border border-zinc-800 rounded-lg p-1 text-xs font-code">
               <button onclick="changeQty(${idx}, -1)" class="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors" title="Restar">-</button>
@@ -3342,6 +3358,7 @@ html { scroll-behavior: smooth; }
           </div>
         `}).join('');
       }
+      renderDelayNotes();
     }
 
     // ==========================================
@@ -3495,6 +3512,37 @@ html { scroll-behavior: smooth; }
     const VEHICLE_INFO = { moto: { label: 'Moto', icon: '🛵' }, auto: { label: 'Auto', icon: '🚗' } };
     const VEHICLE_ORDER = Object.keys(VEHICLE_INFO);
     function vehicleOfProduct(p) { return p && VEHICLE_INFO[p.deliveryClass] ? p.deliveryClass : 'moto'; }
+    // Aviso de demora: productos que no están en el local o llegan de fuera de Tucumán.
+    // Se avisa ANTES de comprar (ficha, carrito y checkout) y queda en el mensaje de WhatsApp.
+    function delayInfo(p) {
+      if (!p || !(p.delayNotice === true || p.pickupAtSupplier === true)) return null;
+      const clamp = (v, d) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= 1 && n <= 30 ? n : d; };
+      const min = clamp(p.delayDaysMin, 1); let max = clamp(p.delayDaysMax, 4); if (max < min) max = min;
+      return { min, max, text: min === max ? `${min} ${min === 1 ? 'día' : 'días'}` : `${min} a ${max} días` };
+    }
+    // Resumen de lo que hay en el carrito: { items:[{name,info}], min, max, text } o null.
+    function cartDelay() {
+      const items = [];
+      cart.forEach(it => { const info = delayInfo(PRODUCTS.find(p => p.id === it.id)); if (info && !items.some(x => x.id === it.id)) items.push({ id: it.id, name: it.name, info }); });
+      if (!items.length) return null;
+      const min = Math.max(...items.map(x => x.info.min)), max = Math.max(...items.map(x => x.info.max));
+      return { items, min, max, text: min === max ? `${min} ${min === 1 ? 'día' : 'días'}` : `${min} a ${max} días` };
+    }
+    function renderDelayNotes() {
+      const d = cartDelay();
+      const names = d ? d.items.map(x => escapeHtml(x.name)).join(', ') : '';
+      const cartBox = document.getElementById('cart-delay-note');
+      if (cartBox) {
+        cartBox.classList.toggle('hidden', !d);
+        if (d) cartBox.innerHTML = `⏳ <b>Puede demorar ${d.text}.</b> ${d.items.length === 1 ? 'Este producto no está en el local' : 'Estos productos no están en el local'} (o llega${d.items.length === 1 ? '' : 'n'} de fuera de Tucumán): ${names}. Te confirmamos el día por WhatsApp.`;
+      }
+      const chk = document.getElementById('chk-delay-note');
+      if (chk) {
+        chk.classList.toggle('hidden', !d);
+        if (d) chk.innerHTML = `⏳ <b>Tu pedido puede demorar ${d.text}</b> por el envío de: ${names}. Si preferís, sacalo del carrito para recibir el resto en el día.`;
+      }
+      const sd = document.getElementById('chk-same-day'); if (sd) sd.classList.toggle('hidden', !!d);
+    }
     function vehicleOfItems(items) {
       return (items || []).reduce((best, it) => {
         const v = vehicleOfProduct(PRODUCTS.find(p => p.id === it.id));
@@ -3591,6 +3639,7 @@ html { scroll-behavior: smooth; }
       if (cart.length === 0) return;
       closeCartDrawer();
       updateCheckoutTotalPreview();
+      renderDelayNotes();
       document.getElementById('checkout-modal').classList.remove('hidden');
       document.getElementById('checkout-modal').classList.add('flex');
     }
@@ -3767,6 +3816,7 @@ html { scroll-behavior: smooth; }
       saveStorage(STORAGE_KEYS.CUSTOMERS, CUSTOMERS);
 
       const trackingUrl = window.location.origin + window.location.pathname + '#track=' + orderNumber;
+      const waDelay = cartDelay();
       const itemsText = cart.map(i => `• ${i.qty}x ${i.name}\n  ↳ ${i.selectedColor && i.selectedColor !== 'Único' ? 'Color: ' + i.selectedColor + ' ' : ''}(${formatARS(i.price * i.qty)})`).join('\n');
 
       const messageRaw = `*NUEVA ORDEN ${orderNumber} EN PLUGSHOP*\n` +
@@ -3779,7 +3829,8 @@ html { scroll-behavior: smooth; }
         `${couponAmount > 0 ? `🎟️ *Cupón ${couponCode}:* -${formatARS(couponAmount)}\n` : ''}` +
         `${isTransfer ? `🏦 *Alias:* ${STORE_SETTINGS.bankAlias || 'PlugShop.store.ar'}\n` : ''}` +
         `${isTransfer && STORE_SETTINGS.bankCbu ? `🔢 *CVU/CBU:* ${STORE_SETTINGS.bankCbu}\n` : ''}` +
-        `${VEHICLE_INFO[vehicle].icon} *Logística${vehicle === 'moto' ? '' : ' (envío en ' + VEHICLE_INFO[vehicle].label.toLowerCase() + ')'}:* ${isRetiro ? 'Retiro sin cargo' : (shippingCost > 0 ? `+${formatARS(shippingCost)}` : 'Envío Gratis')}\n\n` +
+        `${VEHICLE_INFO[vehicle].icon} *Logística${vehicle === 'moto' ? '' : ' (envío en ' + VEHICLE_INFO[vehicle].label.toLowerCase() + ')'}:* ${isRetiro ? 'Retiro sin cargo' : (shippingCost > 0 ? `+${formatARS(shippingCost)}` : 'Envío Gratis')}\n` +
+        `${waDelay ? `⏳ *Demora estimada:* ${waDelay.text} (${waDelay.items.map(x => x.name).join(', ')}) - ya me avisaron\n` : ''}\n` +
         `*PRODUCTOS & COLORES SELECCIONADOS:*\n${itemsText}\n\n` +
         `💰 *TOTAL FINAL:* ${formatARS(grandTotal)}\n` +
         `--------------------------------\n` +
@@ -3799,6 +3850,58 @@ html { scroll-behavior: smooth; }
         openOrderTrackingModal(orderNumber);
         showTrackWa(orderNumber);
       }, 700);
+    }
+
+    // ---- Campañas en la tienda ----
+    let PROMOS = [];
+    const PROMO_THEMES = {
+      orange: 'from-orange-500/25 via-zinc-900 to-zinc-900 border-orange-500/40',
+      pink: 'from-pink-500/25 via-zinc-900 to-zinc-900 border-pink-500/40',
+      cyan: 'from-cyan-500/25 via-zinc-900 to-zinc-900 border-cyan-500/40',
+      emerald: 'from-emerald-500/25 via-zinc-900 to-zinc-900 border-emerald-500/40',
+      violet: 'from-violet-500/25 via-zinc-900 to-zinc-900 border-violet-500/40'
+    };
+    async function loadPromosFromServer() {
+      if (!isBackendConnected()) return;
+      const res = await apiRequest('PROMOTIONS');
+      if (Array.isArray(res)) { PROMOS = res; renderPromos(); }
+    }
+    function copyPromoCoupon(code, btn) {
+      const done = () => { if (btn) { const t = btn.dataset.t || btn.textContent; btn.dataset.t = t; btn.textContent = '¡Copiado!'; setTimeout(() => { btn.textContent = t; }, 1800); } };
+      try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(code).then(done, done); return; } } catch (e) {}
+      done();
+    }
+    function renderPromos() {
+      const sec = document.getElementById('promos-section'), box = document.getElementById('promos-box'); if (!sec || !box) return;
+      const list = (PROMOS || []).filter(p => p && p.title);
+      sec.classList.toggle('hidden', !list.length);
+      const disc = STORE_SETTINGS.transferDiscountPct || 10;
+      box.innerHTML = list.map(p => {
+        const prods = (p.productIds || []).map(id => PRODUCTS.find(x => x.id === id)).filter(x => x && x.active !== false);
+        const theme = PROMO_THEMES[p.theme] || PROMO_THEMES.orange;
+        const until = p.endDate ? `Hasta el ${p.endDate.split('-').reverse().slice(0, 2).join('/')}` : '';
+        const chips = [until ? `<span class="px-2.5 py-1 rounded-full bg-black/40 border border-white/10 text-zinc-200 text-[11px] font-semibold">⏰ ${escapeHtml(until)}</span>` : '',
+          p.couponCode ? `<button type="button" data-promo-coupon="${escapeHtml(p.couponCode)}" onclick="copyPromoCoupon('${escapeHtml(p.couponCode)}', this)" class="px-2.5 py-1 rounded-full bg-brand-orange text-black text-[11px] font-extrabold" title="Tocá para copiar el código">🎟️ Cupón ${escapeHtml(p.couponCode)}${p.couponLabel ? ' · ' + escapeHtml(p.couponLabel) : ''}</button>` : ''].filter(Boolean).join('');
+        const cards = prods.map(pr => {
+          const tp = Math.round(pr.price * (1 - disc / 100));
+          const vis = (pr.photos && pr.photos[0]) ? pr.photos[0] : '📦';
+          const d = delayInfo(pr);
+          return `<button type="button" data-promo-product="${pr.id}" onclick="openProductGallery(${pr.id})" class="snap-start shrink-0 w-36 sm:w-44 text-left rounded-xl bg-zinc-900/90 border border-white/[0.08] hover:border-brand-orange/60 overflow-hidden transition-colors ${pr.stock === 0 ? 'opacity-60' : ''}">
+            <div class="h-24 sm:h-32 bg-black/40 flex items-center justify-center overflow-hidden">${renderVisualElement(vis, 'w-full h-full object-cover', 'text-4xl')}</div>
+            <div class="p-2.5"><div class="text-[12px] font-bold text-white leading-snug line-clamp-2">${escapeHtml(pr.name)}</div>
+              <div class="mt-1 text-sm font-black text-white">${formatARS(tp)}</div><div class="text-[10px] text-emerald-400">${disc}% OFF transferencia</div>
+              ${pr.stock === 0 ? '<div class="text-[10px] text-rose-400 font-bold mt-0.5">Sin stock</div>' : (d ? `<div class="text-[10px] text-amber-300 font-semibold mt-0.5">⏳ ${escapeHtml(d.text)}</div>` : '')}</div></button>`;
+        }).join('');
+        return `<article data-promo="${escapeHtml(p.id)}" class="rounded-3xl border bg-gradient-to-br ${theme} p-4 sm:p-6">
+          <div class="flex items-start gap-3 sm:gap-4">
+            <div class="text-4xl sm:text-5xl leading-none shrink-0" aria-hidden="true">${escapeHtml(p.icon || '🎁')}</div>
+            <div class="min-w-0 flex-1"><h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">${escapeHtml(p.title)}</h3>
+              ${p.body ? `<p class="text-sm text-zinc-300 mt-1">${escapeHtml(p.body)}</p>` : ''}
+              ${chips ? `<div class="flex flex-wrap gap-2 mt-3">${chips}</div>` : ''}</div>
+          </div>
+          ${cards ? `<div class="mt-4 -mx-1 px-1 flex gap-3 overflow-x-auto snap-x pb-1">${cards}</div>` : ''}
+        </article>`;
+      }).join('');
     }
 
     // ---- Reclamos y garantías (panel) ----
@@ -4948,6 +5051,7 @@ html { scroll-behavior: smooth; }
       loadCategoriesFromServer();
       loadNotifications();
       loadCatalogFromServer();
+      loadPromosFromServer();
       applyStoreWhatsappLinks();
       applyBankDisplay();
       loadSettingsFromServer();

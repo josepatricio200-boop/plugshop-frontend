@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.7</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.8</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -779,29 +779,89 @@ html { scroll-behavior: smooth; }
                 </div>
               </div>
 
-              <!-- Fast Profit Calculator -->
-              <div data-fin-pane="sim" class="hidden max-w-xl p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
-                <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-sim" style="scroll-margin-top:72px">Simulador Rápido de Margen</h4>
+              <!-- Simulador de margen -->
+              <div data-fin-pane="sim" class="hidden max-w-2xl p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 space-y-4">
+                <div class="flex items-start justify-between gap-3 flex-wrap">
+                  <h4 class="text-xs font-bold text-white uppercase tracking-wider" id="sec-sim" style="scroll-margin-top:72px">Calculá tu ganancia</h4>
+                  <select id="sim-product" onchange="simLoadProduct(this.value)" aria-label="Cargar un producto" class="max-w-[220px] bg-zinc-950 border border-zinc-800 rounded-lg px-2 py-1.5 text-[11px] text-zinc-200 font-code focus:outline-none focus:border-brand-orange"><option value="">📦 Cargar un producto…</option></select>
+                </div>
                 <div class="space-y-3 text-xs">
-                  <div>
-                    <label class="block text-zinc-400 mb-1 font-code">Costo de Compra Proveedor (ARS)</label>
-                    <input type="number" id="calc-cost" value="45000" oninput="runMarginCalc()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-code" />
-                  </div>
-                  <div>
-                    <label class="block text-zinc-400 mb-1 font-code">Precio de Venta Público (ARS)</label>
-                    <input type="number" id="calc-price" value="79900" oninput="runMarginCalc()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-code" />
-                  </div>
-                  
-                  <div class="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-2 font-code">
-                    <div class="flex justify-between">
-                      <span class="text-zinc-400">Ganancia limpia por unidad:</span>
-                      <strong id="calc-net" class="text-emerald-400 font-bold">$34.900</strong>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label for="calc-cost" class="block text-zinc-400 mb-1 font-code">Costo del proveedor ($)</label>
+                      <input type="number" min="0" id="calc-cost" value="45000" oninput="runMarginCalc()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-code" />
                     </div>
-                    <div class="flex justify-between">
-                      <span class="text-zinc-400">Margen bruto s/venta:</span>
-                      <strong id="calc-pct" class="text-brand-amber font-bold">43.7%</strong>
+                    <div>
+                      <label for="calc-price" class="block text-zinc-400 mb-1 font-code">Precio de lista ($)</label>
+                      <input type="number" min="0" id="calc-price" value="79900" oninput="runMarginCalc()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-code" />
                     </div>
                   </div>
+
+                  <div class="rounded-xl bg-zinc-950 border border-zinc-800 p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                      <span class="text-zinc-300 font-bold">🎯 Poner el precio con un porcentaje</span>
+                      <button type="button" id="sim-edit-presets" onclick="simTogglePresetEdit()" class="text-[11px] text-zinc-400 hover:text-brand-amber underline">✏️ Editar porcentajes</button>
+                    </div>
+                    <div id="sim-presets" class="flex flex-wrap gap-1.5"></div>
+                    <div id="sim-presets-edit" class="hidden flex items-center gap-2 flex-wrap">
+                      <input type="text" id="sim-presets-input" inputmode="decimal" placeholder="Ej: 20, 30, 40, 50" aria-label="Porcentajes predeterminados" class="flex-1 min-w-[140px] bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-white font-code focus:outline-none focus:border-brand-orange" />
+                      <button type="button" onclick="simSavePresets()" class="px-3 py-1.5 rounded-lg bg-brand-orange text-black font-bold">Guardar</button>
+                      <button type="button" onclick="simResetPresets()" class="px-3 py-1.5 rounded-lg bg-zinc-800 text-zinc-200">Volver a los de siempre</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                      <label class="block"><span class="block text-zinc-400 mb-1">El porcentaje es sobre</span>
+                        <select id="sim-base" onchange="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1.5 text-white"><option value="cost">el costo (recargo)</option><option value="sale">la venta (margen)</option></select></label>
+                      <label class="block"><span class="block text-zinc-400 mb-1">Tiene que quedar con</span>
+                        <select id="sim-target" onchange="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1.5 text-white"><option value="transfer">transferencia (ya con el descuento)</option><option value="list">precio de lista</option></select></label>
+                      <label class="block"><span class="block text-zinc-400 mb-1">Redondear a</span>
+                        <select id="sim-round" onchange="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1.5 text-white"><option value="999">terminar en 999</option><option value="500">$500</option><option value="1000">$1.000</option><option value="none">sin redondear</option></select></label>
+                    </div>
+                  </div>
+
+                  <div class="rounded-xl bg-zinc-950 border border-zinc-800 overflow-hidden font-code">
+                    <table class="w-full text-xs">
+                      <thead><tr class="text-zinc-500 text-[10px] uppercase"><th class="text-left font-semibold p-2.5"></th><th class="text-right font-semibold p-2.5">Precio de lista</th><th class="text-right font-semibold p-2.5">Con transferencia</th></tr></thead>
+                      <tbody id="sim-rows" class="divide-y divide-zinc-800"></tbody>
+                    </table>
+                  </div>
+                  <p id="sim-note" class="text-[11px] text-zinc-500"></p>
+                  <div class="rounded-xl bg-zinc-950 border border-zinc-800 p-3 space-y-2">
+                    <div class="text-zinc-300 font-bold">🚚 Envío, retiro y otros costos <span class="font-normal text-zinc-500">(se guardan en este equipo)</span></div>
+                    <div class="flex gap-1.5" role="radiogroup" aria-label="Cómo se entrega">
+                      <button type="button" id="sim-mode-dom" onclick="simSetMode('domicilio')" class="flex-1 px-3 py-2 rounded-lg border text-[11px] font-bold">🛵 Envío a domicilio</button>
+                      <button type="button" id="sim-mode-ret" onclick="simSetMode('retiro')" class="flex-1 px-3 py-2 rounded-lg border text-[11px] font-bold">🏪 Retira el cliente</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div id="sim-ship-box" class="contents">
+                        <div>
+                          <label for="sim-ship-charged" class="block text-zinc-400 mb-1">Envío que le cobrás ($)</label>
+                          <input type="number" min="0" id="sim-ship-charged" oninput="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white focus:outline-none focus:border-brand-orange font-code" />
+                        </div>
+                        <div>
+                          <label for="sim-ship-cost" class="block text-zinc-400 mb-1">Envío que te cuesta ($)</label>
+                          <input type="number" min="0" id="sim-ship-cost" oninput="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white focus:outline-none focus:border-brand-orange font-code" />
+                        </div>
+                      </div>
+                      <div>
+                        <label for="sim-pickup" class="block text-zinc-400 mb-1">Retiro en el proveedor ($)</label>
+                        <input type="number" min="0" id="sim-pickup" oninput="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white focus:outline-none focus:border-brand-orange font-code" />
+                      </div>
+                      <div>
+                        <label for="sim-disc" class="block text-zinc-400 mb-1">Descuento por transferencia (%)</label>
+                        <input type="number" min="0" max="90" step="0.5" id="sim-disc" oninput="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white focus:outline-none focus:border-brand-orange font-code" />
+                      </div>
+                      <div>
+                        <label for="sim-comm" class="block text-zinc-400 mb-1">Otros gastos sobre la venta (%)</label>
+                        <input type="number" min="0" max="90" step="0.5" id="sim-comm" oninput="simSave();runMarginCalc()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white focus:outline-none focus:border-brand-orange font-code" />
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 flex-wrap text-[11px] text-zinc-500">
+                      <span id="sim-defaults-note">Por defecto: lo que cargaste en Ajustes. Podés cambiarlo acá.</span>
+                      <button type="button" onclick="simResetCosts()" class="text-zinc-400 hover:text-brand-amber underline">Volver a lo de Ajustes</button>
+                    </div>
+                  </div>
+
+                  <div class="hidden"><strong id="calc-net"></strong><strong id="calc-pct"></strong></div>
                 </div>
               </div>
             </div>
@@ -1010,6 +1070,16 @@ html { scroll-behavior: smooth; }
                         <option value="auto">🚗 Auto (producto grande)</option>
                       </select>
                       <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">Si un pedido lleva un producto en auto, todo el pedido se envía en auto. El precio de cada uno se carga en Ajustes & Zonas.</p>
+                    </div>
+                    <div id="new-prod-delay-box" class="sm:col-span-2">
+                      <label class="flex items-start gap-2 text-xs text-zinc-300 font-sans cursor-pointer"><input type="checkbox" id="new-prod-delay" onchange="syncDelayBox()" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>⏳ Avisar demora al cliente</b><br><span class="text-[10px] text-zinc-500 leading-snug">Tildalo si no está en el local o viene de fuera de Tucumán. Antes de comprar, el cliente ve que puede demorar. (Los que se retiran en el proveedor avisan solos.)</span></span></label>
+                      <div id="new-prod-delay-days" class="hidden mt-2 flex items-center gap-2 text-xs font-sans">
+                        <span class="text-zinc-400">Demora de</span>
+                        <input type="number" id="new-prod-delay-min" min="1" max="30" value="1" aria-label="Días mínimos" class="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-center focus:outline-none focus:border-brand-orange" />
+                        <span class="text-zinc-400">a</span>
+                        <input type="number" id="new-prod-delay-max" min="1" max="30" value="4" aria-label="Días máximos" class="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-center focus:outline-none focus:border-brand-orange" />
+                        <span class="text-zinc-400">días</span>
+                      </div>
                     </div>
                     <div id="new-prod-supplier-box">
                       <label class="block mb-1 text-zinc-400 font-sans">Proveedor</label>
@@ -1681,6 +1751,34 @@ html { scroll-behavior: smooth; }
               <div id="coupons-list" class="space-y-1.5 text-xs"></div>
             </div>
 </div>
+<div data-sec-pane="offers:camp" class="space-y-6">
+<div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
+              <div>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-camp" style="scroll-margin-top:72px"><span class="w-2 h-2 rounded-full bg-pink-400"></span>Campañas y promociones por fecha</h4>
+                <p class="text-[11px] text-zinc-400 mt-1">Armá una promo (ej. Día de la Madre): título, mensaje, fechas y los productos que entran. Aparece en la tienda arriba del catálogo y se saca sola cuando termina. No cambia precios: si querés un descuento, creá un cupón en <b>Cupones</b> y elegilo acá para que se muestre el código.</p>
+              </div>
+              <div class="flex flex-wrap gap-1.5 text-[11px]" id="camp-templates" aria-label="Ideas rápidas"></div>
+              <form id="camp-form" onsubmit="campSubmit(event)" class="grid grid-cols-2 sm:grid-cols-6 gap-2 text-xs">
+                <input required id="camp-title" maxlength="60" placeholder="Título (ej. Día de la Madre)" class="col-span-2 sm:col-span-3 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                <select id="camp-icon" aria-label="Ícono" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange"><option value="🎁">🎁 Regalo</option><option value="💐">💐 Flores</option><option value="👔">👔 Papá</option><option value="🧸">🧸 Niños</option><option value="🎄">🎄 Navidad</option><option value="🔥">🔥 Oferta</option><option value="🎓">🎓 Clases</option><option value="❤️">❤️ Amor</option><option value="⚡">⚡ Relámpago</option></select>
+                <select id="camp-theme" aria-label="Color" class="col-span-1 sm:col-span-2 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange"><option value="orange">Naranja</option><option value="pink">Rosa</option><option value="cyan">Celeste</option><option value="emerald">Verde</option><option value="violet">Violeta</option></select>
+                <input id="camp-body" maxlength="280" placeholder="Mensaje (ej. Regalá tecnología con envío en el día)" class="col-span-2 sm:col-span-6 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                <label class="col-span-1 sm:col-span-2 text-zinc-400">Desde<input id="camp-start" type="date" class="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white font-code focus:outline-none focus:border-brand-orange" /></label>
+                <label class="col-span-1 sm:col-span-2 text-zinc-400">Hasta (inclusive)<input id="camp-end" type="date" class="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white font-code focus:outline-none focus:border-brand-orange" /></label>
+                <label class="col-span-2 sm:col-span-2 text-zinc-400">Cupón (opcional)<select id="camp-coupon" class="mt-1 w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white font-code focus:outline-none focus:border-brand-orange"><option value="">Sin cupón</option></select></label>
+                <div class="col-span-2 sm:col-span-6 rounded-xl bg-zinc-950 border border-zinc-800 p-3 space-y-2">
+                  <div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-zinc-300 font-bold">Productos de la promo <span id="camp-count" class="font-normal text-zinc-500"></span></span><span class="text-[10px] text-zinc-500">Si no elegís ninguno, se muestra solo el cartel.</span></div>
+                  <div id="camp-chosen" class="flex flex-wrap gap-1.5"></div>
+                  <input type="search" id="camp-search" oninput="campRenderPicker()" placeholder="🔍 Buscar producto para agregar…" aria-label="Buscar producto" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-2.5 py-2 text-white focus:outline-none focus:border-brand-orange" />
+                  <div id="camp-picker" class="max-h-56 overflow-y-auto divide-y divide-zinc-800 rounded-lg border border-zinc-800"></div>
+                </div>
+                <button type="submit" id="camp-submit" class="col-span-2 sm:col-span-4 px-4 py-2.5 rounded-lg bg-pink-500 hover:bg-pink-400 text-black font-bold transition-colors">+ Publicar campaña</button>
+                <button type="button" id="camp-cancel" onclick="campCancel()" class="hidden col-span-2 px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold">Cancelar edición</button>
+              </form>
+              <div id="camp-msg" class="hidden text-[11px] font-semibold text-rose-400"></div>
+              <div id="camp-list" class="space-y-1.5 text-xs"></div>
+            </div>
+</div>
 <div data-sec-pane="offers:promos" class="space-y-6">
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -2223,6 +2321,7 @@ html { scroll-behavior: smooth; }
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
+        PROMOTIONS: '/api/promotions',         // GET público: campañas vigentes; admin: /all, POST/PUT/DELETE
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
         INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
         BACKUP: '/api/backup',                 // GET (solo admin): copia de seguridad completa
@@ -2385,7 +2484,7 @@ html { scroll-behavior: smooth; }
       if (!isBackendConnected() || !currentStaffSession.token) return;
       const role = currentStaffSession.role;
       const headers = { Authorization: 'Bearer ' + currentStaffSession.token };
-      const tasks = [loadSettingsFromServer(), loadAnnouncements(), loadClaims(), loadAudit(), loadCoupons()];
+      const tasks = [loadSettingsFromServer(), loadAnnouncements(), loadClaims(), loadAudit(), loadCoupons(), loadCampaigns()];
 
       if (can('orders.pickup')) tasks.push(loadPickups());
       if (can('orders.view')) {
@@ -2507,7 +2606,7 @@ html { scroll-behavior: smooth; }
     const TAB_SECS = {
       inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía'], ['iphone', '📱', 'Sección iPhone', 'iphone']] },
       suppliers: { def: 'dir', items: [['dir', '📇', 'Directorio'], ['pay', '💳', 'Cuentas por pagar', null, true]] },
-      offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['promos', '🏷️', 'Promos y pagos']] },
+      offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['camp', '🎉', 'Campañas'], ['promos', '🏷️', 'Promos y pagos']] },
       settings: { flat: true, def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['print', '🖨️', 'Impresión'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
     };
     const SEC_NOW = {};
@@ -2539,6 +2638,7 @@ html { scroll-behavior: smooth; }
       syncTabNav();
       if (tab === 'suppliers' && key === 'pay') openPayables();
       if (tab === 'settings' && key === 'print') renderPrintSettings();
+      if (tab === 'offers' && key === 'camp') campOpen();
     }
     function openTabSection(tab, key) { switchAdminTab(tab); setTabSection(tab, key); }
     const NAV_TOP_ON = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 shadow-sm transition-all';
@@ -2589,10 +2689,11 @@ html { scroll-behavior: smooth; }
         b.className = 'fin-sub-btn shrink-0 px-3.5 py-2 rounded-full border text-xs font-semibold ' + (on ? 'bg-brand-orange/15 border-brand-orange text-brand-orange' : 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300 hover:text-white');
         b.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-      const T = { cash: ['Caja diaria', 'Apertura, gastos y cierre de la caja de hoy.'], sales: ['Reportes de ventas', 'Cuánto vendiste, qué se vendió más y tu ganancia estimada.'], mono: ['Monotributo', 'Historial de cobros desglosado para cuando te des de alta en ARCA (ex-AFIP).'], sim: ['Simulador de margen', 'Probá un costo y un precio para ver cuánto ganás.'] }[id];
+      const T = { cash: ['Caja diaria', 'Apertura, gastos y cierre de la caja de hoy.'], sales: ['Reportes de ventas', 'Cuánto vendiste, qué se vendió más y tu ganancia estimada.'], mono: ['Monotributo', 'Historial de cobros desglosado para cuando te des de alta en ARCA (ex-AFIP).'], sim: ['Simulador de margen', 'Probá un costo y un precio con envío, retiro y descuento para ver cuánto ganás.'] }[id];
       const ft = document.getElementById('fin-title'), fs = document.getElementById('fin-subtitle'), fe = document.getElementById('fin-export');
       if (ft) ft.textContent = T[0]; if (fs) fs.textContent = T[1];
       if (fe) fe.classList.toggle('hidden', !['sales', 'mono'].includes(id));
+      if (id === 'sim') simInit();
       syncFinNav();
     }
     function openFinSection(id) { switchAdminTab('finances'); setFinSection(id); }
@@ -2643,7 +2744,8 @@ html { scroll-behavior: smooth; }
       });
 
       const resetBtn = document.getElementById('btn-reset-catalog');
-      if (resetBtn) resetBtn.style.display = currentStaffSession.role === 'admin' ? '' : 'none';
+      // Con el servidor conectado el catálogo real vive en el servidor: "restablecer demo" solo llenaría la pantalla de productos falsos.
+      if (resetBtn) resetBtn.style.display = (currentStaffSession.role === 'admin' && !isBackendConnected()) ? '' : 'none';
 
       const roleLabels = {
         admin: 'Administrador', vendedor: 'Vendedor', reposicion: 'Reposición',
@@ -2693,6 +2795,7 @@ html { scroll-behavior: smooth; }
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
+        delayNotice: p.delayNotice === true, delayDaysMin: Number.isInteger(Number(p.delayDaysMin)) && Number(p.delayDaysMin) >= 1 ? Number(p.delayDaysMin) : null, delayDaysMax: Number.isInteger(Number(p.delayDaysMax)) && Number(p.delayDaysMax) >= 1 ? Number(p.delayDaysMax) : null,
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
         accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
         warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
@@ -3429,6 +3532,14 @@ html { scroll-behavior: smooth; }
     const VEHICLE_INFO = { moto: { label: 'Moto', icon: '🛵' }, auto: { label: 'Auto', icon: '🚗' } };
     const VEHICLE_ORDER = Object.keys(VEHICLE_INFO);
     function vehicleOfProduct(p) { return p && VEHICLE_INFO[p.deliveryClass] ? p.deliveryClass : 'moto'; }
+    // Aviso de demora: productos que no están en el local o llegan de fuera de Tucumán.
+    // Se avisa ANTES de comprar (ficha, carrito y checkout) y queda en el mensaje de WhatsApp.
+    function delayInfo(p) {
+      if (!p || !(p.delayNotice === true || p.pickupAtSupplier === true)) return null;
+      const clamp = (v, d) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= 1 && n <= 30 ? n : d; };
+      const min = clamp(p.delayDaysMin, 1); let max = clamp(p.delayDaysMax, 4); if (max < min) max = min;
+      return { min, max, text: min === max ? `${min} ${min === 1 ? 'día' : 'días'}` : `${min} a ${max} días` };
+    }
     function vehicleOfItems(items) {
       return (items || []).reduce((best, it) => {
         const v = vehicleOfProduct(PRODUCTS.find(p => p.id === it.id));
@@ -3959,6 +4070,17 @@ html { scroll-behavior: smooth; }
       sel.value = list.some(s => String(s.id) === keep) ? keep : '';
       const ck = document.getElementById('new-prod-pickup'); if (ck && pickup !== undefined) ck.checked = pickup === true;
       syncPickupCheck();
+    }
+    function syncDelayBox() {
+      const ck = document.getElementById('new-prod-delay'), box = document.getElementById('new-prod-delay-days');
+      if (ck && box) box.classList.toggle('hidden', !ck.checked);
+    }
+    function delayFieldPayload() {
+      const ck = document.getElementById('new-prod-delay');
+      if (!ck) return {};
+      const n = id => { const v = parseInt(document.getElementById(id).value, 10); return Number.isInteger(v) && v >= 1 && v <= 30 ? v : null; };
+      const mn = n('new-prod-delay-min') || 1, mx = Math.max(mn, n('new-prod-delay-max') || 4);
+      return ck.checked ? { delayNotice: true, delayDaysMin: mn, delayDaysMax: mx } : { delayNotice: false };
     }
     function supplierFieldPayload() {
       const box = document.getElementById('new-prod-supplier-box'), sel = document.getElementById('new-prod-supplier');
@@ -5136,6 +5258,150 @@ html { scroll-behavior: smooth; }
       COUPON_LIST = COUPON_LIST.filter(x => x.code !== code); renderCoupons();
     }
 
+
+    // ---- Campañas / promociones por fecha (panel) ----
+    let CAMPS = [];
+    const CAMP = { editId: null, sel: [] };
+    function showCampMsg(t, okTone) {
+      const el = document.getElementById('camp-msg'); if (!el) return;
+      el.className = 'text-[11px] font-semibold ' + (okTone ? 'text-emerald-400' : 'text-rose-400');
+      el.textContent = t || ''; el.classList.toggle('hidden', !t);
+      if (t) setTimeout(() => el.classList.add('hidden'), 7000);
+    }
+    function campAuth() { return { Authorization: 'Bearer ' + currentStaffSession.token }; }
+    async function loadCampaigns() {
+      if (!isBackendConnected() || !currentStaffSession.token || currentStaffSession.role !== 'admin') return;
+      const res = await apiRequest('PROMOTIONS', { headers: campAuth() }, '/all');
+      if (Array.isArray(res)) { CAMPS = res; renderCampaigns(); }
+    }
+    function campDateLabel(d) { return d ? d.split('-').reverse().join('/') : ''; }
+    function campState(c) {
+      const today = new Date(Date.now() - 3 * 3600000).toISOString().slice(0, 10); // fecha de Argentina
+      if (c.active === false) return { t: 'Pausada', cls: 'bg-amber-500/15 text-amber-300' };
+      if (c.endDate && c.endDate < today) return { t: 'Terminada', cls: 'bg-zinc-700 text-zinc-300' };
+      if (c.startDate && c.startDate > today) return { t: 'Programada', cls: 'bg-sky-500/15 text-sky-300' };
+      return { t: 'En la tienda', cls: 'bg-emerald-500/15 text-emerald-300' };
+    }
+    function renderCampaigns() {
+      const box = document.getElementById('camp-list'); if (!box) return;
+      if (!CAMPS.length) { box.innerHTML = '<p class="text-zinc-500">Todavía no armaste campañas. Probá con una idea rápida de arriba.</p>'; return; }
+      box.innerHTML = CAMPS.map(c => {
+        const st = campState(c);
+        const dates = c.startDate || c.endDate ? `${c.startDate ? 'desde ' + campDateLabel(c.startDate) : ''}${c.startDate && c.endDate ? ' ' : ''}${c.endDate ? 'hasta ' + campDateLabel(c.endDate) : ''}` : 'sin fechas (siempre)';
+        const id = escapeHtml(c.id);
+        return `<div class="flex items-center justify-between gap-2 flex-wrap p-2.5 rounded-lg bg-zinc-950 border border-zinc-800">
+          <div class="min-w-0"><span class="text-base">${escapeHtml(c.icon || '🎁')}</span> <span class="font-bold text-white">${escapeHtml(c.title)}</span> <span class="px-2 py-0.5 rounded font-semibold ${st.cls}">${st.t}</span>
+            <div class="text-[10px] text-zinc-500 font-code">${escapeHtml(dates)} · ${(c.productIds || []).length} producto(s)${c.couponCode ? ' · cupón ' + escapeHtml(c.couponCode) : ''}</div></div>
+          <div class="space-x-1.5 whitespace-nowrap">
+            <button onclick="campEdit('${id}')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold">Editar</button>
+            <button onclick="campToggleActive('${id}')" class="px-2 py-1 rounded bg-amber-950/50 hover:bg-amber-900/60 border border-amber-800/50 text-amber-300 font-semibold">${c.active === false ? 'Activar' : 'Pausar'}</button>
+            <button onclick="campDelete('${id}')" class="px-2 py-1 rounded bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/60 text-rose-400 font-semibold">Borrar</button>
+          </div></div>`;
+      }).join('');
+    }
+    // Ideas rápidas con la fecha del próximo feriado comercial (3er domingo de octubre/junio/agosto, etc.).
+    function campNthWeekday(year, month, weekday, n) {
+      const d = new Date(Date.UTC(year, month, 1)); const shift = (weekday - d.getUTCDay() + 7) % 7;
+      return new Date(Date.UTC(year, month, 1 + shift + (n - 1) * 7));
+    }
+    function campNextDate(month, fn) {
+      const now = new Date(Date.now() - 3 * 3600000), y = now.getUTCFullYear(), today = now.toISOString().slice(0, 10);
+      let d = fn(y); if (d.toISOString().slice(0, 10) < today) d = fn(y + 1);
+      return d.toISOString().slice(0, 10);
+    }
+    function campTemplates() {
+      const addDays = (iso, n) => new Date(Date.parse(iso + 'T12:00:00Z') + n * 86400000).toISOString().slice(0, 10);
+      const madre = campNextDate(9, y => campNthWeekday(y, 9, 0, 3));
+      const padre = campNextDate(5, y => campNthWeekday(y, 5, 0, 3));
+      const nino = campNextDate(7, y => campNthWeekday(y, 7, 0, 3));
+      const navidad = campNextDate(11, y => new Date(Date.UTC(y, 11, 24)));
+      const bf = campNextDate(10, y => campNthWeekday(y, 10, 5, 4));
+      return [
+        { label: '💐 Día de la Madre', title: 'Día de la Madre', icon: '💐', theme: 'pink', body: 'Regalá tecnología. Elegí lo que más le va a gustar.', end: madre, lead: 10 },
+        { label: '👔 Día del Padre', title: 'Día del Padre', icon: '👔', theme: 'cyan', body: 'Sorprendelo con tecnología: auriculares, parlantes y más.', end: padre, lead: 10 },
+        { label: '🧸 Día de las Infancias', title: 'Día de las Infancias', icon: '🧸', theme: 'violet', body: 'Regalos para los más chicos.', end: nino, lead: 10 },
+        { label: '🔥 Black Friday', title: 'Black Friday', icon: '🔥', theme: 'orange', body: 'Ofertas por tiempo limitado hasta agotar stock.', end: addDays(bf, 3), lead: 4 },
+        { label: '🎄 Navidad', title: 'Navidad', icon: '🎄', theme: 'emerald', body: 'Regalá tecnología esta Navidad.', end: navidad, lead: 14 }
+      ].map(t => ({ ...t, start: addDays(t.end, -t.lead) }));
+    }
+    function campRenderTemplates() {
+      const box = document.getElementById('camp-templates'); if (!box) return;
+      box.innerHTML = '<span class="text-zinc-500 self-center">Ideas rápidas:</span>' + campTemplates().map((t, i) => `<button type="button" data-camp-tpl="${i}" onclick="campUseTemplate(${i})" class="px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-zinc-700 hover:border-pink-400 text-zinc-200 font-semibold">${escapeHtml(t.label)}</button>`).join('');
+    }
+    function campUseTemplate(i) {
+      const t = campTemplates()[i]; if (!t) return;
+      const set = (id, v) => { document.getElementById(id).value = v; };
+      set('camp-title', t.title); set('camp-icon', t.icon); set('camp-theme', t.theme); set('camp-body', t.body); set('camp-start', t.start); set('camp-end', t.end);
+    }
+    function campFillCoupons(keep) {
+      const sel = document.getElementById('camp-coupon'); if (!sel) return;
+      const cur = keep !== undefined ? keep : sel.value;
+      sel.innerHTML = '<option value="">Sin cupón</option>' + (COUPON_LIST || []).filter(c => c.active !== false).map(c => `<option value="${escapeHtml(c.code)}">${escapeHtml(c.code)} · ${c.type === 'percent' ? c.value + '%' : formatARS(c.value)}</option>`).join('');
+      sel.value = [...sel.options].some(o => o.value === cur) ? cur : '';
+    }
+    function campOpen() { campRenderTemplates(); campFillCoupons(); campRenderPicker(); renderCampaigns(); loadCampaigns(); Promise.resolve(loadCoupons()).then(() => campFillCoupons()); }
+    function campRenderPicker() {
+      const box = document.getElementById('camp-picker'); if (!box) return;
+      const q = (document.getElementById('camp-search').value || '').toLowerCase().trim();
+      const list = [...PRODUCTS].filter(p => p.active !== false && (!q || `${p.name} ${p.brand}`.toLowerCase().includes(q))).sort((a, b) => String(a.name).localeCompare(String(b.name), 'es')).slice(0, 60);
+      box.innerHTML = list.length ? list.map(p => `<label class="flex items-center gap-2 px-2.5 py-1.5 cursor-pointer hover:bg-zinc-900"><input type="checkbox" data-camp-prod="${p.id}" ${CAMP.sel.includes(p.id) ? 'checked' : ''} onchange="campToggle(${p.id})" class="w-4 h-4 accent-pink-500 shrink-0" /><span class="flex-1 min-w-0 truncate text-zinc-200">${escapeHtml(p.name)}</span><span class="text-zinc-500 font-code">${formatARS(p.price)}</span></label>`).join('') : '<p class="p-3 text-zinc-500">No hay productos con ese nombre.</p>';
+      campRenderChosen();
+    }
+    function campRenderChosen() {
+      const box = document.getElementById('camp-chosen'); if (!box) return;
+      const cnt = document.getElementById('camp-count'); if (cnt) cnt.textContent = CAMP.sel.length ? `(${CAMP.sel.length})` : '';
+      box.innerHTML = CAMP.sel.map(id => { const p = PRODUCTS.find(x => x.id === id); return p ? `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-pink-500/15 text-pink-200 border border-pink-500/30">${escapeHtml(p.name)}<button type="button" onclick="campToggle(${id}, true)" aria-label="Quitar" class="text-pink-300 hover:text-white">✕</button></span>` : ''; }).join('');
+    }
+    function campToggle(id, rerender) {
+      const i = CAMP.sel.indexOf(id);
+      if (i >= 0) CAMP.sel.splice(i, 1);
+      else { if (CAMP.sel.length >= 40) { showCampMsg('Podés poner hasta 40 productos por campaña.'); return; } CAMP.sel.push(id); }
+      if (rerender) campRenderPicker(); else campRenderChosen();
+    }
+    function campCancel() {
+      CAMP.editId = null; CAMP.sel = [];
+      const f = document.getElementById('camp-form'); if (f) f.reset();
+      document.getElementById('camp-submit').textContent = '+ Publicar campaña';
+      document.getElementById('camp-cancel').classList.add('hidden');
+      campFillCoupons(''); campRenderPicker();
+    }
+    function campEdit(id) {
+      const c = CAMPS.find(x => x.id === id); if (!c) return;
+      CAMP.editId = id; CAMP.sel = (c.productIds || []).slice();
+      const set = (el, v) => { document.getElementById(el).value = v || ''; };
+      set('camp-title', c.title); set('camp-body', c.body); set('camp-icon', c.icon || '🎁'); set('camp-theme', c.theme || 'orange'); set('camp-start', c.startDate); set('camp-end', c.endDate);
+      campFillCoupons(c.couponCode || '');
+      document.getElementById('camp-submit').textContent = 'Guardar cambios';
+      document.getElementById('camp-cancel').classList.remove('hidden');
+      campRenderPicker();
+      const f = document.getElementById('camp-form'); if (f && f.scrollIntoView) f.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    async function campSubmit(e) {
+      e.preventDefault();
+      if (!isBackendConnected() || !currentStaffSession.token) { showCampMsg('Las campañas necesitan el servidor conectado.'); return; }
+      const v = id => document.getElementById(id).value;
+      const body = { title: v('camp-title'), body: v('camp-body'), icon: v('camp-icon'), theme: v('camp-theme'), startDate: v('camp-start'), endDate: v('camp-end'), couponCode: v('camp-coupon'), productIds: CAMP.sel.slice() };
+      const editing = CAMP.editId;
+      const res = await apiRequest('PROMOTIONS', { method: editing ? 'PUT' : 'POST', headers: campAuth(), body: JSON.stringify(body) }, editing ? '/' + encodeURIComponent(editing) : '');
+      if (!res || res.success === false || !res.id) { showCampMsg((res && res.error) || 'No se pudo guardar la campaña.'); return; }
+      if (editing) CAMPS = CAMPS.map(x => x.id === editing ? res : x); else CAMPS.unshift(res);
+      campCancel(); renderCampaigns();
+      showCampMsg(editing ? 'Campaña actualizada.' : 'Campaña publicada: ya se ve en la tienda (si está dentro de fecha).', true);
+    }
+    async function campToggleActive(id) {
+      const c = CAMPS.find(x => x.id === id); if (!c) return;
+      const res = await apiRequest('PROMOTIONS', { method: 'PUT', headers: campAuth(), body: JSON.stringify({ active: c.active === false }) }, '/' + encodeURIComponent(id));
+      if (!res || res.success === false) { showCampMsg((res && res.error) || 'No se pudo cambiar la campaña.'); return; }
+      Object.assign(c, res); renderCampaigns();
+    }
+    async function campDelete(id) {
+      const c = CAMPS.find(x => x.id === id); if (!c) return;
+      if (!confirm(`¿Borrar la campaña "${c.title}"? Los productos no se tocan.`)) return;
+      const res = await apiRequest('PROMOTIONS', { method: 'DELETE', headers: campAuth() }, '/' + encodeURIComponent(id));
+      if (!res || res.success === false) { showCampMsg((res && res.error) || 'No se pudo borrar la campaña.'); return; }
+      CAMPS = CAMPS.filter(x => x.id !== id); if (CAMP.editId === id) campCancel(); renderCampaigns();
+    }
+
     // ---- Reclamos y garantías (panel) ----
     let CLAIMS = [];
     const CLAIM_STATUSES = ['Recibido', 'En revisión', 'Aprobado', 'Resuelto', 'Rechazado'];
@@ -5482,7 +5748,7 @@ html { scroll-behavior: smooth; }
           </td>
           <td class="py-3 px-4">
             <div class="font-bold text-white font-sans">${escapeHtml(p.name)}${p.active === false ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold align-middle">PAUSADO</span>' : ''}${p.featured ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-brand-orange/20 text-brand-orange font-bold align-middle">★</span>' : ''}${vehicleOfProduct(p) !== 'moto' ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-bold align-middle" title="Se envía en ${VEHICLE_INFO[vehicleOfProduct(p)].label.toLowerCase()}">${VEHICLE_INFO[vehicleOfProduct(p)].icon} ${VEHICLE_INFO[vehicleOfProduct(p)].label.toUpperCase()}</span>` : ''}${offPct(p) ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold align-middle">-${offPct(p)}%</span>` : ''}</div>
-            <div class="text-[11px] text-zinc-400">${escapeHtml(p.brand)}${supplierNameOf(p.supplierId) ? ' · 🤝 ' + escapeHtml(supplierNameOf(p.supplierId)) : ''}${p.pickupAtSupplier ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-bold align-middle">🧳 SE RETIRA</span>' : ''} · <span class="text-zinc-500 text-[10px]">${escapeHtml(categoryLabel(p.category))}${p.subcategory ? ' › ' + escapeHtml(categoryLabel(p.subcategory)) : ''}</span></div>
+            <div class="text-[11px] text-zinc-400">${escapeHtml(p.brand)}${supplierNameOf(p.supplierId) ? ' · 🤝 ' + escapeHtml(supplierNameOf(p.supplierId)) : ''}${p.pickupAtSupplier ? ' <span class="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/15 text-sky-300 font-bold align-middle">🧳 SE RETIRA</span>' : ''}${delayInfo(p) ? ` <span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-300 font-bold align-middle" title="El cliente ve que puede demorar">⏳ ${delayInfo(p).text}</span>` : ''} · <span class="text-zinc-500 text-[10px]">${escapeHtml(categoryLabel(p.category))}${p.subcategory ? ' › ' + escapeHtml(categoryLabel(p.subcategory)) : ''}</span></div>
           </td>
           <td class="py-3 px-4">
             <div>${colorsBadges}</div>
@@ -5506,6 +5772,8 @@ html { scroll-behavior: smooth; }
             <button onclick="startEditProduct(${p.id})" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-[11px] transition-colors font-sans">
               Editar
             </button>
+            <button onclick="duplicateProduct(${p.id})" data-dup="${p.id}" title="Cargar uno parecido: copia los datos y vos cambiás lo que haga falta" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-[11px] transition-colors font-sans">📋 Duplicar</button>
+            ${currentStaffSession.role === 'admin' ? `<button onclick="simOpenFor(${p.id})" data-sim-for="${p.id}" title="Ver cuánto ganás con este producto" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 font-semibold text-[11px] transition-colors font-sans">🧮 Simular</button>` : ''}
             ${currentStaffSession.role === 'admin' ? `<button onclick="deleteProduct(${p.id})" class="px-2 py-1 rounded bg-rose-950/60 hover:bg-rose-900/80 border border-rose-800/60 text-rose-400 font-semibold text-[11px] transition-colors font-sans">
               Eliminar
             </button>` : ''}
@@ -5943,7 +6211,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v8.7): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v8.8): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -8114,6 +8382,7 @@ html { scroll-behavior: smooth; }
       set('new-prod-compare', p.compareAtPrice || '');
       document.getElementById('new-prod-featured').checked = p.featured === true;
       set('new-prod-delivery', vehicleOfProduct(p));
+      { const dk = document.getElementById('new-prod-delay'); if (dk) { dk.checked = p.delayNotice === true; set('new-prod-delay-min', p.delayDaysMin || 1); set('new-prod-delay-max', p.delayDaysMax || 4); syncDelayBox(); } }
       fillProductSupplierSelect(p.supplierId, p.pickupAtSupplier === true);
       set('new-prod-specs', p.specs || ''); updateSpecsCount();
       set('new-prod-keywords', p.keywords || '');
@@ -8145,12 +8414,38 @@ html { scroll-behavior: smooth; }
       document.getElementById('admin-new-product-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
+    // Atajo: carga el formulario con los datos de otro producto para publicar uno parecido (otro modelo, otro color).
+    function duplicateProduct(id) {
+      const p = PRODUCTS.find(x => x.id === id); if (!p) return;
+      startEditProduct(id);
+      editingProductId = null; // se guarda como producto NUEVO
+      const set = (el, v) => { const e = document.getElementById(el); if (e) e.value = v; };
+      set('new-prod-name', (p.name || '') + ' (copia)');
+      const zero = {}; (p.colors && p.colors.length ? p.colors : ['Único']).forEach(c => { zero[c] = 0; });
+      renderColorStockInputs(zero);
+      const note = document.getElementById('color-stock-note'); if (note) note.classList.add('hidden');
+      set('new-prod-imei', '');
+      const banner = document.getElementById('edit-mode-banner');
+      banner.textContent = '📋 Copia de: ' + p.name + ' — cambiá el nombre, los colores, el stock y las fotos, y tocá "Guardar y Publicar en Tienda". El original no se toca.';
+      banner.classList.remove('hidden');
+      document.getElementById('btn-save-prod').textContent = 'Guardar y Publicar en Tienda';
+      document.getElementById('btn-cancel-edit').classList.remove('hidden');
+      const nm = document.getElementById('new-prod-name'); if (nm && nm.focus) { nm.focus(); if (nm.select) nm.select(); }
+    }
+    // Atajo: del inventario al simulador con el producto ya cargado.
+    function simOpenFor(id) {
+      openFinSection('sim');
+      const sel = document.getElementById('sim-product'); if (sel) sel.value = String(id);
+      simLoadProduct(id);
+    }
+
     function cancelEditProduct(goBack) {
       const wasEditing = editingProductId !== null;
       editingProductId = null;
       fillProductSupplierSelect('', false);
       const form = document.getElementById('admin-new-product-form');
       form.reset();
+      syncDelayBox();
       onProdCategoryChange();
       autoFillWarrantyDefault('original');
       renderColorStockInputs({});
@@ -8204,6 +8499,7 @@ html { scroll-behavior: smooth; }
         name, brand, category, subcategory, type, warranty, warrantyMonths: warrantyMonthsVal, warrantyBy, stock, stockByColor, specs, keywords, featured,
         deliveryClass: (document.getElementById('new-prod-delivery') || { value: 'moto' }).value,
         ...(supplierFieldPayload()),
+        ...(delayFieldPayload()),
         ...(iphData || {}),
         colors: colors.length > 0 ? colors : ['Único'], photos,
         badge: type === 'original' ? '100% ORIGINAL' : 'PLUG SELECCIÓN'
@@ -8372,14 +8668,169 @@ html { scroll-behavior: smooth; }
       refreshAdminUI();
     }
 
+    // ---- Simulador de margen ----
+    // Porcentajes, envío, retiro y descuento: se guardan solo en este equipo (no tocan la tienda).
+    const SIM_KEY = 'plugshop_sim_v1';
+    const SIM_PRESETS_DEFAULT = [20, 30, 40, 50, 60];
+    let SIM = { presets: SIM_PRESETS_DEFAULT.slice(), base: 'cost', target: 'transfer', round: '999', mode: 'domicilio', shipCharged: null, shipCost: null, pickup: 0, disc: null, comm: 0 };
+    function simLoad() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(SIM_KEY) || 'null');
+        if (raw && typeof raw === 'object') {
+          if (Array.isArray(raw.presets)) { const pr = simCleanPresets(raw.presets); if (pr.length) SIM.presets = pr; }
+          if (['cost', 'sale'].includes(raw.base)) SIM.base = raw.base;
+          if (['transfer', 'list'].includes(raw.target)) SIM.target = raw.target;
+          if (['999', '500', '1000', 'none'].includes(raw.round)) SIM.round = raw.round;
+          if (['domicilio', 'retiro'].includes(raw.mode)) SIM.mode = raw.mode;
+          ['shipCharged', 'shipCost', 'disc'].forEach(k => { if (raw[k] === null || (typeof raw[k] === 'number' && isFinite(raw[k]) && raw[k] >= 0)) SIM[k] = raw[k]; });
+          ['pickup', 'comm'].forEach(k => { if (typeof raw[k] === 'number' && isFinite(raw[k]) && raw[k] >= 0) SIM[k] = raw[k]; });
+        }
+      } catch (e) {}
+    }
+    function simPersist() { try { localStorage.setItem(SIM_KEY, JSON.stringify(SIM)); } catch (e) {} }
+    function simCleanPresets(arr) {
+      const out = [];
+      arr.forEach(v => { const n = Math.round(Number(v) * 10) / 10; if (Number.isFinite(n) && n > 0 && n < 1000 && !out.includes(n)) out.push(n); });
+      return out.sort((x, y) => x - y).slice(0, 8);
+    }
+    // Lo que figura en Ajustes (envío del cadete, descuento) como punto de partida.
+    function simDefaultShip() { try { return Math.max(0, Math.round(shippingFor('smt', 'moto') || 0)); } catch (e) { return 0; } }
+    function simDefaultDisc() { const d = Number(STORE_SETTINGS && STORE_SETTINGS.transferDiscountPct); return Number.isFinite(d) && d >= 0 ? d : 10; }
+    function simVal(id) { const el = document.getElementById(id); const n = el ? parseFloat(el.value) : NaN; return Number.isFinite(n) && n >= 0 ? n : 0; }
+    function simRound(v, mode) {
+      const p = Number(v);
+      if (!Number.isFinite(p) || p <= 0) return 0;
+      if (mode === 'none') return Math.ceil(p);
+      return csRound(p, mode);
+    }
+    function simInit() {
+      simLoad();
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+      set('sim-base', SIM.base); set('sim-target', SIM.target); set('sim-round', SIM.round);
+      set('sim-ship-charged', SIM.shipCharged == null ? simDefaultShip() : SIM.shipCharged);
+      set('sim-ship-cost', SIM.shipCost == null ? simDefaultShip() : SIM.shipCost);
+      set('sim-pickup', SIM.pickup || 0);
+      set('sim-disc', SIM.disc == null ? simDefaultDisc() : SIM.disc);
+      set('sim-comm', SIM.comm || 0);
+      const sel = document.getElementById('sim-product');
+      if (sel) {
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">📦 Cargar un producto…</option>' + [...PRODUCTS].sort((x, y) => String(x.name).localeCompare(String(y.name), 'es')).map(p => `<option value="${Number(p.id)}">${escapeHtml(p.name)}${Number(p.cost) > 0 ? '' : ' (sin costo)'}</option>`).join('');
+        if (cur) sel.value = cur;
+      }
+      simRenderPresets();
+      simRenderMode();
+      runMarginCalc();
+    }
+    function simSave() {
+      const num = id => { const el = document.getElementById(id); const n = el ? parseFloat(el.value) : NaN; return Number.isFinite(n) && n >= 0 ? n : 0; };
+      SIM.base = document.getElementById('sim-base').value;
+      SIM.target = document.getElementById('sim-target').value;
+      SIM.round = document.getElementById('sim-round').value;
+      SIM.shipCharged = num('sim-ship-charged'); SIM.shipCost = num('sim-ship-cost');
+      SIM.pickup = num('sim-pickup'); SIM.disc = Math.min(90, num('sim-disc')); SIM.comm = Math.min(90, num('sim-comm'));
+      simPersist();
+    }
+    function simSetMode(m) { SIM.mode = m === 'retiro' ? 'retiro' : 'domicilio'; simPersist(); simRenderMode(); runMarginCalc(); }
+    function simRenderMode() {
+      const dom = SIM.mode === 'domicilio';
+      [['sim-mode-dom', dom], ['sim-mode-ret', !dom]].forEach(([id, on]) => {
+        const b = document.getElementById(id); if (!b) return;
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.className = 'flex-1 px-3 py-2 rounded-lg border text-[11px] font-bold ' + (on ? 'bg-brand-orange text-black border-brand-orange' : 'bg-zinc-900 text-zinc-300 border-zinc-700 hover:border-zinc-500');
+      });
+      const box = document.getElementById('sim-ship-box'); if (box) box.classList.toggle('hidden', !dom);
+    }
+    function simRenderPresets() {
+      const box = document.getElementById('sim-presets'); if (!box) return;
+      box.innerHTML = SIM.presets.map(p => `<button type="button" data-sim-preset="${p}" onclick="simApplyPreset(${p})" class="px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-700 hover:border-brand-orange hover:text-brand-amber text-zinc-200 font-bold text-xs">${String(p).replace('.', ',')}%</button>`).join('');
+    }
+    function simTogglePresetEdit() {
+      const box = document.getElementById('sim-presets-edit'); if (!box) return;
+      box.classList.toggle('hidden');
+      if (!box.classList.contains('hidden')) { const i = document.getElementById('sim-presets-input'); i.value = SIM.presets.join(', '); i.focus(); }
+    }
+    function simSavePresets() {
+      const raw = String(document.getElementById('sim-presets-input').value || '').replace(/,(?=\d{1,2}(\D|$))/g, m => m).split(/[\s;]+|,\s+/).filter(Boolean).map(x => x.replace(',', '.').replace('%', ''));
+      const pr = simCleanPresets(raw);
+      if (!pr.length) { alert('Escribí al menos un porcentaje, por ejemplo: 20, 30, 40.'); return; }
+      SIM.presets = pr; simPersist(); simRenderPresets();
+      document.getElementById('sim-presets-edit').classList.add('hidden');
+    }
+    function simResetPresets() { SIM.presets = SIM_PRESETS_DEFAULT.slice(); simPersist(); simRenderPresets(); const i = document.getElementById('sim-presets-input'); if (i) i.value = SIM.presets.join(', '); }
+    function simResetCosts() {
+      SIM.shipCharged = null; SIM.shipCost = null; SIM.disc = null; SIM.pickup = 0; SIM.comm = 0; simPersist();
+      simInit();
+    }
+    function simLoadProduct(id) {
+      const p = PRODUCTS.find(x => String(x.id) === String(id)); if (!p) return;
+      document.getElementById('calc-cost').value = Number(p.cost) > 0 ? Math.round(p.cost) : '';
+      document.getElementById('calc-price').value = Math.round(Number(p.price) || 0);
+      runMarginCalc();
+    }
+    // Cuenta de una venta: devuelve lo que entra, lo que sale y lo que te queda.
+    function simCalc(o) {
+      const rev = Math.max(0, o.price);
+      const comm = rev * (o.comm / 100);
+      const shipIn = o.mode === 'domicilio' ? o.shipCharged : 0;
+      const shipOut = o.mode === 'domicilio' ? o.shipCost : 0;
+      const net = rev + shipIn - o.cost - o.pickup - shipOut - comm;
+      const baseCost = o.cost + o.pickup + shipOut - shipIn;
+      return { rev, comm, shipIn, shipOut, net, marginSale: rev > 0 ? net / rev * 100 : null, markup: (o.cost + o.pickup) > 0 ? net / (o.cost + o.pickup) * 100 : null, baseCost };
+    }
+    function simOpts() {
+      return { cost: simVal('calc-cost'), pickup: simVal('sim-pickup'), mode: SIM.mode, shipCharged: simVal('sim-ship-charged'), shipCost: simVal('sim-ship-cost'), comm: Math.min(90, simVal('sim-comm')), disc: Math.min(90, simVal('sim-disc')) };
+    }
+    // Precio de lista para que quede el porcentaje elegido.
+    function simPriceFor(pct, o, base, target, roundMode) {
+      const m = pct / 100, c = o.comm / 100;
+      const shipNet = o.mode === 'domicilio' ? (o.shipCost - o.shipCharged) : 0;
+      const totalCost = o.cost + o.pickup + shipNet;      // lo que te cuesta vender 1 unidad
+      if (!(o.cost > 0)) return null;
+      const denom = base === 'sale' ? (1 - c - m) : (1 - c);
+      if (denom <= 0) return null;
+      const need = base === 'sale' ? totalCost : totalCost * (1 + m);
+      let pay = need / denom;                              // precio que se cobra en el caso elegido
+      if (target === 'transfer') { const k = 1 - o.disc / 100; if (k <= 0) return null; pay = pay / k; }
+      return simRound(pay, roundMode);
+    }
+    function simApplyPreset(pct) {
+      const o = simOpts();
+      if (!(o.cost > 0)) { const el = document.getElementById('calc-cost'); el.focus(); alert('Primero poné el costo del proveedor.'); return; }
+      const price = simPriceFor(pct, o, SIM.base, SIM.target, SIM.round);
+      if (!price) { alert('Con esos porcentajes no se puede calcular un precio. Revisá los gastos y el descuento.'); return; }
+      document.getElementById('calc-price').value = price;
+      runMarginCalc();
+    }
     function runMarginCalc() {
-      const cost = parseFloat(document.getElementById('calc-cost').value) || 0;
-      const price = parseFloat(document.getElementById('calc-price').value) || 0;
-      const net = Math.max(0, price - cost);
-      const pct = price > 0 ? ((net / price) * 100).toFixed(1) : '0';
-
-      document.getElementById('calc-net').textContent = formatARS(net);
-      document.getElementById('calc-pct').textContent = `${pct}%`;
+      const rows = document.getElementById('sim-rows'); if (!rows) return;
+      const o = simOpts();
+      const price = simVal('calc-price');
+      const list = simCalc({ ...o, price });
+      const tr = simCalc({ ...o, price: price * (1 - o.disc / 100) });
+      const money = v => (v < 0 ? '−' : '') + formatARS(Math.abs(Math.round(v)));
+      const pct = v => v == null ? '—' : (Math.round(v * 10) / 10).toLocaleString('es-AR') + '%';
+      const cls = v => v < 0 ? 'text-rose-400' : 'text-emerald-400';
+      const line = (label, a, b, extra) => `<tr><td class="p-2.5 text-zinc-400">${label}</td><td class="p-2.5 text-right ${extra || 'text-zinc-200'}">${a}</td><td class="p-2.5 text-right ${extra || 'text-zinc-200'}">${b}</td></tr>`;
+      let h = line('Cobrás por el producto', money(list.rev), money(tr.rev));
+      if (o.mode === 'domicilio' && o.shipCharged > 0) h += line('+ Envío que cobrás', money(o.shipCharged), money(o.shipCharged));
+      h += line('− Costo del proveedor', money(o.cost), money(o.cost));
+      if (o.pickup > 0) h += line('− Retiro en el proveedor', money(o.pickup), money(o.pickup));
+      if (o.mode === 'domicilio' && o.shipCost > 0) h += line('− Envío que pagás', money(o.shipCost), money(o.shipCost));
+      if (o.comm > 0) h += line(`− Otros gastos (${String(o.comm).replace('.', ',')}%)`, money(list.comm), money(tr.comm));
+      h += `<tr class="bg-zinc-900/60"><td class="p-2.5 text-white font-bold">Ganancia limpia por unidad</td><td class="p-2.5 text-right font-bold ${cls(list.net)}" data-sim="net-list">${money(list.net)}</td><td class="p-2.5 text-right font-bold ${cls(tr.net)}" data-sim="net-tr">${money(tr.net)}</td></tr>`;
+      h += line('Margen sobre la venta', pct(list.marginSale), pct(tr.marginSale), 'text-brand-amber font-bold');
+      h += line('Recargo sobre el costo', pct(list.markup), pct(tr.markup), 'text-brand-amber font-bold');
+      rows.innerHTML = h;
+      document.getElementById('calc-net').textContent = formatARS(Math.max(0, Math.round(list.net)));
+      document.getElementById('calc-pct').textContent = `${list.marginSale == null ? 0 : (Math.round(list.marginSale * 10) / 10)}%`;
+      const note = document.getElementById('sim-note');
+      const msgs = [];
+      if (!(o.cost > 0)) msgs.push('Poné el costo del proveedor para ver la ganancia.');
+      else if (tr.net < 0) msgs.push('⚠️ Con transferencia estarías perdiendo plata: subí el precio de lista.');
+      else if (list.net < 0) msgs.push('⚠️ Con este precio estarías perdiendo plata.');
+      if (SIM.mode === 'domicilio') { try { const r = shipRates('moto'); if (Number.isFinite(r.freeFrom)) msgs.push(`En la tienda el envío es gratis desde ${formatARS(r.freeFrom)} de compra: en ese caso no lo cobrás (poné 0 en "Envío que le cobrás").`); } catch (e) {} }
+      if (note) note.textContent = msgs.join(' ');
     }
 
     // ---- Motor Inteligente (panel) ----
