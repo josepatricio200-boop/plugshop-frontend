@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.4</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.7</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -552,6 +552,9 @@ html { scroll-behavior: smooth; }
             </button>
               <button onclick="switchAdminTab('staff-users')" id="tab-btn-staff-users" data-nav-tab="staff-users" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">🔑</span><span>Usuarios & Permisos</span></span><span id="badge-staff-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">0</span>
+            </button>
+              <button onclick="openTabSection('settings','print')"  data-nav-tab="settings" data-sec-nav="settings:print" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🖨️</span><span>Impresión</span></span>
             </button>
               <button onclick="openTabSection('settings','backup')"  data-nav-tab="settings" data-sec-nav="settings:backup" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">💾</span><span>Copia de seguridad</span></span>
@@ -1939,6 +1942,15 @@ html { scroll-behavior: smooth; }
               </div>
             </div>
 </div>
+<div data-sec-pane="settings:print" class="space-y-6">
+<div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-4">
+              <div>
+                <h4 class="text-sm font-bold text-white" id="sec-print" style="scroll-margin-top:72px">🖨️ Impresión</h4>
+                <p class="text-xs text-zinc-400">Elegí el papel de la impresora de este celular o compu. Cada dispositivo guarda su propia configuración, porque cada uno tiene su impresora.</p>
+              </div>
+              <div id="print-settings-box" class="space-y-4"></div>
+            </div>
+</div>
 <div data-sec-pane="settings:backup" class="space-y-6">
 <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
               <div class="flex items-center justify-between gap-3 flex-wrap">
@@ -2476,6 +2488,7 @@ html { scroll-behavior: smooth; }
       { id: 'cfg', icon: '⚙️', label: 'Configuración del sistema', items: [
         { id: 'rates', tab: 'settings', sec: 'rates', icon: '🚚', label: 'Tarifas y cobros' },
         { id: 'staff-users', tab: 'staff-users', icon: '🔑', label: 'Usuarios & Permisos' },
+        { id: 'print', tab: 'settings', sec: 'print', icon: '🖨️', label: 'Impresión' },
         { id: 'backup', tab: 'settings', sec: 'backup', icon: '💾', label: 'Copia de seguridad' },
         { id: 'audit', tab: 'settings', sec: 'audit', icon: '📜', label: 'Registro de cambios' }] }
     ];
@@ -2495,7 +2508,7 @@ html { scroll-behavior: smooth; }
       inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía'], ['iphone', '📱', 'Sección iPhone', 'iphone']] },
       suppliers: { def: 'dir', items: [['dir', '📇', 'Directorio'], ['pay', '💳', 'Cuentas por pagar', null, true]] },
       offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['promos', '🏷️', 'Promos y pagos']] },
-      settings: { flat: true, def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
+      settings: { flat: true, def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['print', '🖨️', 'Impresión'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
     };
     const SEC_NOW = {};
     const SEC_CHIP_ON = 'bg-brand-orange/15 border-brand-orange text-brand-orange', SEC_CHIP_OFF = 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300';
@@ -2525,6 +2538,7 @@ html { scroll-behavior: smooth; }
       document.querySelectorAll(`[data-sec-pane^="${tab}:"]`).forEach(p => p.classList.toggle('hidden', p.dataset.secPane !== tab + ':' + key));
       syncTabNav();
       if (tab === 'suppliers' && key === 'pay') openPayables();
+      if (tab === 'settings' && key === 'print') renderPrintSettings();
     }
     function openTabSection(tab, key) { switchAdminTab(tab); setTabSection(tab, key); }
     const NAV_TOP_ON = 'admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold text-brand-orange bg-brand-orange/10 border border-brand-orange/30 shadow-sm transition-all';
@@ -4865,6 +4879,7 @@ html { scroll-behavior: smooth; }
         <button onclick="window.print()" style="float:right;padding:8px 14px">Imprimir</button>
         <h1>Constancia de entrega — iPhone</h1>
         <div class="muted">${e(LEGAL_DATA.razonSocial)} · CUIT ${e(LEGAL_DATA.cuit)} · ${e(LEGAL_DATA.domicilio)} · ${e(LEGAL_DATA.email)}</div>
+        <p style="border:2px solid #111;display:inline-block;padding:3px 10px;font-weight:bold;margin:8px 0 0">DOCUMENTO NO VÁLIDO COMO FACTURA</p>
         <p><strong>Fecha:</strong> ${e(new Date().toLocaleDateString('es-AR'))}</p>
         <h3>Comprador</h3>
         <table><tr><td>Nombre</td><td>${e(f.name)}</td></tr><tr><td>DNI</td><td>${e(f.dni || '—')}</td></tr><tr><td>WhatsApp</td><td>${e(f.phone || '—')}</td></tr></table>
@@ -5928,7 +5943,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v8.4): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v8.7): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -7378,6 +7393,151 @@ html { scroll-behavior: smooth; }
     function normalizeCode(s) { return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
     function formatPkgCode(c) { return c.slice(0, 4) + '-' + c.slice(4); }
 
+    // ==========================================
+    // IMPRESIÓN: etiqueta del paquete y comprobante del pedido (58 mm, 80 mm o A4)
+    // ==========================================
+    // El papel y las opciones se guardan en cada dispositivo (cada uno tiene su impresora).
+    // El comprobante es un documento interno de la compra: NO es una factura y lo dice en letras grandes.
+    const PRINT_KEY = 'plugshop_print_v1';
+    const PRINT_PAPERS = {
+      '58': { name: '58 mm', hint: 'Impresora térmica chica (rollo angosto)', page: '@page{size:58mm auto;margin:2mm}', body: 'width:54mm;font-size:11px', qr: 38, big: 17 },
+      '80': { name: '80 mm', hint: 'Impresora térmica de mostrador', page: '@page{size:80mm auto;margin:3mm}', body: 'width:74mm;font-size:12px', qr: 52, big: 20 },
+      'A4': { name: 'A4', hint: 'Impresora común de hoja', page: '@page{size:A4;margin:14mm}', body: 'max-width:180mm;font-size:14px', qr: 70, big: 26 }
+    };
+    // Qué muestra el comprobante (todo se puede sacar, menos la leyenda "no válido como factura").
+    const RC_DEFAULT = { seller: true, domicilio: true, email: true, date: true, unit: true, discounts: true, payment: true, header: '', footer: '' };
+    function printCfg() {
+      let v = {};
+      try { v = JSON.parse(localStorage.getItem(PRINT_KEY) || '{}') || {}; } catch (e) { v = {}; }
+      const r = (v.rc && typeof v.rc === 'object') ? v.rc : {};
+      const rc = {};
+      Object.keys(RC_DEFAULT).forEach(k => { rc[k] = typeof RC_DEFAULT[k] === 'boolean' ? r[k] !== false : String(r[k] || '').replace(/[\u0000-\u001f<>`]/g, ' ').trim().slice(0, 160); });
+      return { paper: PRINT_PAPERS[v.paper] ? v.paper : '80', addr: v.addr !== false, phone: v.phone === true, cash: v.cash !== false, rc };
+    }
+    function setPrintCfg(patch) {
+      const cur = printCfg();
+      const next = { ...cur, ...patch, rc: { ...cur.rc, ...((patch && patch.rc) || {}) } };
+      try { localStorage.setItem(PRINT_KEY, JSON.stringify(next)); } catch (e) { /* sin almacenamiento: queda para esta sesión */ }
+      return printCfg();
+    }
+    function printQrImg(text, mm) {
+      if (typeof qrcode !== 'function') return '<div class="muted c">(Sin QR: usá el código de abajo)</div>';
+      const qr = qrcode(0, 'M');
+      qr.addData(text);
+      qr.make();
+      return `<img class="qr" style="width:${mm}mm;height:${mm}mm" src="${qr.createDataURL(6, 4)}" alt="QR del paquete" />`;
+    }
+    function printWrap(title, inner, paper, auto) {
+      const p = PRINT_PAPERS[paper] || PRINT_PAPERS['80'];
+      return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>${p.page}
+        *{box-sizing:border-box}body{margin:0 auto;padding:${auto ? '0' : '6px'};${p.body};font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;line-height:1.3}
+        h1{font-size:1.3em;margin:0 0 2px;text-align:center}.c{text-align:center}.muted{color:#444;font-size:.9em}.qr{display:block;margin:4px auto;image-rendering:pixelated}
+        .code{font:900 ${p.big}px/1.1 'Courier New',monospace;letter-spacing:2px;text-align:center;margin:4px 0}hr{border:0;border-top:1px dashed #000;margin:6px 0}
+        table{width:100%;border-collapse:collapse;table-layout:auto}td{padding:1px 0;vertical-align:top}td.r{text-align:right;white-space:nowrap;padding-left:6px}td.k{white-space:nowrap;padding-right:6px}td.v{text-align:right;word-break:break-word}
+        .tot td{font-weight:900;font-size:1.15em;border-top:1px solid #000;padding-top:3px}.legal{border:2px solid #000;text-align:center;font-weight:900;padding:4px 2px;margin:8px 0}
+        .cobrar{border:2px solid #000;text-align:center;font-weight:900;font-size:1.2em;padding:4px;margin:6px 0}.bar{padding:8px;text-align:center}@media print{.bar{display:none}}
+        </style></head><body${auto ? ' onload="setTimeout(function(){window.print()},350)"' : ''}>${auto ? '<div class="bar"><button onclick="window.print()" style="padding:8px 16px;font-size:14px">Imprimir</button></div>' : ''}${inner}</${'body'}></${'html'}>`;
+    }
+    function printDateAR(o) {
+      const d = String(o.date || '').slice(0, 10).split('-');
+      return d.length === 3 ? d[2] + '/' + d[1] + '/' + d[0] : new Date().toLocaleDateString('es-AR');
+    }
+    function printLabelInner(o, cfg) {
+      const e = escapeHtml, p = PRINT_PAPERS[cfg.paper] || PRINT_PAPERS['80'];
+      const cobrar = cfg.cash ? routeToCollect(o) : 0;
+      return `<h1>PLUGSHOP</h1>${printQrImg('PLUG|' + o.id + '|' + o.pkgCode, p.qr)}<div class="c"><b>Pedido ${e(o.id)}</b></div><div class="code">${e(formatPkgCode(o.pkgCode))}</div><hr>
+        <div><b>${e(o.customer)}</b></div>${cfg.addr && o.address ? `<div>Entrega: ${e(o.address)}</div>` : ''}${cfg.addr && o.deliveryType ? `<div class="muted">${e(o.deliveryType)}</div>` : ''}${cfg.phone && o.phone ? `<div>Tel: ${e(o.phone)}</div>` : ''}${cobrar ? `<div class="cobrar">COBRAR ${e(formatARS(cobrar))}</div>` : ''}<div class="c muted" style="margin-top:6px">${e(printDateAR(o))}</div>`;
+    }
+    function printReceiptInner(o, cfg) {
+      const e = escapeHtml, money = n => e(formatARS(Number(n) || 0)), rc = cfg.rc || RC_DEFAULT;
+      const lines = Array.isArray(o.lines) ? o.lines : [];
+      const sub = lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0);
+      const row = (a, b) => `<tr><td>${a}</td><td class="r">${b}</td></tr>`;
+      const kv = (a, b) => `<tr><td class="k">${a}</td><td class="v">${b}</td></tr>`;
+      const name = l => `${e(l.qty)} x ${e(l.name)}${l.color && l.color !== 'Único' ? ' (' + e(l.color) + ')' : ''}`;
+      const items = lines.length
+        ? lines.map(l => rc.unit
+          ? `<tr><td colspan="2">${name(l)}</td></tr>` + row('<span class="muted">&nbsp;&nbsp;' + money(l.unitPrice) + ' c/u</span>', money((Number(l.qty) || 0) * (Number(l.unitPrice) || 0)))
+          : row(name(l), money((Number(l.qty) || 0) * (Number(l.unitPrice) || 0)))).join('')
+        : `<tr><td colspan="2">${e(o.items || '')}</td></tr>`;
+      const extra = [];
+      if (rc.discounts) {
+        if (lines.length) extra.push(row('Productos', money(sub)));
+        if (Number(o.discountApplied) > 0) extra.push(row('Descuento por transferencia', '-' + money(o.discountApplied)));
+        if (Number(o.couponAmount) > 0) extra.push(row('Cupón' + (o.coupon ? ' ' + e(o.coupon) : ''), '-' + money(o.couponAmount)));
+        if (Number(o.manualDiscount) > 0) extra.push(row('Descuento', '-' + money(o.manualDiscount)));
+        extra.push(row('Envío', Number(o.shippingCost) > 0 ? money(o.shippingCost) : 'Sin cargo'));
+      }
+      const estado = o.paid ? 'Pagado' : (ppIsTransfer(o) ? 'Pago pendiente' : 'A cobrar al entregar');
+      const seller = [];
+      if (rc.seller) seller.push(e(LEGAL_DATA.razonSocial), 'CUIT ' + e(LEGAL_DATA.cuit));
+      if (rc.domicilio) seller.push(e(LEGAL_DATA.domicilio));
+      if (rc.email) seller.push(e(LEGAL_DATA.email));
+      const head = (seller.length ? `<div class="c muted">${seller.join('<br>')}</div>` : '') + (rc.header ? `<div class="c" style="margin-top:3px">${e(rc.header)}</div>` : '');
+      const info = kv('Pedido', '<b>' + e(o.id) + '</b>') + (rc.date ? kv('Fecha', e(printDateAR(o))) : '') + kv('Cliente', e(o.customer)) + (cfg.phone && o.phone ? kv('Teléfono', e(o.phone)) : '') + (cfg.addr && o.address ? kv('Entrega', e(o.address)) : '');
+      const pay = rc.payment ? `<hr><table>${kv('Pago', e(o.paymentMethod || '—'))}${kv('Estado', e(estado))}</table>` : '';
+      return `<h1>PLUGSHOP</h1>${head}<hr>
+        <div class="c"><b>COMPROBANTE DE PEDIDO</b></div><div class="legal">DOCUMENTO NO VÁLIDO COMO FACTURA</div>
+        <table>${info}</table><hr>
+        <table>${items}</table><hr>
+        <table>${extra.join('')}<tr class="tot"><td>TOTAL</td><td class="r">${money(o.total)}</td></tr></table>${pay}
+        <p class="c muted" style="margin:8px 0 0">Comprobante interno de tu compra, sin validez fiscal.<br>${rc.footer ? e(rc.footer) : 'Conservalo: lo necesitás para garantía y cambios.<br>¡Gracias por elegir PLUGSHOP!'}</p>`;
+    }
+    function printDocHtml(o, kind, cfg, auto) {
+      const inner = kind === 'receipt' ? printReceiptInner(o, cfg) : printLabelInner(o, cfg);
+      return printWrap(kind === 'receipt' ? 'Comprobante ' + o.id : 'Etiqueta ' + o.id, inner, cfg.paper, auto);
+    }
+    function printOpenWindow(html) {
+      const w = window.open('', '_blank');
+      if (!w) { alert('El navegador bloqueó la ventana de impresión. Permití las ventanas emergentes de este sitio y probá de nuevo.'); return false; }
+      w.document.write(html);
+      w.document.close();
+      return true;
+    }
+    function printPaperChips(cfg, fnName) {
+      return Object.keys(PRINT_PAPERS).map(k => {
+        const on = cfg.paper === k;
+        return `<button type="button" role="radio" aria-checked="${on}" data-print-paper="${k}" onclick="${fnName}('${k}')" class="py-2.5 rounded-xl border text-xs font-bold ${on ? 'bg-brand-orange/15 border-brand-orange text-brand-orange' : 'bg-zinc-900 border-zinc-700 text-zinc-300'}">${escapeHtml(PRINT_PAPERS[k].name)}</button>`;
+      }).join('');
+    }
+
+    // Casillas y textos para elegir qué sale (sirve en el diálogo de imprimir y en Ajustes → Impresión).
+    function printOptsHtml(kind, cfg) {
+      const chk = (key, on, label) => `<label class="flex items-center gap-2 text-xs text-zinc-200"><input type="checkbox" data-print-opt="${key}" ${on ? 'checked' : ''} onchange="printSetOpt(this)" class="w-4 h-4 accent-orange-500" /> ${label}</label>`;
+      const txt = (key, val, label, ph) => `<label class="block text-xs text-zinc-300">${label}<input type="text" maxlength="160" data-print-text="${key}" value="${escapeHtml(val)}" placeholder="${escapeHtml(ph)}" onchange="printSetOpt(this)" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>`;
+      const rc = cfg.rc;
+      const client = chk('addr', cfg.addr, 'Dirección de entrega del cliente') + chk('phone', cfg.phone, 'Teléfono del cliente');
+      const label = chk('cash', cfg.cash, 'Aviso "COBRAR $" en pedidos en efectivo');
+      const receipt = chk('seller', rc.seller, 'Mi nombre y CUIT') + chk('domicilio', rc.domicilio, 'Mi domicilio') + chk('email', rc.email, 'Mi email')
+        + chk('date', rc.date, 'Fecha') + chk('unit', rc.unit, 'Precio de cada producto') + chk('discounts', rc.discounts, 'Detalle de descuentos y envío') + chk('payment', rc.payment, 'Forma y estado de pago')
+        + txt('header', rc.header, 'Texto arriba (opcional)', 'Ej: Instagram @plugshop · Lun a Sáb de 9 a 20 h')
+        + txt('footer', rc.footer, 'Texto al pie (opcional, reemplaza el saludo)', 'Ej: ¡Gracias por tu compra!');
+      const note = '<p class="text-[11px] text-zinc-500">La leyenda "Documento no válido como factura" no se puede sacar.</p>';
+      const reset = '<button type="button" onclick="printResetOpts()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-300 text-[11px] font-semibold">Volver a lo de fábrica</button>';
+      const box = (t, body) => `<div class="space-y-2"><div class="text-xs font-semibold text-zinc-300">${t}</div>${body}</div>`;
+      if (kind === 'label') return box('Qué lleva la etiqueta', client + label) + reset;
+      if (kind === 'receipt') return box('Qué lleva el comprobante', client + receipt) + note + reset;
+      return box('Datos del cliente (etiqueta y comprobante)', client) + box('Etiqueta del paquete', label) + box('Comprobante del pedido', receipt) + note + reset;
+    }
+    function printSetOpt(el) {
+      const k = el.dataset.printOpt, t = el.dataset.printText;
+      const det = document.getElementById('print-opts'); if (det) PRINT_STATE.opts = det.open;
+      if (k) {
+        if (k === 'addr' || k === 'phone' || k === 'cash') setPrintCfg({ [k]: !!el.checked });
+        else if (typeof RC_DEFAULT[k] === 'boolean') setPrintCfg({ rc: { [k]: !!el.checked } });
+      } else if (t === 'header' || t === 'footer') setPrintCfg({ rc: { [t]: el.value } });
+      printRefreshViews();
+    }
+    function printResetOpts() {
+      setPrintCfg({ addr: true, phone: false, cash: true, rc: { ...RC_DEFAULT } });
+      printRefreshViews();
+    }
+    function printRefreshViews() {
+      if (document.getElementById('label-modal')) renderPrintDialog();
+      if (document.getElementById('print-settings-box')) renderPrintSettings();
+    }
+
+    let PRINT_STATE = { id: null, kind: 'label', opts: false };
     async function openPackageLabel(orderId) {
       const order = ADMIN_ORDERS.find(o => o.id === orderId);
       if (!order) return;
@@ -7390,29 +7550,80 @@ html { scroll-behavior: smooth; }
         order.pkgCode = generatePkgCode();
         saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
       }
-      let qrHtml = '<div class="text-[11px] text-zinc-600 p-6">(No se pudo generar el QR sin internet: usá el código de abajo)</div>';
-      if (typeof qrcode === 'function') {
-        const qr = qrcode(0, 'M');
-        qr.addData(`PLUG|${order.id}|${order.pkgCode}`);
-        qr.make();
-        qrHtml = `<img src="${qr.createDataURL(6, 4)}" alt="QR del paquete" class="w-48 h-48 mx-auto" style="image-rendering:pixelated" />`;
-      }
-      document.getElementById('label-modal')?.remove();
+      PRINT_STATE = { id: orderId, kind: 'label', opts: false };
+      renderPrintDialog();
+    }
+    function closePrintDialog() { document.getElementById('label-modal')?.remove(); }
+    function renderPrintDialog() {
+      const order = ADMIN_ORDERS.find(o => o.id === PRINT_STATE.id);
+      if (!order) return;
+      const cfg = printCfg(), kind = PRINT_STATE.kind === 'receipt' ? 'receipt' : 'label';
+      closePrintDialog();
       const wrap = document.createElement('div');
       wrap.id = 'label-modal';
       wrap.className = 'fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4';
+      const tab = (k, label) => `<button type="button" data-print-kind="${k}" onclick="printSetKind('${k}')" class="py-2.5 rounded-xl border text-xs font-bold ${kind === k ? 'bg-brand-orange/15 border-brand-orange text-brand-orange' : 'bg-zinc-900 border-zinc-700 text-zinc-300'}">${label}</button>`;
       wrap.innerHTML = `
-        <div class="w-full max-w-xs bg-zinc-950 border border-white/[0.15] rounded-2xl p-4 space-y-3 text-center">
-          <div class="text-sm font-bold text-white">Etiqueta del paquete</div>
-          <div class="bg-white rounded-xl p-3 text-black space-y-1">
-            ${qrHtml}
-            <div class="font-bold text-sm">Pedido ${escapeHtml(order.id)}</div>
-            <div class="font-mono text-lg font-black tracking-widest">${escapeHtml(formatPkgCode(order.pkgCode))}</div>
+        <div class="w-full max-w-md max-h-[94vh] overflow-y-auto bg-zinc-950 border border-white/[0.15] rounded-2xl p-4 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-sm font-bold text-white">🖨️ Imprimir · Pedido ${escapeHtml(order.id)}</div>
+            <button type="button" onclick="closePrintDialog()" aria-label="Cerrar" class="w-8 h-8 rounded-lg bg-zinc-800 text-zinc-200">✕</button>
           </div>
-          <p class="text-[11px] text-amber-400">Pegala en el paquete. No compartas este código por WhatsApp: solo va en la etiqueta física.</p>
-          <button onclick="document.getElementById('label-modal').remove()" class="w-full py-2.5 rounded-xl bg-zinc-800 text-zinc-200 text-xs font-bold">Cerrar</button>
+          <div class="grid grid-cols-2 gap-2">${tab('label', '🏷️ Etiqueta del paquete')}${tab('receipt', '🧾 Comprobante')}</div>
+          <div>
+            <div class="text-[11px] text-zinc-400 mb-1">Papel de esta impresora · ${escapeHtml(PRINT_PAPERS[cfg.paper].hint)}</div>
+            <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Papel">${printPaperChips(cfg, 'printSetPaper')}</div>
+          </div>
+          <iframe id="print-preview" title="Vista previa" class="w-full h-72 rounded-xl bg-white border border-zinc-700" srcdoc="${escapeHtml(printDocHtml(order, kind, cfg, false))}"></iframe>
+          <details id="print-opts" ${PRINT_STATE.opts ? 'open' : ''} ontoggle="PRINT_STATE.opts = this.open" class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-3">
+            <summary class="cursor-pointer text-xs font-bold text-zinc-200">✏️ Editar qué sale ${kind === 'receipt' ? 'en el comprobante' : 'en la etiqueta'}</summary>
+            <div class="space-y-3 pt-2">${printOptsHtml(kind, cfg)}</div>
+          </details>
+          ${kind === 'label'
+            ? '<p class="text-[11px] text-amber-400">Pegala en el paquete. No compartas este código por WhatsApp: solo va en la etiqueta física.</p>'
+            : '<p class="text-[11px] text-amber-400">Es el comprobante interno de la compra. No es una factura y lo aclara en la hoja.</p>'}
+          <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+            <button type="button" onclick="closePrintDialog()" class="py-2.5 rounded-xl bg-zinc-800 text-zinc-200">Cerrar</button>
+            <button type="button" id="btn-print-now" onclick="printNow()" class="py-2.5 rounded-xl bg-emerald-500 text-black">🖨️ Imprimir</button>
+          </div>
         </div>`;
       document.body.appendChild(wrap);
+    }
+    function printSetPaper(k) { setPrintCfg({ paper: k }); renderPrintDialog(); }
+    function printSetKind(k) { PRINT_STATE.kind = k === 'receipt' ? 'receipt' : 'label'; renderPrintDialog(); }
+    function printNow() {
+      const order = ADMIN_ORDERS.find(o => o.id === PRINT_STATE.id);
+      if (!order) return;
+      printOpenWindow(printDocHtml(order, PRINT_STATE.kind === 'receipt' ? 'receipt' : 'label', printCfg(), true));
+    }
+
+    // ---- Ajustes → Impresión (papel y opciones de este dispositivo) ----
+    function renderPrintSettings() {
+      const box = document.getElementById('print-settings-box');
+      if (!box) return;
+      const cfg = printCfg();
+      box.innerHTML = `
+        <div>
+          <div class="text-xs font-semibold text-zinc-300 mb-1">Papel de la impresora</div>
+          <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Papel">${printPaperChips(cfg, 'printSetPaperSettings')}</div>
+          <p class="text-[11px] text-zinc-500 mt-1">${escapeHtml(PRINT_PAPERS[cfg.paper].name)}: ${escapeHtml(PRINT_PAPERS[cfg.paper].hint)}.</p>
+        </div>
+        <div class="space-y-4">${printOptsHtml('all', cfg)}</div>
+        <div class="flex flex-wrap gap-2">
+          <button type="button" onclick="printTest('label')" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-100 text-xs font-bold">🏷️ Imprimir etiqueta de prueba</button>
+          <button type="button" onclick="printTest('receipt')" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-100 text-xs font-bold">🧾 Imprimir comprobante de prueba</button>
+        </div>
+        <p class="text-[11px] text-zinc-500">Al imprimir, en el cuadro del navegador elegí tu impresora, los márgenes en "Ninguno" y la escala en "Predeterminada". El comprobante siempre dice "Documento no válido como factura".</p>`;
+    }
+    function printSetPaperSettings(k) { setPrintCfg({ paper: k }); renderPrintSettings(); }
+    function printTest(kind) {
+      const o = {
+        id: 'PS-EJEMPLO1', pkgCode: 'ABCD2345', customer: 'Cliente de Ejemplo', phone: '381 555 0000', address: 'Calle de Ejemplo 123, San Miguel de Tucumán',
+        deliveryType: 'San Miguel de Tucumán', paymentMethod: 'Efectivo en Mano (Precio lista)', isBancarizado: false, paid: false,
+        lines: [{ qty: 1, name: 'Producto de ejemplo', color: 'Negro', unitPrice: 10000 }, { qty: 2, name: 'Otro producto', color: 'Único', unitPrice: 5000 }],
+        discountApplied: 0, shippingCost: 1500, total: 21500, date: new Date().toISOString().slice(0, 10)
+      };
+      printOpenWindow(printDocHtml(o, kind === 'receipt' ? 'receipt' : 'label', printCfg(), true));
     }
 
     let scanState = { mode: null, orderId: null, stream: null, timer: null, fails: 0, lockedUntil: 0 };
