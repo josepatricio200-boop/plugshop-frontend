@@ -3886,7 +3886,7 @@ html { scroll-behavior: smooth; }
       if (Array.isArray(res)) { PROMOS = res; renderPromos(); }
     }
     function copyPromoCoupon(code, btn) {
-      const done = () => { if (btn) { const t = btn.dataset.t || btn.textContent; btn.dataset.t = t; btn.textContent = '¡Copiado!'; setTimeout(() => { btn.textContent = t; }, 1800); } };
+      const done = () => { if (btn) { const t = btn.dataset.t || btn.innerHTML; btn.dataset.t = t; btn.textContent = '¡Copiado!'; setTimeout(() => { btn.innerHTML = t; }, 1800); } };
       try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(code).then(done, done); return; } } catch (e) {}
       done();
     }
@@ -3899,8 +3899,8 @@ html { scroll-behavior: smooth; }
         const prods = (p.productIds || []).map(id => PRODUCTS.find(x => x.id === id)).filter(x => x && x.active !== false);
         const theme = PROMO_THEMES[p.theme] || PROMO_THEMES.orange;
         const until = p.endDate ? `Hasta el ${p.endDate.split('-').reverse().slice(0, 2).join('/')}` : '';
-        const chips = [until ? `<span class="px-2.5 py-1 rounded-full bg-black/40 border border-white/10 text-zinc-200 text-[11px] font-semibold">⏰ ${escapeHtml(until)}</span>` : '',
-          p.couponCode ? `<button type="button" data-promo-coupon="${escapeHtml(p.couponCode)}" onclick="copyPromoCoupon('${escapeHtml(p.couponCode)}', this)" class="px-2.5 py-1 rounded-full bg-brand-orange text-black text-[11px] font-extrabold" title="Tocá para copiar el código">🎟️ Cupón ${escapeHtml(p.couponCode)}${p.couponLabel ? ' · ' + escapeHtml(p.couponLabel) : ''}</button>` : ''].filter(Boolean).join('');
+        const chips = [until ? `<span class="px-2.5 py-1 rounded-full bg-black/40 border border-white/10 text-zinc-200 text-[11px] font-semibold"><svg class="inline w-3.5 h-3.5 -mt-0.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${escapeHtml(until)}</span>` : '',
+          p.couponCode ? `<button type="button" data-promo-coupon="${escapeHtml(p.couponCode)}" onclick="copyPromoCoupon('${escapeHtml(p.couponCode)}', this)" class="px-2.5 py-1 rounded-full bg-brand-orange text-black text-[11px] font-extrabold" title="Tocá para copiar el código"><svg class="inline w-3.5 h-3.5 -mt-0.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"/></svg>Cupón ${escapeHtml(p.couponCode)}${p.couponLabel ? ' · ' + escapeHtml(p.couponLabel) : ''}</button>` : ''].filter(Boolean).join('');
         const cards = prods.map(pr => {
           const tp = Math.round(pr.price * (1 - disc / 100));
           const vis = (pr.photos && pr.photos[0]) ? pr.photos[0] : '📦';
@@ -3911,6 +3911,20 @@ html { scroll-behavior: smooth; }
               <div class="mt-1 text-sm font-black text-white">${formatARS(tp)}</div><div class="text-[10px] text-emerald-400">${disc}% OFF transferencia</div>
               ${pr.stock === 0 ? '<div class="text-[10px] text-rose-400 font-bold mt-0.5">Sin stock</div>' : (d ? `<div class="text-[10px] text-amber-300 font-semibold mt-0.5">⏳ ${escapeHtml(d.text)}</div>` : '')}</div></button>`;
         }).join('');
+        const img = (typeof p.image === 'string' && /^https:\/\//i.test(p.image)) ? p.image : '';
+        const cardsRow = cards ? `<div class="${img ? 'p-4 sm:p-6' : 'mt-4'} -mx-1 px-1 flex gap-3 overflow-x-auto snap-x pb-1">${cards}</div>` : '';
+        if (img) {
+          return `<article data-promo="${escapeHtml(p.id)}" data-promo-image="1" class="rounded-3xl border bg-gradient-to-br ${theme} overflow-hidden">
+          <div class="relative min-h-[190px] sm:min-h-[250px] flex items-end sm:items-center bg-zinc-900">
+            <img src="${escapeHtml(img)}" alt="" loading="lazy" class="absolute inset-0 w-full h-full object-cover" onerror="this.remove()">
+            <div class="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-black/90 via-black/60 to-black/10" aria-hidden="true"></div>
+            <div class="relative p-5 sm:p-10 max-w-xl"><h3 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">${escapeHtml(p.title)}</h3>
+              ${p.body ? `<p class="text-sm sm:text-base text-zinc-200 mt-1.5">${escapeHtml(p.body)}</p>` : ''}
+              ${chips ? `<div class="flex flex-wrap gap-2 mt-4">${chips}</div>` : ''}</div>
+          </div>
+          ${cardsRow}
+        </article>`;
+        }
         return `<article data-promo="${escapeHtml(p.id)}" class="rounded-3xl border bg-gradient-to-br ${theme} p-4 sm:p-6">
           <div class="flex items-start gap-3 sm:gap-4">
             <div class="text-4xl sm:text-5xl leading-none shrink-0" aria-hidden="true">${escapeHtml(p.icon || '🎁')}</div>
@@ -3918,7 +3932,7 @@ html { scroll-behavior: smooth; }
               ${p.body ? `<p class="text-sm text-zinc-300 mt-1">${escapeHtml(p.body)}</p>` : ''}
               ${chips ? `<div class="flex flex-wrap gap-2 mt-3">${chips}</div>` : ''}</div>
           </div>
-          ${cards ? `<div class="mt-4 -mx-1 px-1 flex gap-3 overflow-x-auto snap-x pb-1">${cards}</div>` : ''}
+          ${cardsRow}
         </article>`;
       }).join('');
     }
