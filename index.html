@@ -3539,10 +3539,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     const VEHICLE_INFO = { moto: { label: 'Moto', icon: '🛵' }, auto: { label: 'Auto', icon: '🚗' } };
     const VEHICLE_ORDER = Object.keys(VEHICLE_INFO);
     function vehicleOfProduct(p) { return p && VEHICLE_INFO[p.deliveryClass] ? p.deliveryClass : 'moto'; }
-    // Aviso de demora: productos que no están en el local o llegan de fuera de Tucumán.
+    // Aviso de demora: SOLO en los productos donde se tildó "Avisar demora al cliente" (nada es automático).
     // Se avisa ANTES de comprar (ficha, carrito y checkout) y queda en el mensaje de WhatsApp.
     function delayInfo(p) {
-      if (!p || !(p.delayNotice === true || p.pickupAtSupplier === true)) return null;
+      if (!p || p.delayNotice !== true) return null;
       const clamp = (v, d) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= 1 && n <= 30 ? n : d; };
       const min = clamp(p.delayDaysMin, 1); let max = clamp(p.delayDaysMax, 4); if (max < min) max = min;
       return { min, max, text: min === max ? `${min} ${min === 1 ? 'día' : 'días'}` : `${min} a ${max} días` };

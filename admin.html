@@ -1095,12 +1095,13 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                       <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">Si un pedido lleva un producto en auto, todo el pedido se envía en auto. El precio de cada uno se carga en Ajustes & Zonas.</p>
                     </div>
                     <div id="new-prod-delay-box" class="sm:col-span-2">
-                      <label class="flex items-start gap-2 text-xs text-zinc-300 font-sans cursor-pointer"><input type="checkbox" id="new-prod-delay" onchange="syncDelayBox()" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>⏳ Avisar demora al cliente</b><br><span class="text-[10px] text-zinc-500 leading-snug">Tildalo si no está en el local o viene de fuera de Tucumán. Antes de comprar, el cliente ve que puede demorar. (Los que se retiran en el proveedor avisan solos.)</span></span></label>
+                      <label class="flex items-start gap-2 text-xs text-zinc-300 font-sans cursor-pointer"><input type="checkbox" id="new-prod-delay" onchange="syncDelayBox()" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>⏳ Avisar demora al cliente</b><br><span class="text-[10px] text-zinc-500 leading-snug">Dejalo SIN tildar y el cliente no ve ningún aviso. Si lo tildás, lo ve en la ficha, el carrito y el pedido. Nada se tilda solo (ni siquiera "se retira en el proveedor").</span></span></label>
+                      <div id="new-prod-delay-preview" class="mt-2 text-[11px] font-sans rounded-lg px-3 py-2 border border-zinc-700 bg-zinc-900 text-zinc-400">Sin aviso: el cliente no ve ninguna demora en este producto.</div>
                       <div id="new-prod-delay-days" class="hidden mt-2 flex items-center gap-2 text-xs font-sans">
                         <span class="text-zinc-400">Demora de</span>
-                        <input type="number" id="new-prod-delay-min" min="1" max="30" value="1" aria-label="Días mínimos" class="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-center focus:outline-none focus:border-brand-orange" />
+                        <input type="number" id="new-prod-delay-min" min="1" max="30" value="1" oninput="syncDelayBox()" aria-label="Días mínimos" class="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-center focus:outline-none focus:border-brand-orange" />
                         <span class="text-zinc-400">a</span>
-                        <input type="number" id="new-prod-delay-max" min="1" max="30" value="4" aria-label="Días máximos" class="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-center focus:outline-none focus:border-brand-orange" />
+                        <input type="number" id="new-prod-delay-max" min="1" max="30" value="4" oninput="syncDelayBox()" aria-label="Días máximos" class="w-16 bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-center focus:outline-none focus:border-brand-orange" />
                         <span class="text-zinc-400">días</span>
                       </div>
                     </div>
@@ -1110,7 +1111,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                         <option value="">Sin proveedor (stock propio)</option>
                       </select>
                       <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">A quién le comprás este producto. Sirve para las cuentas por pagar y para la edición masiva de costos.</p>
-                      <label class="mt-2 flex items-start gap-2 text-xs text-zinc-300 font-sans cursor-pointer"><input type="checkbox" id="new-prod-pickup" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>🧳 Se retira en el proveedor</b><br><span class="text-[10px] text-zinc-500 leading-snug">No lo tengo en el local: cuando entra un pedido ya cobrado, el cadete lo va a buscar al proveedor y recién después se embala.</span></span></label>
+                      <label class="mt-2 flex items-start gap-2 text-xs text-zinc-300 font-sans cursor-pointer"><input type="checkbox" id="new-prod-pickup" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>🧳 Se retira en el proveedor</b><br><span class="text-[10px] text-zinc-500 leading-snug">No lo tengo en el local: cuando entra un pedido ya cobrado, el cadete lo va a buscar al proveedor y recién después se embala. Esto NO le muestra demora al cliente (eso se elige arriba, en "Avisar demora").</span></span></label>
                     </div>
                   </div>
 
@@ -3665,10 +3666,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     const VEHICLE_INFO = { moto: { label: 'Moto', icon: '🛵' }, auto: { label: 'Auto', icon: '🚗' } };
     const VEHICLE_ORDER = Object.keys(VEHICLE_INFO);
     function vehicleOfProduct(p) { return p && VEHICLE_INFO[p.deliveryClass] ? p.deliveryClass : 'moto'; }
-    // Aviso de demora: productos que no están en el local o llegan de fuera de Tucumán.
+    // Aviso de demora: SOLO en los productos donde se tildó "Avisar demora al cliente" (nada es automático).
     // Se avisa ANTES de comprar (ficha, carrito y checkout) y queda en el mensaje de WhatsApp.
     function delayInfo(p) {
-      if (!p || !(p.delayNotice === true || p.pickupAtSupplier === true)) return null;
+      if (!p || p.delayNotice !== true) return null;
       const clamp = (v, d) => { const n = Math.round(Number(v)); return Number.isFinite(n) && n >= 1 && n <= 30 ? n : d; };
       const min = clamp(p.delayDaysMin, 1); let max = clamp(p.delayDaysMax, 4); if (max < min) max = min;
       return { min, max, text: min === max ? `${min} ${min === 1 ? 'día' : 'días'}` : `${min} a ${max} días` };
@@ -4264,6 +4265,18 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     function syncDelayBox() {
       const ck = document.getElementById('new-prod-delay'), box = document.getElementById('new-prod-delay-days');
       if (ck && box) box.classList.toggle('hidden', !ck.checked);
+      const pv = document.getElementById('new-prod-delay-preview');
+      if (ck && pv) {
+        if (ck.checked) {
+          const n = id => { const v = parseInt(document.getElementById(id).value, 10); return Number.isInteger(v) && v >= 1 && v <= 30 ? v : null; };
+          const mn = n('new-prod-delay-min') || 1, mx = Math.max(mn, n('new-prod-delay-max') || 4);
+          pv.className = 'mt-2 text-[11px] font-sans rounded-lg px-3 py-2 border border-amber-500/40 bg-amber-500/10 text-amber-200';
+          pv.innerHTML = '⏳ <b>Este producto puede demorar de ' + (mn === mx ? mn + (mn === 1 ? ' día' : ' días') : mn + ' a ' + mx + ' días') + '.</b> Así lo ve el cliente antes de comprar.';
+        } else {
+          pv.className = 'mt-2 text-[11px] font-sans rounded-lg px-3 py-2 border border-zinc-700 bg-zinc-900 text-zinc-400';
+          pv.textContent = 'Sin aviso: el cliente no ve ninguna demora en este producto.';
+        }
+      }
     }
     function delayFieldPayload() {
       const ck = document.getElementById('new-prod-delay');
