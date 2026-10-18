@@ -764,6 +764,31 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   <span class="text-[10px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-semibold font-code">Proyección ARCA</span>
                 </div>
                 
+                <div id="mono-tope-card" class="p-4 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
+                  <div class="flex items-start justify-between gap-2 flex-wrap">
+                    <div class="font-bold text-white text-sm">🧾 Tope de tu régimen · últimos 12 meses</div>
+                    <span id="mono-tope-badge" class="text-[10px] px-2 py-0.5 rounded font-bold"></span>
+                  </div>
+                  <div class="flex items-baseline gap-2 flex-wrap">
+                    <span id="mono-tope-used" class="text-2xl font-black text-white font-code">$0</span>
+                    <span class="text-xs text-zinc-400">de <b id="mono-tope-max" class="text-zinc-200 font-code">$0</b></span>
+                    <span id="mono-tope-pct" class="text-xs font-bold"></span>
+                  </div>
+                  <div class="h-3 rounded-full bg-zinc-800 overflow-hidden" role="progressbar" aria-label="Cuánto del tope anual llevás usado" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="mono-tope-track"><div id="mono-tope-bar" class="h-full rounded-full transition-all bg-emerald-500" style="width:0%"></div></div>
+                  <p id="mono-tope-msg" class="text-xs font-semibold"></p>
+                  <p id="mono-tope-proj" class="text-[11px] text-zinc-400"></p>
+                  <details class="text-[11px] text-zinc-400">
+                    <summary class="cursor-pointer text-zinc-300 font-semibold">Cambiar el tope</summary>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                      <input id="mono-tope-input" type="number" inputmode="numeric" min="100000" step="1000" aria-label="Tope anual en pesos" class="w-40 bg-zinc-900 border border-zinc-800 rounded-lg px-2.5 py-1.5 text-xs text-white font-code focus:outline-none focus:border-brand-orange" />
+                      <button type="button" onclick="monoSaveTope()" class="px-3 py-1.5 rounded-lg bg-brand-orange hover:bg-orange-500 text-black text-[11px] font-bold">Guardar tope</button>
+                      <button type="button" onclick="monoResetTope()" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-semibold">Volver al de Monotributo Social</button>
+                    </div>
+                    <p class="mt-2">ARCA actualiza el tope cada 6 meses. Si cambia, o si pasás al monotributo común, escribí acá el monto nuevo de tu categoría. Se guarda en este navegador.</p>
+                  </details>
+                  <p class="text-[10px] text-zinc-500">Es una guía: suma lo que cobraste en la tienda en los últimos 12 meses (sin pedidos cancelados ni plata devuelta). Lo que vale para ARCA son tus facturas.</p>
+                </div>
+
                 <div class="space-y-3 text-xs">
                   <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center justify-between">
                     <div>
@@ -6171,6 +6196,71 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const all = finStats(ADMIN_ORDERS, 0);
       const setT = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
       setT('fin-breakdown-bank', formatARS(all.bank)); setT('fin-breakdown-cash', formatARS(all.cash)); setT('fin-breakdown-moto', '-' + formatARS(all.shipping));
+      renderMonoTope();
+    }
+
+    // ---- Tope del monotributo (últimos 12 meses) ----
+    // Monotributo Social = tope de la Categoría A (ARCA, vigente ago-2026 a ene-2027). Se puede cambiar.
+    const MONO_TOPE_SOCIAL = 12009410;
+    const MONO_TOPE_KEY = 'plugshop_mono_tope_v1';
+    function monoTope() {
+      try { const v = Number(localStorage.getItem(MONO_TOPE_KEY)); return v >= 100000 ? Math.round(v) : MONO_TOPE_SOCIAL; } catch (e) { return MONO_TOPE_SOCIAL; }
+    }
+    function monoLevel(pct) { return pct >= 100 ? 'over' : pct >= 85 ? 'red' : pct >= 50 ? 'amber' : 'ok'; }
+    function monoSummary(orders, tope, now) {
+      now = now || Date.now(); tope = tope > 0 ? tope : MONO_TOPE_SOCIAL;
+      const DAY = 86400000;
+      const used = finStats(orders, now - 365 * DAY).collected;
+      const pct = Math.round(used / tope * 1000) / 10;
+      // Ritmo: promedio por día de los últimos 90 días (o desde la primera venta si es más nueva).
+      let first = 0;
+      (orders || []).forEach(o => { if (o && o.status !== 'Cancelado' && orderCollected(o) && (o.createdAt || 0) > 0 && (!first || o.createdAt < first)) first = o.createdAt; });
+      let perDay = 0, winDays = 0;
+      if (first) {
+        winDays = Math.min(90, Math.max(7, Math.ceil((now - first) / DAY)));
+        perDay = finStats(orders, now - winDays * DAY).collected / winDays;
+      }
+      const left = Math.max(0, tope - used);
+      const daysLeft = perDay > 0 && left > 0 ? Math.floor(left / perDay) : null;
+      return { used, tope, pct, level: monoLevel(pct), perDay, perMonth: perDay * 30, winDays, daysLeft, left };
+    }
+    function renderMonoTope() {
+      const card = document.getElementById('mono-tope-card'); if (!card) return;
+      const m = monoSummary(ADMIN_ORDERS, monoTope());
+      const L = {
+        ok:    { bar: 'bg-emerald-500', txt: 'text-emerald-400', badge: 'bg-emerald-500/15 text-emerald-300', tag: 'Vas bien', msg: 'Vas bien: todavía estás lejos del tope.' },
+        amber: { bar: 'bg-amber-400',   txt: 'text-amber-300',   badge: 'bg-amber-500/15 text-amber-300',   tag: 'Ya usaste la mitad', msg: 'Ya usaste más de la mitad. Empezá a pensar si te conviene pasarte al monotributo común.' },
+        red:   { bar: 'bg-rose-500',    txt: 'text-rose-400',    badge: 'bg-rose-500/20 text-rose-300',     tag: 'Cerca del tope', msg: 'Estás cerca del tope. Consultá con ARCA o con un contador ahora, antes de pasarte.' },
+        over:  { bar: 'bg-rose-600',    txt: 'text-rose-400',    badge: 'bg-rose-500/25 text-rose-200',     tag: 'Pasaste el tope', msg: 'Pasaste el tope de este régimen. Pasate al monotributo común cuanto antes.' }
+      }[m.level];
+      const set = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      set('mono-tope-used', formatARS(m.used)); set('mono-tope-max', formatARS(m.tope));
+      const pe = document.getElementById('mono-tope-pct'); if (pe) { pe.textContent = (m.pct >= 10 ? Math.round(m.pct) : m.pct) + '%'; pe.className = 'text-xs font-bold ' + L.txt; }
+      const bar = document.getElementById('mono-tope-bar');
+      if (bar) { bar.style.width = Math.min(100, m.pct) + '%'; bar.className = 'h-full rounded-full transition-all ' + L.bar; }
+      const tr = document.getElementById('mono-tope-track'); if (tr) tr.setAttribute('aria-valuenow', String(Math.min(100, Math.round(m.pct))));
+      const bd = document.getElementById('mono-tope-badge'); if (bd) { bd.textContent = L.tag; bd.className = 'text-[10px] px-2 py-0.5 rounded font-bold ' + L.badge; }
+      const mg = document.getElementById('mono-tope-msg'); if (mg) { mg.textContent = L.msg; mg.className = 'text-xs font-semibold ' + L.txt; }
+      let proj;
+      if (m.level === 'over') proj = 'Para volver a estar dentro del tope, lo que vendiste hace más de 12 meses va saliendo de la cuenta de a poco.';
+      else if (!m.perDay) proj = 'Todavía no hay ventas cobradas para estimar cuándo llegarías al tope.';
+      else {
+        const when = new Date(Date.now() + m.daysLeft * 86400000).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+        proj = `Al ritmo de los últimos ${m.winDays} días (unos ${formatARS(Math.round(m.perMonth))} por mes) llegarías al tope ${m.daysLeft > 365 ? 'en más de un año' : 'en unos ' + (m.daysLeft < 60 ? m.daysLeft + ' días' : Math.round(m.daysLeft / 30) + ' meses') + ' (' + when + ')'}. Te quedan ${formatARS(m.left)}.`;
+      }
+      set('mono-tope-proj', proj);
+      const inp = document.getElementById('mono-tope-input'); if (inp && document.activeElement !== inp) inp.value = String(m.tope);
+    }
+    function monoSaveTope() {
+      const inp = document.getElementById('mono-tope-input'); const v = Math.round(Number(inp && inp.value));
+      if (!(v >= 100000)) { alert('Escribí el tope anual en pesos, por ejemplo 12009410.'); return; }
+      try { localStorage.setItem(MONO_TOPE_KEY, String(v)); } catch (e) { alert('Este navegador no deja guardar el tope. Se usa hasta que cierres la página.'); }
+      renderMonoTope(); renderTodayTab();
+    }
+    function monoResetTope() {
+      try { localStorage.removeItem(MONO_TOPE_KEY); } catch (e) { /* nada */ }
+      const inp = document.getElementById('mono-tope-input'); if (inp) inp.value = String(MONO_TOPE_SOCIAL);
+      renderMonoTope(); renderTodayTab();
     }
 
     function buildSalesReport(orders, since) {
@@ -7400,6 +7490,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         const myId = currentStaffSession.staffId;
         const mine = ADMIN_ORDERS.filter(o => ['En preparación', 'Despachado'].includes(o.status) && myId && o.courierId === myId);
         mineParts.push(`<button type="button" onclick="openRoute()" class="w-full text-left rounded-2xl border border-sky-700/50 bg-sky-950/20 p-4 hover:brightness-125"><div class="flex items-center justify-between"><span class="text-2xl">🗺️</span><span class="text-3xl font-black text-white">${mine.length}</span></div><div class="mt-2 text-sm font-bold text-white">Mis entregas</div><div class="text-[11px] text-zinc-400">Tocá para ver tu hoja de ruta con dirección, mapa y cobros.</div></button>`);
+      }
+      // Aviso del tope del monotributo (solo admin, desde la mitad del tope)
+      if (role === 'admin') {
+        const m = monoSummary(ADMIN_ORDERS, monoTope());
+        if (m.level !== 'ok') {
+          const tone = m.level === 'amber' ? 'border-amber-700/50 bg-amber-950/20' : 'border-rose-700/60 bg-rose-950/30';
+          const txt = m.level === 'amber' ? 'Ya usaste más de la mitad del tope.' : m.level === 'red' ? 'Estás cerca del tope. Consultá ya.' : 'Pasaste el tope. Pasate al monotributo común.';
+          parts.push(`<button type="button" data-mono-alert="${m.level}" onclick="openFinSection('mono')" class="w-full text-left rounded-2xl border p-4 hover:brightness-125 transition ${tone}"><div class="flex items-center justify-between gap-3"><span class="text-sm font-black text-white">🧾 Tope del monotributo: ${Math.round(m.pct)}%</span><span class="text-[11px] text-zinc-300 underline">Ver detalle</span></div><div class="text-[11px] text-zinc-300 mt-1">${txt} Llevás ${formatARS(m.used)} de ${formatARS(m.tope)} en 12 meses.</div></button>`);
+        }
       }
       // Resumen de ventas
       if (role === 'admin' || can('insights.view')) {
