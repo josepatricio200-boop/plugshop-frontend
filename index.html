@@ -1744,6 +1744,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         specs: cleanLongText(p.specs, 3000), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
+        colorPhotos: (p.colorPhotos && typeof p.colorPhotos === 'object' && !Array.isArray(p.colorPhotos))
+          ? Object.fromEntries(Object.entries(p.colorPhotos).slice(0, 20).map(([k, v]) => [cleanText(k, 30), cleanVisual(v)]).filter(([k, v]) => k && v)) : {},
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
         delayNotice: p.delayNotice === true, delayDaysMin: Number.isInteger(Number(p.delayDaysMin)) && Number(p.delayDaysMin) >= 1 ? Number(p.delayDaysMin) : null, delayDaysMax: Number.isInteger(Number(p.delayDaysMax)) && Number(p.delayDaysMax) >= 1 ? Number(p.delayDaysMax) : null,
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
@@ -2443,7 +2445,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
              data-color="${escapeHtml(col)}" onclick="selectGalleryColor(this.dataset.color)" 
             class="px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 font-code ${isSelected ? 'bg-brand-orange text-black ring-2 ring-brand-orange/60 shadow-md scale-105' : 'bg-zinc-800 hover:bg-zinc-750 text-zinc-300'}"
           >
-            <span class="w-2 h-2 rounded-full ${isSelected ? 'bg-black' : 'bg-brand-amber'}"></span>
+            ${(() => { const cph = activeGalleryProduct && activeGalleryProduct.colorPhotos && activeGalleryProduct.colorPhotos[col]; return cph && isImageUrl(cph) ? `<img src="${escapeHtml(cph)}" alt="" loading="lazy" class="w-7 h-7 rounded-md object-cover shrink-0 bg-black" />` : `<span class="w-2 h-2 rounded-full ${isSelected ? 'bg-black' : 'bg-brand-amber'}"></span>`; })()}
             <span class="${activeGalleryProduct && stockOf(activeGalleryProduct, col) === 0 ? 'line-through opacity-60' : ''}">${escapeHtml(col)}</span>
           </button>
         `;
@@ -2486,7 +2488,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       activeGallerySelectedColor = col;
       const colors = (activeGalleryProduct && activeGalleryProduct.colors) ? activeGalleryProduct.colors : ['Único'];
       renderGalleryColorPills(colors);
-      
+      // Si el producto tiene fotos por color, al elegir el color se muestra la foto de ese color.
+      if (activeGalleryProduct && activeGalleryProduct.colorPhotos && Object.keys(activeGalleryProduct.colorPhotos).length) { activeGalleryPhotoIndex = 0; renderGalleryActivePhoto(); }
       updateGalleryStock();
     }
 
@@ -2496,9 +2499,19 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       activeGalleryProduct = null;
     }
 
+    // Fotos que se muestran según el color elegido: si ese color tiene su foto, va primero; si no, las de siempre.
+    function photosForColor(p, color) {
+      const base = (p && p.photos && p.photos.length) ? p.photos : ['📦'];
+      const cp = p && p.colorPhotos && color ? p.colorPhotos[color] : '';
+      return cp ? [cp, ...base.filter(x => x !== cp)] : base;
+    }
+    function cartPhoto(it) {
+      const cp = it && it.colorPhotos && it.selectedColor ? it.colorPhotos[it.selectedColor] : '';
+      return cp || ((it && it.photos && it.photos[0]) ? it.photos[0] : '📦');
+    }
     function renderGalleryActivePhoto() {
       if (!activeGalleryProduct) return;
-      const photos = activeGalleryProduct.photos || ['📦'];
+      const photos = photosForColor(activeGalleryProduct, activeGallerySelectedColor);
       const activePhoto = photos[activeGalleryPhotoIndex] || photos[0];
 
       const mainView = document.getElementById('gallery-main-view');
@@ -2527,7 +2540,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
     function stepGalleryPhoto(d) {
       if (!activeGalleryProduct) return;
-      const n = (activeGalleryProduct.photos || []).length; if (n < 2) return;
+      const n = photosForColor(activeGalleryProduct, activeGallerySelectedColor).length; if (n < 2) return;
       switchGalleryPhoto((activeGalleryPhotoIndex + d + n) % n);
     }
 
@@ -2536,7 +2549,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     function lbOpen() { const e = document.getElementById('photo-lightbox'); return !!e && !e.classList.contains('hidden'); }
     function openLightbox(i) {
       const e = document.getElementById('photo-lightbox'); if (!e || !activeGalleryProduct) return;
-      activeGalleryPhotoIndex = Math.max(0, Math.min(Number(i) || 0, (activeGalleryProduct.photos || ['x']).length - 1));
+      activeGalleryPhotoIndex = Math.max(0, Math.min(Number(i) || 0, photosForColor(activeGalleryProduct, activeGallerySelectedColor).length - 1));
       LB_ZOOM = false;
       e.classList.remove('hidden'); e.classList.add('flex');
       lbRender();
@@ -2548,14 +2561,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
     function lbStep(d) {
       if (!activeGalleryProduct) return;
-      const n = (activeGalleryProduct.photos || []).length; if (n < 2) return;
+      const n = photosForColor(activeGalleryProduct, activeGallerySelectedColor).length; if (n < 2) return;
       activeGalleryPhotoIndex = (activeGalleryPhotoIndex + d + n) % n; LB_ZOOM = false; lbRender();
     }
     function lbGo(i) { activeGalleryPhotoIndex = i; LB_ZOOM = false; lbRender(); }
     function lbToggleZoom() { LB_ZOOM = !LB_ZOOM; lbRender(); const w = document.getElementById('lb-wrap'); if (w && LB_ZOOM) { w.scrollLeft = (w.scrollWidth - w.clientWidth) / 2; w.scrollTop = (w.scrollHeight - w.clientHeight) / 2; } }
     function lbRender() {
       const p = activeGalleryProduct; if (!p) return;
-      const photos = (p.photos && p.photos.length) ? p.photos : ['📦'];
+      const photos = photosForColor(p, activeGallerySelectedColor);
       const i = Math.min(activeGalleryPhotoIndex, photos.length - 1), many = photos.length > 1;
       const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
       const t = document.getElementById('lb-title'); if (t) t.textContent = p.name || '';
@@ -3361,7 +3374,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           return `
           <div class="p-3 rounded-xl bg-zinc-900 border border-white/[0.04] flex items-center gap-3">
             <div class="w-12 h-12 rounded-lg bg-black flex items-center justify-center overflow-hidden shrink-0">
-              ${renderVisualElement((item.photos && item.photos[0]) ? item.photos[0] : '📦', 'w-full h-full object-cover', 'text-2xl')}
+              ${renderVisualElement(cartPhoto(item), 'w-full h-full object-cover', 'text-2xl')}
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="text-xs font-bold text-white truncate">${escapeHtml(item.name)}</h4>

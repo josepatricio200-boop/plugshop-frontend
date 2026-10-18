@@ -1073,6 +1073,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                       <div id="color-stock-box" class="grid grid-cols-2 sm:grid-cols-4 gap-2"></div>
                       <span id="color-stock-note" class="hidden text-[10px] text-amber-400 mt-1 block"></span>
                       <input type="hidden" id="new-prod-stock" value="0" />
+                      <div id="color-photo-wrap" class="hidden mt-3">
+                        <label class="block mb-0.5 text-zinc-400 font-sans">🖼️ Foto de cada color <span class="text-zinc-500">(opcional)</span></label>
+                        <p class="text-[10px] text-zinc-500 mb-2 font-sans leading-snug">Tocá el cuadrito de un color para subir su foto. El cliente la ve al elegir ese color y en el carrito. Al color que no le cargues foto le quedan las fotos de siempre.</p>
+                        <div id="color-photo-box" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 font-sans"></div>
+                      </div>
                     </div>
                     <div>
                       <label class="block mb-1 text-zinc-400 font-sans">Garantía *</label>
@@ -2875,6 +2880,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         specs: cleanLongText(p.specs, 3000), keywords: cleanText(p.keywords, 200), warranty: cleanText(p.warranty, 80), badge: cleanText(p.badge, 40),
         colors: (Array.isArray(p.colors) ? p.colors : ['Único']).map(c => cleanText(c, 30)).filter(Boolean),
         photos: (Array.isArray(p.photos) ? p.photos : []).map(cleanVisual).filter(Boolean),
+        colorPhotos: (p.colorPhotos && typeof p.colorPhotos === 'object' && !Array.isArray(p.colorPhotos))
+          ? Object.fromEntries(Object.entries(p.colorPhotos).slice(0, 20).map(([k, v]) => [cleanText(k, 30), cleanVisual(v)]).filter(([k, v]) => k && v)) : {},
         price: num(p.price), cost: num(p.cost), stock: Math.floor(num(p.stock)), compareAtPrice: num(p.compareAtPrice), featured: p.featured === true,
         delayNotice: p.delayNotice === true, delayDaysMin: Number.isInteger(Number(p.delayDaysMin)) && Number(p.delayDaysMin) >= 1 ? Number(p.delayDaysMin) : null, delayDaysMax: Number.isInteger(Number(p.delayDaysMax)) && Number(p.delayDaysMax) >= 1 ? Number(p.delayDaysMax) : null,
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
@@ -5978,7 +5985,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       return [...new Set(colors.length ? colors : ['Único'])].slice(0, 20);
     }
     // preset: { color: cantidad } para rellenar; si no, conserva lo que ya se escribió.
-    function renderColorStockInputs(preset) {
+    function renderColorStockInputs(preset, photoPreset) {
       const box = document.getElementById('color-stock-box');
       if (!box) return;
       const current = {};
@@ -5990,6 +5997,38 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <input type="number" min="0" step="1" data-color="${escapeHtml(c)}" value="${src[c] !== undefined ? escapeHtml(String(src[c])) : ''}" placeholder="0" oninput="updateColorStockTotal()" class="w-16 bg-zinc-950 border border-zinc-700 rounded px-2 py-1 text-white text-right focus:outline-none focus:border-brand-orange" />
         </label>`).join('');
       updateColorStockTotal();
+      renderColorPhotoInputs(preset ? (photoPreset || {}) : undefined);
+    }
+    // ---- Foto por color (opcional) en el formulario de producto ----
+    // preset: { color: foto } para rellenar; si no se pasa, conserva las fotos ya cargadas.
+    function renderColorPhotoInputs(preset) {
+      const box = document.getElementById('color-photo-box'), wrap = document.getElementById('color-photo-wrap');
+      if (!box || !wrap) return;
+      const cur = {};
+      box.querySelectorAll('input[data-cphoto]').forEach(i => { if (i.value) cur[i.dataset.cphoto] = i.value; });
+      const src = preset || cur;
+      const colors = parseColorsField();
+      const show = colors.length > 1;
+      wrap.classList.toggle('hidden', !show);
+      if (!show) { box.innerHTML = ''; return; }
+      box.innerHTML = colors.map((c, i) => `
+        <div class="flex items-center gap-2 bg-zinc-900 border border-zinc-700 rounded-lg p-2">
+          <label class="shrink-0 cursor-pointer" title="Subir la foto de ${escapeHtml(c)}">
+            <div id="cp-pv-${i}" class="relative w-14 h-14 rounded-lg overflow-hidden bg-zinc-950 border border-dashed border-zinc-600 flex items-center justify-center"><span class="text-2xl text-zinc-600">📷</span></div>
+            <input type="file" accept="image/*" class="hidden" onchange="handleFileUpload(event, 'cp-in-${i}', 'cp-pv-${i}', 'cp-st-${i}')" />
+          </label>
+          <input type="hidden" id="cp-in-${i}" data-cphoto="${escapeHtml(c)}" value="" />
+          <div class="min-w-0"><div class="truncate text-xs font-semibold text-zinc-200">${escapeHtml(c)}</div><span id="cp-st-${i}" class="text-[9px] text-zinc-500 font-code">Pendiente</span></div>
+        </div>`).join('');
+      colors.forEach((c, i) => {
+        const v = src[c];
+        if (v) { document.getElementById('cp-in-' + i).value = v; updatePhotoPreview('cp-pv-' + i, v, 'cp-in-' + i, 'cp-st-' + i); }
+      });
+    }
+    function readColorPhotos() {
+      const out = {};
+      document.querySelectorAll('#color-photo-box input[data-cphoto]').forEach(i => { if (i.value.trim()) out[i.dataset.cphoto] = i.value.trim(); });
+      return out;
     }
     function readColorStock() {
       const out = {};
@@ -8672,10 +8711,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       set('new-prod-colors', (p.colors || []).join(', '));
       toggleSingleColor(isSingleColor(p));
       const note = document.getElementById('color-stock-note');
-      if (p.stockByColor) { renderColorStockInputs(p.stockByColor); note.classList.add('hidden'); }
+      if (p.stockByColor) { renderColorStockInputs(p.stockByColor, p.colorPhotos); note.classList.add('hidden'); }
       else {
         const first = (p.colors && p.colors[0]) || 'Único';
-        renderColorStockInputs({ [first]: p.stock || 0 });
+        renderColorStockInputs({ [first]: p.stock || 0 }, p.colorPhotos);
         note.textContent = `Este producto tenía un stock único de ${p.stock || 0}. Lo puse en "${first}": repartilo entre los colores antes de guardar.`;
         note.classList.remove('hidden');
       }
@@ -8705,7 +8744,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const set = (el, v) => { const e = document.getElementById(el); if (e) e.value = v; };
       set('new-prod-name', (p.name || '') + ' (copia)');
       const zero = {}; (p.colors && p.colors.length ? p.colors : ['Único']).forEach(c => { zero[c] = 0; });
-      renderColorStockInputs(zero);
+      renderColorStockInputs(zero, p.colorPhotos);
       const note = document.getElementById('color-stock-note'); if (note) note.classList.add('hidden');
       set('new-prod-imei', '');
       const banner = document.getElementById('edit-mode-banner');
@@ -8786,7 +8825,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         ...(supplierFieldPayload()),
         ...(delayFieldPayload()),
         ...(iphData || {}),
-        colors: colors.length > 0 ? colors : ['Único'], photos,
+        colors: colors.length > 0 ? colors : ['Único'], photos, colorPhotos: readColorPhotos(),
         badge: type === 'original' ? '100% ORIGINAL' : 'PLUG SELECCIÓN'
       };
       if (currentStaffSession.role === 'admin') { payload.price = price; payload.cost = cost; payload.compareAtPrice = compareAtPrice; }
