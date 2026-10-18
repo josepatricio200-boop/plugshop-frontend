@@ -456,7 +456,7 @@ html { scroll-behavior: smooth; }
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.10</span></h3>
+              <h3 class="text-sm font-bold text-white tracking-tight">PLUGSHOP Staff <span class="text-[10px] text-zinc-500 font-normal font-code">v8.11</span></h3>
               <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-code">MOTOR ACTIVO</span>
             </div>
             <p class="text-[10px] text-zinc-400 hidden sm:block">Control de inventario, colores, registro ARCA-Ready y logística local</p>
@@ -1827,6 +1827,21 @@ html { scroll-behavior: smooth; }
               </div>
             </div>
 </div>
+<div data-sec-pane="offers:tips" class="space-y-6">
+<div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-4">
+              <div>
+                <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-tips" style="scroll-margin-top:72px"><span class="w-2 h-2 rounded-full bg-brand-amber"></span>Consejos del asesor</h4>
+                <p class="text-[11px] text-zinc-400 mt-1">Cuando un cliente le escribe algo al asesor de la tienda (ej. "cargador para iPhone 13 Pro Max"), si aparecen tus palabras se muestra un consejo tuyo arriba de las recomendaciones. Podés agregar los que quieras: cables, fundas, vidrios, etc.</p>
+                <p class="text-[11px] text-zinc-500 mt-1">Cómo se activan: el consejo sale si el cliente escribe <b>alguna</b> de las palabras de "Palabras que lo activan" <b>y además</b>, si completaste esa casilla, alguna de "También tiene que nombrar". Las marcas que pongas se muestran solo si hoy tenés stock de esa marca.</p>
+              </div>
+              <div id="tips-list" class="space-y-3"></div>
+              <div class="flex flex-wrap gap-2 items-center">
+                <button type="button" onclick="tipsAdd()" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white text-xs font-bold transition-colors">+ Agregar consejo</button>
+                <button type="button" id="tips-save" onclick="tipsSave()" class="px-4 py-2 rounded-lg bg-brand-orange hover:bg-orange-500 text-black text-xs font-bold transition-colors">Guardar consejos</button>
+                <span id="tips-msg" class="hidden text-[11px] font-semibold"></span>
+              </div>
+            </div>
+</div>
 
           </div>
 
@@ -2332,6 +2347,7 @@ html { scroll-behavior: smooth; }
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
+        ADVISOR_TIPS: '/api/advisor-tips',     // GET público: consejos activos del asesor; admin: GET /all y PUT (reemplaza la lista)
         PROMOTIONS: '/api/promotions',         // GET público: campañas vigentes; admin: /all, POST/PUT/DELETE
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
         INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
@@ -2495,7 +2511,7 @@ html { scroll-behavior: smooth; }
       if (!isBackendConnected() || !currentStaffSession.token) return;
       const role = currentStaffSession.role;
       const headers = { Authorization: 'Bearer ' + currentStaffSession.token };
-      const tasks = [loadSettingsFromServer(), loadAnnouncements(), loadClaims(), loadAudit(), loadCoupons(), loadCampaigns()];
+      const tasks = [loadSettingsFromServer(), loadAnnouncements(), loadClaims(), loadAudit(), loadCoupons(), loadCampaigns(), loadAdvisorTipsAdmin()];
 
       if (can('orders.pickup')) tasks.push(loadPickups());
       if (can('orders.view')) {
@@ -2617,7 +2633,7 @@ html { scroll-behavior: smooth; }
     const TAB_SECS = {
       inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía'], ['iphone', '📱', 'Sección iPhone', 'iphone']] },
       suppliers: { def: 'dir', items: [['dir', '📇', 'Directorio'], ['pay', '💳', 'Cuentas por pagar', null, true]] },
-      offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['camp', '🎉', 'Campañas'], ['promos', '🏷️', 'Promos y pagos']] },
+      offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['camp', '🎉', 'Campañas'], ['promos', '🏷️', 'Promos y pagos'], ['tips', '💡', 'Consejos del asesor']] },
       settings: { flat: true, def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['print', '🖨️', 'Impresión'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
     };
     const SEC_NOW = {};
@@ -5753,6 +5769,64 @@ html { scroll-behavior: smooth; }
       ANNOUNCEMENTS = ANNOUNCEMENTS.filter(a => a.id !== id); renderAnnouncements();
     }
 
+    // ---- Consejos del asesor (admin) ----
+    let TIPS_ADMIN = [];
+    let TIPS_DEFAULT = false;
+    function tipsMsg(t, ok) {
+      const el = document.getElementById('tips-msg'); if (!el) return;
+      el.textContent = t || ''; el.classList.toggle('hidden', !t);
+      el.className = 'text-[11px] font-semibold ' + (ok ? 'text-emerald-400' : 'text-rose-400') + (t ? '' : ' hidden');
+      if (t) setTimeout(() => el.classList.add('hidden'), 6000);
+    }
+    const tipsJoin = v => (Array.isArray(v) ? v : []).join(', ');
+    function renderTipsAdmin() {
+      const box = document.getElementById('tips-list'); if (!box) return;
+      const inp = 'w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white text-xs focus:outline-none focus:border-brand-orange';
+      const lab = 'block text-[10px] font-bold uppercase tracking-wider text-zinc-400 mb-1';
+      box.innerHTML = (TIPS_DEFAULT ? '<p class="text-[11px] text-amber-300">Estos son consejos de ejemplo. Editalos y tocá "Guardar consejos" para dejarlos como tuyos.</p>' : '') +
+        (TIPS_ADMIN.length ? TIPS_ADMIN.map((t, i) => `<div class="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800 space-y-2" data-tip="${i}">
+          <div class="flex items-center justify-between gap-2">
+            <label class="flex items-center gap-2 text-xs text-white font-semibold"><input type="checkbox" ${t.active !== false ? 'checked' : ''} onchange="tipsSet(${i},'active',this.checked)" /> Activo (se muestra en la tienda)</label>
+            <button type="button" onclick="tipsRemove(${i})" class="px-2 py-1 rounded border bg-rose-950/60 hover:bg-rose-900/80 border-rose-800/60 text-rose-400 text-[11px] font-semibold shrink-0">Borrar</button>
+          </div>
+          <div><label class="${lab}">Título</label><input maxlength="80" value="${escapeHtml(t.title || '')}" oninput="tipsSet(${i},'title',this.value)" class="${inp}" placeholder="Ej: Cargadores para iPhone: elegí uno de marca confiable" /></div>
+          <div><label class="${lab}">Consejo</label><textarea rows="3" maxlength="600" oninput="tipsSet(${i},'text',this.value)" class="${inp}" placeholder="Lo que le querés decir al cliente">${escapeHtml(t.text || '')}</textarea></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div><label class="${lab}">Palabras que lo activan (separadas por coma)</label><input value="${escapeHtml(tipsJoin(t.wordsA))}" oninput="tipsSet(${i},'wordsA',this.value)" class="${inp}" placeholder="cargador, cargar, adaptador" /></div>
+            <div><label class="${lab}">También tiene que nombrar (opcional)</label><input value="${escapeHtml(tipsJoin(t.wordsB))}" oninput="tipsSet(${i},'wordsB',this.value)" class="${inp}" placeholder="iphone, ipad, apple" /></div>
+            <div><label class="${lab}">Marcas de confianza (opcional)</label><input value="${escapeHtml(tipsJoin(t.brands))}" oninput="tipsSet(${i},'brands',this.value)" class="${inp}" placeholder="Baseus, Anker, Ugreen" /></div>
+            <div><label class="${lab}">Esas marcas, para qué productos (opcional)</label><input value="${escapeHtml(tipsJoin(t.suggest))}" oninput="tipsSet(${i},'suggest',this.value)" class="${inp}" placeholder="cargador, adaptador" /></div>
+          </div>
+        </div>`).join('') : '<p class="text-zinc-500 text-xs">No hay consejos. Tocá "+ Agregar consejo".</p>');
+    }
+    function tipsSet(i, key, val) {
+      const t = TIPS_ADMIN[i]; if (!t) return;
+      t[key] = (key === 'active') ? !!val : (key === 'title' || key === 'text') ? String(val) : String(val).split(',').map(x => x.trim()).filter(Boolean);
+    }
+    function tipsAdd() {
+      TIPS_ADMIN.push({ active: true, title: '', text: '', wordsA: [], wordsB: [], brands: [], suggest: [] });
+      renderTipsAdmin();
+    }
+    function tipsRemove(i) {
+      const t = TIPS_ADMIN[i]; if (!t) return;
+      if (!confirm('¿Borrar este consejo' + (t.title ? ' ("' + t.title + '")' : '') + '? Se borra cuando toques "Guardar consejos".')) return;
+      TIPS_ADMIN.splice(i, 1); renderTipsAdmin();
+    }
+    async function loadAdvisorTipsAdmin() {
+      if (!isBackendConnected() || !currentStaffSession.token || currentStaffSession.role !== 'admin') return;
+      const res = await apiRequest('ADVISOR_TIPS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/all');
+      if (res && Array.isArray(res.tips)) { TIPS_ADMIN = res.tips; TIPS_DEFAULT = !!res.isDefault; renderTipsAdmin(); }
+    }
+    async function tipsSave() {
+      const btn = document.getElementById('tips-save');
+      if (btn) btn.disabled = true;
+      const res = await apiRequest('ADVISOR_TIPS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ tips: TIPS_ADMIN }) });
+      if (btn) btn.disabled = false;
+      if (!res || res.success === false) { tipsMsg((res && res.error) || 'No se pudo guardar. Revisá tu conexión y probá de nuevo.', false); return; }
+      TIPS_ADMIN = res.tips; TIPS_DEFAULT = false; renderTipsAdmin();
+      tipsMsg('Guardado. Ya se ven en la tienda.', true);
+    }
+
     // ---- Producto de un solo color: se guarda como "Único" y la tienda no muestra colores ----
     let SAVED_COLORS_TEXT = '';
     function syncSingleColorUI() {
@@ -6297,7 +6371,7 @@ html { scroll-behavior: smooth; }
 
 
     // ==========================================================================
-    // PANEL PRO (v8.10): ficha de pedido con línea de tiempo, pedido manual,
+    // PANEL PRO (v8.11): ficha de pedido con línea de tiempo, pedido manual,
     // repartidores y hoja de ruta, mensajes de WhatsApp, buscador global,
     // acciones masivas, vistas guardadas, ficha de cliente y resumen en "Hoy".
     // ==========================================================================
@@ -9486,6 +9560,9 @@ html { scroll-behavior: smooth; }
       const cats = (opts.topCats || []).slice(0, 6);
       out.suggestions = cats.map(c => ({ id: c.id, label: (c.icon ? c.icon + ' ' : '') + c.name, text: c.name }));
     }
+
+    // ---- Consejos del asesor: el negocio avisa algo cuando el cliente nombra ciertas cosas ----
+    let ADVISOR_TIPS = [];
 
     // ==========================================
     // ACCESO DEL STAFF (admin.html)

@@ -1477,6 +1477,7 @@ html { scroll-behavior: smooth; }
         CASH_REGISTER: '/api/cash-register',   // apertura/cierre/gastos de caja (admin y vendedor)
         IPHONE: '/api/iphone',                 // GET público (vacío mientras la sección está apagada) / admin: GET y PUT /admin, reservas
         CATEGORIES: '/api/categories',         // GET público / GET /all y POST/PUT/DELETE (admin): categorías y subcategorías
+        ADVISOR_TIPS: '/api/advisor-tips',     // GET público: consejos activos del asesor; admin: GET /all y PUT (reemplaza la lista)
         PROMOTIONS: '/api/promotions',         // GET público: campañas vigentes; admin: /all, POST/PUT/DELETE
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
         INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
@@ -5010,6 +5011,49 @@ html { scroll-behavior: smooth; }
       return `https://wa.me/${n}?text=${encodeURIComponent('Hola PLUGSHOP! Busco: ' + text)}`;
     }
 
+    // ---- Consejos del asesor: el negocio avisa algo cuando el cliente nombra ciertas cosas ----
+    let ADVISOR_TIPS = [];
+    async function loadAdvisorTips() {
+      if (!isBackendConnected()) return;
+      const res = await apiRequest('ADVISOR_TIPS');
+      if (Array.isArray(res)) ADVISOR_TIPS = res.filter(t => t && t.title && t.text && Array.isArray(t.wordsA));
+    }
+    function advTipNorm(s) { return String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+    function advTipHas(textN, word) {
+      const w = advTipNorm(word).trim(); if (!w) return false;
+      return new RegExp('(^|[^a-z0-9])' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:e?s)?($|[^a-z0-9])').test(textN);
+    }
+    // Marcas de confianza del consejo que HOY tienen stock (nunca se nombra una marca que no hay).
+    function advTipBrandsInStock(tip) {
+      const brands = (tip.brands || []).map(advTipNorm);
+      if (!brands.length) return [];
+      const sug = (tip.suggest || []).map(advTipNorm).filter(Boolean);
+      const found = [];
+      (PRODUCTS || []).forEach(p => {
+        if (!p || p.active === false || !(Number(p.stock) > 0)) return;
+        const i = brands.indexOf(advTipNorm(p.brand).trim());
+        if (i < 0) return;
+        if (sug.length) {
+          const hay = advTipNorm((p.name || '') + ' ' + (p.category || '') + ' ' + (p.subcategory || ''));
+          if (!sug.some(x => hay.includes(x))) return;
+        }
+        if (!found.includes(tip.brands[i])) found.push(tip.brands[i]);
+      });
+      return found;
+    }
+    function advTipsHtml(text) {
+      const n = advTipNorm(text);
+      const hits = ADVISOR_TIPS.filter(t => t.wordsA.some(w => advTipHas(n, w)) && (!(t.wordsB || []).length || t.wordsB.some(w => advTipHas(n, w)))).slice(0, 2);
+      return hits.map(t => {
+        const br = advTipBrandsInStock(t);
+        return `<div data-advisor-tip="${escapeHtml(t.id || '')}" class="md:col-span-2 lg:col-span-3 rounded-xl bg-amber-950/20 border border-amber-500/30 p-4 space-y-1.5">
+          <div class="text-sm font-bold text-white">💡 ${escapeHtml(t.title)}</div>
+          <p class="text-xs text-zinc-300 leading-relaxed">${escapeHtml(t.text)}</p>
+          ${br.length ? `<p class="text-[11px] text-emerald-300">Marcas de confianza que tenemos en stock hoy: <b>${br.map(escapeHtml).join(', ')}</b></p>` : ''}
+        </div>`;
+      }).join('');
+    }
+
     function renderAdvice(advice) {
       const resBox = document.getElementById('advisor-result');
       const countEl = document.getElementById('advisor-results-count');
@@ -5043,7 +5087,7 @@ html { scroll-behavior: smooth; }
           html += `<div class="md:col-span-2 lg:col-span-3">${advRenderCompare(advice.options, discPct)}</div>`;
         }
       }
-      container.innerHTML = html;
+      container.innerHTML = (advice.kind === 'hint' ? '' : advTipsHtml(advice.query)) + html;
       resBox.classList.remove('hidden');
     }
 
@@ -5100,6 +5144,7 @@ html { scroll-behavior: smooth; }
       loadNotifications();
       loadCatalogFromServer();
       loadPromosFromServer();
+      loadAdvisorTips();
       applyStoreWhatsappLinks();
       applyBankDisplay();
       loadSettingsFromServer();
