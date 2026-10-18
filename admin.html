@@ -1011,7 +1011,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   </div>
                   <div>
                     <label class="block mb-1 text-zinc-400">Descripción del producto *</label>
-                    <textarea required id="new-prod-specs" rows="7" maxlength="3000" oninput="updateSpecsCount()" placeholder="Pegá acá la descripción del proveedor, o escribila.&#10;&#10;Ej:&#10;Auriculares Bluetooth 5.3 con estuche de carga.&#10;&#10;Características:&#10;- Batería 12 horas&#10;- Resistentes al agua IP67&#10;- Micrófono con cancelación de ruido" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange leading-relaxed"></textarea>
+                    <textarea required id="new-prod-specs" rows="11" maxlength="3000" oninput="updateSpecsCount()" placeholder="Pegá acá la descripción del proveedor, o escribila.&#10;&#10;Ej:&#10;Auriculares Bluetooth 5.3 con estuche de carga.&#10;&#10;Características:&#10;- Batería 12 horas&#10;- Resistentes al agua IP67&#10;- Micrófono con cancelación de ruido" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange leading-relaxed"></textarea>
+                    <div class="mt-1.5 flex flex-wrap gap-2 font-sans">
+                      <button type="button" id="specs-tpl-btn" onclick="specsTemplate()" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] font-bold">📋 Usar plantilla (Descripción + Especificaciones)</button>
+                      <button type="button" id="specs-bullets-btn" onclick="specsBullets()" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] font-bold">• Poner puntitos</button>
+                    </div>
                     <div class="mt-1 flex items-start justify-between gap-3 text-[10px] text-zinc-500 font-sans"><span>Se respetan los saltos de línea. Las líneas que empiezan con - o • salen como lista. Una línea que termina en ":" sale como subtítulo.</span><span id="new-prod-specs-count" class="shrink-0 font-code">0 / 3000</span></div>
                   </div>
                   <div>
@@ -4178,6 +4182,62 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
 
     // ---- Proveedor en cada producto ----
+    // Plantilla de descripción: "Descripción:" y "Especificaciones:" con puntitos. Lo que no completes se borra solo al guardar.
+    const SPECS_BULLET_RE = /^(?:[-•*·▪►→✔✅]|\d{1,2}[.)])\s+/;
+    const SPECS_TEMPLATE_ITEMS = ['Marca / modelo', 'Conectividad', 'Batería', 'Compatibilidad', 'Incluye en la caja'];
+    function specsTemplate() {
+      const t = document.getElementById('new-prod-specs'); if (!t) return;
+      const cur = t.value.replace(/\s+$/, '');
+      const block = 'Especificaciones:\n' + SPECS_TEMPLATE_ITEMS.map(x => '- ' + x + ': ').join('\n');
+      if (!cur) {
+        t.value = 'Descripción:\n\n\n' + block;
+        updateSpecsCount(); t.focus(); t.setSelectionRange(13, 13);
+        return;
+      }
+      const first = cur.split('\n')[0].trim();
+      const head = (first.length <= 60 && /:$/.test(first)) ? '' : 'Descripción:\n';
+      t.value = (head + cur + (/^\s*especificaciones?\s*:/im.test(cur) ? '' : '\n\n' + block)).slice(0, 3000);
+      updateSpecsCount(); t.focus();
+    }
+    // Pone "- " (se ve como puntito en la tienda) a las líneas elegidas, o a las de abajo de "Especificaciones:".
+    function specsBullets() {
+      const t = document.getElementById('new-prod-specs'); if (!t) return;
+      const lines = t.value.replace(/\r/g, '').split('\n');
+      const start = t.selectionStart, end = t.selectionEnd, hasSel = end > start;
+      let from = 0;
+      if (!hasSel) {
+        const i = lines.findIndex(l => /^\s*especificaciones?\s*:?\s*$/i.test(l));
+        if (i < 0) { alert('Seleccioná con el mouse las líneas que querés con puntito y tocá este botón de nuevo. O tocá "Usar plantilla" para que arme todo ordenado.'); return; }
+        from = i + 1;
+      }
+      let pos = 0;
+      const out = lines.map((l, i) => {
+        const s0 = pos, e0 = pos + l.length; pos = e0 + 1;
+        const tr = l.trim();
+        if (!tr || SPECS_BULLET_RE.test(tr)) return l;
+        if (tr.length <= 60 && /:$/.test(tr)) return l;
+        if (hasSel ? !(e0 >= start && s0 <= end) : i < from) return l;
+        if (!hasSel && tr.length > 90) return l;
+        return '- ' + tr;
+      });
+      t.value = out.join('\n').slice(0, 3000); updateSpecsCount(); t.focus();
+    }
+    // Antes de guardar: saca los puntitos que quedaron vacíos ("- Batería:") y los títulos sin nada abajo.
+    function tidySpecs(raw) {
+      const lines = String(raw || '').replace(/\r/g, '').split('\n').map(l => l.replace(/\s+$/, ''))
+        .filter(l => !/^\s*[-•*·▪►→✔✅]\s*[^:\n]{1,40}:\s*$/.test(l));
+      const isHead = t => t.length <= 60 && /:$/.test(t) && !SPECS_BULLET_RE.test(t);
+      const out = [];
+      for (let i = 0; i < lines.length; i++) {
+        const tr = lines[i].trim();
+        if (tr && isHead(tr)) {
+          let j = i + 1; while (j < lines.length && !lines[j].trim()) j++;
+          if (j >= lines.length || isHead(lines[j].trim())) continue;
+        }
+        out.push(lines[i]);
+      }
+      return out.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+    }
     function updateSpecsCount() {
       const t = document.getElementById('new-prod-specs'), c = document.getElementById('new-prod-specs-count');
       if (t && c) c.textContent = t.value.length + ' / 3000';
@@ -8699,7 +8759,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const compareAtPrice = parseFloat(document.getElementById('new-prod-compare').value) || 0;
       if (compareAtPrice > 0 && compareAtPrice <= price) { alert('El precio anterior tachado tiene que ser MAYOR que el precio actual (si no, no es una oferta). Dejalo vacío si no hay oferta.'); return; }
       const featured = document.getElementById('new-prod-featured').checked;
-      const specs = document.getElementById('new-prod-specs').value.trim();
+      const rawSpecs = document.getElementById('new-prod-specs').value.trim();
+      const specs = tidySpecs(rawSpecs);
+      if (!specs && rawSpecs) { alert('Falta la descripción del producto. Escribí al menos una línea, o completá la plantilla.'); return; }
       const keywords = document.getElementById('new-prod-keywords').value.trim();
 
       const rawColors = document.getElementById('new-prod-colors').value.trim();
