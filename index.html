@@ -53,6 +53,8 @@
       overflow-x: hidden;
     }
     .font-code { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }
+    /* Casillas de tildar sin tamaño propio: un poco más grandes para tocarlas con el dedo */
+    :where(input[type=checkbox]:not([class*="w-"])) { width: 1.125rem; height: 1.125rem; accent-color: #ff6200; }
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -175,7 +177,7 @@
     html[data-theme="light"] .shadow-2xl, html[data-theme="light"] .shadow-lg { box-shadow: 0 10px 30px rgba(0,0,0,.10) !important; }
 
     /* Botón de tema */
-    .theme-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; font-size: 16px; line-height: 1; cursor: pointer; }
+    .theme-btn { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; font-size: 16px; line-height: 1; cursor: pointer; }
 
     /* ---- Contraste (v4.1): textos de color pastel -> versión oscura legible sobre fondo claro ---- */
 html[data-theme="light"] :is([class^="text-emerald-100"],[class*=" text-emerald-100"]),
@@ -399,6 +401,11 @@ html[data-theme="light"] .step-item:not(:last-child)::after { border-top-color: 
 .mbar-item:active { background: rgba(255,98,0,.12); }
 html { scroll-behavior: smooth; }
 @media (max-width: 767px) { body { padding-bottom: 64px; } }
+
+/* Contraste del modo claro: naranja y ámbar un poco más oscuros para llegar a 4,5:1 (el texto legal queda como estaba) */
+html[data-theme="light"] .text-zinc-600:not(#legal-modal *) { color: #63636b !important; }
+html[data-theme="light"] .text-brand-orange:not(#legal-modal *), html[data-theme="light"] .admin-tab-btn.text-brand-orange:not(#legal-modal *) { color: #b03a08 !important; }
+html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.text-amber-400,.text-yellow-300):not(#legal-modal *) { color: #9a4308 !important; }
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
@@ -762,16 +769,16 @@ html { scroll-behavior: smooth; }
 
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">Navegación</div>
-          <div><a href="#catalogo" class="text-zinc-400 hover:text-white transition-colors">Productos</a></div>
-          <div><a href="#asistente" class="text-zinc-400 hover:text-white transition-colors">Asesor PLUG</a></div>
+          <div><a href="#catalogo" class="inline-block py-1.5 text-zinc-400 hover:text-white transition-colors">Productos</a></div>
+          <div><a href="#asistente" class="inline-block py-1.5 text-zinc-400 hover:text-white transition-colors">Asesor PLUG</a></div>
           <div><button type="button" onclick="openLegal('garantia')" class="text-zinc-400 hover:text-white transition-colors">Términos de Garantía</button></div>
-          <div><button onclick="openCustomerModal()" class="text-zinc-400 hover:text-brand-amber transition-colors">Seguimiento & Mi Cuenta</button></div>
-          <div><button type="button" onclick="toggleTheme()" class="text-zinc-400 hover:text-white transition-colors">🌓 Modo claro / oscuro</button></div>
+          <div><button onclick="openCustomerModal()" class="py-1.5 text-zinc-400 hover:text-brand-amber transition-colors">Seguimiento & Mi Cuenta</button></div>
+          <div><button type="button" onclick="toggleTheme()" class="py-1.5 text-zinc-400 hover:text-white transition-colors">🌓 Modo claro / oscuro</button></div>
         </div>
 
         <div class="text-xs space-y-2.5">
           <div class="font-bold text-white uppercase tracking-wider text-[11px]">Atención & Pedidos</div>
-          <div><a data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" class="text-zinc-400 hover:text-white transition-colors">WhatsApp Soporte</a></div>
+          <div><a data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" class="inline-block py-1.5 text-zinc-400 hover:text-white transition-colors">WhatsApp Soporte</a></div>
           <div><span class="text-zinc-400">Lunes a Sábado: 9:00 a 20:30 hs</span></div>
           <div><span class="text-emerald-400 font-medium">✓ Despachos activos hoy</span></div>
         </div>
@@ -1209,7 +1216,7 @@ html { scroll-behavior: smooth; }
           <h3 class="text-base font-bold text-white">Finalizar Orden de Compra</h3>
           <p class="text-[11px] text-zinc-400 font-code">Sin comisiones de pasarela · Colores confirmados y entrega en el día</p>
         </div>
-        <button onclick="closeCheckoutModal()" aria-label="Cerrar" class="text-zinc-400 hover:text-white">✕</button>
+        <button onclick="closeCheckoutModal()" aria-label="Cerrar" class="w-10 h-10 -mr-2 -mt-1 shrink-0 flex items-center justify-center text-lg text-zinc-400 hover:text-white">✕</button>
       </div>
 
       <div class="p-6 overflow-y-auto space-y-6 text-xs text-zinc-300">
@@ -1404,8 +1411,8 @@ html { scroll-behavior: smooth; }
   </div>
 
   <!-- WhatsApp flotante + barra inferior (celular) -->
-  <a id="wa-float" data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp" class="fixed right-4 bottom-24 md:bottom-6 z-30 w-14 h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_8px_24px_rgba(16,185,129,0.45)] flex items-center justify-center transition-transform active:scale-95">
-    <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24s8.24 3.7 8.24 8.24-3.7 8.24-8.24 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
+  <a id="wa-float" data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp" class="fixed right-3 md:right-4 bottom-24 md:bottom-6 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_8px_24px_rgba(16,185,129,0.45)] flex items-center justify-center transition-transform active:scale-95">
+    <svg class="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24s8.24 3.7 8.24 8.24-3.7 8.24-8.24 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
   </a>
   <nav id="mobile-bar" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-white/[0.08] pb-[env(safe-area-inset-bottom)]" aria-label="Menú rápido">
     <div class="grid grid-cols-4 h-16">
@@ -2100,7 +2107,7 @@ html { scroll-behavior: smooth; }
       const box = document.getElementById('category-filters');
       if (!box) return;
       if (currentCategory !== 'all' && !topCats().some(c => c.id === currentCategory)) { currentCategory = 'all'; currentSubcategory = 'all'; }
-      const pill = (on, attr, label) => `<button ${attr} class="cat-pill px-3 py-1.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${on ? 'active bg-white text-black' : 'bg-zinc-900/70 text-zinc-400 hover:text-white border border-zinc-800'}">${escapeHtml(label)}</button>`;
+      const pill = (on, attr, label) => `<button ${attr} class="cat-pill px-3.5 py-2.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${on ? 'active bg-white text-black' : 'bg-zinc-900/70 text-zinc-400 hover:text-white border border-zinc-800'}">${escapeHtml(label)}</button>`;
       box.innerHTML = pill(currentCategory === 'all', 'data-cat="all"', 'Todos') +
         topCats().map(c => pill(currentCategory === c.id, `data-cat="${escapeHtml(c.id)}"`, (c.icon ? c.icon + ' ' : '') + c.name)).join('');
       const sb = document.getElementById('subcategory-filters');
@@ -2434,7 +2441,7 @@ html { scroll-behavior: smooth; }
           <button 
             type="button" 
              data-color="${escapeHtml(col)}" onclick="selectGalleryColor(this.dataset.color)" 
-            class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 font-code ${isSelected ? 'bg-brand-orange text-black ring-2 ring-brand-orange/60 shadow-md scale-105' : 'bg-zinc-800 hover:bg-zinc-750 text-zinc-300'}"
+            class="px-3.5 py-2.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 font-code ${isSelected ? 'bg-brand-orange text-black ring-2 ring-brand-orange/60 shadow-md scale-105' : 'bg-zinc-800 hover:bg-zinc-750 text-zinc-300'}"
           >
             <span class="w-2 h-2 rounded-full ${isSelected ? 'bg-black' : 'bg-brand-amber'}"></span>
             <span class="${activeGalleryProduct && stockOf(activeGalleryProduct, col) === 0 ? 'line-through opacity-60' : ''}">${escapeHtml(col)}</span>
@@ -3365,13 +3372,13 @@ html { scroll-behavior: smooth; }
               ${isAtMaxStock ? '<span class="text-[9px] text-amber-400 font-semibold block mt-0.5 font-code">Tope de stock disponible</span>' : ''}
               ${delayInfo(prod) ? `<span class="text-[10px] text-amber-300 font-semibold block mt-0.5">⏳ Demora ${delayInfo(prod).text}</span>` : ''}
             </div>
-            <div class="flex items-center gap-2 bg-black border border-zinc-800 rounded-lg p-1 text-xs font-code">
-              <button onclick="changeQty(${idx}, -1)" class="w-5 h-5 flex items-center justify-center text-zinc-400 hover:text-white transition-colors" title="Restar">-</button>
+            <div class="flex items-center gap-0.5 bg-black border border-zinc-800 rounded-lg p-0.5 text-xs font-code shrink-0">
+              <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 text-base flex items-center justify-center rounded-md text-zinc-400 hover:text-white transition-colors" title="Restar">-</button>
               <span class="text-white font-bold px-1">${item.qty}</span>
               <button 
                 onclick="changeQty(${idx}, 1)" 
                 ${isAtMaxStock ? 'disabled' : ''} 
-                class="w-5 h-5 flex items-center justify-center transition-colors ${isAtMaxStock ? 'text-zinc-600 cursor-not-allowed opacity-40' : 'text-zinc-400 hover:text-white'}" 
+                class="w-8 h-8 text-base flex items-center justify-center rounded-md transition-colors ${isAtMaxStock ? 'text-zinc-600 cursor-not-allowed opacity-40' : 'text-zinc-400 hover:text-white'}" 
                 title="${isAtMaxStock ? 'Stock máximo alcanzado' : 'Sumar'}"
               >+</button>
             </div>
@@ -5125,7 +5132,7 @@ html { scroll-behavior: smooth; }
     function renderAdvisorChips() {
       const box = document.getElementById('advisor-chips');
       if (!box) return;
-      const chip = (label, text) => `<button type="button" onclick="quickAdvise(${escapeHtml(JSON.stringify(text))})" class="px-3 py-1.5 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 transition-colors">${escapeHtml(label)}</button>`;
+      const chip = (label, text) => `<button type="button" onclick="quickAdvise(${escapeHtml(JSON.stringify(text))})" class="px-3.5 py-2.5 rounded-lg bg-zinc-800/60 hover:bg-zinc-800 text-zinc-300 transition-colors">${escapeHtml(label)}</button>`;
       box.innerHTML = '<span class="text-zinc-400 self-center text-[11px]">Probá con:</span>' +
         topCats().slice(0, 4).map(c => chip((c.icon ? c.icon + ' ' : '') + c.name, c.name)).join('') +
         chip('💰 Tengo $50.000', 'tengo 50 mil') + chip('🎁 Un regalo', 'regalo hasta 80 mil');
