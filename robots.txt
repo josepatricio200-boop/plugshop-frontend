@@ -1,0 +1,7 @@
+# PLUGSHOP
+# El panel interno nunca debe aparecer en buscadores.
+User-agent: *
+Disallow: /admin.html
+Allow: /
+
+Sitemap: https://plugshop.onrender.com/sitemap.xml

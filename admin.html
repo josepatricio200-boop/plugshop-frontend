@@ -475,6 +475,13 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       @keyframes pslWave{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
       @keyframes pslFade{0%,100%{opacity:.55}50%{opacity:1}}
       @keyframes pslBar{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
+      /* Modo claro: la pantalla de carga se pone clara, igual que la tienda */
+      html[data-theme="light"] #ps-loader{background:#f4f4f6}
+      html[data-theme="light"] #ps-loader .psl-name{color:#18181b}
+      html[data-theme="light"] #ps-loader .psl-name .o{color:#e55a00}
+      html[data-theme="light"] #ps-loader .psl-sub{color:#52525b}
+      html[data-theme="light"] #ps-loader .psl-bar{background:#e4e4e7}
+      html[data-theme="light"] #ps-loader .psl-cart path[stroke]{stroke:#18181b}
       @media (prefers-reduced-motion:reduce){#ps-loader *{animation:none!important}}
     </style>
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -485,7 +492,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     <div class="psl-name" aria-hidden="true"><span style="--i:0">P</span><span style="--i:1">L</span><span style="--i:2">U</span><span style="--i:3">G</span><span style="--i:4" class="o">S</span><span style="--i:5" class="o">H</span><span style="--i:6" class="o">O</span><span style="--i:7" class="o">P</span></div>
     <div class="psl-sub">Panel Administrativo</div>
     <div class="psl-bar" aria-hidden="true"><i></i></div>
-    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,1300-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
+    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,2000-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
   </div>
 
   <!-- ===== Ingreso del Staff (pantalla propia) ===== -->
@@ -3281,14 +3288,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       return clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:image/');
     }
 
-    function renderVisualElement(visual, customImgClass, customEmojiClass) {
+    function renderVisualElement(visual, customImgClass, customEmojiClass, altText) {
       if (!visual) return `<div class="${customEmojiClass || 'text-5xl'}">📦</div>`;
 
       if (isImageUrl(visual)) {
         // Foto sin fondo (se subió con "Quitar fondo blanco"): se muestra entera, sin recortar.
         let imgCls = customImgClass || 'w-full h-full object-cover rounded-xl';
         if (/#nobg$/.test(visual)) imgCls = imgCls.replace('object-cover', 'object-contain p-2');
-        return `<img src="${escapeHtml(visual)}" alt="Foto de Producto" class="${imgCls}" loading="lazy" onerror="this.outerHTML='<div class=\'text-5xl flex items-center justify-center w-full h-full\'>📦</div>'" />`;
+        return `<img src="${escapeHtml(visual)}" alt="${escapeHtml(altText || 'Foto de Producto')}" class="${imgCls}" loading="lazy" onerror="this.outerHTML='<div class=\'text-5xl flex items-center justify-center w-full h-full\'>📦</div>'" />`;
       }
       return `<div class="${customEmojiClass || 'text-6xl select-none'}">${escapeHtml(visual)}</div>`;
     }
@@ -6147,7 +6154,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       invTable.innerHTML = visible.map(p => {
         const photoBadges = (p.photos || ['📦', '📦']).map(f => `
           <div class="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center overflow-hidden text-sm shadow-inner" title="Foto">
-            ${renderVisualElement(f, 'w-full h-full object-cover', 'text-sm')}
+            ${renderVisualElement(f, 'w-full h-full object-cover', 'text-sm', p.name)}
           </div>
         `).join('');
 
@@ -8167,7 +8174,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       'A4': { name: 'A4', hint: 'Impresora común de hoja', page: '@page{size:A4;margin:14mm}', body: 'max-width:180mm;font-size:14px', qr: 70, big: 26 }
     };
     // Qué muestra el comprobante (todo se puede sacar, menos la leyenda "no válido como factura").
-    const RC_DEFAULT = { seller: true, domicilio: true, email: true, date: true, unit: true, discounts: true, payment: true, header: '', footer: '' };
+    const RC_DEFAULT = { logo: true, seller: true, domicilio: true, email: true, date: true, unit: true, discounts: true, payment: true, header: '', footer: '' };
     function printCfg() {
       let v = {};
       try { v = JSON.parse(localStorage.getItem(PRINT_KEY) || '{}') || {}; } catch (e) { v = {}; }
@@ -8193,7 +8200,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const p = PRINT_PAPERS[paper] || PRINT_PAPERS['80'];
       return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>${p.page}
         *{box-sizing:border-box}body{margin:0 auto;padding:${auto ? '0' : '6px'};${p.body};font-family:Arial,Helvetica,sans-serif;color:#000;background:#fff;line-height:1.3}
-        h1{font-size:1.3em;margin:0 0 2px;text-align:center}.c{text-align:center}.muted{color:#444;font-size:.9em}.qr{display:block;margin:4px auto;image-rendering:pixelated}
+        h1{font-size:1.3em;margin:0 0 2px;text-align:center}.c{text-align:center}.muted{color:#444;font-size:.9em}.qr{display:block;margin:4px auto;image-rendering:pixelated}svg.logo{display:block;margin:0 auto 2px}
         .code{font:900 ${p.big}px/1.1 'Courier New',monospace;letter-spacing:2px;text-align:center;margin:4px 0}hr{border:0;border-top:1px dashed #000;margin:6px 0}
         table{width:100%;border-collapse:collapse;table-layout:auto}td{padding:1px 0;vertical-align:top}td.r{text-align:right;white-space:nowrap;padding-left:6px}td.k{white-space:nowrap;padding-right:6px}td.v{text-align:right;word-break:break-word}
         .tot td{font-weight:900;font-size:1.15em;border-top:1px solid #000;padding-top:3px}.legal{border:2px solid #000;text-align:center;font-weight:900;padding:4px 2px;margin:8px 0}
@@ -8209,6 +8216,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const cobrar = cfg.cash ? routeToCollect(o) : 0;
       return `<h1>PLUGSHOP</h1>${printQrImg('PLUG|' + o.id + '|' + o.pkgCode, p.qr)}<div class="c"><b>Pedido ${e(o.id)}</b></div><div class="code">${e(formatPkgCode(o.pkgCode))}</div><hr>
         <div><b>${e(o.customer)}</b></div>${cfg.addr && o.address ? `<div>Entrega: ${e(o.address)}</div>` : ''}${cfg.addr && o.deliveryType ? `<div class="muted">${e(o.deliveryType)}</div>` : ''}${cfg.phone && o.phone ? `<div>Tel: ${e(o.phone)}</div>` : ''}${cobrar ? `<div class="cobrar">COBRAR ${e(formatARS(cobrar))}</div>` : ''}<div class="c muted" style="margin-top:6px">${e(printDateAR(o))}</div>`;
+    }
+    // Logo del carrito en blanco y negro (sale bien en impresoras térmicas, que no imprimen colores).
+    function printLogoHtml(paper) {
+      const mm = { '58': 15, '80': 19, 'A4': 26 }[paper] || 19;
+      return `<svg class="logo" style="width:${mm}mm;height:${mm}mm" viewBox="10 20 74 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PLUGSHOP"><rect x="20" y="32" width="16" height="4.5" rx="2.2" fill="#000"/><rect x="12" y="41" width="24" height="4.5" rx="2.2" fill="#000"/><rect x="18" y="50" width="18" height="4.5" rx="2.2" fill="#000"/><path d="M44 32H76L69 45H47L44 32Z" fill="#000"/><path d="M34 25H43L50 51H73L79 30" stroke="#000" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="61" r="5" fill="#000"/><circle cx="69" cy="61" r="5" fill="#000"/></svg>`;
     }
     function printReceiptInner(o, cfg) {
       const e = escapeHtml, money = n => e(formatARS(Number(n) || 0)), rc = cfg.rc || RC_DEFAULT;
@@ -8238,7 +8250,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const head = (seller.length ? `<div class="c muted">${seller.join('<br>')}</div>` : '') + (rc.header ? `<div class="c" style="margin-top:3px">${e(rc.header)}</div>` : '');
       const info = kv('Pedido', '<b>' + e(o.id) + '</b>') + (rc.date ? kv('Fecha', e(printDateAR(o))) : '') + kv('Cliente', e(o.customer)) + (cfg.phone && o.phone ? kv('Teléfono', e(o.phone)) : '') + (cfg.addr && o.address ? kv('Entrega', e(o.address)) : '');
       const pay = rc.payment ? `<hr><table>${kv('Pago', e(o.paymentMethod || '—'))}${kv('Estado', e(estado))}</table>` : '';
-      return `<h1>PLUGSHOP</h1>${head}<hr>
+      return `${rc.logo ? printLogoHtml(cfg.paper) : ''}<h1>PLUGSHOP</h1>${head}<hr>
         <div class="c"><b>COMPROBANTE DE PEDIDO</b></div><div class="legal">DOCUMENTO NO VÁLIDO COMO FACTURA</div>
         <table>${info}</table><hr>
         <table>${items}</table><hr>
@@ -8270,7 +8282,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const rc = cfg.rc;
       const client = chk('addr', cfg.addr, 'Dirección de entrega del cliente') + chk('phone', cfg.phone, 'Teléfono del cliente');
       const label = chk('cash', cfg.cash, 'Aviso "COBRAR $" en pedidos en efectivo');
-      const receipt = chk('seller', rc.seller, 'Mi nombre y CUIT') + chk('domicilio', rc.domicilio, 'Mi domicilio') + chk('email', rc.email, 'Mi email')
+      const receipt = chk('logo', rc.logo, 'Logo de PLUGSHOP (carrito)') + chk('seller', rc.seller, 'Mi nombre y CUIT') + chk('domicilio', rc.domicilio, 'Mi domicilio') + chk('email', rc.email, 'Mi email')
         + chk('date', rc.date, 'Fecha') + chk('unit', rc.unit, 'Precio de cada producto') + chk('discounts', rc.discounts, 'Detalle de descuentos y envío') + chk('payment', rc.payment, 'Forma y estado de pago')
         + txt('header', rc.header, 'Texto arriba (opcional)', 'Ej: Instagram @plugshop · Lun a Sáb de 9 a 20 h')
         + txt('footer', rc.footer, 'Texto al pie (opcional, reemplaza el saludo)', 'Ej: ¡Gracias por tu compra!');

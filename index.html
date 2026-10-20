@@ -10,6 +10,19 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="icon" type="image/png" href="/icon-192.png">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PLUGSHOP">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:title" content="PLUGSHOP — Tecnología con stock real en Tucumán">
+  <meta property="og:description" content="Originales y PlugShop Selección, con garantía y 10% OFF por transferencia. Elegí, pagá fácil y recibilo.">
+  <meta property="og:image" content="https://plugshop.onrender.com/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="PLUGSHOP: tecnología con stock real en Tucumán">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PLUGSHOP — Tecnología con stock real en Tucumán">
+  <meta name="twitter:description" content="Originales y PlugShop Selección, con garantía y 10% OFF por transferencia.">
+  <meta name="twitter:image" content="https://plugshop.onrender.com/og-image.png">
   <title>PLUGSHOP — Tecnología Premium & Stock Inmediato</title>
   <meta name="robots" content="noindex, nofollow" />
   <meta name="description" content="Tecnología con stock real en Tucumán. Originales y PlugShop Selección, con garantía y 10% OFF por transferencia.">
@@ -468,6 +481,13 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       @keyframes pslWave{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
       @keyframes pslFade{0%,100%{opacity:.55}50%{opacity:1}}
       @keyframes pslBar{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
+      /* Modo claro: la pantalla de carga se pone clara, igual que la tienda */
+      html[data-theme="light"] #ps-loader{background:#f4f4f6}
+      html[data-theme="light"] #ps-loader .psl-name{color:#18181b}
+      html[data-theme="light"] #ps-loader .psl-name .o{color:#e55a00}
+      html[data-theme="light"] #ps-loader .psl-sub{color:#52525b}
+      html[data-theme="light"] #ps-loader .psl-bar{background:#e4e4e7}
+      html[data-theme="light"] #ps-loader .psl-cart path[stroke]{stroke:#18181b}
       @media (prefers-reduced-motion:reduce){#ps-loader *{animation:none!important}}
     </style>
     <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -478,7 +498,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     <div class="psl-name" aria-hidden="true"><span style="--i:0">P</span><span style="--i:1">L</span><span style="--i:2">U</span><span style="--i:3">G</span><span style="--i:4" class="o">S</span><span style="--i:5" class="o">H</span><span style="--i:6" class="o">O</span><span style="--i:7" class="o">P</span></div>
     
     <div class="psl-bar" aria-hidden="true"><i></i></div>
-    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,1300-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
+    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,2000-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
   </div>
 
 
@@ -2134,14 +2154,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       return clean.startsWith('http://') || clean.startsWith('https://') || clean.startsWith('data:image/');
     }
 
-    function renderVisualElement(visual, customImgClass, customEmojiClass) {
+    function renderVisualElement(visual, customImgClass, customEmojiClass, altText) {
       if (!visual) return `<div class="${customEmojiClass || 'text-5xl'}">📦</div>`;
 
       if (isImageUrl(visual)) {
         // Foto sin fondo (se subió con "Quitar fondo blanco"): se muestra entera, sin recortar.
         let imgCls = customImgClass || 'w-full h-full object-cover rounded-xl';
         if (/#nobg$/.test(visual)) imgCls = imgCls.replace('object-cover', 'object-contain p-2');
-        return `<img src="${escapeHtml(visual)}" alt="Foto de Producto" class="${imgCls}" loading="lazy" onerror="this.outerHTML='<div class=\'text-5xl flex items-center justify-center w-full h-full\'>📦</div>'" />`;
+        return `<img src="${escapeHtml(visual)}" alt="${escapeHtml(altText || 'Foto de Producto')}" class="${imgCls}" loading="lazy" onerror="this.outerHTML='<div class=\'text-5xl flex items-center justify-center w-full h-full\'>📦</div>'" />`;
       }
       return `<div class="${customEmojiClass || 'text-6xl select-none'}">${escapeHtml(visual)}</div>`;
     }
@@ -2226,7 +2246,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Stock disponible</span>
           </div>
           <div onclick="openProductGallery(${Number(chosen.id)})" class="relative h-36 sm:h-56 rounded-2xl bg-gradient-to-b from-zinc-800/40 to-black/60 border border-white/[0.06] flex items-center justify-center p-3 sm:p-4 mb-3 sm:mb-5 overflow-hidden group cursor-pointer" title="Ver fotos y colores">
-            ${renderVisualElement(visual, 'w-full h-full object-contain transition-transform duration-300 group-hover:scale-105', 'text-6xl sm:text-8xl')}
+            ${renderVisualElement(visual, 'w-full h-full object-contain transition-transform duration-300 group-hover:scale-105', 'text-6xl sm:text-8xl', chosen.name)}
           </div>
           <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">${escapeHtml(chosen.brand)} · ${chosen.type === 'original' ? 'Original' : 'PlugShop Selección'}</div>
           <h2 class="text-lg sm:text-xl font-bold text-white mt-0.5">${escapeHtml(chosen.name)}</h2>
@@ -2393,7 +2413,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <div onclick="openProductGallery(${product.id})" class="relative h-36 sm:h-48 bg-gradient-to-b from-zinc-800/30 to-black/40 flex items-center justify-center overflow-hidden cursor-pointer group/img" title="Ver fotos y colores">
             ${product.featured ? '<span class="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 px-1.5 sm:px-2 py-0.5 rounded-md bg-brand-orange text-black text-[9px] sm:text-[10px] font-black tracking-wide">★ DESTACADO</span>' : ''}
             ${offPct(product) ? `<span class="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 px-1.5 sm:px-2 py-0.5 rounded-md bg-rose-500 text-white text-[10px] sm:text-[11px] font-black">-${offPct(product)}%</span>` : ''}
-            ${renderVisualElement(primaryVisual, 'w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105', 'text-5xl sm:text-6xl group-hover/img:scale-110 transition-transform duration-300')}
+            ${renderVisualElement(primaryVisual, 'w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105', 'text-5xl sm:text-6xl group-hover/img:scale-110 transition-transform duration-300', product.name)}
           </div>
 
           <div class="p-2.5 sm:p-5 flex flex-col flex-1">
@@ -2620,7 +2640,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       const mainView = document.getElementById('gallery-main-view');
       const many = photos.length > 1;
-      mainView.innerHTML = `<button type="button" onclick="openLightbox(${activeGalleryPhotoIndex})" aria-label="Ver la foto en grande" class="w-full h-full flex items-center justify-center cursor-zoom-in">${renderVisualElement(activePhoto, 'w-full h-full object-contain max-h-64 lg:max-h-full rounded-xl', 'text-8xl select-none')}</button>
+      mainView.innerHTML = `<button type="button" onclick="openLightbox(${activeGalleryPhotoIndex})" aria-label="Ver la foto en grande" class="w-full h-full flex items-center justify-center cursor-zoom-in">${renderVisualElement(activePhoto, 'w-full h-full object-contain max-h-64 lg:max-h-full rounded-xl', 'text-8xl select-none', activeGalleryProduct.name + (many ? ' — foto ' + (activeGalleryPhotoIndex + 1) + ' de ' + photos.length : ''))}</button>
         <span class="pointer-events-none absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/60 text-[10px] font-bold text-zinc-100">🔍 Tocá para ampliar${many ? ' · ' + (activeGalleryPhotoIndex + 1) + '/' + photos.length : ''}</span>
         ${many ? `<button type="button" onclick="stepGalleryPhoto(-1)" aria-label="Foto anterior" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white text-xl leading-none">‹</button><button type="button" onclick="stepGalleryPhoto(1)" aria-label="Foto siguiente" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/60 hover:bg-black/80 text-white text-xl leading-none">›</button>` : ''}`;
 
@@ -2634,7 +2654,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             onclick="switchGalleryPhoto(${idx})" 
             class="w-14 h-14 rounded-xl border flex items-center justify-center overflow-hidden transition-all shrink-0 ${isActive ? 'border-brand-orange bg-brand-orange/10 ring-2 ring-brand-orange/40' : 'border-zinc-800 bg-zinc-900 opacity-60 hover:opacity-100'}"
           >
-            ${renderVisualElement(ph, 'w-full h-full object-cover', 'text-xl')}
+            ${renderVisualElement(ph, 'w-full h-full object-cover', 'text-xl', activeGalleryProduct.name + ' — miniatura ' + (idx + 1))}
           </button>
         `;
       }).join('');
@@ -2682,10 +2702,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const wrap = document.getElementById('lb-wrap');
       if (wrap) {
         wrap.style.overflow = LB_ZOOM ? 'auto' : 'hidden';
-        wrap.innerHTML = `<button type="button" onclick="lbToggleZoom()" aria-label="${LB_ZOOM ? 'Alejar' : 'Acercar'}" class="m-auto shrink-0 ${LB_ZOOM ? 'cursor-zoom-out' : 'cursor-zoom-in'}" style="${LB_ZOOM ? 'width:220%;height:220%' : 'width:100%;height:100%'}">${renderVisualElement(photos[i], 'w-full h-full object-contain', 'text-[10rem] leading-none select-none')}</button>`;
+        wrap.innerHTML = `<button type="button" onclick="lbToggleZoom()" aria-label="${LB_ZOOM ? 'Alejar' : 'Acercar'}" class="m-auto shrink-0 ${LB_ZOOM ? 'cursor-zoom-out' : 'cursor-zoom-in'}" style="${LB_ZOOM ? 'width:220%;height:220%' : 'width:100%;height:100%'}">${renderVisualElement(photos[i], 'w-full h-full object-contain', 'text-[10rem] leading-none select-none', p.name + (many ? ' — foto ' + (i + 1) + ' de ' + photos.length : ''))}</button>`;
       }
       ['lb-prev', 'lb-next'].forEach(id => { const b = document.getElementById(id); if (b) b.classList.toggle('hidden', !many); });
-      set('lb-thumbs', many ? photos.map((ph, k) => `<button type="button" onclick="lbGo(${k})" aria-label="Ver foto ${k + 1}" class="w-14 h-14 rounded-xl border overflow-hidden shrink-0 flex items-center justify-center ${k === 0 ? 'ml-auto' : ''} ${k === photos.length - 1 ? 'mr-auto' : ''} ${k === i ? 'border-brand-orange ring-2 ring-brand-orange/50' : 'border-zinc-700 opacity-60 hover:opacity-100'}">${renderVisualElement(ph, 'w-full h-full object-cover', 'text-xl')}</button>`).join('') : '');
+      set('lb-thumbs', many ? photos.map((ph, k) => `<button type="button" onclick="lbGo(${k})" aria-label="Ver foto ${k + 1}" class="w-14 h-14 rounded-xl border overflow-hidden shrink-0 flex items-center justify-center ${k === 0 ? 'ml-auto' : ''} ${k === photos.length - 1 ? 'mr-auto' : ''} ${k === i ? 'border-brand-orange ring-2 ring-brand-orange/50' : 'border-zinc-700 opacity-60 hover:opacity-100'}">${renderVisualElement(ph, 'w-full h-full object-cover', 'text-xl', p.name + ' — miniatura ' + (k + 1))}</button>`).join('') : '');
       const act = document.querySelector('#lb-thumbs .ring-2'); if (act && act.scrollIntoView) act.scrollIntoView({ inline: 'center', block: 'nearest' });
       const hint = document.getElementById('lb-hint'); if (hint) hint.textContent = LB_ZOOM ? 'Tocá la foto para alejar · deslizá para moverte' : 'Tocá la foto para acercar' + (many ? ' · deslizá o usá las flechas para ver las otras' : '');
     }
@@ -3491,7 +3511,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           return `
           <div class="${fxNew ? 'cart-in ' : ''}p-3 rounded-xl bg-zinc-900 border border-white/[0.04] flex items-center gap-3">
             <div class="w-12 h-12 rounded-lg bg-black flex items-center justify-center overflow-hidden shrink-0">
-              ${renderVisualElement(cartPhoto(item), 'w-full h-full object-cover', 'text-2xl')}
+              ${renderVisualElement(cartPhoto(item), 'w-full h-full object-cover', 'text-2xl', item.name)}
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="text-xs font-bold text-white truncate">${escapeHtml(item.name)}</h4>
@@ -4048,7 +4068,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           const vis = (pr.photos && pr.photos[0]) ? pr.photos[0] : '📦';
           const d = delayInfo(pr);
           return `<button type="button" data-promo-product="${pr.id}" onclick="openProductGallery(${pr.id})" class="snap-start shrink-0 w-36 sm:w-44 text-left rounded-xl bg-zinc-900/90 border border-white/[0.08] hover:border-brand-orange/60 overflow-hidden transition-colors ${pr.stock === 0 ? 'opacity-60' : ''}">
-            <div class="h-24 sm:h-32 bg-black/40 flex items-center justify-center overflow-hidden">${renderVisualElement(vis, 'w-full h-full object-cover', 'text-4xl')}</div>
+            <div class="h-24 sm:h-32 bg-black/40 flex items-center justify-center overflow-hidden">${renderVisualElement(vis, 'w-full h-full object-cover', 'text-4xl', pr.name)}</div>
             <div class="p-2.5"><div class="text-[12px] font-bold text-white leading-snug line-clamp-2">${escapeHtml(pr.name)}</div>
               <div class="mt-1 text-sm font-black text-white">${formatARS(tp)}</div><div class="text-[10px] text-emerald-400">${disc}% OFF transferencia</div>
               ${pr.stock === 0 ? '<div class="text-[10px] text-rose-400 font-bold mt-0.5">Sin stock</div>' : (d ? `<div class="text-[10px] text-amber-300 font-semibold mt-0.5">⏳ ${escapeHtml(d.text)}</div>` : '')}</div></button>`;
@@ -5068,7 +5088,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <span class="text-[10px] text-zinc-400 font-semibold font-code">${escapeHtml(p.brand)}</span>
             </div>
             <div onclick="openProductGallery(${Number(p.id)})" class="h-32 rounded-xl bg-zinc-900/90 border border-white/[0.06] flex items-center justify-center p-3 mb-2.5 cursor-pointer group-hover:border-brand-orange/50 overflow-hidden relative" title="Hacé clic para elegir color y ver fotos">
-              ${renderVisualElement(visual, 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105', 'text-5xl')}
+              ${renderVisualElement(visual, 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105', 'text-5xl', p.name)}
             </div>
             <h4 onclick="openProductGallery(${Number(p.id)})" class="text-sm font-bold text-white group-hover:text-brand-orange transition-colors cursor-pointer leading-snug">${escapeHtml(p.name)}</h4>
             <ul class="mt-2 space-y-1 text-[11px] text-zinc-300 leading-relaxed">
