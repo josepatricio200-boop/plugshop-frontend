@@ -4,4 +4,4 @@ User-agent: *
 Disallow: /admin.html
 Allow: /
 
-Sitemap: https://plugshop.onrender.com/sitemap.xml
+Sitemap: https://plugshop.com.ar/sitemap.xml
