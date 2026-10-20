@@ -492,7 +492,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     <div class="psl-name" aria-hidden="true"><span style="--i:0">P</span><span style="--i:1">L</span><span style="--i:2">U</span><span style="--i:3">G</span><span style="--i:4" class="o">S</span><span style="--i:5" class="o">H</span><span style="--i:6" class="o">O</span><span style="--i:7" class="o">P</span></div>
     <div class="psl-sub">Panel Administrativo</div>
     <div class="psl-bar" aria-hidden="true"><i></i></div>
-    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,2000-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
+    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;try{if(sessionStorage.getItem('psl_seen')){if(el.parentNode)el.parentNode.removeChild(el);return;}sessionStorage.setItem('psl_seen','1');}catch(e){}function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,2000-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
   </div>
 
   <!-- ===== Ingreso del Staff (pantalla propia) ===== -->

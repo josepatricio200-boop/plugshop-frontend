@@ -25,7 +25,7 @@
   <meta name="twitter:title" content="PLUGSHOP — Tecnología con stock real en Tucumán">
   <meta name="twitter:description" content="Originales y PlugShop Selección, con garantía y 10% OFF por transferencia.">
   <meta name="twitter:image" content="https://plugshop.com.ar/og-image.png">
-  <title>PLUGSHOP — Tecnología Premium & Stock Inmediato</title>
+  <title>PLUGSHOP — Tecnología con stock real en Tucumán</title>
   <meta name="robots" content="noindex, nofollow" />
   <meta name="description" content="Tecnología con stock real en Tucumán. Originales y PlugShop Selección, con garantía y 10% OFF por transferencia.">
   
@@ -457,7 +457,7 @@ html[data-theme="light"] .text-brand-orange:not(#legal-modal *), html[data-theme
 html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.text-amber-400,.text-yellow-300):not(#legal-modal *) { color: #9a4308 !important; }
 
   </style>
-  <script>try{if(localStorage.getItem('PLUGSHOP_THEME')==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+  <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
 </head>
 <body class="selection:bg-brand-orange selection:text-black">
   <div id="ps-loader" role="status" aria-live="polite" aria-label="Cargando PLUGSHOP">
@@ -500,7 +500,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     <div class="psl-name" aria-hidden="true"><span style="--i:0">P</span><span style="--i:1">L</span><span style="--i:2">U</span><span style="--i:3">G</span><span style="--i:4" class="o">S</span><span style="--i:5" class="o">H</span><span style="--i:6" class="o">O</span><span style="--i:7" class="o">P</span></div>
     
     <div class="psl-bar" aria-hidden="true"><i></i></div>
-    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,2000-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
+    <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;try{if(sessionStorage.getItem('psl_seen')){if(el.parentNode)el.parentNode.removeChild(el);return;}sessionStorage.setItem('psl_seen','1');}catch(e){}function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,2000-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
   </div>
 
 
@@ -692,6 +692,16 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <option value="price-low">Precio: menor a mayor</option>
             <option value="price-high">Precio: mayor a menor</option>
           </select>
+        </div>
+      </div>
+
+      <!-- Buscador para celular (en compu está en el encabezado) -->
+      <div class="md:hidden pt-4">
+        <div class="relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input type="search" id="nav-search-input-m" inputmode="search" enterkeyhint="search" autocomplete="off" aria-label="Buscar productos" placeholder="Buscar producto o marca" class="w-full pl-10 pr-4 py-3 bg-zinc-900/90 border border-zinc-800 rounded-xl text-base text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all" />
         </div>
       </div>
 
@@ -1505,14 +1515,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
   </div>
 
   <!-- WhatsApp flotante + barra inferior (celular) -->
-  <a id="wa-float" data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp" class="fixed right-3 md:right-4 bottom-24 md:bottom-6 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_8px_24px_rgba(16,185,129,0.45)] flex items-center justify-center transition-transform active:scale-95">
+  <a id="wa-float" data-wa-store="1" href="https://wa.me/5493816993305" target="_blank" rel="noopener" aria-label="Escribinos por WhatsApp" class="fixed right-3 md:right-4 bottom-24 md:bottom-6 z-30 w-12 h-12 md:w-14 md:h-14 rounded-full bg-emerald-500 hover:bg-emerald-400 text-white shadow-[0_8px_24px_rgba(16,185,129,0.45)] hidden md:flex items-center justify-center transition-transform active:scale-95">
     <svg class="w-6 h-6 md:w-7 md:h-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24s8.24 3.7 8.24 8.24-3.7 8.24-8.24 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.17-.48-.29z"/></svg>
   </a>
   <nav id="mobile-bar" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-t border-white/[0.08] pb-[env(safe-area-inset-bottom)]" aria-label="Menú rápido">
-    <div class="grid grid-cols-4 h-16">
+    <div class="grid grid-cols-5 h-16">
       <a href="#inicio" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">🏠</span>Inicio</a>
       <a href="#catalogo" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">🛍️</span>Productos</a>
       <a href="#asistente" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="flex h-[18px] items-center"><svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg></span>Asesor</a>
+      <a href="https://wa.me/5493816993305" data-wa-store="1" target="_blank" rel="noopener" class="mbar-item flex flex-col items-center justify-center gap-0.5 text-emerald-400 hover:text-emerald-300 text-[10px] font-semibold" aria-label="Escribinos por WhatsApp"><span class="flex h-[18px] items-center"><svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 0 0 4.74 1.21c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.2 8.2 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.25-8.24s8.24 3.7 8.24 8.24-3.7 8.24-8.24 8.24zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.85-.86 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.23-.17-.48-.29z"/></svg></span>WhatsApp</a>
       <button type="button" onclick="openCartDrawer()" class="mbar-item relative flex flex-col items-center justify-center gap-0.5 text-zinc-400 hover:text-white text-[10px] font-semibold"><span class="text-lg leading-none">🛒</span>Carrito<span id="mbar-cart-count" class="hidden absolute top-1.5 left-1/2 ml-2 min-w-[18px] h-[18px] px-1 rounded-full bg-brand-orange text-black text-[10px] font-black items-center justify-center">0</span></button>
     </div>
   </nav>
@@ -2728,7 +2739,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       currentCategory = 'all';
       currentType = 'all';
       searchQuery = '';
-      document.getElementById('nav-search-input').value = '';
+      ['nav-search-input', 'nav-search-input-m'].forEach(id => { const x = document.getElementById(id); if (x) x.value = ''; });
       setTypeFilter('all');
       currentSubcategory = 'all';
       renderCategoryPills();
@@ -5330,13 +5341,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const subBox = document.getElementById('subcategory-filters');
       if (subBox) subBox.addEventListener('click', e => { const b = e.target.closest('[data-sub]'); if (b) selectSubcategory(b.dataset.sub); });
 
-      const searchInput = document.getElementById('nav-search-input');
-      if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+      ['nav-search-input', 'nav-search-input-m'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
           searchQuery = e.target.value;
+          ['nav-search-input', 'nav-search-input-m'].forEach(o => { const x = document.getElementById(o); if (x && x !== e.target) x.value = searchQuery; });
           renderProducts();
         });
-      }
+      });
 
       const sortEl = document.getElementById('catalog-sort');
       if (sortEl) {
