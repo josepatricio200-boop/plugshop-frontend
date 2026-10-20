@@ -1,7 +1,7 @@
 {
-  "name": "PLUGSHOP Staff",
-  "short_name": "PLUG Staff",
-  "description": "Panel interno del equipo de PLUGSHOP.",
+  "name": "Panel Administrativo",
+  "short_name": "Panel Admin",
+  "description": "Panel Administrativo de PLUGSHOP: pedidos, stock y caja del equipo.",
   "start_url": "/admin.html",
   "scope": "/",
   "display": "standalone",
