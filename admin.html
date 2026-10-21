@@ -1826,6 +1826,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <input required id="sup-name" maxlength="100" placeholder="Nombre del proveedor *" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
               <input id="sup-contact" maxlength="100" placeholder="Persona de contacto (ej. Esteban R.)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
               <input id="sup-phone" maxlength="40" inputmode="tel" placeholder="WhatsApp (ej. 11 4455 8899)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <input id="sup-province" list="ar-provinces" maxlength="80" placeholder="Provincia (ej. Buenos Aires)" autocomplete="off" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+              <datalist id="ar-provinces"><option value="Buenos Aires"><option value="CABA (Ciudad de Buenos Aires)"><option value="Catamarca"><option value="Chaco"><option value="Chubut"><option value="Córdoba"><option value="Corrientes"><option value="Entre Ríos"><option value="Formosa"><option value="Jujuy"><option value="La Pampa"><option value="La Rioja"><option value="Mendoza"><option value="Misiones"><option value="Neuquén"><option value="Río Negro"><option value="Salta"><option value="San Juan"><option value="San Luis"><option value="Santa Cruz"><option value="Santa Fe"><option value="Santiago del Estero"><option value="Tierra del Fuego"><option value="Tucumán"></datalist>
+              <input id="sup-address" maxlength="200" placeholder="Dirección (calle, número, localidad)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange sm:col-span-2" />
               <input id="sup-lead" maxlength="60" placeholder="Plazo (ej. 3 días a Tucumán)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
               <input id="sup-category" maxlength="80" placeholder="Qué te vende (ej. Cargadores y cables)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
               <input id="sup-rating" maxlength="20" placeholder="Tu puntaje (ej. 4.5 ★) — opcional" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
@@ -4735,6 +4738,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           </div>
           <div><span class="text-[10px] px-2 py-0.5 rounded font-bold ${s.paymentTerm === 'before' ? 'bg-sky-500/15 text-sky-300' : 'bg-emerald-500/15 text-emerald-300'}">${s.paymentTerm === 'before' ? '💳 Pago antes de retirar' : '⏳ Retiro y pago después'}</span></div>
           <p class="text-[11px] text-zinc-400">${escapeHtml(s.category || '')}</p>
+          ${(s.address || s.province) ? `<p class="text-[11px] text-zinc-300">📍 ${escapeHtml([s.address, s.province].filter(Boolean).join(', '))} <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([s.address, s.province, 'Argentina'].filter(Boolean).join(', '))}" target="_blank" rel="noopener noreferrer" class="text-brand-amber font-semibold underline">Ver en el mapa</a></p>` : ''}
           <div class="p-2.5 rounded-lg bg-zinc-950 border border-zinc-800/80 text-[11px] flex justify-between gap-2 font-code">
             <span class="text-zinc-400">Plazo: <strong class="text-white">${escapeHtml(s.leadDays || '—')}</strong></span>
             <span class="text-zinc-400">Contacto: <strong class="text-zinc-300 font-sans">${escapeHtml(s.contact || '—')}</strong></span>
@@ -4754,7 +4758,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const s = typeof i === 'number' ? SUPPLIERS[i] : null;
       const set = (id, v) => { document.getElementById(id).value = v || ''; };
       set('sup-id', s && s.id !== undefined ? s.id : (s ? 'idx' + i : '')); set('sup-name', s && s.name); set('sup-contact', s && s.contact); set('sup-phone', s && s.phone);
-      set('sup-lead', s && s.leadDays); set('sup-category', s && s.category); set('sup-rating', s && s.rating);
+      set('sup-province', s && s.province); set('sup-address', s && s.address); set('sup-lead', s && s.leadDays); set('sup-category', s && s.category); set('sup-rating', s && s.rating);
       document.getElementById('sup-term').value = (s && s.paymentTerm === 'before') ? 'before' : 'after';
       document.getElementById('sup-form-title').textContent = s ? 'Editar proveedor' : 'Nuevo proveedor';
       document.getElementById('sup-msg').classList.add('hidden');
@@ -4765,7 +4769,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     async function saveSupplier(e) {
       if (e) e.preventDefault();
       const val = id => document.getElementById(id).value.trim();
-      const body = { name: val('sup-name'), contact: val('sup-contact'), phone: val('sup-phone'), leadDays: val('sup-lead'), category: val('sup-category'), rating: val('sup-rating'), paymentTerm: document.getElementById('sup-term').value };
+      const body = { name: val('sup-name'), contact: val('sup-contact'), phone: val('sup-phone'), province: val('sup-province'), address: val('sup-address'), leadDays: val('sup-lead'), category: val('sup-category'), rating: val('sup-rating'), paymentTerm: document.getElementById('sup-term').value };
       const msg = document.getElementById('sup-msg'), f = document.getElementById('supplier-form');
       const idx = f.dataset.idx === '' ? -1 : Number(f.dataset.idx);
       const cur = idx >= 0 ? SUPPLIERS[idx] : null;

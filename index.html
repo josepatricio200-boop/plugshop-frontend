@@ -157,7 +157,8 @@
       #admin-orders-table tbody td.o-actions button, #admin-customers-table tbody td:last-child button { min-height: 40px; }
     }
   </style>
-<style>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
     /* ============================================================
        MODO CLARO (se activa con data-theme="light" en <html>).
        El sitio está hecho en oscuro; acá se "traducen" los grises.
@@ -456,6 +457,85 @@ html[data-theme="light"] .text-zinc-600:not(#legal-modal *) { color: #63636b !im
 html[data-theme="light"] .text-brand-orange:not(#legal-modal *), html[data-theme="light"] .admin-tab-btn.text-brand-orange:not(#legal-modal *) { color: #b03a08 !important; }
 html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.text-amber-400,.text-yellow-300):not(#legal-modal *) { color: #9a4308 !important; }
 
+    /* ============================================================
+       ACT 58 — DISEÑO NUEVO DE LA TIENDA (solo la tienda, no el panel)
+       Claro = pantalla F · Negro = pantalla G.
+       Tarjetas blancas de 28 px, etiqueta de precio con patitas (enchufe),
+       un solo color de acción (naranja), letra Inter Tight.
+       ============================================================ */
+    html body { font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif; }
+    html[data-theme="light"] body { background-color: #F5F5F7 !important; }
+    html:not([data-theme="light"]) body { background-color: #000 !important; }
+
+    /* Franja de arriba */
+    html:not([data-theme="light"]) .ps-promo { background: #1D1D1F !important; background-image: none !important; border-color: #2A2A2D !important; }
+    html[data-theme="light"] .ps-promo { background: #fff !important; background-image: none !important; border-color: #E8E8ED !important; }
+
+    /* Barra de navegación: oscura en los dos modos */
+    html:not([data-theme="light"]) header.ps-nav { background: rgba(0,0,0,.88) !important; border-color: #2A2A2D !important; }
+    html[data-theme="light"] header.ps-nav { background: #1D1D1F !important; border-color: #1D1D1F !important; }
+    html[data-theme="light"] header.ps-nav .text-white { color: #F5F5F7 !important; }
+    html[data-theme="light"] header.ps-nav .text-zinc-300 { color: #D2D2D7 !important; }
+    html[data-theme="light"] header.ps-nav .text-zinc-400,
+    html[data-theme="light"] header.ps-nav .text-zinc-500 { color: #A1A1A6 !important; }
+    html[data-theme="light"] header.ps-nav .hover\:text-white:hover { color: #fff !important; }
+    html[data-theme="light"] header.ps-nav [class*="bg-zinc-900"],
+    html[data-theme="light"] header.ps-nav [class*="from-zinc-"] { background: #2C2C2E !important; background-image: none !important; }
+    html[data-theme="light"] header.ps-nav [class*="hover:bg-zinc-800"]:hover { background: #3A3A3C !important; }
+    html[data-theme="light"] header.ps-nav [class*="border-zinc-"] { border-color: #3A3A3C !important; }
+    html[data-theme="light"] header.ps-nav input { background: #2C2C2E !important; color: #F5F5F7 !important; }
+    html[data-theme="light"] header.ps-nav input::placeholder { color: #86868B !important; }
+    html[data-theme="light"] header.ps-nav .bg-white { background: #fff !important; color: #1D1D1F !important; }
+    html[data-theme="light"] header.ps-nav .bg-white .text-black { color: #1D1D1F !important; }
+    html[data-theme="light"] header.ps-nav .hover\:bg-zinc-200:hover { background: #E8E8ED !important; }
+
+    /* Portada */
+    html body .ps-h1 { font-weight: 600 !important; letter-spacing: -.025em !important; line-height: 1.07 !important; }
+    @media (max-width: 639px) { html body .ps-h1 { font-size: 2.5rem !important; } }
+    html[data-theme="light"] body .ps-accent { color: #B23C00; }
+    html:not([data-theme="light"]) body .ps-accent { color: #FFA463; }
+    .hero-glow { display: none !important; }
+    html body .ps-cta { background: #FF7A1A !important; background-image: none !important; color: #1D1D1F !important; border-radius: 980px !important; box-shadow: none !important; font-size: 1rem; font-weight: 600; padding: .8rem 1.4rem; letter-spacing: -.01em; }
+    html body .ps-cta:hover { background: #FF8C3A !important; opacity: 1; }
+    html[data-theme="light"] body .ps-link { color: #B23C00; }
+    html:not([data-theme="light"]) body .ps-link { color: #FFA463; }
+    html body .ps-link { text-decoration: none; letter-spacing: -.01em; padding: .5rem 0; }
+    html body .ps-link:hover { text-decoration: underline; }
+
+    /* Tarjetas (producto y destacado): siempre blancas, también en el modo negro */
+    html body .ps-card { background: #fff !important; background-image: none !important; border: 0 !important; border-radius: 28px !important; box-shadow: none !important; color: #1D1D1F; backdrop-filter: none !important; }
+    @media (hover: hover) { html body .ps-card:hover { box-shadow: none !important; background: #fff !important; } }
+    html body .ps-card .text-white, html body .ps-card .text-zinc-100 { color: #1D1D1F !important; }
+    html body .ps-card .text-zinc-200, html body .ps-card .text-zinc-300 { color: #3A3A3C !important; }
+    html body .ps-card .text-zinc-400, html body .ps-card .text-zinc-500, html body .ps-card .text-zinc-600 { color: #6E6E73 !important; }
+    html body .ps-card .text-emerald-400, html body .ps-card .text-emerald-300 { color: #1D1D1F !important; font-weight: 600; }
+    html body .ps-card .text-rose-300, html body .ps-card .text-rose-400 { color: #B3261E !important; }
+    html body .ps-card .text-amber-300, html body .ps-card .text-amber-400, html body .ps-card .text-brand-amber { color: #B45309 !important; }
+    html body .ps-card .text-brand-orange { color: #B23C00 !important; }
+    html body .ps-card:hover h3 { color: #1D1D1F !important; }
+    html body .ps-card [class*="border-white"] { border-color: #E8E8ED !important; }
+    html body .ps-card [class*="from-zinc-800"] { background: #F5F5F7 !important; background-image: none !important; }
+    html body .ps-card .bg-zinc-800 { background: #F5F5F7 !important; color: #3A3A3C !important; }
+
+    /* Etiqueta de precio con patitas de enchufe */
+    html body .ps-price { position: relative; display: inline-block; margin-left: 7px; padding: 7px 11px; border-radius: 10px; background: #1D1D1F; color: #F5F5F7 !important; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    html body .ps-price.ps-price-long { font-size: 16px; padding: 7px 9px; }
+    html body .ps-price.ps-price-big { font-size: 24px; }
+    @media (min-width: 640px) {
+      html body .ps-price { font-size: 24px; }
+      html body .ps-price.ps-price-long { font-size: 19px; }
+      html body .ps-price.ps-price-big { font-size: 28px; }
+    }
+    .ps-price::before, .ps-price::after { content: ""; position: absolute; left: -6px; width: 6px; height: 4px; border-radius: 2px 0 0 2px; background: #FF7A1A; }
+    .ps-price::before { top: calc(50% - 7px); }
+    .ps-price::after { top: calc(50% + 3px); }
+
+    /* Botón de acción: píldora naranja */
+    html body .ps-btn.ps-btn.ps-btn { background: #FF7A1A !important; color: #1D1D1F !important; border-radius: 980px !important; box-shadow: none !important; font-size: 14px; font-weight: 600; min-height: 44px; letter-spacing: -.01em; }
+    html body .ps-btn.ps-btn.ps-btn:hover { background: #FF8C3A !important; color: #1D1D1F !important; }
+    html body .ps-btn.ps-btn.ps-btn svg { display: none; }
+    html body .ps-btn-off.ps-btn-off.ps-btn-off { background: #E5E5EA !important; color: #86868B !important; border-radius: 980px !important; min-height: 44px; font-weight: 600; }
+
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
 </head>
@@ -505,7 +585,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
 
   <!-- Top Announcement Bar -->
-  <aside class="bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-b border-white/[0.06] text-xs py-2 px-4 text-center text-zinc-300">
+  <aside class="ps-promo bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-b border-white/[0.06] text-xs py-2 px-4 text-center text-zinc-300">
     <div class="max-w-7xl mx-auto flex items-center justify-center gap-2 sm:gap-4 sm:flex-wrap text-[11px] sm:text-xs">
       <span class="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
         <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -523,7 +603,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
   </aside>
 
   <!-- Sticky Header -->
-  <header class="sticky top-0 z-40 bg-[#08080a]/85 backdrop-blur-xl border-b border-white/[0.07]">
+  <header class="ps-nav sticky top-0 z-40 bg-[#08080a]/85 backdrop-blur-xl border-b border-white/[0.07]">
     <div class="max-w-7xl 2xl:max-w-[96rem] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
       
       <!-- Brand Logo Badge -->
@@ -619,25 +699,26 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-12 items-center">
         
         <!-- Left: Headline & Actions -->
-        <div class="lg:col-span-7 space-y-3 sm:space-y-6 text-center lg:text-left">
+        <div class="lg:col-span-7 space-y-3 sm:space-y-6 text-left">
           <div class="hidden sm:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.1] text-xs text-zinc-300">
             <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
             Tecnología en <span data-zone>Tucumán</span>
           </div>
 
-          <h1 class="text-[1.9rem] sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
-            La tecnología que querés, <span class="grad-text bg-gradient-to-r from-amber-300 via-brand-orange to-orange-600 bg-clip-text text-transparent">sin vueltas.</span>
+          <h1 class="ps-h1 text-[1.9rem] sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.05]">
+            La tecnología que querés, <span class="ps-accent">sin vueltas.</span>
           </h1>
 
-          <p class="text-zinc-400 text-sm sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-normal">
+          <p class="text-zinc-400 text-base sm:text-lg max-w-xl leading-relaxed font-normal">
             Precios claros, stock real y garantía directa. Elegí lo que te gusta, pagá fácil y listo.
           </p>
 
-          <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-1 sm:pt-2">
-            <a href="#asistente" class="w-full sm:w-auto px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-bold text-sm shadow-[0_10px_25px_rgba(255,98,0,0.3)] hover:opacity-95 transition-all text-center flex items-center justify-center gap-2">
+          <div class="flex flex-row flex-wrap items-center justify-start gap-x-5 gap-y-3 pt-1 sm:pt-2">
+            <a href="#asistente" class="ps-cta px-6 py-3 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-bold text-sm shadow-[0_10px_25px_rgba(255,98,0,0.3)] hover:opacity-95 transition-all text-center flex items-center justify-center gap-2">
               <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/></svg>
               ¿No sabés cuál elegir?
             </a>
+            <a href="#catalogo" class="ps-link text-sm sm:text-base font-semibold">Ver todo &rarr;</a>
           </div>
 
         </div>
@@ -2190,13 +2271,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const visual = (chosen.photos && chosen.photos[0]) ? chosen.photos[0] : '📦';
       const colors = (chosen.colors || []).slice(0, 4);
       box.innerHTML = `
-        <div class="absolute -inset-1 bg-gradient-to-r from-brand-amber/20 to-brand-orange/30 rounded-3xl blur-2xl opacity-70"></div>
-        <div class="relative bg-zinc-900/90 border border-white/[0.12] rounded-3xl p-4 sm:p-8 backdrop-blur-xl shadow-2xl">
+        <div class="ps-card relative bg-zinc-900/90 border border-white/[0.12] rounded-3xl p-4 sm:p-8 backdrop-blur-xl shadow-2xl">
           <div class="flex items-center justify-between mb-3 sm:mb-5">
             <span class="px-2.5 py-1 rounded-md bg-brand-orange/15 text-brand-orange font-bold text-[11px] tracking-wider uppercase border border-brand-orange/30">${escapeHtml(label)}</span>
             <span class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Stock disponible</span>
           </div>
-          <div onclick="openProductGallery(${Number(chosen.id)})" class="relative h-36 sm:h-56 rounded-2xl bg-gradient-to-b from-zinc-800/40 to-black/60 border border-white/[0.06] flex items-center justify-center p-3 sm:p-4 mb-3 sm:mb-5 overflow-hidden group cursor-pointer" title="Ver fotos y colores">
+          <div onclick="openProductGallery(${Number(chosen.id)})" class="relative h-36 sm:h-56 rounded-2xl ${isImageUrl(visual) ? '' : 'bg-gradient-to-b from-zinc-800/40 to-black/60'} border border-white/[0.06] flex items-center justify-center p-3 sm:p-4 mb-3 sm:mb-5 overflow-hidden group cursor-pointer" title="Ver fotos y colores" ${isImageUrl(visual) ? 'style="background:#fff"' : ''}>
             ${renderVisualElement(visual, 'w-full h-full object-contain transition-transform duration-300 group-hover:scale-105', 'text-6xl sm:text-8xl', chosen.name)}
           </div>
           <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">${escapeHtml(chosen.brand)} · ${chosen.type === 'original' ? 'Original' : 'PlugShop Selección'}</div>
@@ -2205,12 +2285,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <div class="flex items-end justify-between gap-3 pt-3 sm:pt-4">
             <div>
               <div class="flex items-baseline gap-2">
-                <span class="text-2xl sm:text-3xl font-black text-white font-code">${formatARS(eff)}</span>
+                <span class="ps-price ps-price-big">${formatARS(eff)}</span>
                 <span class="text-xs text-zinc-500 font-semibold font-code">Efectivo ${formatARS(chosen.price)}</span>
               </div>
               <span class="block text-[11px] text-emerald-400 font-medium">Con ${escapeHtml(String(disc))}% OFF por transferencia</span>
             </div>
-            <button onclick="openProductGallery(${Number(chosen.id)})" class="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-md shrink-0"><span>Elegir color</span></button>
+            <button onclick="openProductGallery(${Number(chosen.id)})" class="ps-btn px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-md shrink-0"><span>Elegir color</span></button>
           </div>
         </div>`;
       box.classList.remove('hidden');
@@ -2340,11 +2420,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         // Solo se avisa el stock cuando importa (poco o nada).
         let stockLabel = '';
         let buttonDisabled = false;
-        let buttonClass = 'px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-white hover:bg-brand-orange text-black font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-md';
+        let buttonClass = 'ps-btn px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-white hover:bg-brand-orange text-black font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-md';
         if (product.stock === 0) {
           stockLabel = `<span class="text-[11px] text-rose-400 font-bold">Sin stock</span>`;
           buttonDisabled = true;
-          buttonClass = 'px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-zinc-800 text-zinc-600 font-bold text-xs cursor-not-allowed';
+          buttonClass = 'ps-btn-off px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-zinc-800 text-zinc-600 font-bold text-xs cursor-not-allowed';
         } else if (product.reserved) {
           stockLabel = `<span class="text-[11px] text-amber-300 font-bold">🔖 Reservado</span>`;
         } else if (product.stock <= 3) {
@@ -2358,35 +2438,36 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           kind = isUsedIphone(product) ? ('Usado' + (gr ? ' · ' + gr.name : '') + (product.battery ? ' · 🔋' + product.battery + '%' : '')) : 'Sellado';
         }
         const colorsTxt = colorsList.length > 1 ? `<span class="hidden sm:inline"> · ${colorsList.length} colores</span>` : '';
+        // Foto real: se ve ENTERA (sin recortar) sobre fondo blanco, como en los catálogos. Sin foto (emoji): fondo oscuro de siempre.
+        const photoTile = isImageUrl(primaryVisual);
 
         return `
-        <article class="group relative flex flex-col bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-brand-orange/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] pcard">
-          <div onclick="openProductGallery(${product.id})" class="relative h-36 sm:h-48 bg-gradient-to-b from-zinc-800/30 to-black/40 flex items-center justify-center overflow-hidden cursor-pointer group/img" title="Ver fotos y colores">
-            ${product.featured ? '<span class="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 px-1.5 sm:px-2 py-0.5 rounded-md bg-brand-orange text-black text-[9px] sm:text-[10px] font-black tracking-wide">★ DESTACADO</span>' : ''}
-            ${offPct(product) ? `<span class="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 px-1.5 sm:px-2 py-0.5 rounded-md bg-rose-500 text-white text-[10px] sm:text-[11px] font-black">-${offPct(product)}%</span>` : ''}
-            ${renderVisualElement(primaryVisual, 'w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105', 'text-5xl sm:text-6xl group-hover/img:scale-110 transition-transform duration-300', product.name)}
+        <article class="ps-card group relative flex flex-col bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-brand-orange/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_12px_32px_rgba(0,0,0,0.35)] pcard">
+          <div onclick="openProductGallery(${product.id})" class="relative h-36 sm:h-48 ${photoTile ? '' : 'bg-gradient-to-b from-zinc-800/30 to-black/40'} flex items-center justify-center overflow-hidden cursor-pointer group/img" ${photoTile ? 'style="background:#fff"' : ''} title="Ver fotos y colores">
+            ${product.featured ? '<span class="absolute top-2.5 left-2.5 sm:top-3.5 sm:left-3.5 z-10 px-2 sm:px-2.5 py-0.5 rounded-full text-[10px] sm:text-[12px] font-semibold" style="background:#F5F5F7;color:#1D1D1F">Destacado</span>' : ''}
+            ${offPct(product) ? `<span class="absolute top-2.5 right-2.5 sm:top-3.5 sm:right-3.5 z-10 px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-[12px] font-semibold" style="background:#1D1D1F;color:#F5F5F7">-${offPct(product)}%</span>` : ''}
+            ${renderVisualElement(primaryVisual, photoTile ? 'w-full h-full object-contain p-2 sm:p-3 transition-transform duration-300 group-hover/img:scale-105' : 'w-full h-full object-cover transition-transform duration-300 group-hover/img:scale-105', 'text-5xl sm:text-6xl group-hover/img:scale-110 transition-transform duration-300', product.name)}
           </div>
 
           <div class="p-2.5 sm:p-5 flex flex-col flex-1">
-            <div class="text-[10px] sm:text-[11px] uppercase tracking-wider text-zinc-500 font-semibold truncate">${escapeHtml(product.brand)}</div>
+            <div class="text-[11px] sm:text-[12px] uppercase tracking-wider text-zinc-500 font-semibold truncate">${escapeHtml(product.brand)}</div>
             <h3 onclick="openProductGallery(${product.id})" class="mt-0.5 text-[13px] sm:text-[15px] font-bold text-white leading-snug group-hover:text-brand-amber transition-colors cursor-pointer line-clamp-2">
               ${escapeHtml(product.name)}
             </h3>
-            <div class="mt-1 sm:mt-1.5 flex items-center gap-1.5 text-[10px] sm:text-[11px] text-zinc-400">
+            <div class="mt-1 sm:mt-1.5 flex items-center gap-1.5 text-[11px] sm:text-[12px] text-zinc-400">
               <span class="w-1.5 h-1.5 rounded-full shrink-0 ${isOriginal ? 'bg-cyan-400' : 'bg-amber-400'}"></span>
               <span class="truncate">${escapeHtml(kind)}${months ? ' · ' + escapeHtml(months) + '<span class="hidden sm:inline"> de garantía</span>' : ''}${colorsTxt}</span>
             </div>
             ${stockLabel ? `<div class="mt-1">${stockLabel}</div>` : ''}
-            ${delayInfo(product) ? `<div data-delay-badge class="mt-1 text-[10px] sm:text-[11px] text-amber-300 font-semibold">⏳ Puede demorar ${delayInfo(product).text}</div>` : ''}
-            ${vehicleOfProduct(product) !== 'moto' ? `<div class="mt-1 text-[10px] sm:text-[11px] text-zinc-400">${VEHICLE_INFO[vehicleOfProduct(product)].icon} Se entrega en ${VEHICLE_INFO[vehicleOfProduct(product)].label.toLowerCase()}</div>` : ''}
+            ${delayInfo(product) ? `<div data-delay-badge class="mt-1 text-[11px] sm:text-[12px] text-amber-300 font-semibold">⏳ Puede demorar ${delayInfo(product).text}</div>` : ''}
+            ${vehicleOfProduct(product) !== 'moto' ? `<div class="mt-1 text-[11px] sm:text-[12px] text-zinc-400">${VEHICLE_INFO[vehicleOfProduct(product)].icon} Se entrega en ${VEHICLE_INFO[vehicleOfProduct(product)].label.toLowerCase()}</div>` : ''}
 
             <div class="mt-auto pt-2.5 sm:pt-4">
-              ${offPct(product) ? `<div class="text-[10px] sm:text-[11px] text-rose-300 line-through font-semibold">Antes ${formatARS(product.compareAtPrice)}</div>` : ''}
               <div class="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-                <span class="text-base sm:text-xl font-black text-white leading-none">${formatARS(transferPrice)}</span>
-                <span class="text-[10px] sm:text-[11px] text-zinc-500">Efectivo ${formatARS(product.price)}</span>
+                <span class="ps-price${formatARS(transferPrice).length > 9 ? ' ps-price-long' : ''}">${formatARS(transferPrice)}</span>
               </div>
-              <div class="mt-1 text-[10px] sm:text-[11px] text-emerald-400 font-medium">${discountPct}% OFF <span class="hidden sm:inline">por </span>transferencia</div>
+              <div class="mt-1 text-[11px] sm:text-[12px] text-emerald-400 font-medium">${discountPct}% OFF <span class="hidden sm:inline">por </span>transferencia</div>
+              <div class="mt-0.5 text-[11px] sm:text-[12px] text-zinc-500">Efectivo ${formatARS(product.price)}${offPct(product) ? ` · <span class="text-rose-300 font-semibold whitespace-nowrap">antes <span class="line-through">${formatARS(product.compareAtPrice)}</span></span>` : ''}</div>
               <button
                 ${buttonDisabled ? 'disabled' : `onclick="openProductGallery(${product.id})"`}
                 class="${buttonClass} w-full justify-center mt-2 sm:mt-3"
@@ -4132,7 +4213,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           const vis = (pr.photos && pr.photos[0]) ? pr.photos[0] : '📦';
           const d = delayInfo(pr);
           return `<button type="button" data-promo-product="${pr.id}" onclick="openProductGallery(${pr.id})" class="snap-start shrink-0 w-36 sm:w-44 text-left rounded-xl bg-zinc-900/90 border border-white/[0.08] hover:border-brand-orange/60 overflow-hidden transition-colors ${pr.stock === 0 ? 'opacity-60' : ''}">
-            <div class="h-24 sm:h-32 bg-black/40 flex items-center justify-center overflow-hidden">${renderVisualElement(vis, 'w-full h-full object-cover', 'text-4xl', pr.name)}</div>
+            <div class="h-24 sm:h-32 ${isImageUrl(vis) ? '' : 'bg-black/40'} flex items-center justify-center overflow-hidden" ${isImageUrl(vis) ? 'style="background:#fff"' : ''}>${renderVisualElement(vis, isImageUrl(vis) ? 'w-full h-full object-contain p-2' : 'w-full h-full object-cover', 'text-4xl', pr.name)}</div>
             <div class="p-2.5"><div class="text-[12px] font-bold text-white leading-snug line-clamp-2">${escapeHtml(pr.name)}</div>
               <div class="mt-1 text-sm font-black text-white">${formatARS(tp)}</div><div class="text-[10px] text-emerald-400">${disc}% OFF transferencia</div>
               ${pr.stock === 0 ? '<div class="text-[10px] text-rose-400 font-bold mt-0.5">Sin stock</div>' : (d ? `<div class="text-[10px] text-amber-300 font-semibold mt-0.5">⏳ ${escapeHtml(d.text)}</div>` : '')}</div></button>`;
@@ -5154,8 +5235,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <span class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-wider font-code ${o.n === 1 ? 'bg-brand-orange/15 text-brand-orange' : 'bg-zinc-800/80 text-zinc-300'}">${o.n}. ${escapeHtml(o.icon)} ${escapeHtml(o.label)}</span>
               <span class="text-[10px] text-zinc-400 font-semibold font-code">${escapeHtml(p.brand)}</span>
             </div>
-            <div onclick="openProductGallery(${Number(p.id)})" class="h-32 rounded-xl bg-zinc-900/90 border border-white/[0.06] flex items-center justify-center p-3 mb-2.5 cursor-pointer group-hover:border-brand-orange/50 overflow-hidden relative" title="Hacé clic para elegir color y ver fotos">
-              ${renderVisualElement(visual, 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105', 'text-5xl', p.name)}
+            <div onclick="openProductGallery(${Number(p.id)})" class="h-32 rounded-xl ${isImageUrl(visual) ? '' : 'bg-zinc-900/90'} border border-white/[0.06] flex items-center justify-center p-3 mb-2.5 cursor-pointer group-hover:border-brand-orange/50 overflow-hidden relative" ${isImageUrl(visual) ? 'style="background:#fff"' : ''}" title="Hacé clic para elegir color y ver fotos">
+              ${renderVisualElement(visual, isImageUrl(visual) ? 'w-full h-full object-contain transition-transform duration-300 group-hover:scale-105' : 'w-full h-full object-cover transition-transform duration-300 group-hover:scale-105', 'text-5xl', p.name)}
             </div>
             <h4 onclick="openProductGallery(${Number(p.id)})" class="text-sm font-bold text-white group-hover:text-brand-orange transition-colors cursor-pointer leading-snug">${escapeHtml(p.name)}</h4>
             <ul class="mt-2 space-y-1 text-[11px] text-zinc-300 leading-relaxed">
