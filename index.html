@@ -460,7 +460,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     /* ============================================================
        ACT 58 — DISEÑO NUEVO DE LA TIENDA (solo la tienda, no el panel)
        Claro = pantalla F · Negro = pantalla G.
-       Tarjetas blancas de 28 px, etiqueta de precio con patitas (enchufe),
+       Tarjetas blancas de 28 px, etiqueta de precio oscura,
        un solo color de acción (naranja), letra Inter Tight.
        ============================================================ */
     html body { font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif; }
@@ -471,23 +471,28 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     html:not([data-theme="light"]) .ps-promo { background: #1D1D1F !important; background-image: none !important; border-color: #2A2A2D !important; }
     html[data-theme="light"] .ps-promo { background: #fff !important; background-image: none !important; border-color: #E8E8ED !important; }
 
-    /* Barra de navegación: oscura en los dos modos */
-    html:not([data-theme="light"]) header.ps-nav { background: rgba(0,0,0,.88) !important; border-color: #2A2A2D !important; }
-    html[data-theme="light"] header.ps-nav { background: #1D1D1F !important; border-color: #1D1D1F !important; }
-    html[data-theme="light"] header.ps-nav .text-white { color: #F5F5F7 !important; }
-    html[data-theme="light"] header.ps-nav .text-zinc-300 { color: #D2D2D7 !important; }
-    html[data-theme="light"] header.ps-nav .text-zinc-400,
-    html[data-theme="light"] header.ps-nav .text-zinc-500 { color: #A1A1A6 !important; }
-    html[data-theme="light"] header.ps-nav .hover\:text-white:hover { color: #fff !important; }
-    html[data-theme="light"] header.ps-nav [class*="bg-zinc-900"],
-    html[data-theme="light"] header.ps-nav [class*="from-zinc-"] { background: #2C2C2E !important; background-image: none !important; }
-    html[data-theme="light"] header.ps-nav [class*="hover:bg-zinc-800"]:hover { background: #3A3A3C !important; }
-    html[data-theme="light"] header.ps-nav [class*="border-zinc-"] { border-color: #3A3A3C !important; }
-    html[data-theme="light"] header.ps-nav input { background: #2C2C2E !important; color: #F5F5F7 !important; }
-    html[data-theme="light"] header.ps-nav input::placeholder { color: #86868B !important; }
-    html[data-theme="light"] header.ps-nav .bg-white { background: #fff !important; color: #1D1D1F !important; }
-    html[data-theme="light"] header.ps-nav .bg-white .text-black { color: #1D1D1F !important; }
-    html[data-theme="light"] header.ps-nav .hover\:bg-zinc-200:hover { background: #E8E8ED !important; }
+    /* Barra de navegación: gris oscuro (no negro) en los dos modos, para que el logo y los botones se vean */
+    html body header.ps-nav.ps-nav { background: #1D1D1F !important; border-color: #3A3A3C !important; }
+    html body header.ps-nav .text-white { color: #fff !important; }
+    html body header.ps-nav .text-zinc-300 { color: #E5E5EA !important; }
+    html body header.ps-nav .text-zinc-400, html body header.ps-nav .text-zinc-500 { color: #C7C7CC !important; }
+    html body header.ps-nav .hover\:text-white:hover { color: #fff !important; }
+    /* Botones de arriba (cuenta, Seguimiento QR, sol/luna): más claros y con borde para que se noten */
+    html body header.ps-nav [class*="bg-zinc-900"],
+    html body header.ps-nav [class*="from-zinc-"] { background: #3A3A3C !important; background-image: none !important; }
+    html body header.ps-nav [class*="hover:bg-zinc-800"]:hover { background: #4A4A4D !important; }
+    html body header.ps-nav [class*="border-zinc-"] { border-color: #636366 !important; }
+    /* Buscador: blanco */
+    html body header.ps-nav input[class] { background: #fff !important; color: #1D1D1F !important; border-color: #fff !important; }
+    html body header.ps-nav input::placeholder { color: #6E6E73 !important; }
+    html body header.ps-nav .pointer-events-none { color: #6E6E73 !important; }
+    html body header.ps-nav .bg-white.bg-white { background: #fff !important; color: #1D1D1F !important; }
+    html body header.ps-nav [class*="text-brand-orange"], html body header.ps-nav [class*="text-orange-"] { color: #FF7A1A !important; }
+    html[data-theme="light"] body header.ps-nav .text-brand-orange:not(#legal-modal *) { color: #FF7A1A !important; }
+    html[data-theme="light"] body header.ps-nav :is(.text-brand-amber,.text-amber-300,.text-amber-400):not(#legal-modal *) { color: #FFB703 !important; }
+    html body header.ps-nav [class*="text-brand-amber"], html body header.ps-nav [class*="text-amber-"] { color: #FFB703 !important; }
+    html body header.ps-nav .bg-white .text-black, html body header.ps-nav .bg-white.text-black { color: #1D1D1F !important; }
+    html body header.ps-nav .hover\:bg-zinc-200:hover { background: #E8E8ED !important; }
 
     /* Portada */
     html body .ps-h1 { font-weight: 600 !important; letter-spacing: -.025em !important; line-height: 1.07 !important; }
@@ -517,8 +522,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     html body .ps-card [class*="from-zinc-800"] { background: #F5F5F7 !important; background-image: none !important; }
     html body .ps-card .bg-zinc-800 { background: #F5F5F7 !important; color: #3A3A3C !important; }
 
-    /* Etiqueta de precio con patitas de enchufe */
-    html body .ps-price { position: relative; display: inline-block; margin-left: 7px; padding: 7px 11px; border-radius: 10px; background: #1D1D1F; color: #F5F5F7 !important; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    /* Etiqueta de precio (oscura, bien resaltada) */
+    html body .ps-price { position: relative; display: inline-block; margin-left: 0; padding: 7px 11px; border-radius: 10px; background: #1D1D1F; color: #F5F5F7 !important; font-size: 19px; line-height: 1; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; font-variant-numeric: tabular-nums; }
     html body .ps-price.ps-price-long { font-size: 16px; padding: 7px 9px; }
     html body .ps-price.ps-price-big { font-size: 24px; }
     @media (min-width: 640px) {
@@ -526,9 +531,6 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       html body .ps-price.ps-price-long { font-size: 19px; }
       html body .ps-price.ps-price-big { font-size: 28px; }
     }
-    .ps-price::before, .ps-price::after { content: ""; position: absolute; left: -6px; width: 6px; height: 4px; border-radius: 2px 0 0 2px; background: #FF7A1A; }
-    .ps-price::before { top: calc(50% - 7px); }
-    .ps-price::after { top: calc(50% + 3px); }
 
     /* Botón de acción: píldora naranja */
     html body .ps-btn.ps-btn.ps-btn { background: #FF7A1A !important; color: #1D1D1F !important; border-radius: 980px !important; box-shadow: none !important; font-size: 14px; font-weight: 600; min-height: 44px; letter-spacing: -.01em; }
