@@ -621,6 +621,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <button onclick="switchAdminTab('customers')" id="tab-btn-customers" data-nav-tab="customers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">👥</span><span>Registro de Clientes</span></span><span id="badge-cust-count" class="text-[10px] text-zinc-500 font-code">4</span>
             </button>
+              <button onclick="switchAdminTab('credits')" id="tab-btn-credits" data-nav-tab="credits" data-admin-only="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🤝</span><span>Créditos en cuotas</span></span><span id="badge-credits" class="text-[10px] text-zinc-500 font-code"></span>
+            </button>
               <button onclick="switchAdminTab('offers')" id="tab-btn-offers" data-nav-tab="offers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">🏷️</span><span>Ofertas & Promos</span></span><span class="text-[10px] text-amber-400 font-code">2 activas</span>
             </button>
@@ -2005,6 +2008,56 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             </div>
           </div>
 
+          <!-- TAB: CRÉDITOS (venta en cuotas a conocidos, solo administrador) -->
+          <div id="admin-tab-credits" class="hidden space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-lg font-bold text-white">Créditos en cuotas</h3>
+                <p class="text-xs text-zinc-400">Para vender en cuotas a gente que conocés. Elegís el recargo, anotás cada pago y ves quién está atrasado. Solo lo ves vos.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <select id="credits-filter" onchange="renderCredits()" aria-label="Qué créditos ver" class="bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-orange">
+                  <option value="active">Activos</option>
+                  <option value="late">Atrasados</option>
+                  <option value="paid">Pagados</option>
+                  <option value="cancelled">Cancelados</option>
+                  <option value="all">Todos</option>
+                </select>
+                <button type="button" onclick="creditToggleForm()" class="px-3 py-2 rounded-lg bg-brand-orange text-white text-xs font-bold whitespace-nowrap">➕ Nuevo crédito</button>
+              </div>
+            </div>
+            <div id="credits-msg" class="hidden text-[11px] font-semibold" role="status"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="p-4 rounded-2xl bg-zinc-950 border border-zinc-800"><div class="text-[11px] text-zinc-400">Plata por cobrar</div><div id="credits-sum-open" class="text-2xl font-black text-white font-code">$0</div><div id="credits-sum-open-sub" class="text-[11px] text-zinc-500"></div></div>
+              <div class="p-4 rounded-2xl bg-zinc-950 border border-zinc-800"><div class="text-[11px] text-zinc-400">Atrasado ahora</div><div id="credits-sum-late" class="text-2xl font-black text-rose-400 font-code">$0</div><div id="credits-sum-late-sub" class="text-[11px] text-zinc-500"></div></div>
+            </div>
+            <div id="credits-form" class="hidden p-4 rounded-2xl bg-zinc-950 border border-zinc-700 space-y-3">
+              <div class="text-sm font-bold text-white">Crédito nuevo</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label class="text-[11px] text-zinc-300">Nombre de la persona<input id="cr-name" type="text" maxlength="80" autocomplete="off" oninput="creditHistory()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">WhatsApp (para los recordatorios)<input id="cr-phone" type="tel" maxlength="40" placeholder="381 555 1234" autocomplete="off" oninput="creditHistory()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <div id="cr-history" class="sm:col-span-2 text-[11px] empty:hidden"></div>
+                <label class="text-[11px] text-zinc-300 sm:col-span-2">Qué se lleva<input id="cr-concept" type="text" maxlength="200" placeholder="Ej: Parlante JBL + cargador" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">Precio de contado ($)<input id="cr-cash" type="number" inputmode="numeric" min="1" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">Recargo por financiar (%) — 0 si no cobrás recargo<input id="cr-pct" type="number" inputmode="decimal" min="0" max="300" step="0.5" placeholder="Ej: 20" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">Anticipo que deja hoy ($, opcional)<input id="cr-down" type="number" inputmode="numeric" min="0" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">Cantidad de cuotas<input id="cr-n" type="number" inputmode="numeric" min="1" max="36" value="3" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">Cada cuánto paga
+                  <select id="cr-freq" onchange="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white"><option value="monthly">Todos los meses</option><option value="biweekly">Cada 15 días</option><option value="weekly">Todas las semanas</option></select></label>
+                <label class="text-[11px] text-zinc-300">Vence la primera cuota<input id="cr-first" type="date" onchange="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300 sm:col-span-2">Nota (opcional, solo la ves vos)<input id="cr-note" type="text" maxlength="300" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="flex items-start gap-2 text-[11px] text-zinc-300 sm:col-span-2 cursor-pointer"><input id="cr-show" type="checkbox" checked class="mt-0.5 w-4 h-4 accent-orange-500" /><span>Mostrarle su crédito al cliente: en la tienda le aparece "Mi crédito" (con sus cuotas y lo que falta) y entra con un código que le pasás vos. Lo podés apagar cuando quieras.</span></label>
+              </div>
+              <div id="cr-preview" class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 text-xs text-zinc-300 space-y-1"></div>
+              <div class="flex flex-wrap gap-2">
+                <button type="button" onclick="creditCreate()" class="px-4 py-2 rounded-lg bg-brand-orange text-white text-xs font-bold">Guardar crédito</button>
+                <button type="button" onclick="creditToggleForm()" class="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-xs font-semibold">Cerrar</button>
+              </div>
+            </div>
+            <div id="credits-list" class="space-y-3"></div>
+            <p class="text-[11px] text-zinc-500">Los pagos se van aplicando a la cuota más vieja primero. Un crédito no se borra: si se cae, lo cancelás y queda el registro.</p>
+          </div>
+
           <!-- TAB: USUARIOS & PERMISOS -->
           <div id="admin-tab-claims" class="hidden space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -2291,7 +2344,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 EN CAMINO
               </span>
             </div>
-            <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">PS-902</strong> · Despacho local Tucumán & YB</p>
+            <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">—</strong> · Despacho local Tucumán & YB</p>
             <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
             <a id="track-wa-send" href="#" target="_blank" rel="noopener" class="hidden mt-2 w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold">📲 Enviar mi pedido por WhatsApp</a>
             <p id="track-wa-hint" class="hidden text-[11px] text-zinc-400 mt-1">Si WhatsApp no se abrió solo, tocá el botón verde: es el paso que confirma tu compra con nosotros.</p>
@@ -2315,7 +2368,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                 <span>DESPACHO EXPRESS EN VIVO</span>
               </span>
-              <div id="track-route-eta" class="text-base font-extrabold text-white mt-0.5 font-code">Tiempo estimado de entrega: ~35 min</div>
+              <div id="track-route-eta" class="text-base font-extrabold text-white mt-0.5 font-code">Calculando tiempo de entrega…</div>
             </div>
             <div class="text-left sm:text-right">
               <span class="text-[10px] text-zinc-500 block font-code">Entrega a cargo de</span>
@@ -2378,7 +2431,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1.5 text-[11px] font-code">
               <div class="flex justify-between">
                 <span class="text-zinc-400">Total de la compra:</span>
-                <strong id="track-modal-total" class="text-brand-amber font-extrabold">$111.110</strong>
+                <strong id="track-modal-total" class="text-brand-amber font-extrabold">—</strong>
               </div>
               <div class="flex justify-between">
                 <span class="text-zinc-400">Modalidad de pago:</span>
@@ -2482,6 +2535,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         ADVISOR_TIPS: '/api/advisor-tips',     // GET público: consejos activos del asesor; admin: GET /all y PUT (reemplaza la lista)
         PROMOTIONS: '/api/promotions',         // GET público: campañas vigentes; admin: /all, POST/PUT/DELETE
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
+        CREDITS: '/api/credits',               // GET / POST / PUT /:id / POST /:id/payments / DELETE /:id/payments/:pid / POST /:id/cancel (solo admin): venta en cuotas
         INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
         BACKUP: '/api/backup',                 // GET (solo admin): copia de seguridad completa
         AUDIT: '/api/audit',                   // GET (solo admin): registro de quién cambió qué
@@ -2693,6 +2747,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       'suppliers': ['admin', 'logistica'],
       'offers': ['admin'],
       'customers': ['admin', 'vendedor'],
+      'credits': ['admin'],
       'claims': ['admin', 'vendedor'],
       'staff-users': ['admin'],
       'settings': ['admin']
@@ -2738,6 +2793,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         { id: 'mono', tab: 'finances', fin: 'mono', icon: '🧾', label: 'Monotributo' }] },
       { id: 'crm', icon: '👥', label: 'Clientes y Marketing', items: [
         { id: 'customers', tab: 'customers', icon: '👥', label: 'Registro de Clientes' },
+        { id: 'credits', tab: 'credits', icon: '🤝', label: 'Créditos en cuotas' },
         { id: 'offers', tab: 'offers', icon: '🏷️', label: 'Ofertas & Promos' }] },
       { id: 'kpi', icon: '📈', label: 'Análisis y Métricas', items: [
         { id: 'sales', tab: 'finances', fin: 'sales', icon: '📊', label: 'Reportes de ventas' },
@@ -3155,88 +3211,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       storeZone: 'Tucumán'
     };
 
-    const DEFAULT_ORDERS = [
-      {
-        id: 'PS-902',
-        customer: 'Sofía C.',
-        phone: '381 555 4912',
-        address: 'Yerba Buena (Av. Aconquija)',
-        items: '1x Auricular Pro X1 (Color: Negro Mate)',
-        deliveryType: 'Yerba Buena Express',
-        paymentMethod: 'Transferencia Bancaria (10% OFF)',
-        isBancarizado: true,
-        discountApplied: 11990,
-        total: 111110,
-        status: 'Despachado',
-        date: '2026-09-24',
-        time: 'Hace 35 min'
-      },
-      {
-        id: 'PS-903',
-        customer: 'Lucas M.',
-        phone: '381 444 8821',
-        address: 'San Miguel de Tucumán (Barrio Norte)',
-        items: '1x Teclado MK-68 (Color: Negro RGB)',
-        deliveryType: 'San Miguel de Tucumán',
-        paymentMethod: 'Efectivo en Mano',
-        isBancarizado: false,
-        discountApplied: 0,
-        total: 132200,
-        status: 'En preparación',
-        date: '2026-09-24',
-        time: 'Hace 1 hora'
-      },
-      {
-        id: 'PS-904',
-        customer: 'Juan González',
-        phone: '381 555 1234',
-        address: 'Punto de Retiro Coordinado',
-        items: '1x Cargador USB-C 45W (Color: Blanco)',
-        deliveryType: 'Punto de Retiro',
-        paymentMethod: 'Transferencia Bancaria (10% OFF)',
-        isBancarizado: true,
-        discountApplied: 3290,
-        total: 29610,
-        status: 'Entregado',
-        date: '2026-09-24',
-        time: 'Hoy 11:20'
-      }
-    ];
+    const DEFAULT_ORDERS = []; // sin pedidos de ejemplo: los pedidos reales vienen del servidor
 
-    const DEFAULT_CUSTOMERS = [
-      {
-        name: 'Sofía C.',
-        phone: '381 555 4912',
-        zone: 'Yerba Buena',
-        ordersCount: 2,
-        totalSpent: 198000,
-        status: 'Garantía Vigente'
-      },
-      {
-        name: 'Lucas M.',
-        phone: '381 444 8821',
-        zone: 'San Miguel de Tucumán (Barrio Norte)',
-        ordersCount: 1,
-        totalSpent: 132200,
-        status: 'Garantía Vigente'
-      },
-      {
-        name: 'Juan González',
-        phone: '381 555 1234',
-        zone: 'San Miguel de Tucumán (Centro)',
-        ordersCount: 3,
-        totalSpent: 215700,
-        status: 'Garantía Vigente'
-      },
-      {
-        name: 'Camila Villafañe',
-        phone: '381 500 0045',
-        zone: 'Yerba Buena',
-        ordersCount: 1,
-        totalSpent: 89900,
-        status: 'Garantía Vigente'
-      }
-    ];
+    const DEFAULT_CUSTOMERS = []; // sin clientes de ejemplo: los clientes reales vienen del servidor
 
     let PRODUCTS = loadStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
     if (Array.isArray(PRODUCTS)) PRODUCTS = PRODUCTS.map(sanitizeProduct); else PRODUCTS = [...DEFAULT_PRODUCTS];
@@ -3843,6 +3820,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       try {
         await refreshMyPerms();
         await syncAdminDataFromServer();
+        if (currentStaffSession.role === 'admin') loadCredits(true);
       } finally {
         ADMIN_LOADING = false;
       }
@@ -3859,8 +3837,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
 
     function switchAdminTab(tabName) {
-      if ((tabName === 'costs' || tabName === 'couriers') && currentStaffSession.role !== 'admin') return; // solo el administrador
-      const allTabs = ['today', 'finances', 'inventory', 'costs', 'couriers', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'claims', 'staff-users', 'settings'];
+      if ((tabName === 'costs' || tabName === 'couriers' || tabName === 'credits') && currentStaffSession.role !== 'admin') return; // solo el administrador
+      const allTabs = ['today', 'finances', 'inventory', 'costs', 'couriers', 'iphone', 'smart-engine', 'orders', 'suppliers', 'offers', 'customers', 'credits', 'claims', 'staff-users', 'settings'];
       
       allTabs.forEach(t => {
         const tabEl = document.getElementById(`admin-tab-${t}`);
@@ -3882,6 +3860,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (tabName === 'smart-engine') { renderEngineTab(); loadInsights(); }
       if (typeof onAdminTabShown === 'function') onAdminTabShown(tabName);
       if (tabName === 'iphone') loadIphoneAdmin();
+      if (tabName === 'credits') openCreditsTab();
       if (tabName === 'costs') openCostsTab();
       if (tabName === 'couriers') openCouriersTab();
       navOpenCurrent();
@@ -9352,6 +9331,316 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (!(Number(p.stock) > 0)) miss.push({ k: 'stock', hard: true, text: 'Sin stock' });
       if (!String(p.keywords || '').trim()) miss.push({ k: 'keywords', hard: false, text: 'Sin palabras clave' });
       return miss;
+    }
+
+    // ==========================================
+    // CRÉDITOS (venta en cuotas a gente conocida) — solo administrador
+    // ==========================================
+    // Los datos viven en el servidor (/api/credits). Acá se dibuja la lista, se anotan pagos,
+    // se arma el recordatorio de WhatsApp y el comprobante para imprimir.
+    let CREDIT_LIST = [], CREDITS_LOADED = false, CREDITS_OPEN = null, CREDITS_PAYING = null, CREDITS_FORM = false;
+    function creditAuth() { return { Authorization: 'Bearer ' + currentStaffSession.token }; }
+    function creditToday() { return new Date(Date.now() - 3 * 3600 * 1000).toISOString().slice(0, 10); }
+    function creditDay(iso) { const p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '—'; }
+    function creditAddMonths(day, n) {
+      const [y, m, d] = day.split('-').map(Number);
+      const t = new Date(Date.UTC(y, m - 1 + n, 1));
+      const last = new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 0)).getUTCDate();
+      t.setUTCDate(Math.min(d, last));
+      return t.toISOString().slice(0, 10);
+    }
+    function creditDaysBetween(a, b) { return Math.round((Date.parse(b + 'T00:00:00Z') - Date.parse(a + 'T00:00:00Z')) / 86400000); }
+    function creditFirstName(n) { return String(n || '').trim().split(/\s+/)[0] || ''; }
+    // Tasa efectiva anual (la que pide la ley de defensa del consumidor al vender en cuotas): sale de
+    // lo que realmente se financia (contado - anticipo) y de las cuotas con sus fechas. null si no se puede calcular.
+    function creditTEA(cashFinanced, cuotas, startDay) {
+      if (!(cashFinanced > 0) || !cuotas.length) return null;
+      const pts = cuotas.map(q => ({ t: Math.max(0, creditDaysBetween(startDay, q.due)) / 365, a: q.amount }));
+      if (!pts.some(p => p.t > 0)) return null;
+      const sum = r => pts.reduce((s, p) => s + p.a / Math.pow(1 + r, p.t), 0);
+      if (sum(0) <= cashFinanced + 0.5) return 0;
+      let lo = 0, hi = 1, guard = 0;
+      while (sum(hi) > cashFinanced && guard++ < 60) hi *= 2;
+      for (let i = 0; i < 120; i++) { const mid = (lo + hi) / 2; if (sum(mid) > cashFinanced) lo = mid; else hi = mid; }
+      return (lo + hi) / 2 * 100;
+    }
+    function creditTEAText(v) { return v === null || v === undefined ? '—' : (v > 99999 ? 'más de 100.000 %' : v.toLocaleString('es-AR', { maximumFractionDigits: 1 }) + ' %'); }
+    // Cuenta que se muestra mientras se completa el formulario (el servidor hace la cuenta oficial al guardar).
+    function creditCalc(v) {
+      const cash = Math.round(Number(v.cash) || 0), pct = Number(v.pct) || 0, down = Math.round(Number(v.down) || 0), n = Math.round(Number(v.n) || 0);
+      const total = Math.round(cash * (1 + pct / 100)), financed = total - down;
+      if (!(cash > 0) || !(n >= 1) || !(financed > 0)) return { cash, pct, total, down, n, financed, cuota: 0, last: 0, ok: false };
+      const base = Math.floor(financed / n);
+      return { cash, pct, total, down, n, financed, cuota: base, last: financed - base * (n - 1), ok: true };
+    }
+    function creditDues(first, freq, n) {
+      const out = [];
+      for (let i = 0; i < n; i++) {
+        if (freq === 'monthly') out.push(creditAddMonths(first, i));
+        else { const d = new Date(first + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + (freq === 'weekly' ? 7 : 14) * i); out.push(d.toISOString().slice(0, 10)); }
+      }
+      return out;
+    }
+    function creditVals() {
+      const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+      return { name: g('cr-name').trim(), phone: g('cr-phone').trim(), concept: g('cr-concept').trim(), cash: g('cr-cash'), pct: g('cr-pct'), down: g('cr-down'), n: g('cr-n'), freq: g('cr-freq') || 'monthly', first: g('cr-first'), note: g('cr-note').trim(), show: !!(document.getElementById('cr-show') || { checked: true }).checked };
+    }
+    function creditPreview() {
+      const box = document.getElementById('cr-preview'); if (!box) return;
+      const v = creditVals(), c = creditCalc(v);
+      if (!c.ok) { box.innerHTML = '<span class="text-zinc-500">Completá el precio de contado y las cuotas para ver la cuenta.</span>'; return; }
+      const dues = /^\d{4}-\d{2}-\d{2}$/.test(v.first) ? creditDues(v.first, v.freq, c.n) : null;
+      const tea = dues ? creditTEA(Math.max(0, c.cash - c.down), dues.map((d, i) => ({ due: d, amount: i === c.n - 1 ? c.last : c.cuota })), creditToday()) : null;
+      const same = c.last === c.cuota;
+      box.innerHTML = `<div>Contado <b>${formatARS(c.cash)}</b> ${c.pct > 0 ? `+ recargo ${escapeHtml(String(c.pct))}% = ` : '→ '}<b class="text-white">Total ${formatARS(c.total)}</b></div>`
+        + (c.down > 0 ? `<div>Anticipo ${formatARS(c.down)} → quedan <b>${formatARS(c.financed)}</b> para las cuotas</div>` : '')
+        + `<div class="text-emerald-400 font-bold">${c.n} ${c.n === 1 ? 'cuota' : 'cuotas'} de ${formatARS(c.cuota)}${same ? '' : ' (la última de ' + formatARS(c.last) + ')'}</div>`
+        + (tea !== null ? `<div class="text-zinc-400">Tasa efectiva anual aproximada: ${creditTEAText(tea)}</div>` : '');
+    }
+    // Antecedentes de la persona que estás cargando (por WhatsApp o, si no hay, por nombre): avisa si ya tuvo un crédito atrasado o sin pagar.
+    function creditSamePerson(c, name, phone) {
+      if (phone.length === 10) return normalizeArPhone(c.phone) === phone;
+      return !!name && String(c.customerName).trim().toLowerCase() === name.toLowerCase();
+    }
+    function creditHistory() {
+      const box = document.getElementById('cr-history'); if (!box) return;
+      const name = ((document.getElementById('cr-name') || {}).value || '').trim(), phone = normalizeArPhone((document.getElementById('cr-phone') || {}).value || '');
+      const prior = (name.length >= 3 || phone.length === 10) ? CREDIT_LIST.filter(c => creditSamePerson(c, name, phone)) : [];
+      if (!prior.length) { box.innerHTML = ''; return; }
+      const late = prior.filter(c => c.status === 'active' && c.overdueCount > 0);
+      const lost = prior.filter(c => c.status === 'cancelled' && c.balance > 0);
+      const paid = prior.filter(c => c.status === 'paid');
+      const e = escapeHtml;
+      if (late.length || lost.length) {
+        const debt = late.reduce((s, c) => s + c.overdueAmount, 0) + lost.reduce((s, c) => s + c.balance, 0);
+        box.innerHTML = `<div class="p-2.5 rounded-lg bg-rose-950/50 border border-rose-800/70 text-rose-200 font-semibold">⚠️ Ojo: ${late.length ? 'ya tiene ' + (late.length === 1 ? 'un crédito atrasado' : late.length + ' créditos atrasados') : ''}${late.length && lost.length ? ' y ' : ''}${lost.length ? (lost.length === 1 ? 'un crédito cancelado' : lost.length + ' créditos cancelados') + ' con plata sin pagar' : ''}. Debe en total ${formatARS(debt)}.</div>`;
+      } else if (paid.length) {
+        box.innerHTML = `<div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-emerald-300">✓ Antecedentes: ya pagó ${paid.length} ${paid.length === 1 ? 'crédito completo' : 'créditos completos'}${prior.length > paid.length ? ' y tiene ' + (prior.length - paid.length) + ' en curso al día' : ''}.</div>`;
+      } else {
+        box.innerHTML = `<div class="p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300">Ya tiene ${prior.length} ${prior.length === 1 ? 'crédito en curso' : 'créditos en curso'}, al día.</div>`;
+      }
+    }
+    function creditMsg(text, bad) {
+      const el = document.getElementById('credits-msg'); if (!el) return;
+      el.textContent = text || ''; el.classList.toggle('hidden', !text);
+      el.className = 'text-[11px] font-semibold ' + (bad ? 'text-rose-400' : 'text-emerald-400') + (text ? '' : ' hidden');
+    }
+    async function loadCredits(silent) {
+      if (!isBackendConnected() || !currentStaffSession.token || currentStaffSession.role !== 'admin') { renderCredits(); return; }
+      const res = await apiRequest('CREDITS', { headers: creditAuth() });
+      if (Array.isArray(res)) { CREDIT_LIST = res; CREDITS_LOADED = true; }
+      else if (!silent) creditMsg((res && res.error) || 'No se pudieron cargar los créditos. Probá de nuevo en un rato.', true);
+      renderCredits();
+    }
+    function openCreditsTab() { renderCredits(); loadCredits(); }
+    function creditSort(a, b) {
+      if ((b.overdueCount > 0) !== (a.overdueCount > 0)) return b.overdueCount > 0 ? 1 : -1;
+      if (a.overdueCount > 0 && b.overdueCount > 0) return b.oldestLateDays - a.oldestLateDays;
+      const da = a.nextDue ? a.nextDue.due : '9999', db2 = b.nextDue ? b.nextDue.due : '9999';
+      return da < db2 ? -1 : da > db2 ? 1 : b.id - a.id;
+    }
+    function creditStateBadge(c) {
+      if (c.status === 'cancelled') return '<span class="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px] font-bold">CANCELADO</span>';
+      if (c.status === 'paid') return '<span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 text-[10px] font-bold">PAGADO ✓</span>';
+      if (c.overdueCount > 0) return `<span class="px-2 py-0.5 rounded bg-rose-950/70 text-rose-300 text-[10px] font-bold">ATRASADO · ${c.oldestLateDays} ${c.oldestLateDays === 1 ? 'día' : 'días'}</span>`;
+      return '<span class="px-2 py-0.5 rounded bg-sky-950/60 text-sky-300 text-[10px] font-bold">AL DÍA</span>';
+    }
+    function renderCredits() {
+      const set = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
+      const live = CREDIT_LIST.filter(c => c.status === 'active');
+      const late = live.filter(c => c.overdueCount > 0);
+      set('credits-sum-open', formatARS(live.reduce((s, c) => s + c.balance, 0)));
+      set('credits-sum-open-sub', live.length ? `${live.length} ${live.length === 1 ? 'crédito activo' : 'créditos activos'}` : 'No hay créditos activos.');
+      set('credits-sum-late', formatARS(late.reduce((s, c) => s + c.overdueAmount, 0)));
+      set('credits-sum-late-sub', late.length ? `${late.length} ${late.length === 1 ? 'persona atrasada' : 'personas atrasadas'}` : 'Nadie está atrasado.');
+      const badge = document.getElementById('badge-credits');
+      if (badge) { badge.textContent = late.length ? late.length + ' atrasad' + (late.length === 1 ? 'o' : 'os') : (live.length ? String(live.length) : ''); badge.className = 'text-[10px] font-code ' + (late.length ? 'text-rose-400 font-bold' : 'text-zinc-500'); }
+      const form = document.getElementById('credits-form'); if (form) form.classList.toggle('hidden', !CREDITS_FORM);
+      const list = document.getElementById('credits-list'); if (!list) return;
+      if (!isBackendConnected()) { list.innerHTML = '<p class="text-xs text-zinc-400 p-4 rounded-xl bg-zinc-950 border border-zinc-800">Los créditos se guardan en el servidor. Conectá la tienda al servidor para usarlos.</p>'; return; }
+      if (!CREDITS_LOADED) { list.innerHTML = '<p class="text-xs text-zinc-500 p-4">Cargando créditos…</p>'; return; }
+      const f = (document.getElementById('credits-filter') || {}).value || 'active';
+      const rows = CREDIT_LIST.filter(c => f === 'all' ? true : f === 'late' ? (c.status === 'active' && c.overdueCount > 0) : c.status === (f === 'active' ? 'active' : f)).sort(creditSort);
+      if (!rows.length) {
+        list.innerHTML = `<p class="text-xs text-zinc-400 p-4 rounded-xl bg-zinc-950 border border-zinc-800">${CREDIT_LIST.length ? 'No hay créditos en esta vista.' : 'Todavía no cargaste ningún crédito. Tocá "➕ Nuevo crédito" para empezar.'}</p>`;
+        return;
+      }
+      list.innerHTML = rows.map(creditCardHtml).join('');
+    }
+    function creditCardHtml(c) {
+      const e = escapeHtml, id = Number(c.id), pct = c.total > 0 ? Math.min(100, Math.round(c.paid / c.total * 100)) : 0;
+      const open = CREDITS_OPEN === id, paying = CREDITS_PAYING === id, active = c.status === 'active';
+      const nextTxt = c.status === 'active' && c.nextDue ? `Próxima cuota (${c.nextDue.n} de ${c.installments}): <b class="text-zinc-200">${formatARS(c.nextDue.left)}</b> el ${e(creditDay(c.nextDue.due))}` : '';
+      const lateTxt = active && c.overdueCount > 0 ? `<div class="mt-1 text-[11px] font-semibold text-rose-300">Debe ${formatARS(c.overdueAmount)} de ${c.overdueCount} ${c.overdueCount === 1 ? 'cuota vencida' : 'cuotas vencidas'}</div>` : '';
+      const btn = 'px-3 py-1.5 rounded-lg border text-[11px] font-semibold ';
+      const wa = c.phone ? `<a href="${e(creditWaUrl(c))}" target="_blank" rel="noopener" class="${btn}bg-emerald-950/50 hover:bg-emerald-900/60 border-emerald-800 text-emerald-300">💬 Recordar por WhatsApp</a>` : `<button type="button" disabled title="Cargale el teléfono en 'Ver detalle'" class="${btn}bg-zinc-900 border-zinc-800 text-zinc-600 cursor-not-allowed">💬 Sin teléfono</button>`;
+      const actions = `<div class="flex flex-wrap gap-2 mt-3">`
+        + (active ? `<button type="button" onclick="creditTogglePay(${id})" class="${btn}bg-brand-orange/15 hover:bg-brand-orange/25 border-brand-orange text-brand-orange">💵 Anotar pago</button>` : '')
+        + (active && c.balance > 0 ? wa : '')
+        + `<button type="button" onclick="creditPrint(${id})" class="${btn}bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-200">🖨️ Comprobante</button>`
+        + `<button type="button" onclick="creditToggleOpen(${id})" class="${btn}bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300">${open ? 'Ocultar detalle' : 'Ver detalle'}</button></div>`;
+      const nextLeft = c.nextDue ? c.nextDue.left : c.balance;
+      const payForm = paying ? `<div class="mt-3 p-3 rounded-xl bg-zinc-900 border border-zinc-700 grid grid-cols-1 sm:grid-cols-4 gap-2 items-end">
+          <label class="text-[11px] text-zinc-300">Monto cobrado<input id="crp-amount-${id}" type="number" inputmode="numeric" min="1" max="${c.balance}" value="${nextLeft}" class="mt-1 w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <label class="text-[11px] text-zinc-300">Fecha<input id="crp-date-${id}" type="date" max="${creditToday()}" value="${creditToday()}" class="mt-1 w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <label class="text-[11px] text-zinc-300">Nota (opcional)<input id="crp-note-${id}" type="text" maxlength="120" placeholder="Efectivo, transferencia…" class="mt-1 w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <button type="button" onclick="creditSavePay(${id})" class="py-2 rounded-lg bg-brand-orange text-white text-xs font-bold">Guardar pago</button></div>` : '';
+      return `<div class="p-4 rounded-2xl bg-zinc-950 border ${active && c.overdueCount > 0 ? 'border-rose-800/70' : 'border-zinc-800'}" data-credit-id="${id}">
+        <div class="flex flex-wrap items-start justify-between gap-2">
+          <div class="min-w-0"><div class="font-bold text-white truncate">${e(c.customerName)}</div><div class="text-[11px] text-zinc-400 truncate">${e(c.concept)}${c.phone ? ' · ' + e(c.phone) : ''}</div></div>
+          ${creditStateBadge(c)}
+        </div>
+        <div class="mt-3 h-2 rounded-full bg-zinc-800 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Pagado"><div class="h-full bg-emerald-500" style="width:${pct}%"></div></div>
+        <div class="mt-1.5 flex flex-wrap justify-between gap-x-4 text-[11px] text-zinc-400"><span>Pagó ${formatARS(c.paid)} de ${formatARS(c.total)}</span><span>Falta <b class="text-white">${formatARS(c.balance)}</b></span></div>
+        ${nextTxt ? `<div class="mt-1 text-[11px] text-zinc-400">${nextTxt}</div>` : ''}${lateTxt}
+        ${actions}${payForm}${open ? creditDetailHtml(c) : ''}</div>`;
+    }
+    function creditDetailHtml(c) {
+      const e = escapeHtml, id = Number(c.id), active = c.status === 'active';
+      const rows = c.schedule.map(q => {
+        const st = q.left === 0 ? '<span class="text-emerald-400">✓ Pagada</span>' : (q.late ? `<span class="text-rose-400 font-bold">Atrasada</span>` : (q.paid > 0 ? '<span class="text-amber-300">Parcial</span>' : '<span class="text-zinc-400">Pendiente</span>'));
+        return `<tr><td class="py-1.5 px-2">${q.n}</td><td class="py-1.5 px-2">${e(creditDay(q.due))}</td><td class="py-1.5 px-2 text-right">${formatARS(q.amount)}</td><td class="py-1.5 px-2 text-right">${formatARS(q.left)}</td><td class="py-1.5 px-2">${st}</td></tr>`;
+      }).join('');
+      const pays = c.payments.length ? c.payments.map(p => `<li class="flex items-center justify-between gap-2 py-1"><span>${e(creditDay(p.date))} · <b>${formatARS(p.amount)}</b>${p.note ? ' · ' + e(p.note) : ''}</span>${c.status !== 'cancelled' ? `<button type="button" onclick="creditUndoPay(${id},${Number(p.id)})" class="text-[10px] text-rose-400 hover:underline shrink-0">Deshacer</button>` : ''}</li>`).join('') : '<li class="text-zinc-500">Todavía no hay pagos.</li>';
+      return `<div class="mt-4 pt-3 border-t border-zinc-800 space-y-4 text-[11px] text-zinc-300">
+        <div>${e(creditCuotasLabel(c))} · contado ${formatARS(c.cashPrice)}${c.surchargePct > 0 ? ' + recargo ' + e(String(c.surchargePct)) + '%' : ''} = total ${formatARS(c.total)}${c.downPayment > 0 ? ' · anticipo ' + formatARS(c.downPayment) : ''}</div>
+        <div class="overflow-x-auto"><table class="w-full text-left"><thead class="text-zinc-500 uppercase text-[10px]"><tr><th class="py-1 px-2">N°</th><th class="py-1 px-2">Vence</th><th class="py-1 px-2 text-right">Cuota</th><th class="py-1 px-2 text-right">Falta</th><th class="py-1 px-2">Estado</th></tr></thead><tbody class="divide-y divide-zinc-800/60">${rows}</tbody></table></div>
+        <div><div class="font-semibold text-zinc-200 mb-1">Pagos anotados</div><ul class="divide-y divide-zinc-800/60">${pays}</ul></div>
+        ${c.note ? `<div class="text-zinc-400">Nota: ${e(c.note)}</div>` : ''}
+        ${c.status !== 'cancelled' ? creditAccessHtml(c) : ''}
+        ${c.status !== 'cancelled' ? `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+          <label>Nombre<input id="cre-name-${id}" type="text" maxlength="80" value="${e(c.customerName)}" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <label>WhatsApp / teléfono<input id="cre-phone-${id}" type="tel" maxlength="40" value="${e(c.phone)}" placeholder="381 555 1234" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <label>Nota<input id="cre-note-${id}" type="text" maxlength="300" value="${e(c.note || '')}" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <button type="button" onclick="creditSaveContact(${id})" class="sm:col-span-3 sm:w-fit px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-100 font-semibold">Guardar datos</button></div>` : ''}
+        ${active ? `<div><button type="button" onclick="creditCancel(${id})" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-950 border border-zinc-700 text-rose-400 font-semibold">Cancelar este crédito</button><span class="ml-2 text-zinc-500">No se borra: queda en la lista como cancelado.</span></div>` : ''}
+        ${c.status === 'cancelled' && c.cancelNote ? `<div class="text-zinc-400">Motivo: ${e(c.cancelNote)}</div>` : ''}
+      </div>`;
+    }
+    // Lo que ve el cliente en la tienda: interruptor, código y botón para pasárselo por WhatsApp.
+    function creditAccessHtml(c) {
+      const id = Number(c.id), on = c.showToCustomer !== false, btn = 'px-3 py-1.5 rounded-lg border text-[11px] font-semibold ';
+      return `<div class="p-3 rounded-xl bg-zinc-900 border border-zinc-800 space-y-2">
+        <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" ${on ? 'checked' : ''} onchange="creditSetShow(${id}, this.checked)" class="mt-0.5 w-4 h-4 accent-orange-500" /><span class="text-zinc-200 font-semibold">Mostrarle su crédito al cliente en la tienda ("Mi crédito")</span></label>
+        ${on ? (c.phone ? `<div class="text-zinc-400">Código para que entre: <b class="font-code text-white text-sm tracking-widest">${escapeHtml(c.accessCode || '')}</b></div>
+          <div class="flex flex-wrap gap-2"><a href="${escapeHtml(creditCodeWaUrl(c))}" target="_blank" rel="noopener" class="${btn}bg-emerald-950/50 hover:bg-emerald-900/60 border-emerald-800 text-emerald-300">💬 Pasarle el código por WhatsApp</a><button type="button" onclick="creditRotate(${id})" class="${btn}bg-zinc-800 hover:bg-zinc-700 border-zinc-700 text-zinc-300">Cambiar código</button></div>`
+          : '<div class="text-amber-300">Cargale el WhatsApp (abajo) para que pueda ver su crédito.</div>') : '<div class="text-zinc-500">Apagado: el cliente no ve nada de este crédito.</div>'}
+      </div>`;
+    }
+    function creditCodeWaText(c) {
+      return `Hola ${creditFirstName(c.customerName)}! Ya podés ver tu crédito en PLUGSHOP: entrá a plugshop.com.ar, tocá "Mi cuenta" y elegí "Entrá con tu código". Tu WhatsApp es este número y tu código es ${c.accessCode}. Es solo tuyo, no lo compartas.`;
+    }
+    function creditCodeWaUrl(c) { return waLink(c.phone, creditCodeWaText(c)); }
+    async function creditSetShow(id, on) {
+      const res = await apiRequest('CREDITS', { method: 'PUT', headers: creditAuth(), body: JSON.stringify({ showToCustomer: !!on }) }, '/' + id);
+      if (!res || res.success === false || !res.id) { creditMsg((res && res.error) || 'No se pudo cambiar.', true); renderCredits(); return; }
+      creditReplace(res); creditMsg(on ? 'Listo: el cliente ya puede ver su crédito.' : 'Listo: el cliente ya no ve este crédito.', false); renderCredits();
+    }
+    async function creditRotate(id) {
+      if (!confirm('¿Cambiar el código? El anterior deja de funcionar y tenés que pasarle el nuevo al cliente.')) return;
+      const res = await apiRequest('CREDITS', { method: 'PUT', headers: creditAuth(), body: JSON.stringify({ rotateCode: true }) }, '/' + id);
+      if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudo cambiar el código.', true);
+      creditReplace(res); creditMsg('Código nuevo: ' + res.accessCode, false); renderCredits();
+    }
+    function creditToggleForm() {
+      CREDITS_FORM = !CREDITS_FORM;
+      if (CREDITS_FORM) {
+        const f = document.getElementById('cr-first'); if (f && !f.value) f.value = creditAddMonths(creditToday(), 1);
+        const n = document.getElementById('cr-n'); if (n && !n.value) n.value = '3';
+        creditPreview(); creditHistory();
+      }
+      renderCredits();
+      if (CREDITS_FORM) { const el = document.getElementById('cr-name'); if (el) el.focus(); }
+    }
+    function creditToggleOpen(id) { CREDITS_OPEN = CREDITS_OPEN === id ? null : id; renderCredits(); }
+    function creditTogglePay(id) { CREDITS_PAYING = CREDITS_PAYING === id ? null : id; renderCredits(); }
+    function creditReplace(c) { const i = CREDIT_LIST.findIndex(x => x.id === c.id); if (i >= 0) CREDIT_LIST[i] = c; else CREDIT_LIST.unshift(c); }
+    async function creditCreate() {
+      const v = creditVals(), c = creditCalc(v);
+      if (!v.name) return creditMsg('Falta el nombre de la persona.', true);
+      if (v.phone && !isValidArPhone(v.phone)) return creditMsg('El teléfono no parece válido. Poné la característica y el número, por ejemplo 381 555 1234.', true);
+      if (!v.concept) return creditMsg('Falta qué se lleva (producto o detalle).', true);
+      if (!(c.cash > 0)) return creditMsg('Falta el precio de contado.', true);
+      if (v.pct !== '' && (!(Number(v.pct) >= 0) || Number(v.pct) > 300)) return creditMsg('El recargo tiene que estar entre 0 y 300.', true);
+      if (!(c.n >= 1 && c.n <= 36)) return creditMsg('Las cuotas tienen que ser entre 1 y 36.', true);
+      if (!(c.down >= 0) || c.down >= c.total) return creditMsg('El anticipo no puede ser igual o mayor al total (' + formatARS(c.total) + ').', true);
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(v.first)) return creditMsg('Falta la fecha de la primera cuota.', true);
+      const res = await apiRequest('CREDITS', { method: 'POST', headers: creditAuth(), body: JSON.stringify({ customerName: v.name, phone: v.phone, concept: v.concept, cashPrice: c.cash, surchargePct: Number(v.pct) || 0, downPayment: c.down, installments: c.n, frequency: v.freq, firstDue: v.first, note: v.note, showToCustomer: v.show }) });
+      if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudo guardar. Revisá la conexión e intentá de nuevo.', true);
+      creditReplace(res); CREDITS_LOADED = true; CREDITS_FORM = false; CREDITS_OPEN = res.id;
+      ['cr-name', 'cr-phone', 'cr-concept', 'cr-cash', 'cr-pct', 'cr-down', 'cr-first', 'cr-note'].forEach(i => { const el = document.getElementById(i); if (el) el.value = ''; });
+      const sh = document.getElementById('cr-show'); if (sh) sh.checked = true;
+      creditHistory();
+      const fl = document.getElementById('credits-filter'); if (fl) fl.value = 'active';
+      creditMsg('Crédito guardado. Ya podés imprimir el comprobante.', false);
+      renderCredits();
+    }
+    async function creditSavePay(id) {
+      const amount = Math.round(Number((document.getElementById('crp-amount-' + id) || {}).value));
+      const date = (document.getElementById('crp-date-' + id) || {}).value || creditToday();
+      const note = ((document.getElementById('crp-note-' + id) || {}).value || '').trim();
+      if (!(amount >= 1)) return creditMsg('Poné cuánto te pagó.', true);
+      const res = await apiRequest('CREDITS', { method: 'POST', headers: creditAuth(), body: JSON.stringify({ amount, date, note }) }, '/' + id + '/payments');
+      if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudo anotar el pago.', true);
+      creditReplace(res); CREDITS_PAYING = null;
+      creditMsg(res.status === 'paid' ? '¡Crédito pagado por completo!' : 'Pago anotado. Falta ' + formatARS(res.balance) + '.', false);
+      renderCredits();
+    }
+    async function creditUndoPay(id, pid) {
+      if (!confirm('¿Deshacer este pago? Vuelve a figurar como que no se cobró.')) return;
+      const res = await apiRequest('CREDITS', { method: 'DELETE', headers: creditAuth() }, '/' + id + '/payments/' + pid);
+      if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudo deshacer el pago.', true);
+      creditReplace(res); creditMsg('Pago deshecho.', false); renderCredits();
+    }
+    async function creditSaveContact(id) {
+      const g = k => ((document.getElementById('cre-' + k + '-' + id) || {}).value || '').trim();
+      if (g('phone') && !isValidArPhone(g('phone'))) return creditMsg('El teléfono no parece válido. Poné la característica y el número, por ejemplo 381 555 1234.', true);
+      const res = await apiRequest('CREDITS', { method: 'PUT', headers: creditAuth(), body: JSON.stringify({ customerName: g('name'), phone: g('phone'), note: g('note') }) }, '/' + id);
+      if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudieron guardar los datos.', true);
+      creditReplace(res); creditMsg('Datos guardados.', false); renderCredits();
+    }
+    async function creditCancel(id) {
+      const c = CREDIT_LIST.find(x => x.id === id); if (!c) return;
+      if (!confirm('¿Cancelar el crédito de ' + c.customerName + '? No se borra: queda en la lista como cancelado y ya no se le pueden anotar pagos.')) return;
+      const res = await apiRequest('CREDITS', { method: 'POST', headers: creditAuth(), body: JSON.stringify({ note: '' }) }, '/' + id + '/cancel');
+      if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudo cancelar.', true);
+      creditReplace(res); creditMsg('Crédito cancelado.', false); renderCredits();
+    }
+    // Mensaje de WhatsApp para recordar la cuota (vencida o próxima).
+    function creditWaText(c) {
+      const nombre = creditFirstName(c.customerName), alias = STORE_SETTINGS.bankAlias ? ' Podés transferir al alias ' + STORE_SETTINGS.bankAlias + ' o pasar a pagar en efectivo.' : '';
+      if (c.overdueCount > 0) {
+        const old = c.schedule.find(q => q.late);
+        return `Hola ${nombre}! Te escribo de PLUGSHOP por tu compra en cuotas (${c.concept}). Tenés ${c.overdueCount} ${c.overdueCount === 1 ? 'cuota vencida' : 'cuotas vencidas'} por ${formatARS(c.overdueAmount)}${old ? '; la primera venció el ' + creditDay(old.due) : ''}.${alias} ¿Cuándo podés ponerte al día? Gracias!`;
+      }
+      if (c.nextDue) return `Hola ${nombre}! Te recuerdo de PLUGSHOP que la cuota ${c.nextDue.n} de ${c.installments} de tu compra (${c.concept}) es de ${formatARS(c.nextDue.left)} y vence el ${creditDay(c.nextDue.due)}.${alias} Gracias!`;
+      return '';
+    }
+    function creditWaUrl(c) { return waLink(c.phone, creditWaText(c)); }
+    // Comprobante / acuerdo para imprimir: precio de contado, recargo, total, cuotas con fechas, pagos y saldo.
+    function creditCuotasLabel(c) { const n = c.installments; return n === 1 ? '1 cuota' : n + ' cuotas ' + ({ weekly: 'semanales', biweekly: 'quincenales', monthly: 'mensuales' }[c.frequency] || ''); }
+    function creditPrintInner(c) {
+      const e = escapeHtml, money = n => e(formatARS(Number(n) || 0));
+      const kv = (a, b) => `<tr><td class="k">${a}</td><td class="v">${b}</td></tr>`;
+      const start = new Date((c.createdAt || Date.now()) - 3 * 3600 * 1000).toISOString().slice(0, 10);
+      const tea = creditTEA(Math.max(0, c.cashPrice - c.downPayment), c.schedule, start);
+      const surcharge = c.total - c.cashPrice;
+      const sched = c.schedule.map(q => `<tr><td>${q.n}</td><td>${e(creditDay(q.due))}</td><td class="r">${money(q.amount)}</td><td class="r">${q.left === 0 ? 'Pagada' : money(q.left)}</td></tr>`).join('');
+      const pays = c.payments.length ? c.payments.map(p => `<tr><td>${e(creditDay(p.date))}${p.note ? ' · ' + e(p.note) : ''}</td><td class="r">${money(p.amount)}</td></tr>`).join('') : '<tr><td colspan="2">Sin pagos todavía</td></tr>';
+      return `${printLogoHtml('A4')}<h1>PLUGSHOP</h1>
+        <div class="c muted">${e(LEGAL_DATA.razonSocial)} · CUIT ${e(LEGAL_DATA.cuit)}<br>${e(LEGAL_DATA.domicilio)}</div><hr>
+        <div class="c"><b>COMPROBANTE DE VENTA EN CUOTAS</b>${c.status === 'cancelled' ? '<br><b>(CRÉDITO CANCELADO)</b>' : ''}</div><div class="legal">DOCUMENTO NO VÁLIDO COMO FACTURA</div>
+        <table>${kv('Crédito N°', '<b>' + Number(c.id) + '</b>')}${kv('Fecha', e(creditDay(start)))}${kv('Cliente', e(c.customerName))}${c.phone ? kv('Teléfono', e(c.phone)) : ''}${kv('Detalle', e(c.concept))}</table><hr>
+        <table>${kv('Precio de contado', money(c.cashPrice))}${kv('Recargo por financiar' + (c.surchargePct > 0 ? ' (' + e(String(c.surchargePct)) + '%)' : ''), money(surcharge))}${kv('<b>Precio total financiado</b>', '<b>' + money(c.total) + '</b>')}${c.downPayment > 0 ? kv('Anticipo', money(c.downPayment)) : ''}${kv('Saldo en cuotas', money(c.total - c.downPayment))}${kv('Cuotas', e(creditCuotasLabel(c)))}${kv('Tasa efectiva anual (calculada)', e(creditTEAText(tea)))}</table><hr>
+        <table><tr><td><b>Cuota</b></td><td><b>Vence</b></td><td class="r"><b>Importe</b></td><td class="r"><b>Falta</b></td></tr>${sched}</table><hr>
+        <div><b>Pagos recibidos</b></div><table>${pays}</table>
+        <table class="tot"><tr><td>SALDO PENDIENTE</td><td class="r">${money(c.balance)}</td></tr></table>
+        <p class="c muted" style="margin:8px 0 0">Impreso el ${e(creditDay(creditToday()))}. Conservalo junto con tus comprobantes de pago.</p>
+        <table style="margin-top:36px"><tr><td class="c" style="width:50%"><hr style="border-top:1px solid #000">Firma del cliente<br>Aclaración y DNI</td><td class="c"><hr style="border-top:1px solid #000">Por PLUGSHOP</td></tr></table>`;
+    }
+    function creditPrint(id) {
+      const c = CREDIT_LIST.find(x => x.id === id); if (!c) return;
+      printOpenWindow(printWrap('Crédito ' + c.id + ' — ' + c.customerName, creditPrintInner(c), 'A4', true));
     }
 
     async function loadInsights() {

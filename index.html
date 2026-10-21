@@ -745,7 +745,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         </li>
         <li class="step-item relative flex md:flex-col items-center md:text-center gap-4 md:gap-3 px-2 md:px-6">
           <span class="step-num shrink-0 w-12 h-12 rounded-2xl bg-brand-orange text-black font-black text-lg flex items-center justify-center">2</span>
-          <div><div class="font-bold text-white">Confirmá por WhatsApp</div><p class="text-xs text-zinc-400 mt-1 leading-relaxed">Completás tus datos y te armamos el pedido en el chat.</p></div>
+          <div><div class="font-bold text-white">Confirmá por WhatsApp</div><p class="text-xs text-zinc-400 mt-1 leading-relaxed">Completás tus datos y se abre WhatsApp con tu pedido listo. Ahí te confirmamos color, entrega y pago.</p></div>
         </li>
         <li class="step-item relative flex md:flex-col items-center md:text-center gap-4 md:gap-3 px-2 md:px-6">
           <span class="step-num shrink-0 w-12 h-12 rounded-2xl bg-brand-orange text-black font-black text-lg flex items-center justify-center">3</span>
@@ -961,7 +961,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <div>
                 <div class="flex items-baseline gap-2.5">
                   <div id="gallery-price" class="text-3xl font-black text-white font-code">$0</div>
-                  <div id="gallery-list-price" class="text-sm text-zinc-500 line-through font-semibold font-code"></div>
+                  <div id="gallery-list-price" class="text-sm text-zinc-500 font-semibold font-code"></div>
                 </div>
                 <div id="gallery-compare" class="hidden text-xs text-rose-300 font-semibold font-code mt-0.5"></div>
                 <span id="gallery-installments" class="text-xs text-emerald-400 font-medium">🔥 10% OFF abonando por Transferencia</span>
@@ -1079,6 +1079,21 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <button id="cust-access-cancel" onclick="hideAddOrderForm()" class="hidden px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold">Cancelar</button>
           </div>
           <div id="cust-access-error" class="hidden text-rose-400 text-[11px] font-semibold"></div>
+          <div class="pt-2 border-t border-zinc-800 text-[11px] text-zinc-400">¿Tenés un crédito en cuotas con PLUGSHOP? <button type="button" onclick="showCreditAccess()" class="text-brand-orange font-semibold hover:underline">Entrá con tu código</button></div>
+        </div>
+        <div id="cust-credit-access-card" class="hidden p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3">
+          <div class="font-bold text-white text-xs">Entrá a tu crédito con tu WhatsApp y tu código</div>
+          <p class="text-[11px] text-zinc-400">El código de 6 números te lo pasamos nosotros por WhatsApp cuando armamos tu crédito. Es solo tuyo.</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <input type="tel" id="cust-cr-phone" inputmode="tel" autocomplete="off" placeholder="Tu WhatsApp (ej. 381 555 1234)" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') submitCreditAccess()" />
+            <input type="text" id="cust-cr-code" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Código de 6 números" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white tracking-widest focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') submitCreditAccess()" />
+          </div>
+          <label class="flex items-start gap-2 text-[11px] text-zinc-300 cursor-pointer"><input type="checkbox" id="cust-cr-remember" class="mt-0.5" checked /><span>Mantener mi sesión iniciada en este celular <span class="text-zinc-500">(desmarcalo si el celular o la compu es de otra persona)</span></span></label>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button id="cust-cr-btn" onclick="submitCreditAccess()" class="px-4 py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold transition-all">Ver mi crédito</button>
+            <button onclick="hideCreditAccess()" class="px-4 py-2.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-semibold">Volver</button>
+          </div>
+          <div id="cust-cr-error" class="hidden text-rose-400 text-[11px] font-semibold"></div>
         </div>
 
         
@@ -1090,6 +1105,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <div id="customer-orders-list" class="space-y-4"></div>
           <div id="customer-claims-list" class="space-y-3 mt-6"></div>
           <div id="customer-notifs-list" class="hidden space-y-0"></div>
+          <div id="customer-credit-list" class="hidden space-y-4"></div>
         </div>
         <div id="cust-register-card" class="hidden p-4 rounded-xl bg-zinc-900 border border-brand-orange/30 space-y-3">
           <div id="cust-register-form" class="space-y-3">
@@ -1134,7 +1150,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 EN CAMINO
               </span>
             </div>
-            <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">PS-902</strong> · Despacho local Tucumán & YB</p>
+            <p class="text-[11px] text-zinc-400">Orden <strong id="track-modal-order-id" class="text-white font-code">—</strong> · Despacho local Tucumán & YB</p>
             <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
             <a id="track-wa-send" href="#" target="_blank" rel="noopener" class="hidden mt-2 w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold">📲 Enviar mi pedido por WhatsApp</a>
             <p id="track-wa-hint" class="hidden text-[11px] text-zinc-400 mt-1">Si WhatsApp no se abrió solo, tocá el botón verde: es el paso que confirma tu compra con nosotros.</p>
@@ -1158,7 +1174,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                 <span>DESPACHO EXPRESS EN VIVO</span>
               </span>
-              <div id="track-route-eta" class="text-base font-extrabold text-white mt-0.5 font-code">Tiempo estimado de entrega: ~35 min</div>
+              <div id="track-route-eta" class="text-base font-extrabold text-white mt-0.5 font-code">Calculando tiempo de entrega…</div>
             </div>
             <div class="text-left sm:text-right">
               <span class="text-[10px] text-zinc-500 block font-code">Entrega a cargo de</span>
@@ -1221,7 +1237,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div class="p-3 rounded-xl bg-zinc-950 border border-zinc-800 space-y-1.5 text-[11px] font-code">
               <div class="flex justify-between">
                 <span class="text-zinc-400">Total de la compra:</span>
-                <strong id="track-modal-total" class="text-brand-amber font-extrabold">$111.110</strong>
+                <strong id="track-modal-total" class="text-brand-amber font-extrabold">—</strong>
               </div>
               <div class="flex justify-between">
                 <span class="text-zinc-400">Modalidad de pago:</span>
@@ -1317,8 +1333,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       
       <div class="p-5 border-b border-zinc-800 flex items-center justify-between bg-black">
         <div>
-          <h3 class="text-base font-bold text-white">Finalizar Orden de Compra</h3>
-          <p class="text-[11px] text-zinc-400 font-code">Sin comisiones de pasarela · Colores confirmados y entrega en el día</p>
+          <h3 class="text-base font-bold text-white">Confirmá tu pedido</h3>
+          <p class="text-[11px] text-zinc-400 leading-snug">Pagás por transferencia (con descuento) o en efectivo al recibir. Te atendemos por WhatsApp de lunes a sábado, de 9:00 a 20:30.</p>
         </div>
         <button onclick="closeCheckoutModal()" aria-label="Cerrar" class="w-10 h-10 -mr-2 -mt-1 shrink-0 flex items-center justify-center text-lg text-zinc-400 hover:text-white">✕</button>
       </div>
@@ -1592,6 +1608,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         ADVISOR_TIPS: '/api/advisor-tips',     // GET público: consejos activos del asesor; admin: GET /all y PUT (reemplaza la lista)
         PROMOTIONS: '/api/promotions',         // GET público: campañas vigentes; admin: /all, POST/PUT/DELETE
         COUPONS: '/api/coupons',               // POST /validate (público); admin: GET/POST/PUT/DELETE
+        CREDITS: '/api/credits',               // GET / POST / PUT /:id / POST /:id/payments / DELETE /:id/payments/:pid / POST /:id/cancel (solo admin): venta en cuotas
         INSIGHTS: '/api/insights',             // POST /search y /view (público, anónimo) / GET y DELETE (equipo): qué buscan los clientes
         BACKUP: '/api/backup',                 // GET (solo admin): copia de seguridad completa
         AUDIT: '/api/audit',                   // GET (solo admin): registro de quién cambió qué
@@ -2026,88 +2043,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       storeZone: 'Tucumán'
     };
 
-    const DEFAULT_ORDERS = [
-      {
-        id: 'PS-902',
-        customer: 'Sofía C.',
-        phone: '381 555 4912',
-        address: 'Yerba Buena (Av. Aconquija)',
-        items: '1x Auricular Pro X1 (Color: Negro Mate)',
-        deliveryType: 'Yerba Buena Express',
-        paymentMethod: 'Transferencia Bancaria (10% OFF)',
-        isBancarizado: true,
-        discountApplied: 11990,
-        total: 111110,
-        status: 'Despachado',
-        date: '2026-09-24',
-        time: 'Hace 35 min'
-      },
-      {
-        id: 'PS-903',
-        customer: 'Lucas M.',
-        phone: '381 444 8821',
-        address: 'San Miguel de Tucumán (Barrio Norte)',
-        items: '1x Teclado MK-68 (Color: Negro RGB)',
-        deliveryType: 'San Miguel de Tucumán',
-        paymentMethod: 'Efectivo en Mano',
-        isBancarizado: false,
-        discountApplied: 0,
-        total: 132200,
-        status: 'En preparación',
-        date: '2026-09-24',
-        time: 'Hace 1 hora'
-      },
-      {
-        id: 'PS-904',
-        customer: 'Juan González',
-        phone: '381 555 1234',
-        address: 'Punto de Retiro Coordinado',
-        items: '1x Cargador USB-C 45W (Color: Blanco)',
-        deliveryType: 'Punto de Retiro',
-        paymentMethod: 'Transferencia Bancaria (10% OFF)',
-        isBancarizado: true,
-        discountApplied: 3290,
-        total: 29610,
-        status: 'Entregado',
-        date: '2026-09-24',
-        time: 'Hoy 11:20'
-      }
-    ];
+    const DEFAULT_ORDERS = []; // sin pedidos de ejemplo: los pedidos reales vienen del servidor
 
-    const DEFAULT_CUSTOMERS = [
-      {
-        name: 'Sofía C.',
-        phone: '381 555 4912',
-        zone: 'Yerba Buena',
-        ordersCount: 2,
-        totalSpent: 198000,
-        status: 'Garantía Vigente'
-      },
-      {
-        name: 'Lucas M.',
-        phone: '381 444 8821',
-        zone: 'San Miguel de Tucumán (Barrio Norte)',
-        ordersCount: 1,
-        totalSpent: 132200,
-        status: 'Garantía Vigente'
-      },
-      {
-        name: 'Juan González',
-        phone: '381 555 1234',
-        zone: 'San Miguel de Tucumán (Centro)',
-        ordersCount: 3,
-        totalSpent: 215700,
-        status: 'Garantía Vigente'
-      },
-      {
-        name: 'Camila Villafañe',
-        phone: '381 500 0045',
-        zone: 'Yerba Buena',
-        ordersCount: 1,
-        totalSpent: 89900,
-        status: 'Garantía Vigente'
-      }
-    ];
+    const DEFAULT_CUSTOMERS = []; // sin clientes de ejemplo: los clientes reales vienen del servidor
 
     let PRODUCTS = loadStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
     if (Array.isArray(PRODUCTS)) PRODUCTS = PRODUCTS.map(sanitizeProduct); else PRODUCTS = [...DEFAULT_PRODUCTS];
@@ -2268,7 +2206,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div>
               <div class="flex items-baseline gap-2">
                 <span class="text-2xl sm:text-3xl font-black text-white font-code">${formatARS(eff)}</span>
-                <span class="text-xs text-zinc-500 line-through font-semibold font-code">${formatARS(chosen.price)}</span>
+                <span class="text-xs text-zinc-500 font-semibold font-code">Efectivo ${formatARS(chosen.price)}</span>
               </div>
               <span class="block text-[11px] text-emerald-400 font-medium">Con ${escapeHtml(String(disc))}% OFF por transferencia</span>
             </div>
@@ -2446,7 +2384,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               ${offPct(product) ? `<div class="text-[10px] sm:text-[11px] text-rose-300 line-through font-semibold">Antes ${formatARS(product.compareAtPrice)}</div>` : ''}
               <div class="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
                 <span class="text-base sm:text-xl font-black text-white leading-none">${formatARS(transferPrice)}</span>
-                <span class="text-[10px] sm:text-[11px] text-zinc-500 line-through">${formatARS(product.price)}</span>
+                <span class="text-[10px] sm:text-[11px] text-zinc-500">Efectivo ${formatARS(product.price)}</span>
               </div>
               <div class="mt-1 text-[10px] sm:text-[11px] text-emerald-400 font-medium">${discountPct}% OFF <span class="hidden sm:inline">por </span>transferencia</div>
               <button
@@ -2509,7 +2447,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const transferPrice = Math.round(prod.price * (1 - (discountPct / 100)));
 
       document.getElementById('gallery-price').textContent = formatARS(transferPrice);
-      document.getElementById('gallery-list-price').textContent = formatARS(prod.price);
+      document.getElementById('gallery-list-price').textContent = 'Efectivo ' + formatARS(prod.price);
       const galCmp = document.getElementById('gallery-compare');
       if (galCmp) {
         galCmp.textContent = offPct(prod) ? `🏷️ Antes ${formatARS(prod.compareAtPrice)} · -${offPct(prod)}% de rebaja` : '';
@@ -2969,7 +2907,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
 
     function promptQuickTracking() {
-      const input = prompt('Ingresá el número de orden para rastrear (ej. PS-902):');
+      const input = prompt('Ingresá el número de orden para rastrear (ej. PS-AB12CD34):');
       if (!input) return;
       const cleanId = input.trim().toUpperCase();
       openOrderTrackingModal(cleanId);
@@ -3119,9 +3057,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     let localOwnedIds = [];
     let addingOrder = false;
     let myOrders = [];
+    let myCredits = [], myCreditHas = false, myCreditCodes = [], creditAccessing = false;
 
     function walletInit() {
-      walletToken = ''; walletRemembered = false;
+      walletToken = ''; walletRemembered = false; myCreditsInit();
       try { localStorage.removeItem(NOTIF_PHONE_KEY); } catch (e) { /* versión vieja: ya no se guarda el teléfono suelto */ }
       try { const t = sessionStorage.getItem(WALLET_KEY); if (t) { walletToken = t; return; } } catch (e) {}
       const st = loadStorage(WALLET_KEY, null);
@@ -3140,7 +3079,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
     function walletHeaders() { return walletToken && walletToken !== 'local' ? { Authorization: 'Bearer ' + walletToken } : {}; }
     function walletClear() {
-      walletToken = ''; walletRemembered = false; localOwnedIds = [];
+      walletToken = ''; walletRemembered = false; localOwnedIds = []; myCreditsClear();
       try { sessionStorage.removeItem(WALLET_KEY); } catch (e) {}
       try { localStorage.removeItem(WALLET_KEY); } catch (e) {}
       try { syncBellVisibility(); } catch (e) {}
@@ -3155,7 +3094,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     function renderCustomerShell() {
       const show = !walletToken || addingOrder;
       const set = (id, hidden) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', hidden); };
-      set('cust-access-card', !show);
+      set('cust-access-card', !show || creditAccessing);
+      set('cust-credit-access-card', !(creditAccessing && !walletToken));
       set('cust-access-cancel', !(walletToken && addingOrder));
       set('cust-session-bar', !walletToken);
       const note = document.getElementById('cust-session-note');
@@ -3174,7 +3114,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
     function customerLogout() {
       walletClear();
-      myOrders = []; myClaims = []; addingOrder = false; custTab = 'orders';
+      myOrders = []; myClaims = []; addingOrder = false; custTab = 'orders'; creditAccessing = false;
       notifState = { items: [], announcements: notifState.announcements };
       // "No soy yo": también se borra lo que el celular recordaba de la persona.
       try { localStorage.removeItem(PROFILE_KEY); } catch (e) {}
@@ -3218,6 +3158,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       loadNotifications();
       await loadMyClaims();
       renderMyOrders();
+      loadCreditStatus();
     }
 
     // Refresca "Mis pedidos" con el pase (la usan también las acciones: subir comprobante, cancelar, etc.)
@@ -3242,6 +3183,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       }
       loadMyClaims();
       renderMyOrders();
+      loadCreditStatus();
     }
 
     function refundHtml(order) {
@@ -3258,9 +3200,117 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       </div>`;
     }
 
+    // ---- "Mi crédito": solo aparece si el dueño le cargó un crédito a este WhatsApp y lo dejó visible ----
+    // Además del pase de Mi Cuenta hace falta el código del crédito (lo pasa el dueño por WhatsApp).
+    const MYCREDIT_KEY = 'PLUGSHOP_CREDIT_CODES';
+    function myCreditsInit() {
+      myCreditCodes = [];
+      try {
+        const a = JSON.parse(sessionStorage.getItem(MYCREDIT_KEY) || localStorage.getItem(MYCREDIT_KEY) || '[]');
+        if (Array.isArray(a)) myCreditCodes = a.filter(x => /^\d{6}$/.test(x)).slice(0, 5);
+      } catch (e) { /* sin almacenamiento */ }
+    }
+    function myCreditsSave() {
+      const v = JSON.stringify(myCreditCodes.slice(0, 5));
+      try {
+        if (walletRemembered) { localStorage.setItem(MYCREDIT_KEY, v); sessionStorage.removeItem(MYCREDIT_KEY); } else { sessionStorage.setItem(MYCREDIT_KEY, v); }
+      } catch (e) { /* queda solo en memoria */ }
+    }
+    function myCreditsClear() {
+      myCreditCodes = []; myCredits = []; myCreditHas = false;
+      try { sessionStorage.removeItem(MYCREDIT_KEY); localStorage.removeItem(MYCREDIT_KEY); } catch (e) {}
+    }
+    function creditBoxError(id, msg) { const el = document.getElementById(id); if (!el) return; el.textContent = msg || ''; el.classList.toggle('hidden', !msg); }
+    // ¿Tiene un crédito visible? Si sí, aparece el menú "Mi crédito".
+    async function loadCreditStatus() {
+      if (!walletToken || walletToken === 'local' || !isBackendConnected()) { myCreditHas = false; renderCustDashboard(); return; }
+      const res = await apiRequest('CREDITS', { headers: walletHeaders() }, '/mine/status');
+      myCreditHas = !!(res && res.has === true);
+      if (!myCreditHas) { myCredits = []; if (custTab === 'credit') custTab = 'orders'; }
+      else if (!myOrders.length && custTab === 'orders') custTab = 'credit'; // quien solo tiene crédito entra directo a "Mi crédito"
+      renderCustDashboard();
+      if (myCreditHas && myCreditCodes.length && !myCredits.length) await loadMyCredits(true);
+      renderMyCredit();
+    }
+    async function loadMyCredits(silent) {
+      if (!myCreditCodes.length) return;
+      const res = await apiRequest('CREDITS', { method: 'POST', headers: walletHeaders(), body: JSON.stringify({ codes: myCreditCodes }) }, '/mine');
+      if (res && res.success && Array.isArray(res.credits)) myCredits = res.credits;
+      else if (res && res.success === false && !silent) creditBoxError('cust-credit-error', res.error);
+      else if (res && res.success === false) { myCreditCodes = []; myCreditsSave(); }
+      renderMyCredit(); renderCustDashboard();
+    }
+    async function myCreditUnlock() {
+      const code = String((document.getElementById('cust-credit-code') || {}).value || '').replace(/\D/g, '');
+      creditBoxError('cust-credit-error', '');
+      if (code.length !== 6) return creditBoxError('cust-credit-error', 'Escribí el código de 6 números que te pasamos.');
+      const res = await apiRequest('CREDITS', { method: 'POST', headers: walletHeaders(), body: JSON.stringify({ codes: [...new Set([...myCreditCodes, code])] }) }, '/mine');
+      if (!res) return creditBoxError('cust-credit-error', 'No pudimos conectar con el servidor. Probá de nuevo en un momento.');
+      if (res.success === false || !Array.isArray(res.credits)) return creditBoxError('cust-credit-error', res.error || 'Ese código no es correcto.');
+      myCreditCodes = [...new Set([...myCreditCodes, code])].slice(0, 5); myCreditsSave(); myCredits = res.credits;
+      renderMyCredit(); renderCustDashboard();
+    }
+    function showCreditAccess() { creditAccessing = true; creditBoxError('cust-cr-error', ''); renderCustomerShell(); const p = document.getElementById('cust-cr-phone'); if (p) p.focus(); }
+    function hideCreditAccess() { creditAccessing = false; renderCustomerShell(); }
+    // Para quien nunca compró en la tienda: WhatsApp + código.
+    async function submitCreditAccess() {
+      const phone = (document.getElementById('cust-cr-phone').value || '').trim();
+      const code = (document.getElementById('cust-cr-code').value || '').replace(/\D/g, '');
+      const remember = !!(document.getElementById('cust-cr-remember') || {}).checked;
+      creditBoxError('cust-cr-error', '');
+      if (!isValidArPhone(phone)) return creditBoxError('cust-cr-error', 'Escribí tu WhatsApp completo, con característica (ej. 381 555 1234).');
+      if (code.length !== 6) return creditBoxError('cust-cr-error', 'El código tiene 6 números.');
+      if (!isBackendConnected()) return creditBoxError('cust-cr-error', 'Tu crédito se ve cuando la tienda está conectada. Probá de nuevo en un momento.');
+      const btn = document.getElementById('cust-cr-btn'); if (btn) btn.disabled = true;
+      const res = await apiRequest('CREDITS', { method: 'POST', headers: walletHeaders(), body: JSON.stringify({ phone, code }) }, '/access');
+      if (btn) btn.disabled = false;
+      if (!res) return creditBoxError('cust-cr-error', 'No pudimos conectar con el servidor. Si recién se despierta puede tardar un minuto: probá de nuevo.');
+      if (res.success === false || !res.wallet) return creditBoxError('cust-cr-error', res.error || 'No coinciden el WhatsApp y el código.');
+      walletSet(res.wallet, remember);
+      myCreditCodes = [...new Set([...myCreditCodes, code])].slice(0, 5); myCreditsSave();
+      myCredits = res.credits; myCreditHas = true; custTab = 'credit'; creditAccessing = false;
+      document.getElementById('cust-cr-phone').value = ''; document.getElementById('cust-cr-code').value = '';
+      renderCustomerShell(); renderMyOrders(); renderMyCredit();
+      loadNotifications();
+    }
+    function renderMyCredit() {
+      const box = document.getElementById('customer-credit-list');
+      if (!box || custTab !== 'credit') return;
+      if (!myCredits.length) {
+        box.innerHTML = `<div class="p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3">
+          <div class="font-bold text-white text-sm">Tenés un crédito en cuotas con PLUGSHOP</div>
+          <p class="text-xs text-zinc-400">Para verlo, poné el código de 6 números que te pasamos por WhatsApp. Es solo tuyo y no lo compartas.</p>
+          <div class="flex gap-2 flex-wrap"><input type="text" id="cust-credit-code" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="Código de 6 números" class="bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white tracking-widest focus:outline-none focus:border-brand-orange" onkeydown="if(event.key==='Enter') myCreditUnlock()" />
+          <button onclick="myCreditUnlock()" class="px-4 py-2.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold">Ver mi crédito</button></div>
+          <div id="cust-credit-error" class="hidden text-rose-400 text-[11px] font-semibold"></div></div>`;
+        return;
+      }
+      box.innerHTML = myCredits.map(myCreditCardHtml).join('');
+    }
+    function myCreditCardHtml(c) {
+      const e = escapeHtml, pct = c.total > 0 ? Math.min(100, Math.round(c.paid / c.total * 100)) : 0;
+      const late = c.status === 'active' && c.overdueCount > 0;
+      const sched = c.schedule.map(q => {
+        const st = q.left === 0 ? '<span class="text-emerald-400">✓ Pagada</span>' : (q.late ? '<span class="text-rose-400 font-bold">Vencida</span>' : (q.paid > 0 ? '<span class="text-amber-300">Pago parcial</span>' : '<span class="text-zinc-400">Pendiente</span>'));
+        return `<tr><td class="py-1.5 px-2">${q.n}</td><td class="py-1.5 px-2">${e(creditDay(q.due))}</td><td class="py-1.5 px-2 text-right">${formatARS(q.amount)}</td><td class="py-1.5 px-2">${st}</td></tr>`;
+      }).join('');
+      const pays = c.payments.length ? c.payments.map(p => `<li class="flex justify-between gap-2 py-1"><span>${e(creditDay(p.date))}</span><b>${formatARS(p.amount)}</b></li>`).join('') : '<li class="text-zinc-500 py-1">Todavía no hay pagos.</li>';
+      const msg = encodeURIComponent('Hola PLUGSHOP! Consulto por mi crédito en cuotas (' + c.concept + ').');
+      return `<div class="p-4 sm:p-5 rounded-2xl bg-zinc-900 border ${late ? 'border-rose-800/70' : 'border-zinc-800'} space-y-4">
+        <div class="flex flex-wrap items-start justify-between gap-2"><div class="min-w-0"><div class="font-bold text-white text-base">${e(c.concept)}</div><div class="text-xs text-zinc-400">${e(creditCuotasLabel(c))} · contado ${formatARS(c.cashPrice)}${c.surchargePct > 0 ? ' + recargo ' + e(String(c.surchargePct)) + '%' : ''} = total ${formatARS(c.total)}${c.downPayment > 0 ? ' · anticipo ' + formatARS(c.downPayment) : ''}</div></div>
+          ${c.status === 'paid' ? '<span class="px-2 py-0.5 rounded bg-emerald-950/60 text-emerald-300 text-[10px] font-bold">PAGADO ✓</span>' : (late ? '<span class="px-2 py-0.5 rounded bg-rose-950/70 text-rose-300 text-[10px] font-bold">CUOTAS VENCIDAS</span>' : '<span class="px-2 py-0.5 rounded bg-sky-950/60 text-sky-300 text-[10px] font-bold">AL DÍA</span>')}</div>
+        <div><div class="h-2.5 rounded-full bg-zinc-800 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Pagado"><div class="h-full bg-emerald-500" style="width:${pct}%"></div></div>
+          <div class="mt-1.5 flex flex-wrap justify-between gap-x-4 text-xs text-zinc-400"><span>Pagaste ${formatARS(c.paid)} de ${formatARS(c.total)}</span><span>Te falta <b class="text-white">${formatARS(c.balance)}</b></span></div></div>
+        ${c.status === 'paid' ? '<div class="p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-xs text-emerald-300">¡Terminaste de pagar tu crédito! Gracias por tu confianza.</div>' : ''}
+        ${late ? `<div class="p-3 rounded-lg bg-rose-950/40 border border-rose-800/60 text-xs text-rose-200">Tenés ${c.overdueCount} ${c.overdueCount === 1 ? 'cuota vencida' : 'cuotas vencidas'} por ${formatARS(c.overdueAmount)}. Escribinos y lo ponemos al día.</div>` : (c.nextDue ? `<div class="text-xs text-zinc-300">Próxima cuota (${c.nextDue.n} de ${c.installments}): <b class="text-white">${formatARS(c.nextDue.left)}</b> el ${e(creditDay(c.nextDue.due))}</div>` : '')}
+        <div class="overflow-x-auto"><table class="w-full text-left text-xs text-zinc-300"><thead class="text-zinc-500 uppercase text-[10px]"><tr><th class="py-1 px-2">N°</th><th class="py-1 px-2">Vence</th><th class="py-1 px-2 text-right">Cuota</th><th class="py-1 px-2">Estado</th></tr></thead><tbody class="divide-y divide-zinc-800/60">${sched}</tbody></table></div>
+        <div class="text-xs text-zinc-300"><div class="font-semibold text-zinc-200 mb-1">Tus pagos</div><ul class="divide-y divide-zinc-800/60">${pays}</ul></div>
+        <a href="https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${msg}" target="_blank" rel="noopener noreferrer" class="inline-block text-emerald-400 font-semibold text-xs hover:underline">Consultar por WhatsApp ↗</a></div>`;
+    }
+
     // ---- Mini panel del cliente: resumen + pestañas (Mis pedidos / Cancelados / Reclamos / Avisos) ----
     let custTab = 'orders';
-    function setCustTab(t) { custTab = t; renderMyOrders(); renderMyClaims(); renderCustNotifs(); renderCustDashboard(); }
+    function setCustTab(t) { custTab = t; renderMyOrders(); renderMyClaims(); renderCustNotifs(); renderMyCredit(); renderCustDashboard(); if (t === 'credit' && myCreditHas && myCreditCodes.length && !myCredits.length) loadMyCredits(); }
     function renderCustDashboard() {
       const dash = document.getElementById('cust-dashboard');
       if (!dash) return;
@@ -3286,13 +3336,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const item = (id, icon, label, n, hot) => `<button type="button" onclick="setCustTab('${id}')" aria-current="${custTab === id ? 'page' : 'false'}" class="shrink-0 flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg text-sm font-semibold text-left transition-colors ${custTab === id ? 'bg-brand-orange/15 text-brand-amber ring-1 ring-brand-orange/50' : 'text-zinc-300 hover:bg-zinc-800'}">
           <span aria-hidden="true">${icon}</span><span class="flex-1 whitespace-nowrap">${label}</span>${n ? `<span class="min-w-[22px] text-center px-1.5 py-0.5 rounded-full text-[11px] font-bold ${hot ? 'bg-brand-orange text-black' : 'bg-zinc-800 text-zinc-300'}">${n}</span>` : ''}</button>`;
       document.getElementById('cust-nav').innerHTML =
-        item('orders', '🛍️', 'Mis pedidos', myOrders.length) + item('cancelled', '✕', 'Cancelados', cancelled.length) + item('claims', '🛡️', 'Reclamos', myClaims.length, openClaims > 0) + item('notifs', '🔔', 'Avisos', unread, unread > 0);
-      const titles = { orders: 'Mis pedidos', cancelled: 'Pedidos cancelados y reintegros', claims: 'Mis reclamos', notifs: 'Avisos de mis pedidos' };
+        (myCreditHas ? item('credit', '🤝', 'Mi crédito', myCredits.some(c => c.status === 'active' && c.overdueCount > 0) ? '!' : 0, true) : '') + item('orders', '🛍️', 'Mis pedidos', myOrders.length) + item('cancelled', '✕', 'Cancelados', cancelled.length) + item('claims', '🛡️', 'Reclamos', myClaims.length, openClaims > 0) + item('notifs', '🔔', 'Avisos', unread, unread > 0);
+      const titles = { orders: 'Mis pedidos', cancelled: 'Pedidos cancelados y reintegros', claims: 'Mis reclamos', notifs: 'Avisos de mis pedidos', credit: 'Mi crédito' };
       const h = document.getElementById('cust-section-title'); if (h) h.textContent = titles[custTab] || titles.orders;
       const show = (id, on) => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', !on); };
       show('customer-orders-list', custTab === 'orders' || custTab === 'cancelled');
       show('customer-claims-list', custTab === 'orders' || custTab === 'claims');
       show('customer-notifs-list', custTab === 'notifs');
+      show('customer-credit-list', custTab === 'credit');
     }
     function renderCustNotifs() {
       const box = document.getElementById('customer-notifs-list');
@@ -4691,6 +4742,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       };
       reader.readAsDataURL(file);
     }
+    function creditDay(iso) { const p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '—'; }
+    // Comprobante / acuerdo para imprimir: precio de contado, recargo, total, cuotas con fechas, pagos y saldo.
+    function creditCuotasLabel(c) { const n = c.installments; return n === 1 ? '1 cuota' : n + ' cuotas ' + ({ weekly: 'semanales', biweekly: 'quincenales', monthly: 'mensuales' }[c.frequency] || ''); }
 
     // ==========================================
     // 10. ASESOR PLUG (motor de recomendación)
@@ -5113,7 +5167,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <div>
                 <div class="flex items-baseline gap-2">
                   <span class="text-lg font-black text-white">${formatARS(o.eff)}</span>
-                  <span class="text-[10px] text-zinc-500 line-through font-semibold">${formatARS(p.price)}</span>
+                  <span class="text-[10px] text-zinc-500 font-semibold">Efectivo ${formatARS(p.price)}</span>
                 </div>
                 <span class="text-[10px] text-emerald-400 font-bold">${escapeHtml(String(discPct))}% OFF con Transferencia</span>
               </div>
