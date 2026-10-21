@@ -2034,16 +2034,22 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div id="credits-form" class="hidden p-4 rounded-2xl bg-zinc-950 border border-zinc-700 space-y-3">
               <div class="text-sm font-bold text-white">Crédito nuevo</div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label class="text-[11px] text-zinc-300">Nombre de la persona<input id="cr-name" type="text" maxlength="80" autocomplete="off" oninput="creditHistory()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
-                <label class="text-[11px] text-zinc-300">WhatsApp (para los recordatorios)<input id="cr-phone" type="tel" maxlength="40" placeholder="381 555 1234" autocomplete="off" oninput="creditHistory()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">Nombre y apellido *<input id="cr-name" type="text" maxlength="80" autocomplete="off" oninput="creditHistory()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">WhatsApp * (para los recordatorios)<input id="cr-phone" type="tel" maxlength="40" placeholder="381 555 1234" autocomplete="off" oninput="creditHistory()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">DNI *<input id="cr-dni" type="text" inputmode="numeric" maxlength="11" placeholder="Sin puntos" autocomplete="off" oninput="creditHistory()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300">Correo (opcional)<input id="cr-email" type="email" maxlength="120" placeholder="nombre@correo.com" autocomplete="off" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+                <label class="text-[11px] text-zinc-300 sm:col-span-2">Dirección *<input id="cr-address" type="text" maxlength="200" placeholder="Calle, número, barrio y localidad" autocomplete="off" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
                 <div id="cr-history" class="sm:col-span-2 text-[11px] empty:hidden"></div>
                 <label class="text-[11px] text-zinc-300 sm:col-span-2">Qué se lleva<input id="cr-concept" type="text" maxlength="200" placeholder="Ej: Parlante JBL + cargador" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
                 <label class="text-[11px] text-zinc-300">Precio de contado ($)<input id="cr-cash" type="number" inputmode="numeric" min="1" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
                 <label class="text-[11px] text-zinc-300">Recargo por financiar (%) — 0 si no cobrás recargo<input id="cr-pct" type="number" inputmode="decimal" min="0" max="300" step="0.5" placeholder="Ej: 20" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
                 <label class="text-[11px] text-zinc-300">Anticipo que deja hoy ($, opcional)<input id="cr-down" type="number" inputmode="numeric" min="0" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
-                <label class="text-[11px] text-zinc-300">Cantidad de cuotas<input id="cr-n" type="number" inputmode="numeric" min="1" max="36" value="3" oninput="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
-                <label class="text-[11px] text-zinc-300">Cada cuánto paga
-                  <select id="cr-freq" onchange="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white"><option value="monthly">Todos los meses</option><option value="biweekly">Cada 15 días</option><option value="weekly">Todas las semanas</option></select></label>
+                <div class="sm:col-span-2 text-[11px] text-zinc-300">En cuántas cuotas
+                  <div id="cr-n-chips" class="mt-1 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Cantidad de cuotas"></div>
+                  <label class="mt-2 flex items-center gap-2 text-zinc-400">Otra cantidad (1 a 36): <input id="cr-n" type="number" inputmode="numeric" min="1" max="36" value="3" oninput="creditChips(); creditPreview()" class="w-20 bg-zinc-900 border border-zinc-700 rounded-lg p-1.5 text-xs text-white" /></label></div>
+                <div class="sm:col-span-2 text-[11px] text-zinc-300">Cada cuánto paga
+                  <input id="cr-freq" type="hidden" value="monthly" />
+                  <div id="cr-freq-chips" class="mt-1 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Cada cuánto paga"></div></div>
                 <label class="text-[11px] text-zinc-300">Vence la primera cuota<input id="cr-first" type="date" onchange="creditPreview()" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
                 <label class="text-[11px] text-zinc-300 sm:col-span-2">Nota (opcional, solo la ves vos)<input id="cr-note" type="text" maxlength="300" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
                 <label class="flex items-start gap-2 text-[11px] text-zinc-300 sm:col-span-2 cursor-pointer"><input id="cr-show" type="checkbox" checked class="mt-0.5 w-4 h-4 accent-orange-500" /><span>Mostrarle su crédito al cliente: en la tienda le aparece "Mi crédito" (con sus cuotas y lo que falta) y entra con un código que le pasás vos. Lo podés apagar cuando quieras.</span></label>
@@ -3429,7 +3435,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       if (isImageUrl(value)) {
         container.innerHTML = `
-          <img src="${value}" alt="Preview" class="w-full h-full object-cover" />
+          <img src="${escapeHtml(value)}" alt="Preview" class="w-full h-full object-cover" />
           <button type="button" onclick="clearPhotoSlot('${inputId}', '${containerId}', '${statusBadgeId}')" class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/80 hover:bg-rose-900 text-white text-[10px] flex items-center justify-center transition-colors" title="Quitar foto">✕</button>
         `;
       } else {
@@ -7324,9 +7330,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       SEL_ORDERS.clear(); refreshAdminUI();
       alert(`Listo: ${ok} de ${list.length} actualizado(s).${fails.length ? '\n\nNo se pudieron:\n' + fails.join('\n') : ''}`);
     }
+    // Excel/Sheets ejecutan como fórmula cualquier celda que empiece con = + - @ : se les antepone un apóstrofe.
+    function csvSafe(s) {
+      const t = String(s == null ? '' : s);
+      return /^[=+\-@\t\r]/.test(t) ? "'" + t : t;
+    }
     function exportSelectedOrders() {
       const list = selectedOrders(); if (!list.length) return;
-      const q = s => `"${String(s == null ? '' : s).replace(/"/g, '""')}"`;
+      const q = s => `"${csvSafe(s).replace(/"/g, '""')}"`;
       let csv = 'Pedido,Fecha,Cliente,Telefono,Direccion,Items,Pago,Total,Estado,Repartidor\n';
       list.forEach(o => { csv += [q(o.id), q(o.date), q(o.customer), q(o.phone), q(o.address), q(o.items), q(o.paymentMethod), o.total, q(o.status), q(o.courierName)].join(',') + '\n'; });
       const a = document.createElement('a');
@@ -7677,9 +7688,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <td class="py-3 px-4 font-bold text-brand-amber">${formatARS(custStats(c).spent)}</td>
           <td class="py-3 px-4 text-right font-sans">
             <button onclick="openCustomerFicha('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-zinc-100 hover:bg-white text-black text-[10px] font-bold">📋 Ficha</button>
-            <button onclick="window.open(waLink('${c.phone}'), '_blank')" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-semibold">
+            <a href="${escapeHtml(waLink(c.phone))}" target="_blank" rel="noopener noreferrer" class="inline-block px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] font-semibold">
               WhatsApp ↗
-            </button>
+            </a>
             ${can('customers.manage') ? `<button onclick="editCustomer('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[10px] font-semibold">✏️ Editar</button>` : ''}
             ${currentStaffSession.role === 'admin' ? `<button onclick="deleteCustomer('${normalizeArPhone(c.phone)}')" class="px-2 py-1 rounded bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 text-[10px] font-semibold">🗑️ Borrar</button>` : ''}
           </td>
@@ -8325,7 +8336,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div class="text-[11px] text-zinc-400 mb-1">Papel de esta impresora · ${escapeHtml(PRINT_PAPERS[cfg.paper].hint)}</div>
             <div class="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Papel">${printPaperChips(cfg, 'printSetPaper')}</div>
           </div>
-          <iframe id="print-preview" title="Vista previa" class="w-full h-72 rounded-xl bg-white border border-zinc-700" srcdoc="${escapeHtml(printDocHtml(order, kind, cfg, false))}"></iframe>
+          <iframe id="print-preview" sandbox title="Vista previa" class="w-full h-72 rounded-xl bg-white border border-zinc-700" srcdoc="${escapeHtml(printDocHtml(order, kind, cfg, false))}"></iframe>
           <details id="print-opts" ${PRINT_STATE.opts ? 'open' : ''} ontoggle="PRINT_STATE.opts = this.open" class="rounded-xl border border-zinc-800 bg-zinc-900/60 p-3 space-y-3">
             <summary class="cursor-pointer text-xs font-bold text-zinc-200">✏️ Editar qué sale ${kind === 'receipt' ? 'en el comprobante' : 'en la etiqueta'}</summary>
             <div class="space-y-3 pt-2">${printOptsHtml(kind, cfg)}</div>
@@ -8717,15 +8728,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       ADMIN_ORDERS.forEach(o => {
         const date = o.date || '2026-09-24';
         const id = o.id;
-        const cust = `"${(o.customer || '').replace(/"/g, '""')}"`;
-        const phone = `"${(o.phone || '').replace(/"/g, '""')}"`;
-        const zone = `"${(o.deliveryType || '').replace(/"/g, '""')}"`;
-        const method = `"${(o.paymentMethod || 'Transferencia').replace(/"/g, '""')}"`;
+        const cust = `"${csvSafe(o.customer).replace(/"/g, '""')}"`;
+        const phone = `"${csvSafe(o.phone).replace(/"/g, '""')}"`;
+        const zone = `"${csvSafe(o.deliveryType).replace(/"/g, '""')}"`;
+        const method = `"${csvSafe(o.paymentMethod || 'Transferencia').replace(/"/g, '""')}"`;
         const isBank = o.isBancarizado || (o.paymentMethod && o.paymentMethod.includes('Transferencia')) ? 'SI' : 'NO';
         const disc = o.discountApplied || 0;
-        const items = `"${(o.items || '').replace(/"/g, '""')}"`;
+        const items = `"${csvSafe(o.items).replace(/"/g, '""')}"`;
         const total = o.total;
-        const status = `"${(o.status || '').replace(/"/g, '""')}"`;
+        const status = `"${csvSafe(o.status).replace(/"/g, '""')}"`;
 
         csv += `${date},${id},${cust},${phone},${zone},${method},${isBank},${disc},${items},${total},${status}\n`;
       });
@@ -9383,8 +9394,20 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
     function creditVals() {
       const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
-      return { name: g('cr-name').trim(), phone: g('cr-phone').trim(), concept: g('cr-concept').trim(), cash: g('cr-cash'), pct: g('cr-pct'), down: g('cr-down'), n: g('cr-n'), freq: g('cr-freq') || 'monthly', first: g('cr-first'), note: g('cr-note').trim(), show: !!(document.getElementById('cr-show') || { checked: true }).checked };
+      return { name: g('cr-name').trim(), phone: g('cr-phone').trim(), dni: g('cr-dni').replace(/\D/g, ''), address: g('cr-address').trim(), email: g('cr-email').trim(), concept: g('cr-concept').trim(), cash: g('cr-cash'), pct: g('cr-pct'), down: g('cr-down'), n: g('cr-n'), freq: g('cr-freq') || 'monthly', first: g('cr-first'), note: g('cr-note').trim(), show: !!(document.getElementById('cr-show') || { checked: true }).checked };
     }
+    // Tiras de botones para elegir las cuotas y cada cuánto se paga (se ven todas las opciones juntas).
+    const CREDIT_N_OPTS = [1, 2, 3, 4, 5, 6, 9, 12, 18, 24];
+    const CREDIT_FREQ_OPTS = [['weekly', 'Todas las semanas'], ['biweekly', 'Cada 15 días'], ['monthly', 'Todos los meses']];
+    function creditChips() {
+      const chip = (on, label, fn) => `<button type="button" role="radio" aria-checked="${on}" onclick="${fn}" class="px-3 py-2 rounded-lg border text-xs font-bold ${on ? 'bg-brand-orange/15 border-brand-orange text-brand-orange' : 'bg-zinc-900 border-zinc-700 text-zinc-300 hover:bg-zinc-800'}">${label}</button>`;
+      const n = Math.round(Number((document.getElementById('cr-n') || {}).value)), f = (document.getElementById('cr-freq') || {}).value || 'monthly';
+      const a = document.getElementById('cr-n-chips'), b = document.getElementById('cr-freq-chips');
+      if (a) a.innerHTML = CREDIT_N_OPTS.map(k => chip(k === n, k === 1 ? '1 pago' : k + ' cuotas', 'creditPickN(' + k + ')')).join('');
+      if (b) b.innerHTML = CREDIT_FREQ_OPTS.map(([k, lb]) => chip(k === f, lb, "creditPickFreq('" + k + "')")).join('');
+    }
+    function creditPickN(k) { const el = document.getElementById('cr-n'); if (el) el.value = String(k); creditChips(); creditPreview(); }
+    function creditPickFreq(k) { const el = document.getElementById('cr-freq'); if (el) el.value = k; creditChips(); creditPreview(); }
     function creditPreview() {
       const box = document.getElementById('cr-preview'); if (!box) return;
       const v = creditVals(), c = creditCalc(v);
@@ -9398,14 +9421,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         + (tea !== null ? `<div class="text-zinc-400">Tasa efectiva anual aproximada: ${creditTEAText(tea)}</div>` : '');
     }
     // Antecedentes de la persona que estás cargando (por WhatsApp o, si no hay, por nombre): avisa si ya tuvo un crédito atrasado o sin pagar.
-    function creditSamePerson(c, name, phone) {
+    function creditSamePerson(c, name, phone, dni) {
+      if (dni && dni.length >= 7) return String(c.dni || '') === dni;
       if (phone.length === 10) return normalizeArPhone(c.phone) === phone;
       return !!name && String(c.customerName).trim().toLowerCase() === name.toLowerCase();
     }
     function creditHistory() {
       const box = document.getElementById('cr-history'); if (!box) return;
-      const name = ((document.getElementById('cr-name') || {}).value || '').trim(), phone = normalizeArPhone((document.getElementById('cr-phone') || {}).value || '');
-      const prior = (name.length >= 3 || phone.length === 10) ? CREDIT_LIST.filter(c => creditSamePerson(c, name, phone)) : [];
+      const name = ((document.getElementById('cr-name') || {}).value || '').trim(), phone = normalizeArPhone((document.getElementById('cr-phone') || {}).value || ''), dni = ((document.getElementById('cr-dni') || {}).value || '').replace(/\D/g, '');
+      const prior = (name.length >= 3 || phone.length === 10 || dni.length >= 7) ? CREDIT_LIST.filter(c => creditSamePerson(c, name, phone, dni)) : [];
       if (!prior.length) { box.innerHTML = ''; return; }
       const late = prior.filter(c => c.status === 'active' && c.overdueCount > 0);
       const lost = prior.filter(c => c.status === 'cancelled' && c.balance > 0);
@@ -9506,12 +9530,16 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         <div>${e(creditCuotasLabel(c))} · contado ${formatARS(c.cashPrice)}${c.surchargePct > 0 ? ' + recargo ' + e(String(c.surchargePct)) + '%' : ''} = total ${formatARS(c.total)}${c.downPayment > 0 ? ' · anticipo ' + formatARS(c.downPayment) : ''}</div>
         <div class="overflow-x-auto"><table class="w-full text-left"><thead class="text-zinc-500 uppercase text-[10px]"><tr><th class="py-1 px-2">N°</th><th class="py-1 px-2">Vence</th><th class="py-1 px-2 text-right">Cuota</th><th class="py-1 px-2 text-right">Falta</th><th class="py-1 px-2">Estado</th></tr></thead><tbody class="divide-y divide-zinc-800/60">${rows}</tbody></table></div>
         <div><div class="font-semibold text-zinc-200 mb-1">Pagos anotados</div><ul class="divide-y divide-zinc-800/60">${pays}</ul></div>
+        ${c.dni || c.address || c.email ? `<div class="text-zinc-400">${[c.dni ? 'DNI ' + e(c.dni) : '', c.address ? e(c.address) : '', c.email ? e(c.email) : ''].filter(Boolean).join(' · ')}</div>` : ''}
         ${c.note ? `<div class="text-zinc-400">Nota: ${e(c.note)}</div>` : ''}
         ${c.status !== 'cancelled' ? creditAccessHtml(c) : ''}
         ${c.status !== 'cancelled' ? `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
           <label>Nombre<input id="cre-name-${id}" type="text" maxlength="80" value="${e(c.customerName)}" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
           <label>WhatsApp / teléfono<input id="cre-phone-${id}" type="tel" maxlength="40" value="${e(c.phone)}" placeholder="381 555 1234" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
           <label>Nota<input id="cre-note-${id}" type="text" maxlength="300" value="${e(c.note || '')}" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <label>DNI<input id="cre-dni-${id}" type="text" inputmode="numeric" maxlength="11" value="${e(c.dni || '')}" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <label>Correo<input id="cre-email-${id}" type="email" maxlength="120" value="${e(c.email || '')}" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
+          <label>Dirección<input id="cre-address-${id}" type="text" maxlength="200" value="${e(c.address || '')}" class="mt-1 w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-xs text-white" /></label>
           <button type="button" onclick="creditSaveContact(${id})" class="sm:col-span-3 sm:w-fit px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-100 font-semibold">Guardar datos</button></div>` : ''}
         ${active ? `<div><button type="button" onclick="creditCancel(${id})" class="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-rose-950 border border-zinc-700 text-rose-400 font-semibold">Cancelar este crédito</button><span class="ml-2 text-zinc-500">No se borra: queda en la lista como cancelado.</span></div>` : ''}
         ${c.status === 'cancelled' && c.cancelNote ? `<div class="text-zinc-400">Motivo: ${e(c.cancelNote)}</div>` : ''}
@@ -9547,7 +9575,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (CREDITS_FORM) {
         const f = document.getElementById('cr-first'); if (f && !f.value) f.value = creditAddMonths(creditToday(), 1);
         const n = document.getElementById('cr-n'); if (n && !n.value) n.value = '3';
-        creditPreview(); creditHistory();
+        creditPreview(); creditHistory(); creditChips();
       }
       renderCredits();
       if (CREDITS_FORM) { const el = document.getElementById('cr-name'); if (el) el.focus(); }
@@ -9558,17 +9586,21 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     async function creditCreate() {
       const v = creditVals(), c = creditCalc(v);
       if (!v.name) return creditMsg('Falta el nombre de la persona.', true);
-      if (v.phone && !isValidArPhone(v.phone)) return creditMsg('El teléfono no parece válido. Poné la característica y el número, por ejemplo 381 555 1234.', true);
+      if (!v.phone) return creditMsg('Falta el WhatsApp de la persona (lo necesitás para los recordatorios).', true);
+      if (!isValidArPhone(v.phone)) return creditMsg('El teléfono no parece válido. Poné la característica y el número, por ejemplo 381 555 1234.', true);
+      if (!/^\d{7,8}$/.test(v.dni)) return creditMsg('El DNI tiene que tener 7 u 8 números (sin puntos).', true);
+      if (v.address.length < 5) return creditMsg('Falta la dirección de la persona.', true);
+      if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email)) return creditMsg('El correo no parece válido.', true);
       if (!v.concept) return creditMsg('Falta qué se lleva (producto o detalle).', true);
       if (!(c.cash > 0)) return creditMsg('Falta el precio de contado.', true);
       if (v.pct !== '' && (!(Number(v.pct) >= 0) || Number(v.pct) > 300)) return creditMsg('El recargo tiene que estar entre 0 y 300.', true);
       if (!(c.n >= 1 && c.n <= 36)) return creditMsg('Las cuotas tienen que ser entre 1 y 36.', true);
       if (!(c.down >= 0) || c.down >= c.total) return creditMsg('El anticipo no puede ser igual o mayor al total (' + formatARS(c.total) + ').', true);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(v.first)) return creditMsg('Falta la fecha de la primera cuota.', true);
-      const res = await apiRequest('CREDITS', { method: 'POST', headers: creditAuth(), body: JSON.stringify({ customerName: v.name, phone: v.phone, concept: v.concept, cashPrice: c.cash, surchargePct: Number(v.pct) || 0, downPayment: c.down, installments: c.n, frequency: v.freq, firstDue: v.first, note: v.note, showToCustomer: v.show }) });
+      const res = await apiRequest('CREDITS', { method: 'POST', headers: creditAuth(), body: JSON.stringify({ customerName: v.name, phone: v.phone, dni: v.dni, address: v.address, email: v.email, concept: v.concept, cashPrice: c.cash, surchargePct: Number(v.pct) || 0, downPayment: c.down, installments: c.n, frequency: v.freq, firstDue: v.first, note: v.note, showToCustomer: v.show }) });
       if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudo guardar. Revisá la conexión e intentá de nuevo.', true);
       creditReplace(res); CREDITS_LOADED = true; CREDITS_FORM = false; CREDITS_OPEN = res.id;
-      ['cr-name', 'cr-phone', 'cr-concept', 'cr-cash', 'cr-pct', 'cr-down', 'cr-first', 'cr-note'].forEach(i => { const el = document.getElementById(i); if (el) el.value = ''; });
+      ['cr-name', 'cr-phone', 'cr-dni', 'cr-address', 'cr-email', 'cr-concept', 'cr-cash', 'cr-pct', 'cr-down', 'cr-first', 'cr-note'].forEach(i => { const el = document.getElementById(i); if (el) el.value = ''; });
       const sh = document.getElementById('cr-show'); if (sh) sh.checked = true;
       creditHistory();
       const fl = document.getElementById('credits-filter'); if (fl) fl.value = 'active';
@@ -9595,7 +9627,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     async function creditSaveContact(id) {
       const g = k => ((document.getElementById('cre-' + k + '-' + id) || {}).value || '').trim();
       if (g('phone') && !isValidArPhone(g('phone'))) return creditMsg('El teléfono no parece válido. Poné la característica y el número, por ejemplo 381 555 1234.', true);
-      const res = await apiRequest('CREDITS', { method: 'PUT', headers: creditAuth(), body: JSON.stringify({ customerName: g('name'), phone: g('phone'), note: g('note') }) }, '/' + id);
+      const res = await apiRequest('CREDITS', { method: 'PUT', headers: creditAuth(), body: JSON.stringify({ customerName: g('name'), phone: g('phone'), note: g('note'), dni: g('dni'), address: g('address'), email: g('email') }) }, '/' + id);
       if (!res || res.success === false || !res.id) return creditMsg((res && res.error) || 'No se pudieron guardar los datos.', true);
       creditReplace(res); creditMsg('Datos guardados.', false); renderCredits();
     }
@@ -9630,7 +9662,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       return `${printLogoHtml('A4')}<h1>PLUGSHOP</h1>
         <div class="c muted">${e(LEGAL_DATA.razonSocial)} · CUIT ${e(LEGAL_DATA.cuit)}<br>${e(LEGAL_DATA.domicilio)}</div><hr>
         <div class="c"><b>COMPROBANTE DE VENTA EN CUOTAS</b>${c.status === 'cancelled' ? '<br><b>(CRÉDITO CANCELADO)</b>' : ''}</div><div class="legal">DOCUMENTO NO VÁLIDO COMO FACTURA</div>
-        <table>${kv('Crédito N°', '<b>' + Number(c.id) + '</b>')}${kv('Fecha', e(creditDay(start)))}${kv('Cliente', e(c.customerName))}${c.phone ? kv('Teléfono', e(c.phone)) : ''}${kv('Detalle', e(c.concept))}</table><hr>
+        <table>${kv('Crédito N°', '<b>' + Number(c.id) + '</b>')}${kv('Fecha', e(creditDay(start)))}${kv('Cliente', e(c.customerName))}${c.dni ? kv('DNI', e(c.dni)) : ''}${c.address ? kv('Dirección', e(c.address)) : ''}${c.phone ? kv('Teléfono', e(c.phone)) : ''}${c.email ? kv('Correo', e(c.email)) : ''}${kv('Detalle', e(c.concept))}</table><hr>
         <table>${kv('Precio de contado', money(c.cashPrice))}${kv('Recargo por financiar' + (c.surchargePct > 0 ? ' (' + e(String(c.surchargePct)) + '%)' : ''), money(surcharge))}${kv('<b>Precio total financiado</b>', '<b>' + money(c.total) + '</b>')}${c.downPayment > 0 ? kv('Anticipo', money(c.downPayment)) : ''}${kv('Saldo en cuotas', money(c.total - c.downPayment))}${kv('Cuotas', e(creditCuotasLabel(c)))}${kv('Tasa efectiva anual (calculada)', e(creditTEAText(tea)))}</table><hr>
         <table><tr><td><b>Cuota</b></td><td><b>Vence</b></td><td class="r"><b>Importe</b></td><td class="r"><b>Falta</b></td></tr>${sched}</table><hr>
         <div><b>Pagos recibidos</b></div><table>${pays}</table>
@@ -10230,6 +10262,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
 
     function showLogin(message) {
+      if (!message) { try { message = sessionStorage.getItem('plugshop_login_note') || ''; } catch (e) {} }
+      try { sessionStorage.removeItem('plugshop_login_note'); } catch (e) {}
       if (typeof appRemove === 'function') appRemove();
       const screen = document.getElementById('login-screen');
       screen.classList.remove('hidden');
@@ -10255,9 +10289,19 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       closeAdminModal();
     }
 
+    // Al cerrar sesión se borra TODO lo del panel que quedó en memoria y en el celular/compu (pedidos, clientes con
+    // teléfono y dirección): si el equipo es compartido, la persona siguiente no ve nada. Se recarga la página para
+    // que no quede ni un dato en pantalla.
+    function wipeStaffData() {
+      try { if (isBackendConnected()) { localStorage.removeItem(STORAGE_KEYS.ORDERS); localStorage.removeItem(STORAGE_KEYS.CUSTOMERS); } } catch (e) {}
+    }
+    function reloadClean() { try { setTimeout(() => location.reload(), 60); } catch (e) {} }
+
     function logoutStaff() {
       resetStaffSession();
+      wipeStaffData();
       showLogin();
+      reloadClean();
     }
 
     // Lo llama apiRequest cuando el servidor responde 401 a un pedido con
@@ -10265,7 +10309,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     function onStaffSessionExpired() {
       if (!isAdminAuthenticated) return;
       resetStaffSession();
+      wipeStaffData();
+      try { sessionStorage.setItem('plugshop_login_note', 'Tu sesión terminó. Volvé a ingresar.'); } catch (e) {}
       showLogin('Tu sesión terminó. Volvé a ingresar.');
+      reloadClean();
     }
 
     function applyStaffModeUi() {

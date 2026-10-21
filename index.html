@@ -3990,7 +3990,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         serverOrder = res.order;
         // El servidor entrega un pase para ESTE pedido: así el cliente lo ve en Mi Cuenta
         // sin volver a escribir nada (se borra al cerrar el navegador, salvo que elija "Recordarme").
-        if (res.wallet) walletSet(res.wallet, true);
+        if (res.wallet) walletSet(res.wallet, false);
         loadNotifications();
         orderNumber = serverOrder.id;
         grandTotal = serverOrder.total;
