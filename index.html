@@ -540,6 +540,67 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     html body .ps-btn.ps-btn.ps-btn svg { display: none; }
     html body .ps-btn-off.ps-btn-off.ps-btn-off { background: #E5E5EA !important; color: #86868B !important; border-radius: 980px !important; min-height: 44px; font-weight: 600; }
 
+    /* ===== Temporadas (ACT 61) · solo tienda · se activa por JS (season61.js) ===== */
+    /* Colores por temporada: --s1..--s5. Base = modo negro; el modo claro los cambia más abajo. */
+    html[data-season="halloween"]  { --s1:#FF8A3D; --s2:#A98BFF; --s3:#5FBF6A; --s4:#F5F5F7; --s5:#1D1D1F; --st:#636366; }
+    html[data-season="navidad"]    { --s1:#FF4D5E; --s2:#4CC38A; --s3:#FFD54A; --s4:#FFFFFF; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="anionuevo"]  { --s1:#FF8A3D; --s2:#FF6FA5; --s3:#FFD54A; --s4:#5CC8F2; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="sanvalentin"], html[data-season="enamorados"] { --s1:#FF4D8D; --s2:#FF9DBA; --s3:#FFD54A; --s4:#FFFFFF; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="hotsale"]    { --s1:#FF8A3D; --s2:#FF4D5E; --s3:#FFD54A; --s4:#FFFFFF; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="blackfriday"]{ --s1:#F5F5F7; --s2:#FF7A1A; --s3:#FFD54A; --s4:#FFFFFF; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="cyber"]      { --s1:#2DC4F5; --s2:#A98BFF; --s3:#FFD54A; --s4:#FFFFFF; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="nino"]       { --s1:#FF6B4A; --s2:#4DB8F0; --s3:#FFD54A; --s4:#6FD07F; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="padre"]      { --s1:#5AA0FF; --s2:#FF8A3D; --s3:#FFD54A; --s4:#FFFFFF; --s5:#1D1D1F; --st:#8E8E93; }
+    html[data-season="madre"]      { --s1:#FF7FAE; --s2:#FFD54A; --s3:#7BD88F; --s4:#FFFFFF; --s5:#1D1D1F; --st:#8E8E93; }
+
+    html[data-theme="light"][data-season="halloween"]  { --s1:#FF7A1A; --s2:#4B2E83; --s3:#2F7D3A; --s4:#FFFFFF; --st:#8E8E93; }
+    html[data-theme="light"][data-season="navidad"]    { --s1:#D62839; --s2:#2E7D4F; --s3:#E6B422; --s4:#9CB9D6; --s5:#FFFFFF; }
+    html[data-theme="light"][data-season="anionuevo"]  { --s1:#FF7A1A; --s2:#D6336C; --s3:#F2B705; --s4:#2DA8D8; }
+    html[data-theme="light"][data-season="sanvalentin"], html[data-theme="light"][data-season="enamorados"] { --s1:#E5195A; --s2:#FF8FB1; --s3:#F2B705; --s4:#FFFFFF; }
+    html[data-theme="light"][data-season="hotsale"]    { --s1:#FF7A1A; --s2:#D62839; --s3:#F2B705; }
+    html[data-theme="light"][data-season="blackfriday"]{ --s1:#1D1D1F; --s2:#FF7A1A; --s3:#F2B705; --s5:#FFFFFF; }
+    html[data-theme="light"][data-season="cyber"]      { --s1:#0A8FBF; --s2:#6A3FE0; --s3:#F2B705; }
+    html[data-theme="light"][data-season="nino"]       { --s1:#F2542D; --s2:#2DA8D8; --s3:#F2B705; --s4:#3FAF52; }
+    html[data-theme="light"][data-season="padre"]      { --s1:#1E4E8C; --s2:#FF7A1A; --s3:#F2B705; }
+    html[data-theme="light"][data-season="madre"]      { --s1:#E5558A; --s2:#F2B705; --s3:#3FAF52; }
+
+    /* Dibujos: cada trazo toma su color de las variables */
+    .ps-defs .f1 { fill: var(--s1); }
+    .ps-defs .f2 { fill: var(--s2); }
+    .ps-defs .f3 { fill: var(--s3); }
+    .ps-defs .f4 { fill: var(--s4); }
+    .ps-defs .f5 { fill: var(--s5); }
+
+    /* Capa de partículas: va DETRÁS de todo el contenido (z-index -1), así nunca tapa texto, fotos, precios ni botones */
+    #ps-season-fx { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; overflow: hidden; contain: layout paint; }
+    #ps-season-fx .ps-p { position: absolute; display: block; width: var(--w); height: var(--w); opacity: var(--o, .8); pointer-events: none; will-change: transform; }
+    #ps-season-fx .ps-p.fall { top: 0; animation: ps-fall var(--d) linear var(--dl) infinite; }
+    #ps-season-fx .ps-p.rise { top: 0; animation: ps-rise var(--d) linear var(--dl) infinite; }
+    #ps-season-fx .ps-p.fly  { left: 0; animation: ps-fly var(--d) linear var(--dl) infinite; }
+    #ps-season-fx .ps-p.fly svg { animation: ps-wob 1.1s ease-in-out infinite alternate; }
+    @keyframes ps-fall { from { transform: translate3d(0, -12vh, 0) rotate(0deg); } to { transform: translate3d(var(--dx, 0), 112vh, 0) rotate(var(--r, 180deg)); } }
+    @keyframes ps-rise { from { transform: translate3d(0, 112vh, 0) rotate(0deg); } to { transform: translate3d(var(--dx, 0), -14vh, 0) rotate(calc(var(--r, 0deg) / 6)); } }
+    @keyframes ps-fly  { from { transform: translate3d(-12vw, 0, 0); } to { transform: translate3d(112vw, var(--dy, 0), 0); } }
+    @keyframes ps-wob  { from { transform: translateY(-6px) rotate(-7deg); } to { transform: translateY(6px) rotate(7deg); } }
+
+    /* Guirnalda colgando arriba de la portada (dentro del espacio de arriba del título, sin tapar texto) */
+    .ps-garland { position: absolute; left: 0; right: 0; top: 0; z-index: 1; height: 31px; display: flex; justify-content: space-between; align-items: flex-start; padding: 0 10px; pointer-events: none; }
+    .ps-garland::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0; border-top: 1px solid var(--st); opacity: .45; }
+    .ps-garland .g { display: block; width: 24px; height: 31px; flex: 0 0 auto; transform-origin: 50% 0; overflow: visible; }
+    .ps-garland .g .th { stroke: var(--st); stroke-width: 1; fill: none; opacity: .75; }
+    @media (min-width: 640px) {
+      .ps-garland { height: 42px; padding: 0 18px; }
+      .ps-garland .g { width: 32px; height: 41px; }
+    }
+    @media (prefers-reduced-motion: no-preference) {
+      .ps-garland .g { animation: ps-sway 4.2s ease-in-out infinite alternate; }
+      @keyframes ps-sway { from { transform: rotate(-4deg); } to { transform: rotate(4deg); } }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #ps-season-fx .ps-p, #ps-season-fx .ps-p svg, .ps-garland .g { animation: none !important; }
+    }
+    @media print { #ps-season-fx, .ps-garland { display: none !important; } }
+
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
 </head>
@@ -5534,6 +5595,185 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
     function toggleTheme() { applyTheme(currentTheme() === 'light' ? 'dark' : 'light'); }
     syncThemeButtons();
+
+
+    // ===== Efectos de temporada (ACT 61) · solo tienda =====
+    // Decoración liviana que se activa SOLA por fecha. Es solo dibujo: no toca precios, botones ni textos.
+    // Para probar cualquiera sin esperar la fecha: agregá  ?temporada=navidad  al final del link de la tienda.
+    // Nombres: halloween, cyber, blackfriday, navidad, anionuevo, sanvalentin, enamorados, hotsale, nino, padre, madre.
+    // Para ver la tienda sin decoración: ?temporada=ninguna
+    (function () {
+      'use strict';
+      try {
+        // 1) INTERRUPTOR GENERAL: false = se apagan TODAS las decoraciones.
+        var TEMPORADAS_ACTIVAS = true;
+
+        // 2) FECHAS EXACTAS (opcional). Sirve para fijar a mano un evento de un año puntual.
+        //    Ejemplo:  2027: { hotsale: [5, 10, 5, 12] }  →  mes y día de inicio, mes y día de fin.
+        var FECHAS_EXACTAS = {};
+
+        // 3) Días de decoración antes de cada "Día de..." (el último día es la fecha de la celebración).
+        var DIAS_ANTES = 9;
+
+        var DAY = 86400000;
+        function T(y, m, d) { return Date.UTC(y, m - 1, d); }
+        // n-ésimo día de la semana (wd: 0 domingo ... 6 sábado) de un mes (m: 1-12)
+        function nth(y, m, wd, n) { var f = new Date(Date.UTC(y, m - 1, 1)).getUTCDay(); return 1 + ((wd - f + 7) % 7) + (n - 1) * 7; }
+        function fija(m1, d1, m2, d2) { return function (y) { return [T(y, m1, d1), T(m2 < m1 ? y + 1 : y, m2, d2)]; }; }
+        function dia(m, wd, n) { return function (y) { var t = T(y, m, nth(y, m, wd, n)); return [t - DIAS_ANTES * DAY, t]; }; }
+
+        // Orden = prioridad si dos fechas se pisan (el primero gana).
+        var EVENTOS = [
+          // Hot Sale: 2.º lunes de mayo, de lunes a miércoles (confirmar cada año cuando lo anuncia la CACE)
+          { id: 'hotsale', rango: function (y) { var d = nth(y, 5, 1, 2); return [T(y, 5, d), T(y, 5, d + 2)]; } },
+          // Cyber Monday Argentina: 1.er lunes de noviembre, de lunes a miércoles (confirmar cada año)
+          { id: 'cyber', rango: function (y) { var d = nth(y, 11, 1, 1); return [T(y, 11, d), T(y, 11, d + 2)]; } },
+          // Black Friday: 4.º viernes de noviembre; decoración de lunes a domingo de esa semana
+          { id: 'blackfriday', rango: function (y) { var t = T(y, 11, nth(y, 11, 5, 4)); return [t - 4 * DAY, t + 2 * DAY]; } },
+          { id: 'madre', rango: dia(10, 0, 3) },    // Día de la Madre: 3.er domingo de octubre
+          { id: 'padre', rango: dia(6, 0, 3) },     // Día del Padre: 3.er domingo de junio
+          { id: 'nino', rango: dia(8, 0, 3) },      // Día del Niño: 3.er domingo de agosto
+          { id: 'enamorados', rango: fija(7, 6, 7, 13) },  // Día de los Enamorados: 13 de julio
+          { id: 'sanvalentin', rango: fija(2, 7, 2, 14) }, // San Valentín: 14 de febrero
+          { id: 'halloween', rango: fija(10, 22, 11, 1) },
+          { id: 'navidad', rango: fija(12, 1, 12, 26) },
+          { id: 'anionuevo', rango: fija(12, 27, 1, 6) }    // Año Nuevo y Reyes
+        ];
+
+        function rangoDe(ev, y) {
+          var ex = FECHAS_EXACTAS[y] && FECHAS_EXACTAS[y][ev.id];
+          if (ex) return [T(y, ex[0], ex[1]), T(ex[2] < ex[0] ? y + 1 : y, ex[2], ex[3])];
+          return ev.rango(y);
+        }
+        function pick(y, m, d) {
+          var t = T(y, m, d);
+          for (var i = 0; i < EVENTOS.length; i++) {
+            for (var k = y - 1; k <= y; k++) {
+              var r = rangoDe(EVENTOS[i], k);
+              if (t >= r[0] && t <= r[1]) return EVENTOS[i].id;
+            }
+          }
+          return null;
+        }
+        function hoy() {
+          try {
+            var p = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Tucuman', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date()).split('-');
+            if (p.length === 3 && +p[0] > 2000) return [+p[0], +p[1], +p[2]];
+          } catch (e) { /* sigue abajo */ }
+          var n = new Date(); return [n.getFullYear(), n.getMonth() + 1, n.getDate()];
+        }
+
+        // ---- Dibujos (todos propios, simples). Colores = variables --s1..--s5 del CSS ----
+        var SW = 'fill:none;stroke-linecap:round;stroke-linejoin:round;';
+        function V(inner, c) { return inner.replace(/fX/g, 'f' + c); }
+        var BALLOON = '<ellipse class="fX" cx="12" cy="9.5" rx="6.8" ry="7.8"/><path class="fX" d="M10.6 17.6l1.4 2 1.4-2z"/><path d="M12 19.8c-1.2 1.2 1.2 2.2 0 4" style="' + SW + 'stroke:var(--st);stroke-width:1"/><path d="M8.4 7.6a4.6 4.6 0 0 1 2.6-2.8" style="' + SW + 'stroke:#fff;stroke-width:1.5;opacity:.6"/>';
+        var SYM = {
+          pumpkin: '<ellipse class="f1" cx="12" cy="14.5" rx="10" ry="8"/><path d="M12 6.7c-3 1.5-4.6 4.4-4.6 7.8s1.6 6.3 4.6 7.8c3-1.5 4.6-4.4 4.6-7.8S15 8.2 12 6.7z" style="fill:#000;opacity:.13"/><path class="f3" d="M10.9 3.2h2.3l.7 3.6h-3.6z"/><path class="f5" d="M7.3 12.7h2.7l-1.35-2.5zM14 12.7h2.7l-1.35-2.5zM8 16.4l1.6 1.3 1.2-1.3 1.2 1.3 1.2-1.3 1.6 1.3v1.4H8z"/>',
+          bat: '<path class="f2" d="M12 8L13.2 6l.5 2.4C15 8 17 7.4 20.5 8.5c1.1.5 1.5 1.5 1.3 2.7-1-.6-2.4-.5-3.2.3-.4.9-.4 1.7-.1 2.5-1.3-1-2.7-1-3.7-.2-.3 2-1.3 3.7-2.8 4.7-1.5-1-2.5-2.7-2.8-4.7-1-.8-2.4-.8-3.7.2.3-.8.3-1.6-.1-2.5-.8-.8-2.2-.9-3.2-.3-.2-1.2.2-2.2 1.3-2.7C7 7.4 9 8 10.3 8.4L10.8 6z"/><circle cx="10.9" cy="10.6" r=".65" style="fill:#fff"/><circle cx="13.1" cy="10.6" r=".65" style="fill:#fff"/>',
+          ghost: '<path class="f4" d="M5 21V11a7 7 0 0 1 14 0v10l-2.3-1.8-2.3 1.8-2.4-1.8-2.4 1.8-2.3-1.8z" style="stroke:var(--s2);stroke-width:.9;stroke-linejoin:round"/><circle class="f5" cx="9.6" cy="11" r="1.2"/><circle class="f5" cx="14.4" cy="11" r="1.2"/><ellipse class="f5" cx="12" cy="14.8" rx="1.3" ry="1.7"/>',
+          candy: '<path class="f2" d="M7.6 12L2.5 8.4v7.2zM16.4 12l5.1-3.6v7.2z"/><circle class="f1" cx="12" cy="12" r="5"/><path d="M9.4 9.2l4.8 5.6" style="' + SW + 'stroke:var(--s4);stroke-width:1.7"/>',
+          tree: '<path class="f2" d="M12 2.4l5 6h-2.6l4 5h-3.2l4.3 5.2H4.5L8.8 13.4H5.6l4-5H7z"/><rect x="10.4" y="18.6" width="3.2" height="3.2" rx=".6" style="fill:#7A4B2A"/><path d="M12 .8l.9 1.9 2.1.3-1.5 1.4.4 2.1L12 5.5l-1.9 1 .4-2.1L9 3l2.1-.3z" style="fill:#FFD54A"/><circle class="f1" cx="10" cy="12" r="1.1"/><circle class="f3" cx="14.2" cy="15.4" r="1.1"/>',
+          ball: '<rect x="10" y="1.6" width="4" height="3.4" rx="1" style="fill:#E6B422"/><circle class="f1" cx="12" cy="14" r="8.2"/><path class="f3" d="M4.2 14.4c2.6 2.4 12.9 2.4 15.6 0l.2 2c-3 2.8-13 2.8-16 0z"/><path d="M7.4 11.4a5.2 5.2 0 0 1 3.2-3" style="' + SW + 'stroke:#fff;stroke-width:1.5;opacity:.6"/>',
+          snowflake: '<g style="' + SW + 'stroke:var(--s4);stroke-width:1.7"><path d="M12 2v20M3.3 7l17.4 10M20.7 7L3.3 17"/><path d="M9.4 3.8L12 6.4l2.6-2.6M9.4 20.2L12 17.6l2.6 2.6"/></g>',
+          snowdot: '<circle class="f4" cx="12" cy="12" r="5.5"/>',
+          star: '<path class="f3" d="M12 2.5l2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 16.3l-5.6 3.2 1.3-6.2L3 9l6.3-.7z" style="stroke-linejoin:round"/>',
+          heart: '<path class="f1" d="M12 21S3.5 15.8 3.5 9.8c0-3.2 2.3-5.3 4.9-5.3 1.6 0 3 .8 3.6 2.1.6-1.3 2-2.1 3.6-2.1 2.6 0 4.9 2.1 4.9 5.3C20.5 15.8 12 21 12 21z"/><path d="M6.6 9.2c.2-1.4 1.2-2.4 2.5-2.5" style="' + SW + 'stroke:#fff;stroke-width:1.4;opacity:.55"/>',
+          heart2: '<path class="f2" d="M12 21S3.5 15.8 3.5 9.8c0-3.2 2.3-5.3 4.9-5.3 1.6 0 3 .8 3.6 2.1.6-1.3 2-2.1 3.6-2.1 2.6 0 4.9 2.1 4.9 5.3C20.5 15.8 12 21 12 21z"/><path d="M6.6 9.2c.2-1.4 1.2-2.4 2.5-2.5" style="' + SW + 'stroke:#fff;stroke-width:1.4;opacity:.55"/>',
+          flower: '<g class="f1"><circle cx="12" cy="6.8" r="3.9"/><circle cx="16.95" cy="10.4" r="3.9"/><circle cx="15.06" cy="16.2" r="3.9"/><circle cx="8.94" cy="16.2" r="3.9"/><circle cx="7.05" cy="10.4" r="3.9"/></g><circle class="f2" cx="12" cy="12" r="2.7"/>',
+          gift: '<rect class="f2" x="3.5" y="10.5" width="17" height="10.5" rx="1.5"/><rect class="f1" x="2.5" y="7.5" width="19" height="4.5" rx="1.2"/><rect x="10.8" y="7.5" width="2.4" height="13.5" style="fill:#FFD54A"/><path d="M12 7.5C9 7.5 7.2 4.5 9 3.5c2-1 3 2.4 3 4zM12 7.5c3 0 4.8-3 3-4-2-1-3 2.4-3 4z" style="fill:#FFD54A"/>',
+          crown: '<path d="M3.5 18.5l-1-11 5.2 4.3L12 5l4.3 6.8 5.2-4.3-1 11z" style="fill:#F2B705"/><rect class="f1" x="3.5" y="18.5" width="17" height="2.6" rx="1"/><circle class="f1" cx="12" cy="4.6" r="1.4"/><circle class="f1" cx="2.5" cy="7.2" r="1.4"/><circle class="f1" cx="21.5" cy="7.2" r="1.4"/>',
+          tag: '<path class="f1" d="M3 4.8A1.8 1.8 0 0 1 4.8 3h7.3c.5 0 1 .2 1.4.6l7.2 7.2c.8.8.8 2 0 2.8l-6.9 6.9c-.8.8-2 .8-2.8 0l-7.2-7.2A2 2 0 0 1 3 12z"/><circle class="f5" cx="8" cy="8" r="1.8"/><path d="M12.4 17.2l5-5" style="' + SW + 'stroke:var(--s5);stroke-width:1.8;opacity:.55"/>',
+          bolt: '<path class="f2" d="M13.6 2L4.5 13.6h6.1L9.6 22l9-11.8h-6z" style="stroke-linejoin:round"/>',
+          plug: '<g style="' + SW + 'stroke:var(--s1);stroke-width:2"><path d="M9 3v4.5M15 3v4.5M6.5 7.5h11v3.6a5.5 5.5 0 0 1-11 0zM12 16.6V21"/></g>',
+          tie: '<path class="f1" d="M9.4 2.4h5.2l-.9 3.4h-3.4z"/><path class="f2" d="M10.3 5.8h3.4l2.2 12.2-3.9 3.6-3.9-3.6z" style="stroke-linejoin:round"/>',
+          conf1: '<rect class="f1" x="8" y="3" width="8" height="18" rx="1.6"/>',
+          conf2: '<circle class="f2" cx="12" cy="12" r="6"/>',
+          conf3: '<rect class="f3" x="3" y="9" width="18" height="6" rx="1.4"/>',
+          conf4: '<path d="M4 7c4-4 6 4 10 0s5-3 6-1" style="' + SW + 'stroke:var(--s4);stroke-width:2.6"/>'
+        };
+        for (var c = 1; c <= 4; c++) { SYM['pen' + c] = V('<path class="fX" d="M2.5 2.5h19L12 21.5z" style="stroke-linejoin:round"/>', c); }
+        for (var b = 1; b <= 3; b++) { SYM['bal' + b] = V(BALLOON, b); }
+
+        var TEMAS = {
+          halloween: { g: ['pumpkin', 'bat', 'ghost', 'candy', 'pumpkin', 'bat'], p: [
+            { modo: 'fly', formas: ['bat'], n: 6, min: 22, max: 36, dmin: 24, dmax: 42 },
+            { modo: 'rise', formas: ['ghost'], n: 2, min: 24, max: 32, dmin: 34, dmax: 50 }] },
+          navidad: { g: ['tree', 'ball', 'star', 'snowflake', 'ball', 'tree', 'gift'], p: [
+            { modo: 'fall', formas: ['snowdot', 'snowdot', 'snowflake'], n: 18, min: 7, max: 17, dmin: 14, dmax: 26 }] },
+          anionuevo: { g: ['star', 'crown', 'gift', 'star', 'crown'], p: [
+            { modo: 'fall', formas: ['conf1', 'conf2', 'conf3', 'conf4'], n: 20, min: 8, max: 15, dmin: 12, dmax: 22 }] },
+          sanvalentin: { g: ['heart', 'heart2'], p: [
+            { modo: 'rise', formas: ['heart', 'heart2'], n: 12, min: 12, max: 26, dmin: 14, dmax: 26 }] },
+          hotsale: { g: ['tag', 'bolt'], p: [
+            { modo: 'fall', formas: ['tag', 'bolt'], n: 10, min: 16, max: 26, dmin: 14, dmax: 24 }] },
+          blackfriday: { g: ['tag', 'bolt', 'tag'], p: [
+            { modo: 'fall', formas: ['tag', 'bolt', 'tag'], n: 10, min: 16, max: 26, dmin: 14, dmax: 24 }] },
+          cyber: { g: ['plug', 'bolt'], p: [
+            { modo: 'fall', formas: ['bolt', 'plug'], n: 10, min: 16, max: 26, dmin: 14, dmax: 24 }] },
+          nino: { g: ['pen1', 'pen2', 'pen3', 'pen4'], p: [
+            { modo: 'rise', formas: ['bal1', 'bal2', 'bal3', 'star'], n: 10, min: 22, max: 34, dmin: 18, dmax: 32 }] },
+          padre: { g: ['tie', 'gift', 'star', 'tie'], p: [
+            { modo: 'fall', formas: ['star', 'tie'], n: 8, min: 16, max: 24, dmin: 16, dmax: 26 }] },
+          madre: { g: ['flower', 'heart', 'gift', 'flower'], p: [
+            { modo: 'fall', formas: ['flower', 'heart'], n: 12, min: 16, max: 26, dmin: 16, dmax: 28 }] }
+        };
+        TEMAS.enamorados = TEMAS.sanvalentin;
+
+        function rnd(a, b) { return a + Math.random() * (b - a); }
+        function useTag(id, extra) { return '<use href="#ps-s-' + id + '" xlink:href="#ps-s-' + id + '" ' + (extra || '') + '/>'; }
+        function defs() {
+          var h = '<svg class="ps-defs" xmlns:xlink="http://www.w3.org/1999/xlink" width="0" height="0" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden">';
+          for (var k in SYM) if (Object.prototype.hasOwnProperty.call(SYM, k)) h += '<symbol id="ps-s-' + k + '" viewBox="0 0 24 24">' + SYM[k] + '</symbol>';
+          return h + '</svg>';
+        }
+        function guirnalda(ids, n) {
+          var h = '';
+          for (var i = 0; i < n; i++) {
+            h += '<svg class="g" viewBox="0 0 24 31" aria-hidden="true" focusable="false" style="animation-delay:' + (-(i % 5) * 0.7).toFixed(1) + 's"><path class="th" d="M12 0V7"/>' + useTag(ids[i % ids.length], 'x="0" y="7" width="24" height="24"') + '</svg>';
+          }
+          return '<div class="ps-garland" aria-hidden="true">' + h + '</div>';
+        }
+        function particulas(lista, angosto) {
+          var h = '';
+          lista.forEach(function (cfg) {
+            var n = Math.round(cfg.n * (angosto ? 0.6 : 1));
+            for (var i = 0; i < n; i++) {
+              var f = cfg.formas[i % cfg.formas.length], w = rnd(cfg.min, cfg.max), d = rnd(cfg.dmin, cfg.dmax);
+              var st = '--w:' + w.toFixed(0) + 'px;--d:' + d.toFixed(1) + 's;--dl:' + (-rnd(0, d)).toFixed(1) + 's;--o:' + rnd(0.5, 0.9).toFixed(2) + ';';
+              if (cfg.modo === 'fly') st += 'top:' + rnd(8, 70).toFixed(0) + '%;--dy:' + rnd(-18, 18).toFixed(0) + 'vh;';
+              else st += 'left:' + rnd(2, 96).toFixed(0) + '%;--dx:' + rnd(-12, 12).toFixed(0) + 'vw;--r:' + rnd(-300, 300).toFixed(0) + 'deg;';
+              h += '<span class="ps-p ' + cfg.modo + '" style="' + st + '"><svg viewBox="0 0 24 24" width="100%" height="100%" aria-hidden="true" focusable="false">' + useTag(f) + '</svg></span>';
+            }
+          });
+          return h;
+        }
+
+        function activar(id) {
+          var tema = TEMAS[id];
+          if (!tema || !document.body) return false;
+          var ancho = window.innerWidth || 390, angosto = ancho < 640;
+          var reducir = false;
+          try { reducir = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { reducir = false; }
+          document.documentElement.setAttribute('data-season', id);
+          var n = Math.max(6, Math.round(ancho / (angosto ? 44 : 72)));
+          var hero = document.getElementById('inicio');
+          if (hero) hero.insertAdjacentHTML('afterbegin', guirnalda(tema.g, n));
+          document.body.insertAdjacentHTML('beforeend', defs() + '<div id="ps-season-fx" aria-hidden="true">' + (reducir ? '' : particulas(tema.p, angosto)) + '</div>');
+          return true;
+        }
+
+        function iniciar() {
+          if (!TEMPORADAS_ACTIVAS) return null;
+          var forz = null;
+          try { var q = new URLSearchParams(window.location.search).get('temporada'); forz = q ? q.toLowerCase() : null; } catch (e) { forz = null; }
+          if (forz === 'ninguna') return null;
+          var id = (forz && TEMAS[forz]) ? forz : (function () { var h = hoy(); return pick(h[0], h[1], h[2]); })();
+          return id && activar(id) ? id : null;
+        }
+
+        window.__psSeason = { pick: pick, ids: Object.keys(TEMAS), eventos: EVENTOS.map(function (e) { return e.id; }), rango: function (id, y) { for (var i = 0; i < EVENTOS.length; i++) if (EVENTOS[i].id === id) { var r = rangoDe(EVENTOS[i], y); return [new Date(r[0]).toISOString().slice(0, 10), new Date(r[1]).toISOString().slice(0, 10)]; } return null; }, simbolos: Object.keys(SYM), temas: TEMAS, activa: iniciar() };
+      } catch (err) { /* una decoración jamás debe romper la tienda */ }
+    })();
 
   </script>
 
