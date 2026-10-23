@@ -3578,10 +3578,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       updateLiveProfitCalculator();
     }
 
-    // Porcentaje de rebaja del "precio anterior" frente al precio actual (0 si no hay oferta).
+    // Porcentaje de rebaja REAL: el "precio anterior" frente al precio más bajo que paga el cliente
+    // (el de transferencia, que es el que se muestra grande). 0 si no hay oferta.
     function offPct(p) {
-      const was = Number(p && p.compareAtPrice) || 0, now = Number(p && p.price) || 0;
-      return was > now && now > 0 ? Math.round((1 - now / was) * 100) : 0;
+      const was = Number(p && p.compareAtPrice) || 0, cash = Number(p && p.price) || 0;
+      if (!(was > cash && cash > 0)) return 0;
+      const disc = Number((typeof STORE_SETTINGS !== 'undefined' && STORE_SETTINGS && STORE_SETTINGS.transferDiscountPct) || 10);
+      const best = Math.round(cash * (1 - disc / 100));
+      return Math.round((1 - best / was) * 100);
     }
 
     // "Garantía Oficial 12 meses" -> "12 meses" (para la tarjeta; el texto completo está en la ficha).
