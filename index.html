@@ -463,7 +463,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
        Tarjetas blancas de 28 px, etiqueta de precio oscura,
        un solo color de acción (naranja), letra Inter Tight.
        ============================================================ */
-    html body { font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif; }
+    /* Letra nueva (Inter Tight) solo en títulos, precios y botones; el resto sigue con Inter para que se lea bien chico */
+    html body h1, html body h2, html body h3, html body .ps-price, html body .ps-btn, html body .ps-cta { font-family: 'Inter Tight', 'Inter', system-ui, -apple-system, sans-serif; }
     html[data-theme="light"] body { background-color: #F5F5F7 !important; }
     html:not([data-theme="light"]) body { background-color: #000 !important; }
 
@@ -495,7 +496,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     html body header.ps-nav .hover\:bg-zinc-200:hover { background: #E8E8ED !important; }
 
     /* Portada */
-    html body .ps-h1 { font-weight: 600 !important; letter-spacing: -.025em !important; line-height: 1.07 !important; }
+    html body .ps-h1 { font-weight: 600 !important; letter-spacing: -.02em !important; line-height: 1.07 !important; }
     @media (max-width: 639px) { html body .ps-h1 { font-size: 2.5rem !important; } }
     html[data-theme="light"] body .ps-accent { color: #B23C00; }
     html:not([data-theme="light"]) body .ps-accent { color: #FFA463; }
