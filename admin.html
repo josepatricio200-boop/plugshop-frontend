@@ -5642,12 +5642,24 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const nino = campNextDate(7, y => campNthWeekday(y, 7, 0, 3));
       const navidad = campNextDate(11, y => new Date(Date.UTC(y, 11, 24)));
       const bf = campNextDate(10, y => campNthWeekday(y, 10, 5, 4));
+      const halloween = campNextDate(10, y => new Date(Date.UTC(y, 10, 1)));
+      const cyber = campNextDate(10, y => new Date(campNthWeekday(y, 10, 1, 1).getTime() + 2 * 86400000)); // 1.er lunes de noviembre + 2 días
+      const hotsale = campNextDate(4, y => new Date(campNthWeekday(y, 4, 1, 2).getTime() + 2 * 86400000)); // 2.º lunes de mayo + 2 días
+      const valentin = campNextDate(1, y => new Date(Date.UTC(y, 1, 14)));
+      const enamorados = campNextDate(6, y => new Date(Date.UTC(y, 6, 13)));
+      const anioNuevo = campNextDate(0, y => new Date(Date.UTC(y, 0, 6)));
       return [
         { label: '💐 Día de la Madre', title: 'Día de la Madre', icon: '💐', theme: 'pink', body: 'Regalá tecnología. Elegí lo que más le va a gustar.', image: 'https://res.cloudinary.com/wo7fmro1/image/upload/f_auto,q_auto,w_1600/v1792101020/plugshop/campanas/dia-de-la-madre.jpg', end: madre, lead: 10 },
         { label: '👔 Día del Padre', title: 'Día del Padre', icon: '👔', theme: 'cyan', body: 'Sorprendelo con tecnología: auriculares, parlantes y más.', end: padre, lead: 10 },
         { label: '🧸 Día de las Infancias', title: 'Día de las Infancias', icon: '🧸', theme: 'violet', body: 'Regalos para los más chicos.', end: nino, lead: 10 },
         { label: '🔥 Black Friday', title: 'Black Friday', icon: '🔥', theme: 'orange', body: 'Ofertas por tiempo limitado hasta agotar stock.', end: addDays(bf, 3), lead: 4 },
-        { label: '🎄 Navidad', title: 'Navidad', icon: '🎄', theme: 'emerald', body: 'Regalá tecnología esta Navidad.', end: navidad, lead: 14 }
+        { label: '🎄 Navidad', title: 'Navidad', icon: '🎄', theme: 'emerald', body: 'Regalá tecnología esta Navidad.', end: navidad, lead: 14 },
+        { label: '🎃 Halloween', title: 'Halloween', icon: '🎃', theme: 'orange', body: 'Tecnología para una noche de terror.', end: halloween, lead: 10 },
+        { label: '⚡ Cyber Monday', title: 'Cyber Monday', icon: '⚡', theme: 'cyan', body: 'Ofertas por tiempo limitado hasta agotar stock.', end: cyber, lead: 2 },
+        { label: '🏷️ Hot Sale', title: 'Hot Sale', icon: '🏷️', theme: 'orange', body: 'Ofertas por tiempo limitado hasta agotar stock.', end: hotsale, lead: 2 },
+        { label: '❤️ San Valentín', title: 'San Valentín', icon: '❤️', theme: 'pink', body: 'Regalá tecnología para el día de los enamorados.', end: valentin, lead: 7 },
+        { label: '💘 Día de los Enamorados', title: 'Día de los Enamorados', icon: '💘', theme: 'pink', body: 'Regalá tecnología a quien más querés.', end: enamorados, lead: 7 },
+        { label: '🎉 Año Nuevo y Reyes', title: 'Año Nuevo y Reyes', icon: '🎉', theme: 'violet', body: 'Empezá el año con tecnología nueva.', end: anioNuevo, lead: 10 }
       ].map(t => ({ ...t, start: addDays(t.end, -t.lead) }));
     }
     function campRenderTemplates() {
