@@ -518,8 +518,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     html body .ps-btn-off.ps-btn-off.ps-btn-off { background: #E5E5EA !important; color: #86868B !important; border-radius: 980px !important; min-height: 44px; font-weight: 600; }
 
     /* Banner de campaña con imagen: la foto es oscura en los dos modos, así que el texto va blanco y la sombra negra (ACT 62) */
-    html[data-theme="light"] body [data-promo-image] > div > [aria-hidden="true"] { background-image: linear-gradient(to top, rgba(0,0,0,.88), rgba(0,0,0,.55) 55%, rgba(0,0,0,.1)) !important; }
-    @media (min-width: 640px) { html[data-theme="light"] body [data-promo-image] > div > [aria-hidden="true"] { background-image: linear-gradient(to right, rgba(0,0,0,.88), rgba(0,0,0,.55) 55%, rgba(0,0,0,.1)) !important; } }
+    html[data-theme="light"] body [data-promo-image] > div > [aria-hidden="true"]:not([data-promo-clone]) { background-image: linear-gradient(to top, rgba(0,0,0,.88), rgba(0,0,0,.55) 55%, rgba(0,0,0,.1)) !important; }
+    @media (min-width: 640px) { html[data-theme="light"] body [data-promo-image] > div > [aria-hidden="true"]:not([data-promo-clone]) { background-image: linear-gradient(to right, rgba(0,0,0,.88), rgba(0,0,0,.55) 55%, rgba(0,0,0,.1)) !important; } }
     html[data-theme="light"] body [data-promo-image] h3 { color: #ffffff !important; }
     html[data-theme="light"] body [data-promo-image] p.text-zinc-200, html[data-theme="light"] body [data-promo-image] p.text-zinc-300 { color: #E4E4E7 !important; }
     html[data-theme="light"] body [data-promo-image] [class*="bg-black/40"] { background-color: rgba(0,0,0,.5) !important; color: #ffffff !important; border-color: rgba(255,255,255,.18) !important; }
