@@ -524,6 +524,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     html[data-theme="light"] body [data-promo-image] p.text-zinc-200, html[data-theme="light"] body [data-promo-image] p.text-zinc-300 { color: #E4E4E7 !important; }
     html[data-theme="light"] body [data-promo-image] [class*="bg-black/40"] { background-color: rgba(0,0,0,.5) !important; color: #ffffff !important; border-color: rgba(255,255,255,.18) !important; }
 
+    /* Fila de productos de la campaña con movimiento propio (ACT 65): sin imán de "snap" y sin barrita mientras se desliza */
+    .ps-marquee { scroll-snap-type: none !important; scrollbar-width: none; }
+    .ps-marquee::-webkit-scrollbar { display: none; }
+
     /* ===== Temporadas (ACT 61) · solo tienda · se activa por JS (season61.js) ===== */
     /* Colores por temporada: --s1..--s5. Base = modo negro; el modo claro los cambia más abajo. */
     html[data-season="halloween"]  { --s1:#FF8A3D; --s2:#A98BFF; --s3:#5FBF6A; --s4:#F5F5F7; --s5:#1D1D1F; --st:#636366; }
@@ -624,7 +628,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
-  <link rel="stylesheet" href="/tw.css?v=d5671846" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
+  <link rel="stylesheet" href="/tw.css?v=740def1a" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
 </head>
 <body class="selection:bg-brand-orange selection:text-black">
   <div id="ps-loader" role="status" aria-live="polite" aria-label="Cargando PLUGSHOP">
@@ -4288,6 +4292,63 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       try { if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(code).then(done, done); return; } } catch (e) {}
       done();
     }
+    // ---- Fila de productos de la campaña: se desliza sola (ACT 65) ----
+    // Solo en las campañas. Se frena al tocar o pasar el mouse, se puede seguir deslizando a mano, y no se mueve
+    // si el cliente tiene "reducir movimiento" o si los productos entran enteros en la pantalla.
+    const PROMO_ROWS = new Set(); let PROMO_RAF = 0, PROMO_LAST = 0, PROMO_RT = 0, PROMO_BOUND = false;
+    const PROMO_SPEED = 36; // píxeles por segundo
+    function promoMotionOk() { try { return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch (e) { return true; } }
+    function promoRowSetup(row) {
+      row.querySelectorAll('[data-promo-clone]').forEach(n => n.remove());
+      row.classList.remove('ps-marquee'); row._m = null; PROMO_ROWS.delete(row);
+      const cards = [...row.querySelectorAll('[data-promo-product]')];
+      if (!cards.length || !promoMotionOk()) return;
+      if (row.scrollWidth <= row.clientWidth + 4) return; // entran todos: quedan quietos
+      cards.forEach(c => { const k = c.cloneNode(true); k.setAttribute('data-promo-clone', '1'); k.removeAttribute('data-promo-product'); k.setAttribute('aria-hidden', 'true'); k.tabIndex = -1; row.appendChild(k); });
+      const set = row.querySelector('[data-promo-clone]').offsetLeft - cards[0].offsetLeft; // ancho de un juego completo de productos
+      if (!(set > row.clientWidth)) { row.querySelectorAll('[data-promo-clone]').forEach(n => n.remove()); return; }
+      row.classList.add('ps-marquee');
+      row._m = { set, pos: row.scrollLeft, hold: 0, hover: false };
+      PROMO_ROWS.add(row);
+      if (!row._mBound) {
+        row._mBound = true;
+        const stop = () => { if (row._m) row._m.hold = Infinity; };
+        const go = () => { if (row._m) { row._m.hold = Date.now() + 3000; row._m.pos = row.scrollLeft; } };
+        row.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse' && row._m) row._m.hover = true; });
+        row.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse' && row._m) { row._m.hover = false; row._m.pos = row.scrollLeft; } });
+        row.addEventListener('touchstart', stop, { passive: true });
+        row.addEventListener('touchend', go, { passive: true });
+        row.addEventListener('touchcancel', go, { passive: true });
+        row.addEventListener('wheel', go, { passive: true });
+        row.addEventListener('focusin', stop);
+        row.addEventListener('focusout', go);
+      }
+    }
+    function promoTick(ts) {
+      PROMO_RAF = 0;
+      const dt = PROMO_LAST ? Math.min(0.1, (ts - PROMO_LAST) / 1000) : 0; PROMO_LAST = ts;
+      const now = Date.now(); let any = false;
+      PROMO_ROWS.forEach(row => {
+        const m = row._m;
+        if (!row.isConnected || !m) { PROMO_ROWS.delete(row); return; }
+        any = true;
+        if (m.hover || m.hold > now) { m.pos = row.scrollLeft; return; }
+        const r = row.getBoundingClientRect(); if (r.bottom < 0 || r.top > (window.innerHeight || 800)) return; // fuera de pantalla: no se mueve
+        m.pos += PROMO_SPEED * dt;
+        if (m.pos >= m.set) m.pos -= m.set;
+        row.scrollLeft = Math.round(m.pos);
+      });
+      if (any && !document.hidden) PROMO_RAF = requestAnimationFrame(promoTick);
+    }
+    function promoMarqueeInit(box) {
+      box.querySelectorAll('[data-promo] .overflow-x-auto').forEach(promoRowSetup);
+      if (PROMO_ROWS.size && !PROMO_RAF) { PROMO_LAST = 0; PROMO_RAF = requestAnimationFrame(promoTick); }
+      if (!PROMO_BOUND) {
+        PROMO_BOUND = true;
+        window.addEventListener('resize', () => { clearTimeout(PROMO_RT); PROMO_RT = setTimeout(() => { const b = document.getElementById('promos-box'); if (b) promoMarqueeInit(b); }, 250); });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden && PROMO_ROWS.size && !PROMO_RAF) { PROMO_LAST = 0; PROMO_RAF = requestAnimationFrame(promoTick); } });
+      }
+    }
     function renderPromos() {
       const sec = document.getElementById('promos-section'), box = document.getElementById('promos-box'); if (!sec || !box) return;
       const list = (PROMOS || []).filter(p => p && p.title);
@@ -4333,6 +4394,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           ${cardsRow}
         </article>`;
       }).join('');
+      promoMarqueeInit(box);
     }
 
     // ---- Reclamos y garantías (panel) ----
