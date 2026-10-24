@@ -29,31 +29,8 @@
   <meta name="robots" content="noindex, nofollow" />
   <meta name="description" content="Tecnología con stock real en Tucumán. Originales y PlugShop Selección, con garantía y 10% OFF por transferencia.">
   
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS precompilado (tw.css). Si no carga, se usa el CDN como respaldo. -->
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              orange: '#ff6200',
-              amber: '#ffb703',
-              dark: '#08080a',
-              card: '#111115',
-              surface: '#18181f',
-              border: '#24242e'
-            }
-          },
-          fontFamily: {
-            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-            mono: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
-          }
-        }
-      }
-    }
-  </script>
 
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -647,6 +624,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
+  <link rel="stylesheet" href="/tw.css?v=d5671846" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
 </head>
 <body class="selection:bg-brand-orange selection:text-black">
   <div id="ps-loader" role="status" aria-live="polite" aria-label="Cargando PLUGSHOP">
