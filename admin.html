@@ -2210,7 +2210,22 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-code">
+                <div id="bank-accounts-box" class="hidden space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-3.5">
+                  <div>
+                    <div class="text-zinc-200 font-bold text-sm">🏦 Cuentas para transferencias</div>
+                    <div class="text-[11px] text-zinc-500 mt-0.5">Los clientes ven una sola: la que está <b class="text-emerald-400">EN USO</b>. Cuando se acerca al límite del día te aviso y vos activás la siguiente con un toque. Podés cargar hasta 4 (banco, Mercado Pago, Ualá, Brubank...).</div>
+                  </div>
+                  <div id="bank-warn" class="hidden rounded-xl border p-3 text-[12px] font-semibold"></div>
+                  <div id="bank-rows" class="space-y-3"></div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <button type="button" id="bank-add-btn" onclick="bankAddRow()" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-100 font-bold text-[12px]">+ Agregar cuenta</button>
+                    <span class="text-[10px] text-zinc-500">Se guardan con el botón de abajo ("Guardar Cambios").</span>
+                  </div>
+                  <div class="text-[10px] text-zinc-500">El contador suma los pedidos por transferencia de hoy (sin cancelados). Es un margen de seguridad: no ve el saldo real de tu banco, solo lo que registra la tienda. Límite 0 = sin límite.</div>
+                </div>
+                <datalist id="bank-names"><option value="Banco"></option><option value="Mercado Pago"></option><option value="Ualá"></option><option value="Brubank"></option><option value="Naranja X"></option></datalist>
+
+                <div id="bank-legacy" class="grid grid-cols-1 sm:grid-cols-2 gap-3 font-code">
                   <div>
                     <label class="block mb-1 text-zinc-300 font-semibold font-sans">Alias Bancario / CVU</label>
                     <input type="text" id="setting-alias" value="PlugShop.store.ar" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
@@ -2605,6 +2620,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (a) a.textContent = STORE_SETTINGS.bankAlias;
       const c = document.getElementById('cbu-display-text');
       if (c) c.textContent = STORE_SETTINGS.bankCbu;
+      // Cuenta sin CBU/CVU (ej. una billetera): se muestra solo el alias, sin el número de otra cuenta.
+      const noCbu = !STORE_SETTINGS.bankCbu;
+      ['cbu-row', 'cbu-copy-btn', 'cbu-copy-sep'].forEach(id => { const el = document.getElementById(id); if (el) el.classList.toggle('hidden', noCbu); });
       applyStoreZone();
     }
     // La zona que nombra la tienda ("Stock real en ..."): sale de Ajustes.
@@ -2618,6 +2636,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const res = await apiRequest('SETTINGS');
       if (!res || typeof res !== 'object' || res.error) return;
       ['whatsappNumber', 'bankAlias', 'bankCbu', 'advisorBias', 'storeZone'].forEach(k => { if (typeof res[k] === 'string' && res[k]) STORE_SETTINGS[k] = res[k]; });
+      if (typeof res.bankCbu === 'string') STORE_SETTINGS.bankCbu = res.bankCbu; // vacío = la cuenta activa no tiene CBU/CVU: no mostrar el de otra
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold', 'shippingCostAuto', 'shippingCostAutoSmt', 'freeShippingThresholdAuto'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       if (typeof res.shippingAutoSet === 'boolean') STORE_SETTINGS.shippingAutoSet = res.shippingAutoSet;
@@ -2722,6 +2741,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         tasks.push(loadCategoriesFromServer(headers));
       }
       if (role === 'admin') tasks.push(loadIphoneAdmin(true));
+      if (role === 'admin') tasks.push(loadBankAdmin());
       if (role !== 'admin' && can('orders.dispatch')) tasks.push(loadMyCourier());
       if (can('customers.manage')) {
         tasks.push(apiRequest('CUSTOMERS', { headers }).then(res => {
@@ -6829,7 +6849,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const first = String(o.customer || '').trim().split(/\s+/)[0] || '';
       return {
         nombre: first, id: o.id, total: formatARS(o.total || 0), items: o.items || '',
-        alias: STORE_SETTINGS.bankAlias || '', cbu: STORE_SETTINGS.bankCbu || '',
+        // el pedido conserva el alias que se le mostró al cliente, aunque después se active otra cuenta
+        alias: o.bankAlias || STORE_SETTINGS.bankAlias || '', cbu: o.bankAlias ? (o.bankCbu || '') : (STORE_SETTINGS.bankCbu || ''),
         cadete: o.courierName || '', sitio: (typeof location !== 'undefined' && location.origin && location.origin !== 'null') ? location.origin : 'nuestra tienda'
       };
     }
@@ -7578,6 +7599,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         const myId = currentStaffSession.staffId;
         const mine = ADMIN_ORDERS.filter(o => ['En preparación', 'Despachado'].includes(o.status) && myId && o.courierId === myId);
         mineParts.push(`<button type="button" onclick="openRoute()" class="w-full text-left rounded-2xl border border-sky-700/50 bg-sky-950/20 p-4 hover:brightness-125"><div class="flex items-center justify-between"><span class="text-2xl">🗺️</span><span class="text-3xl font-black text-white">${mine.length}</span></div><div class="mt-2 text-sm font-bold text-white">Mis entregas</div><div class="text-[11px] text-zinc-400">Tocá para ver tu hoja de ruta con dirección, mapa y cobros.</div></button>`);
+      }
+      // Aviso: la cuenta de transferencias en uso se acerca al límite del día (solo admin)
+      if (role === 'admin') {
+        const bw = typeof bankWarn === 'function' ? bankWarn() : null;
+        if (bw) {
+          const tone = bw.level === 'red' ? 'border-rose-700/60 bg-rose-950/30' : 'border-amber-700/50 bg-amber-950/20';
+          parts.push(`<button type="button" data-bank-alert="${bw.level}" onclick="openBankAccounts()" class="w-full text-left rounded-2xl border p-4 hover:brightness-125 transition ${tone}"><div class="flex items-center justify-between gap-3"><span class="text-sm font-black text-white">🏦 ${bw.level === 'red' ? 'Cuenta al límite del día' : 'Cuenta casi al límite del día'}</span><span class="text-[11px] text-zinc-300 underline">Ver cuentas</span></div><div class="text-[11px] text-zinc-300 mt-1">${escapeHtml(bankWarnText(bw))}</div></button>`);
+        }
       }
       // Aviso del tope del monotributo (solo admin, desde la mitad del tope)
       if (role === 'admin') {
@@ -9775,8 +9804,137 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (res && res.success) { ENGINE_INSIGHTS = null; await loadInsights(); } else alert((res && res.error) || 'No se pudo borrar.');
     }
 
+    // ---------- Cuentas para transferencias (solo administrador) ----------
+    // El servidor guarda hasta 4 cuentas y cuál está "en uso" (la que ven los clientes). El cambio es manual:
+    // la tienda cuenta lo de hoy por cuenta y avisa cuando la activa se acerca al límite.
+    let BANK_ADMIN = null;   // lo último que mandó el servidor: { accounts, activeId, max, usage }
+    let BANK_DRAFT = null;   // lo que se está editando: [{ id, label, alias, cbu, dailyLimit }]
+    let BANK_ACTIVE = '';    // cuenta marcada "en uso" en el borrador
+    async function loadBankAdmin() {
+      if (!isBackendConnected() || !currentStaffSession || currentStaffSession.role !== 'admin' || !currentStaffSession.token) return;
+      const res = await apiRequest('SETTINGS', { headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/bank');
+      if (res && res.success && res.bank) bankApply(res.bank, false);
+    }
+    function bankApply(bank, resetDraft) {
+      BANK_ADMIN = bank;
+      if (resetDraft || !BANK_DRAFT) {
+        BANK_DRAFT = bank.accounts.map(a => ({ id: a.id, label: a.label, alias: a.alias, cbu: a.cbu || '', dailyLimit: a.dailyLimit ? String(a.dailyLimit) : '' }));
+        BANK_ACTIVE = bank.activeId;
+        renderBankAccounts();
+      } else { bankPaintUsage(); bankPaintWarn(); } // no pisar lo que se está escribiendo
+      if (typeof renderTodayExtras === 'function') renderTodayExtras();
+    }
+    function bankUsageOf(id) { const u = BANK_ADMIN && BANK_ADMIN.usage && BANK_ADMIN.usage.byId && BANK_ADMIN.usage.byId[id]; return u || null; }
+    function bankWarnPct() { return (BANK_ADMIN && BANK_ADMIN.usage && BANK_ADMIN.usage.warnPct) || 80; }
+    function bankUsageHtml(id) {
+      const u = id ? bankUsageOf(id) : null;
+      if (!u) return '<span class="text-zinc-500">Guardá los cambios para empezar a contar.</span>';
+      const txt = `Hoy: <b class="text-white">${formatARS(u.used)}</b>${u.limit > 0 ? ' de ' + formatARS(u.limit) + ' · <b class="text-white">' + u.pct + '%</b>' : ' · sin límite'} · ${u.count} pedido${u.count === 1 ? '' : 's'}`;
+      if (!(u.limit > 0)) return txt;
+      const col = u.pct >= 100 ? 'bg-rose-500' : u.pct >= bankWarnPct() ? 'bg-amber-400' : 'bg-emerald-500';
+      return `${txt}<div class="h-1.5 rounded-full bg-zinc-800 mt-1.5 overflow-hidden"><div class="h-full ${col}" style="width:${Math.min(100, u.pct)}%"></div></div>`;
+    }
+    function bankPaintUsage() {
+      document.querySelectorAll('[data-bank-use]').forEach(el => { el.innerHTML = bankUsageHtml(el.getAttribute('data-bank-use')); });
+    }
+    // Cuenta en uso cerca del límite: { level: 'amber'|'red', pct, label, next }
+    function bankWarn() {
+      if (!BANK_ADMIN) return null;
+      const act = BANK_ADMIN.accounts.find(a => a.id === BANK_ADMIN.activeId);
+      const u = act && bankUsageOf(act.id);
+      if (!u || !(u.limit > 0) || u.pct < bankWarnPct()) return null;
+      const room = x => !x.u || !(x.u.limit > 0) || x.u.pct < bankWarnPct();
+      const pctOf = x => (x.u && x.u.limit > 0 ? x.u.pct : 0);
+      const others = BANK_ADMIN.accounts.filter(a => a.id !== act.id).map(a => ({ a, u: bankUsageOf(a.id) })).filter(room).sort((x, y) => pctOf(x) - pctOf(y));
+      return { level: u.pct >= 100 ? 'red' : 'amber', pct: u.pct, label: act.label, next: others.length ? others[0].a : null };
+    }
+    function bankWarnText(w) {
+      return (w.level === 'red' ? `🚨 ${w.label} llegó al límite de hoy (${w.pct}%).` : `⚠️ ${w.label} está al ${w.pct}% del límite de hoy.`) +
+        (w.next ? ` Conviene activar la siguiente: ${w.next.label}.` : ' No hay otra cuenta con margen: cargá una para seguir recibiendo.');
+    }
+    function bankPaintWarn() {
+      const el = document.getElementById('bank-warn'); if (!el) return;
+      const w = bankWarn();
+      el.classList.toggle('hidden', !w);
+      if (!w) return;
+      el.className = 'rounded-xl border p-3 text-[12px] font-semibold ' + (w.level === 'red' ? 'border-rose-700/60 bg-rose-950/30 text-rose-200' : 'border-amber-700/50 bg-amber-950/20 text-amber-200');
+      el.textContent = bankWarnText(w);
+    }
+    function renderBankAccounts() {
+      const box = document.getElementById('bank-accounts-box'); if (!box) return;
+      const legacy = document.getElementById('bank-legacy');
+      if (!BANK_DRAFT) { box.classList.add('hidden'); if (legacy) legacy.classList.remove('hidden'); return; }
+      box.classList.remove('hidden'); if (legacy) legacy.classList.add('hidden');
+      const inp = 'w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-white focus:outline-none focus:border-brand-orange';
+      document.getElementById('bank-rows').innerHTML = BANK_DRAFT.map((r, i) => {
+        const active = !!r.id && r.id === BANK_ACTIVE;
+        const head = active
+          ? '<span class="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-[10px] font-black tracking-wider">EN USO</span>'
+          : (r.id ? `<button type="button" data-bank-activate="${i}" onclick="bankActivate(${i})" class="px-3 py-1.5 rounded-lg bg-brand-orange text-black font-extrabold text-[11px] hover:opacity-90">Activar este alias</button>`
+                  : '<span class="text-[10px] text-zinc-500">Guardá los cambios para poder activarla.</span>');
+        const del = (!active && BANK_DRAFT.length > 1) ? `<button type="button" onclick="bankRemoveRow(${i})" class="px-2 py-1 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 text-[11px] font-bold">Quitar</button>` : '';
+        return `<div data-bank-row="${i}" class="rounded-xl border p-3 space-y-2.5 ${active ? 'border-emerald-500/50 bg-emerald-950/10' : 'border-zinc-800 bg-zinc-900/40'}">
+          <div class="flex items-center justify-between gap-2 flex-wrap"><span class="text-[11px] font-bold text-zinc-400">Cuenta ${i + 1}</span><span class="flex items-center gap-2">${head}${del}</span></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <label class="block text-[11px] text-zinc-400">Nombre<input type="text" list="bank-names" maxlength="24" value="${escapeHtml(r.label)}" placeholder="Ej. Mercado Pago" oninput="bankField(${i},'label',this.value)" class="${inp} mt-1" /></label>
+            <label class="block text-[11px] text-zinc-400">Alias<input type="text" maxlength="20" value="${escapeHtml(r.alias)}" placeholder="Ej. plugshop.mp" oninput="bankField(${i},'alias',this.value)" class="${inp} mt-1 font-code" /></label>
+            <label class="block text-[11px] text-zinc-400">CBU / CVU (opcional)<input type="text" inputmode="numeric" maxlength="22" value="${escapeHtml(r.cbu)}" placeholder="22 números" oninput="bankField(${i},'cbu',this.value)" class="${inp} mt-1 font-code tracking-wider" /></label>
+            <label class="block text-[11px] text-zinc-400">Límite por día ($, 0 = sin límite)<input type="text" inputmode="numeric" value="${escapeHtml(r.dailyLimit)}" placeholder="Ej. 200000" oninput="bankField(${i},'dailyLimit',this.value)" class="${inp} mt-1 font-code" /></label>
+          </div>
+          <div class="text-[11px] text-zinc-400" data-bank-use="${r.id || ''}">${bankUsageHtml(r.id)}</div>
+        </div>`;
+      }).join('');
+      const add = document.getElementById('bank-add-btn');
+      if (add) add.classList.toggle('hidden', BANK_DRAFT.length >= ((BANK_ADMIN && BANK_ADMIN.max) || 4));
+      bankPaintWarn();
+    }
+    function bankField(i, k, v) { if (BANK_DRAFT && BANK_DRAFT[i]) BANK_DRAFT[i][k] = v; }
+    function bankAddRow() {
+      if (!BANK_DRAFT || BANK_DRAFT.length >= ((BANK_ADMIN && BANK_ADMIN.max) || 4)) return;
+      BANK_DRAFT.push({ id: null, label: '', alias: '', cbu: '', dailyLimit: '' });
+      renderBankAccounts();
+    }
+    function bankRemoveRow(i) {
+      const r = BANK_DRAFT && BANK_DRAFT[i];
+      if (!r || BANK_DRAFT.length < 2 || (r.id && r.id === BANK_ACTIVE)) return;
+      if (!confirm('¿Quitar la cuenta "' + (r.label || 'sin nombre') + '"? Se borra cuando toques "Guardar Cambios". Los pedidos que ya la usaron conservan sus datos.')) return;
+      BANK_DRAFT.splice(i, 1);
+      renderBankAccounts();
+    }
+    // Lo que se manda al servidor. El límite acepta "200000" o "200.000"; cualquier otra cosa se avisa en vez de guardarse mal.
+    function bankPayload() {
+      const accounts = [];
+      for (const r of BANK_DRAFT) {
+        const t = String(r.dailyLimit == null ? '' : r.dailyLimit).replace(/[\s$.]/g, '');
+        if (t !== '' && !/^\d+$/.test(t)) return { error: 'El límite de "' + (String(r.label).trim() || 'una cuenta') + '" tiene que ser un número entero en pesos (ej. 200000).' };
+        accounts.push({ id: r.id || undefined, label: String(r.label || '').trim(), alias: String(r.alias || '').trim(), cbu: String(r.cbu || '').trim(), dailyLimit: t === '' ? 0 : Number(t) });
+      }
+      return { bankAccounts: accounts, activeBankId: BANK_ACTIVE };
+    }
+    async function bankSave() {
+      const p = bankPayload(); if (p.error) { alert(p.error); return false; }
+      const res = await apiRequest('SETTINGS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify(p) });
+      if (!res || !res.success || !res.settings) { alert((res && res.error) || 'No se pudo guardar. Probá de nuevo.'); return false; }
+      Object.assign(STORE_SETTINGS, res.settings);
+      saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
+      if (res.bank) bankApply(res.bank, true);
+      refreshAdminUI();
+      return true;
+    }
+    async function bankActivate(i) {
+      const r = BANK_DRAFT && BANK_DRAFT[i]; if (!r || !r.id) return;
+      if (!confirm('¿Activar "' + r.label + '"? Desde ahora los clientes van a ver ese alias para transferir (los pedidos ya hechos mantienen el suyo).')) return;
+      const prev = BANK_ACTIVE; BANK_ACTIVE = r.id;
+      if (!(await bankSave())) { BANK_ACTIVE = prev; renderBankAccounts(); }
+    }
+    function openBankAccounts() {
+      switchAdminTab('settings');
+      setTimeout(() => { const b = document.getElementById('bank-accounts-box'); if (b && b.scrollIntoView) b.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
+    }
+
     async function saveStoreSettings() {
       const val = id => document.getElementById(id).value.trim();
+      const bankPart = BANK_DRAFT ? bankPayload() : { bankAlias: val('setting-alias'), bankCbu: val('setting-cbu') };
       const body = {
         transferDiscountPct: parseFloat(val('setting-transfer-discount')),
         shippingCost: parseFloat(val('setting-shipping-cost')),
@@ -9786,8 +9944,6 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         shippingCostAutoSmt: parseFloat(val('setting-shipping-auto-smt')),
         freeShippingThresholdAuto: parseFloat(val('setting-free-auto')),
         whatsappNumber: val('setting-whatsapp-num'),
-        bankAlias: val('setting-alias'),
-        bankCbu: val('setting-cbu'),
         featuredBrands: val('setting-brands'),
         storeZone: val('setting-zone')
       };
@@ -9798,6 +9954,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         indicator.classList.remove('hidden');
         setTimeout(() => indicator.classList.add('hidden'), ok ? 2500 : 6000);
       };
+      if (bankPart.error) { showMsg(bankPart.error, false); return; }
+      Object.assign(body, bankPart);
       if (Object.values(body).some(v => typeof v === 'number' && isNaN(v))) {
         showMsg('Revisá los números: hay un campo vacío o inválido.', false);
         return;
@@ -9813,6 +9971,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       }
       Object.assign(STORE_SETTINGS, res.settings);
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
+      if (res.bank) bankApply(res.bank, true);
       refreshAdminUI();
       showMsg('✓ Guardado para todos los clientes', true);
     }
