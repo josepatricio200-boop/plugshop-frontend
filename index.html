@@ -628,7 +628,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
-  <link rel="stylesheet" href="/tw.css?v=740def1a" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
+  <link rel="stylesheet" href="/tw.css?v=0f3d8ff6" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
 </head>
 <body class="selection:bg-brand-orange selection:text-black">
   <div id="ps-loader" role="status" aria-live="polite" aria-label="Cargando PLUGSHOP">
@@ -1101,6 +1101,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <div class="space-y-4">
             <div>
               <h3 id="gallery-title" class="text-xl font-extrabold text-white leading-tight"></h3>
+              <div id="gallery-iph-spec" class="hidden mt-2"></div>
               <div id="gallery-specs" class="text-xs text-zinc-400 mt-1.5 leading-relaxed"></div>
               <button type="button" id="gallery-specs-more" onclick="toggleGalleryDesc()" class="hidden mt-1 text-[11px] font-bold text-brand-orange hover:underline">Ver descripción completa ▾</button>
             </div>
@@ -1326,6 +1327,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
             <a id="track-wa-send" href="#" target="_blank" rel="noopener" class="hidden mt-2 w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold">📲 Enviar mi pedido por WhatsApp</a>
             <p id="track-wa-hint" class="hidden text-[11px] text-zinc-400 mt-1">Si WhatsApp no se abrió solo, tocá el botón verde: es el paso que confirma tu compra con nosotros.</p>
+            <p id="track-ondemand-note" class="hidden mt-2 text-[11px] font-semibold rounded-lg px-3 py-2 border border-sky-700 bg-sky-950 text-sky-200">📦 Tu pedido incluye un iPhone por pedido. <b>Todavía no transfieras:</b> te escribimos por WhatsApp para confirmarte que lo conseguimos, el precio y cuándo llega. Si no lo conseguimos, no pagás nada.</p>
           </div>
         </div>
         <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
@@ -1875,6 +1877,27 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     let IPHONE_CFG = { enabled: false };
     const isIphoneProd = p => !!p && (p.category === IPHONE_CAT || p.subcategory === IPHONE_SEALED || p.subcategory === IPHONE_USED);
     const isUsedIphone = p => !!p && p.subcategory === IPHONE_USED;
+    // Almacenamiento y SIM del iPhone: se muestran SIEMPRE y bien visibles (el cliente tiene que saber exactamente qué compra).
+    // 64 GB no se vende. 1024 GB = 1 TB.
+    const IPH_STORAGES = [128, 256, 512, 1024], IPH_SIMS = ['esim', 'fisica', 'ambas'];
+    const IPH_SIM_TEXT = { esim: 'Solo eSIM', fisica: 'SIM física', ambas: 'SIM física + eSIM' };
+    const IPH_SIM_NOTE = {
+      esim: 'No tiene ranura para chip: se activa con eSIM. Tu línea tiene que ser compatible con eSIM (consultalo con tu operador antes de comprar).',
+      fisica: 'Usa chip (SIM física) en la ranura del equipo.',
+      ambas: 'Podés usar chip (SIM física), eSIM, o las dos a la vez.'
+    };
+    // iPhone SELLADO "por pedido": el dueño lo pide a Buenos Aires, así que se puede comprar aunque haya 0 en stock.
+    // El servidor lo valida igual (hasta 2 por pedido). Los usados nunca son "por pedido".
+    const ON_DEMAND_MAX = 2;
+    const isOnDemand = p => !!p && p.onDemand === true && isIphoneProd(p) && !isUsedIphone(p);
+    const iphStorageText = gb => (Number(gb) >= 1024 ? (Number(gb) / 1024) + ' TB' : Number(gb) + ' GB');
+    const iphHasSpec = p => !!p && IPH_STORAGES.includes(Number(p.storage)) && IPH_SIMS.includes(p.sim);
+    // "256 GB · Solo eSIM" (vacío si el equipo no tiene los datos)
+    const iphSpecText = p => iphHasSpec(p) ? iphStorageText(p.storage) + ' · ' + IPH_SIM_TEXT[p.sim] : '';
+    // Dos etiquetas con colores sólidos (se leen igual en modo luna y modo sol).
+    const iphSpecChips = (p, size) => iphHasSpec(p)
+      ? `<span class="inline-flex flex-wrap gap-1 ${size === 'lg' ? 'text-sm' : 'text-[11px] sm:text-xs'} font-extrabold leading-none"><span class="px-2 py-1 rounded-md" style="background:#F97316;color:#111">${escapeHtml(iphStorageText(p.storage))}</span><span class="px-2 py-1 rounded-md" style="background:#0EA5E9;color:#04121C">${escapeHtml(IPH_SIM_TEXT[p.sim])}</span></span>`
+      : '';
     function textBlock(t) { return escapeHtml(t).replace(/\n/g, '<br>'); }
     async function loadIphoneConfig() {
       if (!isBackendConnected()) return;
@@ -1923,7 +1946,16 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const row = (k, v) => `<div class="flex items-start justify-between gap-3 text-xs"><span class="text-zinc-400 shrink-0">${k}</span><span class="text-white font-semibold text-right">${v}</span></div>`;
       const used = isUsedIphone(prod);
       const g = used ? iphoneGrade(prod.grade, cfg) : null;
-      let h = row('Condición', used ? '♻️ Usado, revisado' : '📦 Nuevo, sellado');
+      let h = '';
+      // Almacenamiento y SIM: primero y bien grande (es lo que más pregunta la gente).
+      if (iphHasSpec(prod)) {
+        h += `<div class="rounded-lg border border-sky-800/70 bg-sky-950/40 p-2.5 space-y-1.5" data-iph-spec-box>
+          <div class="flex items-center justify-between gap-3 text-sm"><span class="text-zinc-300 font-semibold">Almacenamiento</span><span class="text-white font-extrabold">${escapeHtml(iphStorageText(prod.storage))}</span></div>
+          <div class="flex items-center justify-between gap-3 text-sm"><span class="text-zinc-300 font-semibold">Tipo de SIM</span><span class="text-white font-extrabold text-right">${escapeHtml(IPH_SIM_TEXT[prod.sim])}</span></div>
+          <div class="text-[11px] text-sky-200 leading-snug">${escapeHtml(IPH_SIM_NOTE[prod.sim])}</div>
+        </div>`;
+      }
+      h += row('Condición', used ? '♻️ Usado, revisado' : '📦 Nuevo, sellado');
       if (used && g) h += row('Estado', escapeHtml(`${g.name}`)) + (g.desc ? `<div class="text-[11px] text-zinc-400 leading-snug">${escapeHtml(g.desc)}</div>` : '');
       if (used && prod.battery) h += row('Batería', '🔋 ' + escapeHtml(String(prod.battery)) + '%');
       if (prod.accessories) h += row(used ? 'Incluye' : 'Trae', escapeHtml(prod.accessories));
@@ -2026,6 +2058,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     // Stock de un color puntual. Productos viejos (sin stock por color) usan el total.
     function stockOf(prod, color) {
       if (!prod) return 0;
+      if (isOnDemand(prod)) return ON_DEMAND_MAX; // por pedido: el tope es por pedido, no hay stock que contar
       if (prod.stockByColor && typeof prod.stockByColor === 'object') return Math.max(0, Number(prod.stockByColor[color]) || 0);
       return Math.max(0, Number(prod.stock) || 0);
     }
@@ -2048,6 +2081,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         delayNotice: p.delayNotice === true, delayDaysMin: Number.isInteger(Number(p.delayDaysMin)) && Number(p.delayDaysMin) >= 1 ? Number(p.delayDaysMin) : null, delayDaysMax: Number.isInteger(Number(p.delayDaysMax)) && Number(p.delayDaysMax) >= 1 ? Number(p.delayDaysMax) : null,
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
         accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
+        onDemand: p.onDemand === true,
+        storage: [128, 256, 512, 1024].includes(Number(p.storage)) ? Number(p.storage) : null, sim: ['esim', 'fisica', 'ambas'].includes(p.sim) ? p.sim : '',
         warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
         stockByColor: (p.stockByColor && typeof p.stockByColor === 'object' && !Array.isArray(p.stockByColor))
           ? Object.fromEntries(Object.entries(p.stockByColor).slice(0, 20).map(([k, v]) => [cleanText(k, 30), Math.floor(num(v))]))
@@ -2520,7 +2555,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         let stockLabel = '';
         let buttonDisabled = false;
         let buttonClass = 'ps-btn px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-white hover:bg-brand-orange text-black font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-md';
-        if (product.stock === 0) {
+        if (isOnDemand(product)) {
+          const di = delayInfo(product);
+          stockLabel = `<span class="text-[11px] sm:text-xs font-bold" style="color:#7DD3FC" data-on-demand>📦 Por pedido${di ? ' · llega en ' + escapeHtml(di.text) : ''}</span>`;
+        } else if (product.stock === 0) {
           stockLabel = `<span class="text-[11px] text-rose-400 font-bold">Sin stock</span>`;
           buttonDisabled = true;
           buttonClass = 'ps-btn-off px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl bg-zinc-800 text-zinc-600 font-bold text-xs cursor-not-allowed';
@@ -2553,12 +2591,13 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <h3 onclick="openProductGallery(${product.id})" class="mt-0.5 text-[13px] sm:text-[15px] font-bold text-white leading-snug group-hover:text-brand-amber transition-colors cursor-pointer line-clamp-2">
               ${escapeHtml(product.name)}
             </h3>
+            ${isIphoneProd(product) && iphHasSpec(product) ? `<div class="mt-1.5" data-iph-spec>${iphSpecChips(product)}</div>` : ''}
             <div class="mt-1 sm:mt-1.5 flex items-center gap-1.5 text-[11px] sm:text-[12px] text-zinc-400">
               <span class="w-1.5 h-1.5 rounded-full shrink-0 ${isOriginal ? 'bg-cyan-400' : 'bg-amber-400'}"></span>
               <span class="truncate">${escapeHtml(kind)}${months ? ' · ' + escapeHtml(months) + '<span class="hidden sm:inline"> de garantía</span>' : ''}${colorsTxt}</span>
             </div>
             ${stockLabel ? `<div class="mt-1">${stockLabel}</div>` : ''}
-            ${delayInfo(product) ? `<div data-delay-badge class="mt-1 text-[11px] sm:text-[12px] text-amber-300 font-semibold">⏳ Puede demorar ${delayInfo(product).text}</div>` : ''}
+            ${delayInfo(product) && !isOnDemand(product) ? `<div data-delay-badge class="mt-1 text-[11px] sm:text-[12px] text-amber-300 font-semibold">⏳ Puede demorar ${delayInfo(product).text}</div>` : ''}
             ${vehicleOfProduct(product) !== 'moto' ? `<div class="mt-1 text-[11px] sm:text-[12px] text-zinc-400">${VEHICLE_INFO[vehicleOfProduct(product)].icon} Se entrega en ${VEHICLE_INFO[vehicleOfProduct(product)].label.toLowerCase()}</div>` : ''}
 
             <div class="mt-auto pt-2.5 sm:pt-4">
@@ -2613,6 +2652,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       { const catTxt = [categoryLabel(prod.category), prod.subcategory ? categoryLabel(prod.subcategory) : ''].filter(Boolean).join(' › ');
         const ce = document.getElementById('detail-modal-cat'); ce.textContent = catTxt; ce.classList.toggle('hidden', !catTxt); }
       document.getElementById('gallery-title').textContent = prod.name;
+      { const sb = document.getElementById('gallery-iph-spec');
+        if (sb) { const on = isIphoneProd(prod) && iphHasSpec(prod); sb.innerHTML = on ? iphSpecChips(prod, 'lg') : ''; sb.classList.toggle('hidden', !on); } }
       renderGalleryDesc(prod.specs);
       document.getElementById('gallery-warranty').textContent = prod.warranty;
       const wNote = document.getElementById('gallery-warranty-note');
@@ -2636,7 +2677,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const galDelay = delayInfo(prod);
       document.getElementById('gallery-installments').textContent = `🔥 ${discountPct}% OFF pagando por Transferencia` + (galDelay ? '' : ' · Entrega en el día');
       const galDelayBox = document.getElementById('gallery-delay');
-      if (galDelayBox) { galDelayBox.classList.toggle('hidden', !galDelay); if (galDelay) galDelayBox.innerHTML = `⏳ <b>Puede demorar ${galDelay.text}.</b> Este producto no lo tenemos en el local o llega de fuera de Tucumán. Te confirmamos el día exacto por WhatsApp antes de enviarlo.`; }
+      if (galDelayBox) {
+        galDelayBox.classList.toggle('hidden', !galDelay);
+        if (galDelay) galDelayBox.innerHTML = isOnDemand(prod)
+          ? `📦 <b>Este iPhone se pide por encargo.</b> No lo tenemos en el local: lo pedimos a Buenos Aires y llega en <b>${escapeHtml(galDelay.text)}</b>. <b>Antes de que pagues</b>, te escribimos por WhatsApp para confirmarte que lo conseguimos, el precio y el día de entrega. Si no lo conseguimos, no pagás nada.`
+          : `⏳ <b>Puede demorar ${galDelay.text}.</b> Este producto no lo tenemos en el local o llega de fuera de Tucumán. Te confirmamos el día exacto por WhatsApp antes de enviarlo.`;
+      }
 
       renderGalleryColorPills(colors);
       const colorsBox = document.getElementById('gallery-colors-box');
@@ -2714,7 +2760,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const addBtn = document.getElementById('gallery-add-btn');
 
       const colorStock = stockOf(prod, activeGallerySelectedColor);
-      if (prod.reserved && colorStock > 0) {
+      if (isOnDemand(prod)) {
+        const di = delayInfo(prod);
+        stockStatusEl.textContent = '📦 Por pedido' + (di ? ' · llega en ' + di.text : '');
+        stockStatusEl.className = 'text-xs font-bold text-sky-300 font-code';
+        addBtn.disabled = false;
+        addBtn.className = 'w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-extrabold text-xs shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2';
+        addBtn.innerHTML = `<span>Pedir por encargo${isSingleColor(prod) ? '' : ` (Color: <span id="gallery-btn-color-label" class="font-code">${escapeHtml(activeGallerySelectedColor)}</span>)`}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>`;
+        addBtn.onclick = () => { addToCart(prod.id, activeGallerySelectedColor); closeProductGallery(); };
+      } else if (prod.reserved && colorStock > 0) {
         stockStatusEl.textContent = 'Reservado por otra persona';
         stockStatusEl.className = 'text-xs font-bold text-amber-300 font-code';
         addBtn.disabled = true;
@@ -3158,6 +3212,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       driverBtn.href = `https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(driverMsg)}`;
 
       applyTrackingStages(order.status);
+      { const odn = document.getElementById('track-ondemand-note');
+        if (odn) odn.classList.toggle('hidden', !(/POR PEDIDO/.test(String(order.items || '')) && String(order.status || '').toLowerCase().includes('pago pendiente'))); }
 
       const modal = document.getElementById('order-tracking-modal');
       modal.classList.remove('hidden');
@@ -3759,12 +3815,13 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="text-xs font-bold text-white truncate">${escapeHtml(item.name)}</h4>
+              ${prod && isIphoneProd(prod) && iphHasSpec(prod) ? `<div class="mt-1" data-iph-spec>${iphSpecChips(prod)}</div>` : ''}
               <div class="flex items-center gap-1.5 mt-0.5 font-code">
                 ${(item.selectedColor && item.selectedColor !== 'Único') ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-brand-amber font-semibold">🎨 ${escapeHtml(item.selectedColor)}</span>` : ''}
                 <span class="text-xs text-brand-orange font-bold">${formatARS(item.price * item.qty)}</span>
               </div>
-              ${isAtMaxStock ? '<span class="text-[9px] text-amber-400 font-semibold block mt-0.5 font-code">Tope de stock disponible</span>' : ''}
-              ${delayInfo(prod) ? `<span class="text-[10px] text-amber-300 font-semibold block mt-0.5">⏳ Demora ${delayInfo(prod).text}</span>` : ''}
+              ${isAtMaxStock ? `<span class="text-[9px] text-amber-400 font-semibold block mt-0.5 font-code">${isOnDemand(prod) ? 'Máximo ' + ON_DEMAND_MAX + ' por pedido' : 'Tope de stock disponible'}</span>` : ''}
+              ${isOnDemand(prod) ? `<span class="text-[10px] font-semibold block mt-0.5" style="color:#7DD3FC" data-on-demand>📦 Por pedido${delayInfo(prod) ? ' · llega en ' + escapeHtml(delayInfo(prod).text) : ''}. Antes de que pagues te confirmamos por WhatsApp que lo conseguimos.</span>` : (delayInfo(prod) ? `<span class="text-[10px] text-amber-300 font-semibold block mt-0.5">⏳ Demora ${delayInfo(prod).text}</span>` : '')}
             </div>
             <div class="flex items-center gap-0.5 bg-black border border-zinc-800 rounded-lg p-0.5 text-xs font-code shrink-0">
               <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 text-base flex items-center justify-center rounded-md text-zinc-400 hover:text-white transition-colors" title="Restar">-</button>
@@ -4137,7 +4194,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (Date.now() - lastCheckoutAt < 5000) return; // doble toque
       lastCheckoutAt = Date.now();
       let orderNumber = generateOrderId();
-      const itemsList = cart.map(i => `${i.qty}x ${i.name}${i.selectedColor && i.selectedColor !== 'Único' ? ` (Color: ${i.selectedColor})` : ''}`).join(', ');
+      const itemsList = cart.map(i => { const pr = PRODUCTS.find(x => x.id === i.id); const sp = pr && isIphoneProd(pr) ? iphSpecText(pr) : ''; return `${i.qty}x ${i.name}${sp ? ' · ' + sp : ''}${i.selectedColor && i.selectedColor !== 'Único' ? ` (Color: ${i.selectedColor})` : ''}${isOnDemand(pr) ? ' · POR PEDIDO' : ''}`; }).join(', ');
+      const cartOnDemand = cart.some(i => isOnDemand(PRODUCTS.find(x => x.id === i.id)));
 
       const zoneNameMap = {
         'yb': 'Yerba Buena Express',
@@ -4254,8 +4312,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         `💳 *Método de Pago:* ${payLabel}\n` +
         `${isTransfer ? `🔥 *Ahorro Transferencia:* -${formatARS(discountAmount)}\n` : ''}` +
         `${couponAmount > 0 ? `🎟️ *Cupón ${couponCode}:* -${formatARS(couponAmount)}\n` : ''}` +
-        `${isTransfer ? `🏦 *Alias:* ${STORE_SETTINGS.bankAlias || 'PlugShop.store.ar'}\n` : ''}` +
-        `${isTransfer && STORE_SETTINGS.bankCbu ? `🔢 *CVU/CBU:* ${STORE_SETTINGS.bankCbu}\n` : ''}` +
+        `${isTransfer && !cartOnDemand ? `🏦 *Alias:* ${STORE_SETTINGS.bankAlias || 'PlugShop.store.ar'}\n` : ''}` +
+        `${isTransfer && !cartOnDemand && STORE_SETTINGS.bankCbu ? `🔢 *CVU/CBU:* ${STORE_SETTINGS.bankCbu}\n` : ''}` +
+        `${cartOnDemand ? `📦 *IPHONE POR PEDIDO:* confirmame que lo conseguís, el precio y el plazo ANTES de que yo pague. Todavía no voy a transferir.\n` : ''}` +
         `${VEHICLE_INFO[vehicle].icon} *Logística${vehicle === 'moto' ? '' : ' (envío en ' + VEHICLE_INFO[vehicle].label.toLowerCase() + ')'}:* ${isRetiro ? 'Retiro sin cargo' : (shippingCost > 0 ? `+${formatARS(shippingCost)}` : 'Envío Gratis')}\n` +
         `${waDelay ? `⏳ *Demora estimada:* ${waDelay.text} (${waDelay.items.map(x => x.name).join(', ')}) - ya me avisaron\n` : ''}\n` +
         `*PRODUCTOS & COLORES SELECCIONADOS:*\n${itemsText}\n\n` +
@@ -4374,7 +4433,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div class="h-24 sm:h-32 ${isImageUrl(vis) ? '' : 'bg-black/40'} flex items-center justify-center overflow-hidden" ${isImageUrl(vis) ? 'style="background:#fff"' : ''}>${renderVisualElement(vis, isImageUrl(vis) ? 'w-full h-full object-contain p-2' : 'w-full h-full object-cover', 'text-4xl', pr.name)}</div>
             <div class="p-2.5"><div class="text-[12px] font-bold text-white leading-snug line-clamp-2">${escapeHtml(pr.name)}</div>
               <div class="mt-1 text-sm font-black text-white">${formatARS(tp)}</div><div class="text-[10px] text-emerald-400">${disc}% OFF transferencia</div>
-              ${pr.stock === 0 ? '<div class="text-[10px] text-rose-400 font-bold mt-0.5">Sin stock</div>' : (d ? `<div class="text-[10px] text-amber-300 font-semibold mt-0.5">⏳ ${escapeHtml(d.text)}</div>` : '')}</div></button>`;
+              ${pr.stock === 0 && !isOnDemand(pr) ? '<div class="text-[10px] text-rose-400 font-bold mt-0.5">Sin stock</div>' : (d ? `<div class="text-[10px] text-amber-300 font-semibold mt-0.5">⏳ ${escapeHtml(d.text)}</div>` : '')}</div></button>`;
         }).join('');
         const img = (typeof p.image === 'string' && /^https:\/\//i.test(p.image)) ? p.image : '';
         const cardsRow = cards ? `<div class="${img ? 'p-4 sm:p-6' : 'mt-4'} -mx-1 px-1 flex gap-3 overflow-x-auto snap-x pb-1">${cards}</div>` : '';
@@ -4982,6 +5041,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       };
       reader.readAsDataURL(file);
     }
+    const SIM_PRESETS_DEFAULT = [20, 30, 40, 50, 60];
+    let SIM = { presets: SIM_PRESETS_DEFAULT.slice(), base: 'cost', target: 'transfer', round: '999', mode: 'domicilio', shipCharged: null, shipCost: null, pickup: 0, disc: null, comm: 0 };
     function creditDay(iso) { const p = String(iso || '').split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : '—'; }
     // Comprobante / acuerdo para imprimir: precio de contado, recargo, total, cuotas con fechas, pagos y saldo.
     function creditCuotasLabel(c) { const n = c.installments; return n === 1 ? '1 cuota' : n + ' cuotas ' + ({ weekly: 'semanales', biweekly: 'quincenales', monthly: 'mensuales' }[c.frequency] || ''); }
