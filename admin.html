@@ -604,6 +604,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <button onclick="openFinSection('cash')"  data-nav-tab="finances" data-fin-nav="cash" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">💵</span><span>Caja diaria</span></span>
             </button>
+              <button onclick="openTabSection('settings','cobros')"  data-nav-tab="settings" data-sec-nav="settings:cobros" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">💳</span><span>Cobros</span></span>
+            </button>
+              <button onclick="openTabSection('settings','envios')"  data-nav-tab="settings" data-sec-nav="settings:envios" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🚚</span><span>Envíos y tarifas</span></span>
+            </button>
               <button onclick="switchAdminTab('couriers')" id="tab-btn-couriers" data-nav-tab="couriers" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">🛵</span><span>Rendición de Cadetes</span></span>
             </button>
@@ -646,8 +652,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div data-nav-group="cfg" class="space-y-1">
               <button type="button" data-nav-head="cfg" onclick="toggleNavGroup('cfg')" aria-expanded="false" class="nav-head w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-left text-[11px] uppercase font-extrabold tracking-wide text-zinc-300 bg-zinc-900/60 hover:bg-zinc-800 hover:text-white transition-all"><span class="flex items-center gap-2 min-w-0"><span class="text-sm shrink-0">⚙️</span><span class="text-left">Configuración del sistema</span></span><span data-nav-chev class="shrink-0 text-zinc-500 text-xs transition-transform">▸</span></button>
               <div data-nav-body="cfg" class="space-y-1 hidden">
-              <button onclick="openTabSection('settings','rates')"  data-nav-tab="settings" data-sec-nav="settings:rates" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
-              <span class="flex items-center gap-2.5"><span class="text-sm">🚚</span><span>Tarifas y cobros</span></span>
+              <button onclick="openTabSection('settings','tienda')"  data-nav-tab="settings" data-sec-nav="settings:tienda" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🏪</span><span>Mi tienda</span></span>
+            </button>
+              <button onclick="openTabSection('settings','seguridad')"  data-nav-tab="settings" data-sec-nav="settings:seguridad" data-flat="1" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
+              <span class="flex items-center gap-2.5"><span class="text-sm">🔒</span><span>Seguridad</span></span>
             </button>
               <button onclick="switchAdminTab('staff-users')" id="tab-btn-staff-users" data-nav-tab="staff-users" class="admin-tab-btn w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white hover:bg-zinc-900 transition-all">
               <span class="flex items-center gap-2.5"><span class="text-sm">🔑</span><span>Usuarios & Permisos</span></span><span id="badge-staff-count" class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 font-bold font-code">0</span>
@@ -981,8 +990,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                       </div>
                     </div>
                     <div class="flex items-center justify-between gap-2 flex-wrap text-[11px] text-zinc-500">
-                      <span id="sim-defaults-note">Por defecto: lo que cargaste en Ajustes. Podés cambiarlo acá.</span>
-                      <button type="button" onclick="simResetCosts()" class="text-zinc-400 hover:text-brand-amber underline">Volver a lo de Ajustes</button>
+                      <span id="sim-defaults-note">Por defecto: lo que cargaste en Envíos y tarifas. Podés cambiarlo acá.</span>
+                      <button type="button" onclick="simResetCosts()" class="text-zinc-400 hover:text-brand-amber underline">Volver a lo de Envíos y tarifas</button>
                     </div>
                   </div>
 
@@ -1109,7 +1118,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                     <div id="iph-f-ondemand-box" class="sm:col-span-2 p-3 rounded-lg border border-sky-500/40 bg-sky-500/[0.07]">
                       <label class="flex items-start gap-2 cursor-pointer"><input type="checkbox" id="new-prod-ondemand" onchange="syncOnDemand()" class="mt-0.5 w-4 h-4" />
                         <span><span class="block text-sky-200 font-bold">📦 Este iPhone se pide por encargo (no lo tengo en el local)</span>
-                        <span class="block text-[11px] text-zinc-400 leading-snug">Solo sellados. El cliente puede comprarlo aunque el stock sea 0 y ve "llega en X a Y días". Vos confirmás con Buenos Aires ANTES de cobrar (a él se le dice que no transfiera todavía). Se acepta hasta 2 por pedido y no descuenta stock. Más abajo elegí los días de demora: son obligatorios.</span></span></label>
+                        <span class="block text-[11px] text-zinc-400 leading-snug">Solo sellados. El cliente puede comprarlo aunque el stock sea 0 y ve "llega en X a Y días". Lo fija con una SEÑA por transferencia (con eso vos lo pedís a Buenos Aires) y el resto lo paga al recibirlo. Si no lo conseguís, cancelás el pedido y le devolvés la seña completa. Se acepta hasta 2 por pedido y no descuenta stock. Más abajo elegí los días de demora: son obligatorios.</span></span></label>
+                      <div id="iph-f-deposit-row" class="hidden mt-3">
+                        <label class="block mb-1 text-sky-200 font-bold">Seña en pesos <span class="text-rose-300">(obligatoria)</span></label>
+                        <input type="number" id="new-prod-deposit" min="1" step="1" placeholder="Ej. 200000" class="w-full sm:w-56 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white font-code" oninput="syncDepositHint()" />
+                        <p id="iph-f-deposit-hint" class="mt-1 text-[11px] text-zinc-400 leading-snug">Es lo que el cliente transfiere para fijar el equipo. Tiene que ser menos que el precio: lo que falta lo paga al recibirlo.</p>
+                      </div>
                     </div>
                     <p class="sm:col-span-2 text-[11px] text-orange-100/80 leading-snug">Esto se muestra bien grande en la tienda y queda anotado en el pedido. Mirá el equipo en mano antes de elegir: si dudás, no lo publiques. Si el nombre del producto dice otro almacenamiento o "eSIM", el sistema no te deja guardar.</p>
                   </div>
@@ -1219,7 +1233,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                         <option value="moto">🛵 Moto (chico o mediano)</option>
                         <option value="auto">🚗 Auto (producto grande)</option>
                       </select>
-                      <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">Si un pedido lleva un producto en auto, todo el pedido se envía en auto. El precio de cada uno se carga en Ajustes & Zonas.</p>
+                      <p class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug">Si un pedido lleva un producto en auto, todo el pedido se envía en auto. El precio de cada uno se carga en Logística y finanzas → Envíos y tarifas.</p>
                     </div>
                     <div id="new-prod-delay-box" class="sm:col-span-2">
                       <label class="flex items-start gap-2 text-xs text-zinc-300 font-sans cursor-pointer"><input type="checkbox" id="new-prod-delay" onchange="syncDelayBox()" class="mt-0.5 w-4 h-4 accent-orange-500 shrink-0"><span><b>⏳ Avisar demora al cliente</b><br><span class="text-[10px] text-zinc-500 leading-snug">Dejalo SIN tildar y el cliente no ve ningún aviso. Si lo tildás, lo ve en la ficha, el carrito y el pedido. Nada se tilda solo (ni siquiera "se retira en el proveedor").</span></span></label>
@@ -1959,7 +1973,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 </div>
                 <h4 class="font-bold text-white text-sm">Transferencia Directa (Alias/CVU)</h4>
                 <p id="promo-transfer-text" class="text-xs text-zinc-400">Incentivo directo del 10% de descuento que reduce la fricción y elimina riesgos de cadetería.</p>
-                <div class="text-[11px] text-zinc-500 font-code">Configurable desde Ajustes</div>
+                <div class="text-[11px] text-zinc-500 font-code">Se cambia en Logística y finanzas → Cobros</div>
               </div>
               <div class="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-3">
                 <div class="flex items-center justify-between">
@@ -2162,23 +2176,14 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <!-- TAB 8: AJUSTES & ZONAS -->
           <div id="admin-tab-settings" class="hidden space-y-6">
             <div data-sec-chips="settings" class="sticky top-0 z-10 -mx-1 px-1 py-2 bg-zinc-950/90 backdrop-blur flex md:hidden gap-1.5 overflow-x-auto" role="tablist" aria-label="Secciones"></div>
-<div data-sec-pane="settings:rates" class="space-y-6">
+<div data-sec-pane="settings:envios" class="space-y-6">
 <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
               <div>
-                <h4 class="text-sm font-bold text-white" id="sec-rates" style="scroll-margin-top:72px">Tarifas de Logística, Datos de Cobro & Descuentos</h4>
-                <p class="text-xs text-zinc-400">Configurá tarifas de envío para Yerba Buena y Capital, el descuento por transferencia, tu Alias, CBU y el PIN del staff.</p>
+                <h4 class="text-sm font-bold text-white" id="sec-envios" style="scroll-margin-top:72px">🚚 Envíos y tarifas</h4>
+                <p class="text-xs text-zinc-400">Cuánto cobrás el envío en moto y en auto (productos grandes) a Yerba Buena y a la capital, y desde qué monto el envío es gratis.</p>
               </div>
 
               <div class="space-y-4 text-xs">
-                <div>
-                  <label class="block mb-1 text-emerald-400 font-semibold">Descuento por Transferencia Bancaria Directa</label>
-                  <div class="flex items-center gap-2">
-                    <input type="number" id="setting-transfer-discount" value="10" min="0" max="30" step="1" class="w-32 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white font-bold focus:outline-none focus:border-brand-orange font-code" />
-                    <span class="text-zinc-400 font-bold font-code">% OFF</span>
-                  </div>
-                  <span class="block text-[10px] text-zinc-500 mt-1">Este incentivo económico alivia el miedo del cliente y estimula el pago 100% anticipado.</span>
-                </div>
-
                 <div>
                   <label class="block mb-1 text-zinc-300 font-semibold">Envío en moto a Yerba Buena</label>
                   <div class="flex items-center gap-2 font-code">
@@ -2226,6 +2231,32 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   </div>
                 </div>
 
+                <div class="pt-2">
+                  <button onclick="saveStoreSettings()" class="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all">
+                    Guardar Cambios
+                  </button>
+                  <span class="settings-saved-ind hidden text-emerald-400 font-semibold ml-3 font-code" id="settings-saved-indicator">✓ Ajustes actualizados</span>
+                </div>
+              </div>
+            </div>
+</div>
+<div data-sec-pane="settings:cobros" class="space-y-6">
+<div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
+              <div>
+                <h4 class="text-sm font-bold text-white" id="sec-cobros" style="scroll-margin-top:72px">💵 Cobros</h4>
+                <p class="text-xs text-zinc-400">El descuento por transferencia y las cuentas donde te transfieren (alias y CBU). Los clientes ven una sola cuenta: la que está en uso.</p>
+              </div>
+
+              <div class="space-y-4 text-xs">
+                <div>
+                  <label class="block mb-1 text-emerald-400 font-semibold">Descuento por Transferencia Bancaria Directa</label>
+                  <div class="flex items-center gap-2">
+                    <input type="number" id="setting-transfer-discount" value="10" min="0" max="30" step="1" class="w-32 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white font-bold focus:outline-none focus:border-brand-orange font-code" />
+                    <span class="text-zinc-400 font-bold font-code">% OFF</span>
+                  </div>
+                  <span class="block text-[10px] text-zinc-500 mt-1">Este incentivo económico alivia el miedo del cliente y estimula el pago 100% anticipado.</span>
+                </div>
+
                 <div id="bank-accounts-box" class="hidden space-y-3 rounded-xl border border-zinc-800 bg-zinc-950/40 p-3.5">
                   <div>
                     <div class="text-zinc-200 font-bold text-sm">🏦 Cuentas para transferencias</div>
@@ -2252,6 +2283,24 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   </div>
                 </div>
 
+
+                <div class="pt-2">
+                  <button onclick="saveStoreSettings()" class="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all">
+                    Guardar Cambios
+                  </button>
+                  <span class="settings-saved-ind hidden text-emerald-400 font-semibold ml-3 font-code" id="settings-saved-indicator2">✓ Ajustes actualizados</span>
+                </div>
+              </div>
+            </div>
+</div>
+<div data-sec-pane="settings:tienda" class="space-y-6">
+<div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
+              <div>
+                <h4 class="text-sm font-bold text-white" id="sec-tienda" style="scroll-margin-top:72px">🏪 Mi tienda</h4>
+                <p class="text-xs text-zinc-400">Datos generales de la tienda: tu WhatsApp de ventas, la zona, las marcas de la tira del inicio y la decoración de temporada.</p>
+              </div>
+
+              <div class="space-y-4 text-xs">
                 <div>
                   <label class="block mb-1 text-zinc-300 font-semibold">Número de WhatsApp de Ventas</label>
                   <input type="text" id="setting-whatsapp-num" value="5493816993305" class="w-64 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-code" />
@@ -2270,6 +2319,34 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   <span class="block text-[10px] text-zinc-500 mt-1">Separalas con coma. Se muestran en ese orden en la página principal. Si lo dejás vacío, se usan las marcas de tus productos. Después tocá "Guardar Cambios".</span>
                 </div>
 
+                <div id="season-settings-box" class="pt-3 border-t border-zinc-800 space-y-2">
+                  <label class="block text-zinc-300 font-semibold" for="setting-season-mode">🎃 Decoración de temporada de la tienda</label>
+                  <select id="setting-season-mode" class="w-full sm:w-80 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange">
+                    <option value="auto">Automática (se enciende sola por fecha)</option>
+                    <option value="off">Apagada (la tienda nunca se decora)</option>
+                  </select>
+                  <div id="setting-season-list" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5"></div>
+                  <span class="block text-[10px] text-zinc-500">En "Automática", destildá las fechas que NO querés decorar. Es solo dibujo: no cambia precios ni textos. Después tocá "Guardar Cambios". Los clientes lo ven en la próxima vez que abran la tienda.</span>
+                </div>
+
+
+                <div class="pt-2">
+                  <button onclick="saveStoreSettings()" class="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all">
+                    Guardar Cambios
+                  </button>
+                  <span class="settings-saved-ind hidden text-emerald-400 font-semibold ml-3 font-code" id="settings-saved-indicator3">✓ Ajustes actualizados</span>
+                </div>
+              </div>
+            </div>
+</div>
+<div data-sec-pane="settings:seguridad" class="space-y-6">
+<div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
+              <div>
+                <h4 class="text-sm font-bold text-white" id="sec-seguridad" style="scroll-margin-top:72px">🔒 Seguridad</h4>
+                <p class="text-xs text-zinc-400">Cambiá el PIN con el que entrás al panel de administración.</p>
+              </div>
+
+              <div class="space-y-4 text-xs">
                 <div class="pt-3 border-t border-zinc-800 space-y-2">
                   <label class="block text-brand-amber font-semibold">Cambiar el PIN de administrador</label>
                   <div class="flex flex-wrap gap-2">
@@ -2282,12 +2359,6 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   <span class="block text-[10px] text-zinc-500">Al cambiarlo se cierran todas las sesiones de administrador y tenés que volver a entrar con el PIN nuevo.</span>
                 </div>
 
-                <div class="pt-2">
-                  <button onclick="saveStoreSettings()" class="px-5 py-2.5 rounded-xl bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all">
-                    Guardar Cambios
-                  </button>
-                  <span id="settings-saved-indicator" class="hidden text-emerald-400 font-semibold ml-3 font-code">✓ Ajustes actualizados</span>
-                </div>
               </div>
             </div>
 </div>
@@ -2388,7 +2459,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
             <a id="track-wa-send" href="#" target="_blank" rel="noopener" class="hidden mt-2 w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold">📲 Enviar mi pedido por WhatsApp</a>
             <p id="track-wa-hint" class="hidden text-[11px] text-zinc-400 mt-1">Si WhatsApp no se abrió solo, tocá el botón verde: es el paso que confirma tu compra con nosotros.</p>
-            <p id="track-ondemand-note" class="hidden mt-2 text-[11px] font-semibold rounded-lg px-3 py-2 border border-sky-700 bg-sky-950 text-sky-200">📦 Tu pedido incluye un iPhone por pedido. <b>Todavía no transfieras:</b> te escribimos por WhatsApp para confirmarte que lo conseguimos, el precio y cuándo llega. Si no lo conseguimos, no pagás nada.</p>
+            <p id="track-ondemand-note" class="hidden mt-2 text-[11px] font-semibold rounded-lg px-3 py-2 border border-sky-700 bg-sky-950 text-sky-200"></p>
           </div>
         </div>
         <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
@@ -2657,6 +2728,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold', 'shippingCostAuto', 'shippingCostAutoSmt', 'freeShippingThresholdAuto'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       if (typeof res.shippingAutoSet === 'boolean') STORE_SETTINGS.shippingAutoSet = res.shippingAutoSet;
+      // Decoración de temporada (la capa vive solo en la tienda): enciende o apaga según lo que dejó el panel.
+      if (res.seasonMode === 'auto' || res.seasonMode === 'off') STORE_SETTINGS.seasonMode = res.seasonMode;
+      if (Array.isArray(res.seasonSkip)) STORE_SETTINGS.seasonSkip = res.seasonSkip;
+      try { if (window.__psSeason && typeof window.__psSeason.sync === 'function') window.__psSeason.sync({ mode: STORE_SETTINGS.seasonMode, skip: STORE_SETTINGS.seasonSkip }); } catch (e) { /* la decoración nunca rompe la tienda */ }
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
       applyStoreWhatsappLinks();
       applyBankDisplay();
@@ -2685,6 +2760,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     // El servidor lo valida igual (hasta 2 por pedido). Los usados nunca son "por pedido".
     const ON_DEMAND_MAX = 2;
     const isOnDemand = p => !!p && p.onDemand === true && isIphoneProd(p) && !isUsedIphone(p);
+    // Seña del iPhone por pedido: lo que el cliente transfiere para fijar el equipo (el resto se paga al recibirlo).
+    const iphDeposit = p => isOnDemand(p) && Number.isInteger(Number(p.onDemandDeposit)) && Number(p.onDemandDeposit) >= 1 ? Number(p.onDemandDeposit) : 0;
     const iphStorageText = gb => (Number(gb) >= 1024 ? (Number(gb) / 1024) + ' TB' : Number(gb) + ' GB');
     const iphHasSpec = p => !!p && IPH_STORAGES.includes(Number(p.storage)) && IPH_SIMS.includes(p.sim);
     // "256 GB · Solo eSIM" (vacío si el equipo no tiene los datos)
@@ -2704,6 +2781,55 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         <div class="mt-2.5 flex flex-wrap gap-1.5">${chip('🛡️', 'Garantía PlugShop')}${chip('↩️', '10 días para arrepentirte')}${chip('🔖', 'Reserva por ' + (cfg.reserveHours || 24) + ' h')}</div>
         <button type="button" ${preview ? 'tabindex="-1"' : 'onclick="iphoneOpenLegal(false)"'} class="mt-2.5 text-[11px] sm:text-xs text-brand-orange hover:underline font-semibold">Ver condiciones completas de iPhone</button>`;
     }
+    // Seguimiento del iPhone por pedido, como lo ve el cliente: Seña recibida → En proceso → En camino → Por llegar → Llegó.
+    const IPH_STAGE_STEPS = ['Seña recibida', 'En proceso', 'En camino', 'Por llegar', 'Llegó'];
+    const IPH_STAGE_INDEX = { pedido: 1, camino: 2, cerca: 3, llego: 4 };
+    function iphStageHtml(order) {
+      const idx = order && order.supplierOrdered ? (IPH_STAGE_INDEX[order.supplierStage] || 1) : 0;
+      const msg = [
+        '📦 Seña recibida. Estamos por pedir tu iPhone.',
+        '📦 Tu iPhone está pedido y en proceso.',
+        '🚚 Tu iPhone está en camino.',
+        '📍 Tu iPhone está por llegar. Te escribimos para coordinar la entrega.',
+        '✅ Tu iPhone ya llegó. Te escribimos para coordinar la entrega y el saldo.'
+      ][idx];
+      const steps = IPH_STAGE_STEPS.map((t, i) => `<span data-iph-step="${i < idx ? 'done' : i === idx ? 'now' : 'next'}" class="px-2 py-0.5 rounded-md text-[10px] font-bold ${i < idx ? 'bg-emerald-950 text-emerald-300' : i === idx ? 'bg-sky-900 text-sky-100 ring-1 ring-sky-400' : 'bg-zinc-800 text-zinc-500'}">${i < idx ? '✓ ' : ''}${t}</span>`).join('');
+      return `<div class="flex flex-wrap gap-1 mb-1.5" data-iph-stages>${steps}</div>${msg}`;
+    }
+    // "Otras memorias de este modelo": mismo modelo (nombre sin memoria ni SIM) y mismo estado (sellado/usado), otra memoria.
+    // No inventa nada: solo muestra productos que ya están publicados, con su precio real.
+    function iphModelKey(p) {
+      return String(p && p.name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/\b\d{2,4}\s?(gb|tb)\b|\b[12]\s?tb\b/g, ' ').replace(/\b(e-?sim|sim fisica|dual sim|sim)\b/g, ' ')
+        .replace(/\b(sellado|usado|nuevo|por pedido)\b/g, ' ')
+        // "iPhone 16 256" (sin GB): si el número es la memoria del propio equipo, tampoco cuenta como parte del modelo
+        .replace(new RegExp('\\b(' + (Number(p && p.storage) || 0) + '|' + (Number(p && p.storage) >= 1024 ? Number(p.storage) / 1024 + ' ?tb' : 'x') + ')\\b', 'g'), ' ')
+        .replace(/[^a-z0-9]+/g, ' ').trim();
+    }
+    function iphOtherStorages(prod) {
+      if (!iphHasSpec(prod)) return [];
+      const key = iphModelKey(prod), used = isUsedIphone(prod);
+      const seen = {};
+      return PRODUCTS.filter(p => p.id !== prod.id && isIphoneProd(p) && iphHasSpec(p) && p.active !== false && isUsedIphone(p) === used
+        && Number(p.storage) !== Number(prod.storage) && iphModelKey(p) === key)
+        .sort((a, b) => Number(a.storage) - Number(b.storage) || Number(a.price) - Number(b.price))
+        .filter(p => { const k = Number(p.storage); if (seen[k]) return false; seen[k] = 1; return true; }); // una por memoria (la más barata)
+    }
+    function iphOtherStoragesHtml(prod) {
+      const list = iphOtherStorages(prod);
+      if (!list.length) return '';
+      const pct = STORE_SETTINGS.transferDiscountPct || 10;
+      const tp = x => Math.round(Number(x.price) * (1 - pct / 100));
+      const here = tp(prod);
+      const chip = p => {
+        const diff = tp(p) - here;
+        const diffTxt = diff === 0 ? 'Mismo precio' : (diff > 0 ? '+ ' : '− ') + formatARS(Math.abs(diff)) + (diff > 0 ? ' más' : ' menos');
+        const od = isOnDemand(p), out = !od && Number(p.stock) === 0;
+        const status = od ? '📦 Por pedido' : out ? 'Sin stock' : p.reserved ? '🔖 Reservado' : 'Disponible';
+        return `<button type="button" data-iph-other="${p.id}" class="text-left rounded-xl border border-zinc-700/70 bg-zinc-900/60 hover:border-brand-orange/60 px-3 py-2 min-h-[44px]"><span class="block text-base font-extrabold text-white leading-tight">${escapeHtml(iphStorageText(p.storage))}</span><span class="block text-xs font-bold text-white">${formatARS(tp(p))}</span><span class="block text-[11px] ${diff > 0 ? 'text-amber-300' : diff < 0 ? 'text-emerald-400' : 'text-zinc-400'} font-semibold">${escapeHtml(diffTxt)}</span><span class="block text-[11px] text-zinc-400">${escapeHtml(status)}</span></button>`;
+      };
+      return `<div data-iph-others><div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Otras memorias de este modelo</div><div class="mt-1.5 grid grid-cols-2 gap-2">${list.map(chip).join('')}</div><div class="mt-1 text-[11px] text-zinc-500 leading-snug">Precios por transferencia, comparados con el ${escapeHtml(iphStorageText(prod.storage))} que estás viendo. Cada memoria tiene su propio precio.</div></div>`;
+    }
     // Datos propios del iPhone en la ficha del producto (estado, batería, controles, accesorios).
     function renderGalleryIphone(prod, boxEl, cfg, preview) {
       const box = boxEl || document.getElementById('gallery-iphone');
@@ -2715,13 +2841,19 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       let h = '';
       // Almacenamiento y SIM: primero y bien grande (es lo que más pregunta la gente).
       if (iphHasSpec(prod)) {
-        h += `<div class="rounded-lg border border-sky-800/70 bg-sky-950/40 p-2.5 space-y-1.5" data-iph-spec-box>
-          <div class="flex items-center justify-between gap-3 text-sm"><span class="text-zinc-300 font-semibold">Almacenamiento</span><span class="text-white font-extrabold">${escapeHtml(iphStorageText(prod.storage))}</span></div>
-          <div class="flex items-center justify-between gap-3 text-sm"><span class="text-zinc-300 font-semibold">Tipo de SIM</span><span class="text-white font-extrabold text-right">${escapeHtml(IPH_SIM_TEXT[prod.sim])}</span></div>
-          <div class="text-[11px] text-sky-200 leading-snug">${escapeHtml(IPH_SIM_NOTE[prod.sim])}</div>
-        </div>`;
+        // Cuatro fichas: las dos primeras (memoria y SIM) con una franja de color y en grande.
+        const tile = (label, value, bar) => `<div class="rounded-xl border border-zinc-700/70 bg-zinc-900/60 overflow-hidden">${bar ? `<div style="height:5px;background:${bar}"></div>` : ''}<div class="px-3 ${bar ? 'pt-2 pb-2.5' : 'py-2.5'}"><div class="text-[11px] font-semibold text-zinc-400">${label}</div><div class="mt-0.5 ${bar ? 'text-xl font-extrabold' : 'text-sm font-bold'} text-white leading-tight">${value}</div></div></div>`;
+        const wm = warrantyMonths(prod.warranty);
+        h += `<div class="grid grid-cols-2 gap-2" data-iph-spec-box>
+          ${tile('Almacenamiento', escapeHtml(iphStorageText(prod.storage)), '#F97316')}
+          ${tile('Tipo de SIM', escapeHtml(IPH_SIM_TEXT[prod.sim]), '#0EA5E9')}
+          ${tile('Condición', used ? 'Usado, revisado' : 'Nuevo, sellado')}
+          ${tile('Garantía PlugShop', escapeHtml(wm || '—'))}
+        </div>
+        <div class="rounded-lg px-3 py-2 text-[11px] leading-snug" style="background:#E0F2FE;color:#075985">${escapeHtml(IPH_SIM_NOTE[prod.sim])}</div>${preview ? '' : iphOtherStoragesHtml(prod)}`;
+      } else {
+        h += row('Condición', used ? '♻️ Usado, revisado' : '📦 Nuevo, sellado');
       }
-      h += row('Condición', used ? '♻️ Usado, revisado' : '📦 Nuevo, sellado');
       if (used && g) h += row('Estado', escapeHtml(`${g.name}`)) + (g.desc ? `<div class="text-[11px] text-zinc-400 leading-snug">${escapeHtml(g.desc)}</div>` : '');
       if (used && prod.battery) h += row('Batería', '🔋 ' + escapeHtml(String(prod.battery)) + '%');
       if (prod.accessories) h += row(used ? 'Incluye' : 'Trae', escapeHtml(prod.accessories));
@@ -2860,6 +2992,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         { id: 'iphone', tab: 'iphone', icon: '📱', label: 'Sección iPhone' }] },
       { id: 'fin', icon: '💰', label: 'Logística y Finanzas', items: [
         { id: 'cash', tab: 'finances', fin: 'cash', icon: '💵', label: 'Caja diaria' },
+        { id: 'cobros', tab: 'settings', sec: 'cobros', icon: '💳', label: 'Cobros' },
+        { id: 'envios', tab: 'settings', sec: 'envios', icon: '🚚', label: 'Envíos y tarifas' },
         { id: 'couriers', tab: 'couriers', icon: '🛵', label: 'Rendición de Cadetes' },
         { id: 'suppliers', tab: 'suppliers', icon: '🤝', label: 'Proveedores' },
         { id: 'mono', tab: 'finances', fin: 'mono', icon: '🧾', label: 'Monotributo' }] },
@@ -2872,7 +3006,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         { id: 'sim', tab: 'finances', fin: 'sim', icon: '🧮', label: 'Simulador de margen' },
         { id: 'smart-engine', tab: 'smart-engine', icon: '🧠', label: 'Motor Inteligente' }] },
       { id: 'cfg', icon: '⚙️', label: 'Configuración del sistema', items: [
-        { id: 'rates', tab: 'settings', sec: 'rates', icon: '🚚', label: 'Tarifas y cobros' },
+        { id: 'tienda', tab: 'settings', sec: 'tienda', icon: '🏪', label: 'Mi tienda' },
+        { id: 'seguridad', tab: 'settings', sec: 'seguridad', icon: '🔒', label: 'Seguridad' },
         { id: 'staff-users', tab: 'staff-users', icon: '🔑', label: 'Usuarios & Permisos' },
         { id: 'print', tab: 'settings', sec: 'print', icon: '🖨️', label: 'Impresión' },
         { id: 'backup', tab: 'settings', sec: 'backup', icon: '💾', label: 'Copia de seguridad' },
@@ -2894,7 +3029,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       inventory: { def: 'inv', items: [['inv', '📦', 'Inventario activo'], ['new', '➕', 'Cargar producto'], ['cats', '🗂️', 'Categorías y garantía'], ['iphone', '📱', 'Sección iPhone', 'iphone']] },
       suppliers: { def: 'dir', items: [['dir', '📇', 'Directorio'], ['pay', '💳', 'Cuentas por pagar', null, true]] },
       offers: { def: 'ann', items: [['ann', '📣', 'Anuncios'], ['coupons', '🎟️', 'Cupones'], ['camp', '🎉', 'Campañas'], ['promos', '🏷️', 'Promos y pagos'], ['tips', '💡', 'Consejos del asesor']] },
-      settings: { flat: true, def: 'rates', items: [['rates', '🚚', 'Tarifas y cobros'], ['print', '🖨️', 'Impresión'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
+      settings: { flat: true, def: 'tienda', items: [['cobros', '💳', 'Cobros'], ['envios', '🚚', 'Envíos y tarifas'], ['tienda', '🏪', 'Mi tienda'], ['seguridad', '🔒', 'Seguridad'], ['print', '🖨️', 'Impresión'], ['backup', '💾', 'Copia de seguridad'], ['audit', '📜', 'Registro de cambios']] }
     };
     const SEC_NOW = {};
     const SEC_CHIP_ON = 'bg-brand-orange/15 border-brand-orange text-brand-orange', SEC_CHIP_OFF = 'bg-zinc-900 hover:bg-zinc-800 border-zinc-700 text-zinc-300';
@@ -3118,6 +3253,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
         accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
         onDemand: p.onDemand === true,
+        onDemandDeposit: Number.isInteger(Number(p.onDemandDeposit)) && Number(p.onDemandDeposit) >= 1 ? Number(p.onDemandDeposit) : null,
         storage: [128, 256, 512, 1024].includes(Number(p.storage)) ? Number(p.storage) : null, sim: ['esim', 'fisica', 'ambas'].includes(p.sim) ? p.sim : '',
         warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
         stockByColor: (p.stockByColor && typeof p.stockByColor === 'object' && !Array.isArray(p.stockByColor))
@@ -3282,7 +3418,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       transferDiscountPct: 10,
       advisorBias: 'equilibrado',
       featuredBrands: DEFAULT_BRANDS,
-      storeZone: 'Tucumán'
+      storeZone: 'Tucumán',
+      seasonMode: 'auto',
+      seasonSkip: []
     };
 
     const DEFAULT_ORDERS = []; // sin pedidos de ejemplo: los pedidos reales vienen del servidor
@@ -3716,7 +3854,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         const pv = await apiRequest('ORDERS', {}, '/' + encodeURIComponent(orderId));
         if (!pv) { alert('No pudimos conectar con el servidor para buscar el pedido. Probá de nuevo en un momento.'); return; }
         if (pv.success === false || !pv.id) { alert('No encontramos ese pedido. Revisá el número (ej. PS-AB12CD34).'); return; }
-        order = { id: pv.id, customer: pv.customer, address: '', items: pv.items, deliveryType: pv.deliveryType, paymentMethod: pv.paymentMethod, total: pv.total, status: pv.status };
+        order = { id: pv.id, customer: pv.customer, address: '', items: pv.items, deliveryType: pv.deliveryType, paymentMethod: pv.paymentMethod, total: pv.total, status: pv.status, deposit: pv.deposit || null, supplierOrdered: pv.supplierOrdered === true, supplierStage: typeof pv.supplierStage === 'string' ? pv.supplierStage : null };
       }
 
       if (!order) {
@@ -3753,8 +3891,20 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       driverBtn.href = `https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(driverMsg)}`;
 
       applyTrackingStages(order.status);
-      { const odn = document.getElementById('track-ondemand-note');
-        if (odn) odn.classList.toggle('hidden', !(/POR PEDIDO/.test(String(order.items || '')) && String(order.status || '').toLowerCase().includes('pago pendiente'))); }
+      { // iPhone por pedido: qué falta pagar y qué pasa si no se consigue
+        const odn = document.getElementById('track-ondemand-note');
+        if (odn) {
+          const dep = order.deposit, st = String(order.status || '').toLowerCase();
+          let html = '';
+          if (dep && /POR PEDIDO/.test(String(order.items || '')) && !['cancelado', 'entregado'].includes(st)) {
+            const saldo = dep.balancePaid || !dep.balance ? '' : ` El saldo de <b>${formatARS(dep.balance)}</b> lo pagás al recibirlo.`;
+            if (st.includes('pago pendiente') || st.includes('rechazado')) html = `📦 Tu pedido incluye un iPhone por pedido. <b>Transferí la seña de ${formatARS(dep.amount)}</b> para fijarlo y subí el comprobante.${saldo} <b>Si no lo conseguimos, te devolvemos la seña completa.</b>`;
+            else if (st.includes('comprobante enviado')) html = `🧾 Recibimos tu comprobante. Cuando confirmemos la seña de ${formatARS(dep.amount)}, pedimos tu iPhone a Buenos Aires.${saldo}`;
+            else html = `${iphStageHtml(order)}${saldo} Si no lo conseguimos, te devolvemos la seña completa.`;
+          }
+          odn.innerHTML = html;
+          odn.classList.toggle('hidden', !html);
+        } }
 
       const modal = document.getElementById('order-tracking-modal');
       modal.classList.remove('hidden');
@@ -4963,7 +5113,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     function waSetKey(k) { WA_KEY = k; const t = document.getElementById('wa-text'); if (k === 'free' && t) t.value = ''; renderWaSend(); }
     function waSaveNumber(v) {
       try { localStorage.setItem(OWNER_WA_KEY, String(v || '').trim()); } catch (e) { /* sin almacenamiento: queda el del local */ }
-      const t = document.getElementById('wa-target-note'); if (t) t.textContent = ownerWa() ? 'Guardado en este navegador.' : 'Vacío: se usa el WhatsApp del local (Ajustes).';
+      const t = document.getElementById('wa-target-note'); if (t) t.textContent = ownerWa() ? 'Guardado en este navegador.' : 'Vacío: se usa el WhatsApp del local (Configuración → Mi tienda).';
       waSyncLink();
     }
     function waSyncLink() {
@@ -4992,7 +5142,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <div>
             <label class="block text-[11px] font-bold text-zinc-400 mb-1" for="wa-target">Mi número de WhatsApp (adonde llega)</label>
             <input id="wa-target" type="tel" inputmode="tel" value="${escapeHtml(ownerWa())}" placeholder="${escapeHtml(STORE_SETTINGS.whatsappNumber || 'Ej. 381 555 1234')}" oninput="waSaveNumber(this.value)" class="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-brand-orange" />
-            <p id="wa-target-note" class="text-[10px] text-zinc-500 mt-1">${ownerWa() ? 'Guardado en este navegador.' : 'Vacío: se usa el WhatsApp del local (Ajustes).'}</p>
+            <p id="wa-target-note" class="text-[10px] text-zinc-500 mt-1">${ownerWa() ? 'Guardado en este navegador.' : 'Vacío: se usa el WhatsApp del local (Configuración → Mi tienda).'}</p>
           </div>
           <div>
             <label class="block text-[11px] font-bold text-zinc-400 mb-1" for="wa-text">Mensaje (podés editarlo)</label>
@@ -5135,6 +5285,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         gEl('new-prod-storage').value = IPH_STORAGES.includes(Number(p.storage)) ? String(p.storage) : '';
         gEl('new-prod-sim').value = IPH_SIMS.includes(p.sim) ? p.sim : '';
         gEl('new-prod-ondemand').checked = p.onDemand === true && !used;
+        gEl('new-prod-deposit').value = p.onDemandDeposit || '';
       }
       syncOnDemand();
     }
@@ -5143,7 +5294,17 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const od = gEl('new-prod-ondemand'), dl = document.getElementById('new-prod-delay');
       if (!od || !dl) return;
       if (od.checked) { dl.checked = true; dl.disabled = true; } else dl.disabled = false;
+      const dr = gEl('iph-f-deposit-row'); if (dr) dr.classList.toggle('hidden', !od.checked);
+      syncDepositHint();
       syncDelayBox();
+    }
+    // Muestra cuánto paga el cliente de saldo (precio de lista menos la seña), para que la cuenta sea visible.
+    function syncDepositHint() {
+      const h = gEl('iph-f-deposit-hint'), d = gEl('new-prod-deposit'), pr = document.getElementById('new-prod-price');
+      if (!h || !d) return;
+      const dep = parseInt(d.value, 10), price = parseFloat(pr && pr.value);
+      if (dep > 0 && price > 0) h.innerHTML = dep >= price ? '<span class="text-rose-300 font-bold">La seña tiene que ser menor que el precio.</span>' : `Seña ${formatARS(dep)} · el cliente paga el resto (${formatARS(price - dep)} a precio de lista, menos el descuento por transferencia) al recibirlo.`;
+      else h.textContent = 'Es lo que el cliente transfiere para fijar el equipo. Tiene que ser menos que el precio: lo que falta lo paga al recibirlo.';
     }
     function iphonePayload() {
       const used = gEl('new-prod-subcategory').value === IPHONE_USED;
@@ -5152,7 +5313,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         grade: used ? gEl('new-prod-grade').value : '', battery: used && bat > 0 ? bat : null,
         accessories: gEl('new-prod-accessories').value.trim(), imei: gEl('new-prod-imei').value.trim(), checks: used ? readChecks() : [],
         storage: Number(gEl('new-prod-storage').value) || '', sim: gEl('new-prod-sim').value,
-        onDemand: !used && gEl('new-prod-ondemand').checked
+        onDemand: !used && gEl('new-prod-ondemand').checked,
+        onDemandDeposit: !used && gEl('new-prod-ondemand').checked ? (parseInt(gEl('new-prod-deposit').value, 10) || null) : null
       };
     }
 
@@ -5235,6 +5397,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div class="text-[11px] font-bold ${isOnDemand(p) ? 'text-sky-300' : Number(p.stock) > 0 ? 'text-emerald-300' : 'text-rose-400'}">${isOnDemand(p) ? '📦 Por pedido' + (p.delayDaysMin ? ' · ' + p.delayDaysMin + ' a ' + p.delayDaysMax + ' días' : '') : Number(p.stock) > 0 ? p.stock + ' en stock' : 'Vendido / sin stock'}</div>
           </div>
           ${iphHasSpec(p) ? '' : '<div class="text-[11px] text-rose-300 font-bold">⚠️ Falta elegir almacenamiento y tipo de SIM: tocá “Editar” y completalos antes de publicarlo.</div>'}
+          ${isOnDemand(p) ? (iphDeposit(p) ? `<div class="text-[11px] text-sky-300 font-semibold">💸 Seña ${formatARS(iphDeposit(p))} · el cliente paga el resto al recibirlo</div>` : '<div class="text-[11px] text-rose-300 font-bold">⚠️ Falta la seña: tocá “Editar” y poné cuánto transfiere el cliente para fijarlo.</div>') : ''}
           <div class="text-[11px] ${p.imei || isOnDemand(p) ? 'text-zinc-400' : 'text-amber-300'}">${p.imei ? 'IMEI/serie: <span class="font-code text-zinc-200">' + escapeHtml(p.imei) + '</span>' : (isOnDemand(p) ? 'IMEI/serie: se carga cuando te llega el equipo (para la constancia)' : '⚠️ Falta cargar el IMEI/serie')}</div>
           ${res ? `<div class="text-[11px] text-amber-300 font-semibold">🔖 Reservado para ${escapeHtml(p.reservedFor || '')} (${escapeHtml(p.reservedPhone || '')}) · vence en ${iphLeft(p.reservedUntil)}</div>` : ''}
           <div class="flex gap-1.5 flex-wrap pt-1">
@@ -6331,8 +6494,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         if (since && (o.createdAt || 0) < since) return;
         const net = orderNetTotal(o);
         if (orderCollected(o)) {
-          r.collected += net;
-          if (isTransferOrder(o)) r.bank += net; else r.cash += net;
+          // iPhone por pedido con seña: hasta cobrar el saldo, lo cobrado es solo la seña y el saldo queda pendiente.
+          const dep = o.deposit && !o.deposit.balancePaid ? o.deposit : null;
+          const got = dep ? Math.max(0, (Number(dep.amount) || 0) - (o.refund ? Math.min(Number(o.refund.amount) || 0, Number(dep.amount) || 0) : 0)) : net;
+          r.collected += got;
+          if (isTransferOrder(o)) r.bank += got; else r.cash += got;
+          if (dep && !o.refund) { r.pending += Number(dep.balance) || 0; r.pendingCount += 1; }
         } else { r.pending += net; r.pendingCount += 1; }
         if (['Despachado', 'Entregado'].includes(o.status) && !String(o.deliveryType || '').includes('Retiro')) {
           r.shipping += (typeof o.shippingCost === 'number' ? o.shippingCost : (STORE_SETTINGS.shippingCost || 0));
@@ -6673,6 +6840,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <td class="py-3 px-4 o-total">
             <div class="font-bold text-brand-amber">${formatARS(o.total)}</div>
             <span class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold ${isTransfer ? 'bg-sky-950 text-sky-400 border border-sky-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">${escapeHtml(o.paymentMethod || 'Transferencia')}</span>
+            ${o.deposit ? `<div class="mt-1 text-[10px] font-bold text-sky-300">📦 Por pedido · seña ${formatARS(o.deposit.amount)}</div><div class="text-[10px] font-bold ${o.deposit.balancePaid || !o.deposit.balance ? 'text-emerald-400' : 'text-amber-300'}">${o.deposit.balancePaid || !o.deposit.balance ? '✓ Saldo cobrado' : 'Saldo por cobrar ' + formatARS(o.deposit.balance)}</div>${o.supplierOrderedAt ? '<div class="text-[10px] font-bold text-emerald-400">✓ Pedido a Buenos Aires</div>' : ''}` : ''}
           </td>
           <td class="py-3 px-4 o-status">
             <select onchange="updateOrderStatus('${o.id}', this.value)" class="bg-zinc-900 border border-zinc-700 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer font-sans">
@@ -6691,6 +6859,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               ${(o.status === 'En preparación' && canScan && !ordPickupPending(o)) ? `<button onclick="openScanModal('dispatch', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📷 Salida</button>` : ''}
               ${(o.status === 'Despachado' && canScan) ? `<button onclick="openScanModal('handover', '${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 border border-emerald-800 text-[11px] font-semibold">📲 Entregar</button>` : ''}
               ${(o.proof || o.hasProof) ? `<button onclick="openProofModal('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-300 border border-sky-800 text-[11px] font-semibold">🧾 Comprobante</button>` : ''}
+              ${(o.deposit && o.status === 'En preparación' && !o.supplierOrderedAt && canManageOrd) ? `<button onclick="markSupplierOrdered('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-200 border border-sky-700 text-[11px] font-bold">📦 Ya lo pedí a Buenos Aires</button>` : ''}
+              ${(o.deposit && o.status === 'En preparación' && o.supplierOrderedAt && canManageOrd) ? (() => { const st = o.supplierStage || 'pedido'; const nx = { pedido: ['camino', '🚚 Ya viene en camino'], camino: ['cerca', '📍 Está por llegar'], cerca: ['llego', '✅ Ya llegó'] }[st]; return `<span class="px-2 py-1 rounded-lg bg-zinc-900 text-sky-200 border border-sky-800 text-[11px] font-bold">${{ pedido: '📦 Pedido · en proceso', camino: '🚚 En camino', cerca: '📍 Por llegar', llego: '✅ Ya llegó' }[st]}</span>` + (nx ? `<button onclick="markSupplierStage('${o.id}', '${nx[0]}')" class="px-2.5 py-1.5 rounded-lg bg-sky-950 hover:bg-sky-900 text-sky-200 border border-sky-700 text-[11px] font-bold">${nx[1]}</button>` : ''); })() : ''}
+              ${(o.deposit && !o.deposit.balancePaid && o.deposit.balance > 0 && ['En preparación', 'Despachado'].includes(o.status) && canScan) ? `<button onclick="markBalancePaid('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-amber-950 hover:bg-amber-900 text-amber-200 border border-amber-700 text-[11px] font-bold">💵 Cobré el saldo ${formatARS(o.deposit.balance)}</button>` : ''}
               <button onclick="sendOrderUpdateWhatsApp('${o.id}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-400 border border-emerald-800 text-[11px] font-semibold transition-colors" title="Abre WhatsApp con el mensaje que corresponde al estado del pedido">WhatsApp</button>
               <button type="button" onclick="toggleOrderMore(this)" aria-expanded="false" aria-label="Más acciones del pedido ${escapeHtml(o.id)}" class="px-2.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[11px] font-bold">⋯ Más</button>
             </div>
@@ -6709,6 +6880,55 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       renderCourierFilter();
       renderOrderFicha();
       renderRoute();
+    }
+    // iPhone por pedido: "Ya lo pedí a Buenos Aires". Desde ahí el cliente ya no cancela solo desde Mi Cuenta.
+    // iPhone por pedido: avanza el seguimiento que ve el cliente (en camino → por llegar → ya llegó). Solo hacia adelante.
+    async function markSupplierStage(orderId, stage) {
+      const order = ADMIN_ORDERS.find(o => o.id === orderId);
+      if (!order) return;
+      const txt = { camino: 'ya viene en camino', cerca: 'está por llegar', llego: 'ya llegó' }[stage];
+      if (!txt || !confirm('¿Confirmás que el iPhone ' + txt + '?\n\nEl cliente recibe un aviso en su campanita.')) return;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('ORDERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ stage }) }, '/' + encodeURIComponent(orderId) + '/supplier-stage');
+        if (!res || res.success === false || !res.order) { alert((res && res.error) || 'No se pudo cambiar el seguimiento.'); return; }
+        Object.assign(order, res.order);
+      } else {
+        order.supplierStage = stage;
+        saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
+      }
+      renderOrdersTable();
+    }
+    async function markSupplierOrdered(orderId) {
+      const order = ADMIN_ORDERS.find(o => o.id === orderId);
+      if (!order) return;
+      if (!confirm('¿Ya hiciste el pedido de este iPhone a Buenos Aires?\n\nDesde ese momento el cliente ya no puede cancelar solo desde Mi Cuenta: tendría que escribirte.')) return;
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('ORDERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: '{}' }, '/' + encodeURIComponent(orderId) + '/supplier-ordered');
+        if (!res || res.success === false || !res.order) { alert((res && res.error) || 'No se pudo marcar el pedido.'); return; }
+        Object.assign(order, res.order);
+      } else {
+        order.supplierOrderedAt = new Date().toISOString();
+        saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
+      }
+      renderOrdersTable();
+    }
+    // iPhone por pedido: se cobró el saldo (lo que faltaba después de la seña). Sin esto no se puede marcar Entregado.
+    async function markBalancePaid(orderId) {
+      const order = ADMIN_ORDERS.find(o => o.id === orderId);
+      if (!order || !order.deposit) return;
+      const ans = prompt(`Saldo de ${formatARS(order.deposit.balance)} del pedido ${orderId}.\n¿Cómo lo cobraste? Escribí: efectivo o transferencia`, 'efectivo');
+      if (ans === null) return;
+      const method = /^t/i.test(ans.trim()) ? 'transferencia' : /^e/i.test(ans.trim()) ? 'efectivo' : '';
+      if (!method) { alert('Escribí "efectivo" o "transferencia".'); return; }
+      if (isBackendConnected() && currentStaffSession.token) {
+        const res = await apiRequest('ORDERS', { method: 'POST', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify({ method }) }, '/' + encodeURIComponent(orderId) + '/balance');
+        if (!res || res.success === false || !res.order) { alert((res && res.error) || 'No se pudo marcar el saldo como cobrado.'); return; }
+        Object.assign(order, res.order);
+      } else {
+        order.deposit.balancePaid = true; order.deposit.balanceMethod = method;
+        saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
+      }
+      renderOrdersTable();
     }
     async function addOrderNote(orderId) {
       const text = prompt('Nota interna sobre el pedido ' + orderId + ' (el cliente NO la ve):', '');
@@ -6950,6 +7170,101 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       return [main].concat(all.filter(k => k !== main));
     }
 
+    // ---------- Certificado de garantía (digital, hoja A5 vertical) ----------
+    // Se arma con los datos del pedido y se abre en otra pestaña para guardar como PDF o imprimir.
+    // No lleva datos del vendedor (pedido del Jefe) ni datos personales del cliente.
+    const CERT_QR_NUMBER = '5493816993305'; // el código QR de abajo apunta a este WhatsApp
+    const CERT_QR_PATH = 'M0 0h7v1h-7zM11 0h2v1h-2zM17 0h1v1h-1zM19 0h1v1h-1zM21 0h1v1h-1zM23 0h1v1h-1zM30 0h4v1h-4zM36 0h1v1h-1zM38 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM10 1h1v1h-1zM14 1h2v1h-2zM18 1h2v1h-2zM22 1h1v1h-1zM24 1h1v1h-1zM26 1h2v1h-2zM29 1h1v1h-1zM31 1h3v1h-3zM35 1h1v1h-1zM38 1h1v1h-1zM44 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM11 2h1v1h-1zM14 2h3v1h-3zM18 2h1v1h-1zM23 2h1v1h-1zM25 2h1v1h-1zM28 2h3v1h-3zM32 2h2v1h-2zM35 2h1v1h-1zM38 2h1v1h-1zM40 2h3v1h-3zM44 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM13 3h2v1h-2zM16 3h7v1h-7zM24 3h2v1h-2zM27 3h1v1h-1zM29 3h3v1h-3zM35 3h2v1h-2zM38 3h1v1h-1zM40 3h3v1h-3zM44 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h4v1h-4zM14 4h1v1h-1zM19 4h6v1h-6zM29 4h2v1h-2zM34 4h3v1h-3zM38 4h1v1h-1zM40 4h3v1h-3zM44 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM12 5h5v1h-5zM18 5h1v1h-1zM20 5h1v1h-1zM24 5h3v1h-3zM33 5h1v1h-1zM38 5h1v1h-1zM44 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h1v1h-1zM24 6h1v1h-1zM26 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM38 6h7v1h-7zM8 7h1v1h-1zM11 7h6v1h-6zM19 7h2v1h-2zM24 7h1v1h-1zM28 7h1v1h-1zM30 7h1v1h-1zM35 7h2v1h-2zM0 8h1v1h-1zM2 8h5v1h-5zM9 8h1v1h-1zM14 8h1v1h-1zM18 8h8v1h-8zM27 8h1v1h-1zM29 8h1v1h-1zM31 8h1v1h-1zM34 8h2v1h-2zM38 8h5v1h-5zM0 9h1v1h-1zM2 9h1v1h-1zM4 9h2v1h-2zM9 9h2v1h-2zM12 9h1v1h-1zM14 9h2v1h-2zM17 9h1v1h-1zM19 9h2v1h-2zM22 9h1v1h-1zM27 9h1v1h-1zM30 9h2v1h-2zM35 9h2v1h-2zM40 9h5v1h-5zM0 10h1v1h-1zM5 10h3v1h-3zM10 10h1v1h-1zM12 10h2v1h-2zM15 10h1v1h-1zM17 10h4v1h-4zM24 10h6v1h-6zM31 10h1v1h-1zM33 10h7v1h-7zM42 10h2v1h-2zM2 11h2v1h-2zM5 11h1v1h-1zM7 11h1v1h-1zM9 11h5v1h-5zM18 11h1v1h-1zM23 11h1v1h-1zM27 11h7v1h-7zM36 11h5v1h-5zM42 11h1v1h-1zM0 12h1v1h-1zM3 12h1v1h-1zM5 12h2v1h-2zM9 12h1v1h-1zM11 12h1v1h-1zM13 12h1v1h-1zM15 12h1v1h-1zM17 12h3v1h-3zM21 12h2v1h-2zM24 12h1v1h-1zM26 12h2v1h-2zM29 12h3v1h-3zM34 12h1v1h-1zM36 12h1v1h-1zM39 12h1v1h-1zM41 12h1v1h-1zM44 12h1v1h-1zM0 13h6v1h-6zM8 13h1v1h-1zM12 13h2v1h-2zM15 13h1v1h-1zM19 13h1v1h-1zM24 13h1v1h-1zM28 13h4v1h-4zM33 13h1v1h-1zM35 13h3v1h-3zM39 13h1v1h-1zM42 13h3v1h-3zM0 14h1v1h-1zM2 14h2v1h-2zM5 14h2v1h-2zM8 14h1v1h-1zM10 14h1v1h-1zM14 14h3v1h-3zM18 14h3v1h-3zM23 14h4v1h-4zM28 14h1v1h-1zM33 14h2v1h-2zM38 14h2v1h-2zM42 14h1v1h-1zM1 15h1v1h-1zM5 15h1v1h-1zM7 15h1v1h-1zM10 15h1v1h-1zM14 15h2v1h-2zM21 15h1v1h-1zM24 15h7v1h-7zM32 15h2v1h-2zM36 15h1v1h-1zM40 15h5v1h-5zM2 16h1v1h-1zM4 16h1v1h-1zM6 16h1v1h-1zM8 16h1v1h-1zM11 16h1v1h-1zM13 16h2v1h-2zM18 16h1v1h-1zM20 16h1v1h-1zM22 16h1v1h-1zM24 16h1v1h-1zM26 16h1v1h-1zM29 16h2v1h-2zM33 16h3v1h-3zM38 16h2v1h-2zM1 17h1v1h-1zM4 17h2v1h-2zM7 17h1v1h-1zM10 17h1v1h-1zM14 17h1v1h-1zM16 17h1v1h-1zM21 17h1v1h-1zM27 17h1v1h-1zM30 17h2v1h-2zM35 17h2v1h-2zM42 17h3v1h-3zM0 18h2v1h-2zM4 18h3v1h-3zM9 18h1v1h-1zM11 18h1v1h-1zM13 18h3v1h-3zM17 18h1v1h-1zM20 18h1v1h-1zM22 18h3v1h-3zM26 18h1v1h-1zM29 18h1v1h-1zM31 18h1v1h-1zM33 18h3v1h-3zM37 18h2v1h-2zM0 19h2v1h-2zM3 19h1v1h-1zM5 19h1v1h-1zM7 19h1v1h-1zM10 19h2v1h-2zM14 19h3v1h-3zM19 19h1v1h-1zM21 19h1v1h-1zM23 19h2v1h-2zM27 19h2v1h-2zM31 19h2v1h-2zM35 19h1v1h-1zM37 19h1v1h-1zM39 19h2v1h-2zM42 19h1v1h-1zM44 19h1v1h-1zM0 20h9v1h-9zM12 20h4v1h-4zM18 20h7v1h-7zM26 20h2v1h-2zM29 20h3v1h-3zM36 20h5v1h-5zM0 21h2v1h-2zM4 21h1v1h-1zM8 21h2v1h-2zM13 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM28 21h3v1h-3zM33 21h1v1h-1zM35 21h2v1h-2zM40 21h5v1h-5zM0 22h1v1h-1zM2 22h3v1h-3zM6 22h1v1h-1zM8 22h1v1h-1zM10 22h4v1h-4zM16 22h1v1h-1zM18 22h3v1h-3zM22 22h1v1h-1zM24 22h3v1h-3zM28 22h1v1h-1zM33 22h4v1h-4zM38 22h1v1h-1zM40 22h1v1h-1zM42 22h2v1h-2zM4 23h1v1h-1zM8 23h2v1h-2zM11 23h1v1h-1zM14 23h2v1h-2zM18 23h3v1h-3zM24 23h2v1h-2zM28 23h1v1h-1zM30 23h1v1h-1zM32 23h2v1h-2zM36 23h1v1h-1zM40 23h3v1h-3zM0 24h2v1h-2zM4 24h5v1h-5zM11 24h1v1h-1zM13 24h1v1h-1zM15 24h2v1h-2zM18 24h7v1h-7zM26 24h2v1h-2zM29 24h1v1h-1zM36 24h6v1h-6zM44 24h1v1h-1zM0 25h1v1h-1zM2 25h2v1h-2zM7 25h1v1h-1zM9 25h1v1h-1zM11 25h1v1h-1zM14 25h2v1h-2zM18 25h2v1h-2zM22 25h3v1h-3zM28 25h1v1h-1zM30 25h1v1h-1zM33 25h1v1h-1zM36 25h2v1h-2zM41 25h1v1h-1zM44 25h1v1h-1zM2 26h1v1h-1zM4 26h1v1h-1zM6 26h3v1h-3zM10 26h1v1h-1zM12 26h1v1h-1zM18 26h1v1h-1zM20 26h1v1h-1zM22 26h2v1h-2zM25 26h3v1h-3zM31 26h1v1h-1zM33 26h2v1h-2zM36 26h1v1h-1zM40 26h4v1h-4zM0 27h3v1h-3zM7 27h2v1h-2zM12 27h2v1h-2zM15 27h1v1h-1zM18 27h1v1h-1zM20 27h2v1h-2zM24 27h1v1h-1zM27 27h6v1h-6zM35 27h1v1h-1zM37 27h2v1h-2zM40 27h3v1h-3zM44 27h1v1h-1zM0 28h1v1h-1zM2 28h1v1h-1zM4 28h1v1h-1zM6 28h1v1h-1zM8 28h1v1h-1zM11 28h1v1h-1zM13 28h4v1h-4zM23 28h2v1h-2zM30 28h2v1h-2zM38 28h1v1h-1zM40 28h1v1h-1zM42 28h1v1h-1zM44 28h1v1h-1zM1 29h1v1h-1zM5 29h1v1h-1zM9 29h5v1h-5zM19 29h1v1h-1zM21 29h2v1h-2zM25 29h1v1h-1zM27 29h1v1h-1zM29 29h2v1h-2zM33 29h1v1h-1zM35 29h1v1h-1zM38 29h1v1h-1zM41 29h1v1h-1zM2 30h2v1h-2zM6 30h1v1h-1zM11 30h1v1h-1zM13 30h1v1h-1zM16 30h3v1h-3zM20 30h4v1h-4zM25 30h2v1h-2zM34 30h1v1h-1zM39 30h1v1h-1zM42 30h2v1h-2zM0 31h2v1h-2zM3 31h1v1h-1zM10 31h6v1h-6zM17 31h2v1h-2zM23 31h3v1h-3zM27 31h1v1h-1zM29 31h2v1h-2zM32 31h2v1h-2zM35 31h2v1h-2zM38 31h2v1h-2zM41 31h3v1h-3zM1 32h2v1h-2zM5 32h2v1h-2zM11 32h1v1h-1zM14 32h2v1h-2zM20 32h2v1h-2zM23 32h3v1h-3zM30 32h2v1h-2zM40 32h1v1h-1zM43 32h1v1h-1zM2 33h4v1h-4zM7 33h1v1h-1zM14 33h2v1h-2zM17 33h1v1h-1zM19 33h1v1h-1zM21 33h4v1h-4zM30 33h2v1h-2zM37 33h1v1h-1zM39 33h1v1h-1zM41 33h4v1h-4zM4 34h1v1h-1zM6 34h2v1h-2zM12 34h1v1h-1zM14 34h1v1h-1zM16 34h1v1h-1zM18 34h1v1h-1zM20 34h2v1h-2zM23 34h1v1h-1zM25 34h3v1h-3zM29 34h1v1h-1zM31 34h4v1h-4zM36 34h1v1h-1zM39 34h4v1h-4zM1 35h4v1h-4zM7 35h2v1h-2zM10 35h1v1h-1zM12 35h1v1h-1zM15 35h1v1h-1zM17 35h1v1h-1zM20 35h1v1h-1zM22 35h1v1h-1zM24 35h1v1h-1zM27 35h6v1h-6zM35 35h2v1h-2zM38 35h2v1h-2zM41 35h3v1h-3zM0 36h1v1h-1zM3 36h2v1h-2zM6 36h2v1h-2zM10 36h1v1h-1zM15 36h1v1h-1zM17 36h2v1h-2zM20 36h5v1h-5zM29 36h2v1h-2zM36 36h5v1h-5zM42 36h2v1h-2zM8 37h2v1h-2zM11 37h1v1h-1zM13 37h1v1h-1zM16 37h1v1h-1zM18 37h1v1h-1zM20 37h1v1h-1zM24 37h2v1h-2zM27 37h4v1h-4zM32 37h2v1h-2zM35 37h2v1h-2zM40 37h5v1h-5zM0 38h7v1h-7zM9 38h2v1h-2zM13 38h1v1h-1zM18 38h3v1h-3zM22 38h1v1h-1zM24 38h1v1h-1zM26 38h2v1h-2zM29 38h1v1h-1zM34 38h3v1h-3zM38 38h1v1h-1zM40 38h1v1h-1zM42 38h2v1h-2zM0 39h1v1h-1zM6 39h1v1h-1zM8 39h3v1h-3zM13 39h1v1h-1zM15 39h3v1h-3zM19 39h2v1h-2zM24 39h1v1h-1zM26 39h1v1h-1zM28 39h5v1h-5zM34 39h3v1h-3zM40 39h4v1h-4zM0 40h1v1h-1zM2 40h3v1h-3zM6 40h1v1h-1zM8 40h1v1h-1zM12 40h2v1h-2zM20 40h6v1h-6zM27 40h1v1h-1zM29 40h3v1h-3zM33 40h9v1h-9zM43 40h1v1h-1zM0 41h1v1h-1zM2 41h3v1h-3zM6 41h1v1h-1zM8 41h2v1h-2zM12 41h1v1h-1zM14 41h2v1h-2zM18 41h2v1h-2zM29 41h2v1h-2zM32 41h1v1h-1zM35 41h1v1h-1zM39 41h2v1h-2zM43 41h2v1h-2zM0 42h1v1h-1zM2 42h3v1h-3zM6 42h1v1h-1zM8 42h2v1h-2zM11 42h1v1h-1zM13 42h5v1h-5zM21 42h1v1h-1zM24 42h5v1h-5zM30 42h5v1h-5zM36 42h1v1h-1zM39 42h1v1h-1zM42 42h2v1h-2zM0 43h1v1h-1zM6 43h1v1h-1zM12 43h2v1h-2zM15 43h2v1h-2zM18 43h4v1h-4zM27 43h2v1h-2zM31 43h3v1h-3zM37 43h1v1h-1zM41 43h2v1h-2zM0 44h7v1h-7zM8 44h1v1h-1zM10 44h1v1h-1zM13 44h2v1h-2zM17 44h1v1h-1zM21 44h1v1h-1zM23 44h2v1h-2zM26 44h1v1h-1zM29 44h2v1h-2zM33 44h2v1h-2zM36 44h1v1h-1zM38 44h2v1h-2zM43 44h1v1h-1z';
+    function certProductOf(line) { return (typeof PRODUCTS !== 'undefined' ? PRODUCTS : []).find(p => String(p.id) === String(line.id)) || null; }
+    function certInfo(line) {
+      const p = certProductOf(line); if (!p) return null;
+      let months = Number(p.warrantyMonths) || legacyWarrantyMonths(p.warranty) || (p.type === 'original' ? 12 : 6);
+      months = months >= 12 ? 12 : months >= 6 ? 6 : 3;
+      const by = isIphoneProd(p) ? 'tienda' : (p.warrantyBy || (p.type === 'original' ? 'marca' : 'tienda'));
+      return { months, by, name: line.name || p.name, color: line.color && line.color !== 'Único' ? line.color : '' };
+    }
+    function certDate(o) {
+      const at = o && o.deliveryLog && o.deliveryLog.at; const d = at ? new Date(at) : null;
+      return d && !isNaN(d) ? d.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '';
+    }
+    function certSealPath() {
+      let d = ''; for (let i = 0; i <= 240; i++) { const t = i / 240 * Math.PI * 2, r = 56.4 + 1.8 * Math.cos(12 * t); d += (i ? 'L' : 'M') + (60 + r * Math.cos(t)).toFixed(2) + ',' + (60 + r * Math.sin(t)).toFixed(2); }
+      return d + 'Z';
+    }
+    function certWaLabel() {
+      const n = String(STORE_SETTINGS.whatsappNumber || '').replace(/\D/g, '').replace(/^549?/, '');
+      return n.length === 10 ? `${n.slice(0, 3)} ${n.slice(3, 6)}-${n.slice(6)}` : n;
+    }
+    function certPagesHtml(o, line) {
+      const c = certInfo(line); if (!c) return '';
+      const E = escapeHtml, acc = '#FF8A00', lab = 'font-size:9px;font-weight:700;letter-spacing:.14em;color:#6B665B;line-height:11px';
+      const box = on => `<div style="width:11px;height:11px;box-sizing:border-box;border:1.3px solid #0B0B0D;background:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;line-height:1;font-weight:800">${on ? '✕' : ''}</div>`;
+      const frame = inner => `<section class="page"><div style="position:absolute;inset:12px;border:1.5px solid #0B0B0D"></div><div style="position:absolute;inset:17px;border:.75px solid ${acc}"></div><div style="position:absolute;inset:0;box-sizing:border-box;padding:30px 38px 28px;display:flex;flex-direction:column;justify-content:space-between">${inner}</div></section>`;
+      const h = t => `<div style="font-family:'Playfair Display',Georgia,serif;font-size:12.5px;font-weight:700;letter-spacing:.04em">${t}</div>`;
+      const field = (k, v) => `<div><div style="${lab}">${k}</div><div style="min-height:19px;border-bottom:1px solid #0B0B0D;font-size:13px;font-weight:700;padding-top:2px">${E(v)}</div></div>`;
+      const wa = certWaLabel();
+      const foot = `<div style="border-top:1px solid #0B0B0D;padding-top:7px;display:flex;justify-content:space-between;align-items:center;gap:12px"><div style="font-size:11px;font-weight:800">WhatsApp ${E(wa)}</div><div style="font-size:11px;font-weight:800">plugshop.com.ar</div></div>`;
+      const logo = `<div style="display:flex;align-items:center;justify-content:center;gap:8px"><svg viewBox="8 20 76 50" width="44" height="29" fill="none" role="img" aria-label="PLUGSHOP"><defs><linearGradient id="o" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#ffb703"/><stop offset="100%" stop-color="#ff6200"/></linearGradient></defs><rect x="20" y="32" width="16" height="4.5" rx="2.2" fill="url(#o)"/><rect x="12" y="41" width="24" height="4.5" rx="2.2" fill="url(#o)"/><rect x="18" y="50" width="18" height="4.5" rx="2.2" fill="url(#o)"/><path d="M44 32H76L69 45H47L44 32Z" fill="url(#o)"/><path d="M34 25H43L50 51H73L79 30" stroke="#0B0B0D" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="50" cy="61" r="5" fill="url(#o)"/><circle cx="69" cy="61" r="5" fill="url(#o)"/></svg><div style="font-size:16px;font-weight:800;letter-spacing:.16em">PLUGSHOP</div></div>`;
+      const seal = `<svg viewBox="0 0 120 120" width="112" height="112" role="img" aria-label="Sello de garantía ${c.months} meses"><path d="${certSealPath()}" fill="${acc}"/><circle cx="60" cy="60" r="46" fill="none" stroke="#0B0B0D" stroke-width="1.6"/><circle cx="60" cy="60" r="42" fill="none" stroke="#0B0B0D" stroke-width=".6"/><text x="60" y="33" text-anchor="middle" font-size="7.5" font-weight="800" letter-spacing="1.6" fill="#0B0B0D">GARANTÍA</text><text x="60" y="74" text-anchor="middle" font-family="'Playfair Display',Georgia,serif" font-size="40" font-weight="800" fill="#0B0B0D">${c.months}</text><text x="60" y="89" text-anchor="middle" font-size="9" font-weight="800" letter-spacing="2.2" fill="#0B0B0D">MESES</text></svg>`;
+      const front = frame(`${logo}
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px"><div><div style="font-family:'Playfair Display',Georgia,serif;font-size:31px;font-weight:800;line-height:1.02;letter-spacing:.01em">Certificado<br>de Garantía</div><div style="margin-top:8px;width:64px;height:2px;background:${acc}"></div><div style="margin-top:7px;${lab}">VÁLIDO DESDE LA FECHA DE ENTREGA</div></div>${seal}</div>
+        <div style="display:flex;flex-direction:column;gap:8px">${field('PRODUCTO', c.name + (c.color ? ' · ' + c.color : ''))}<div style="display:flex;gap:16px"><div style="flex:1 1 0">${field('N° DE PEDIDO', o.id)}</div><div style="flex:1 1 0">${field('FECHA DE ENTREGA', certDate(o))}</div></div>
+          <div><div style="${lab}">LA GARANTÍA LA DA</div><div style="margin-top:5px;display:flex;align-items:center;gap:22px"><div style="display:flex;align-items:center;gap:6px">${box(c.by === 'marca')}<div style="font-size:11px;font-weight:800">LA MARCA (oficial)</div></div><div style="display:flex;align-items:center;gap:6px">${box(c.by === 'tienda')}<div style="font-size:11px;font-weight:800">PLUGSHOP</div></div></div></div></div>
+        <div style="height:1px;background:#CFC8B8"></div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div>${h('Qué cubre')}<div style="font-size:10px;font-weight:500;line-height:1.3;color:#26262B">Fallas de fabricación o de funcionamiento que no se deban al uso.</div></div>
+          <div>${h('Qué no cubre')}<div style="font-size:10px;font-weight:500;line-height:1.3;color:#26262B">Golpes, caídas o pantalla rota · daños por líquidos o humedad · reparaciones de terceros no autorizados · cargadores o accesorios no compatibles · desgaste normal esperable (cables, fundas y el uso normal de la batería).</div></div>
+          <div>${h('Cómo reclamar')}<div style="font-size:10px;font-weight:500;line-height:1.3;color:#26262B">1. Escribinos por WhatsApp con tu n° de pedido. 2. Contanos la falla, con fotos o video. 3. Te decimos cómo traer o enviar el producto.</div></div>
+          <div style="font-size:9px;font-weight:500;line-height:1.3;color:#4F4F56">Conservá la caja, los accesorios y este certificado. Si no se puede reparar, elegís: cambio por otro igual (nuevo), devolución del dinero o quita proporcional del precio (Ley 24.240, art. 17). Si la da la marca, rigen también sus condiciones oficiales. No limita tus derechos de consumidor.</div></div>
+        ${foot}`);
+      const step = (n, t) => `<div style="display:flex;gap:8px;align-items:flex-start"><div style="width:18px;height:18px;flex-shrink:0;border-radius:50%;background:#0B0B0D;color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center">${n}</div><div style="font-size:10.5px;font-weight:500;line-height:1.35;color:#26262B">${t}</div></div>`;
+      const dot = t => `<div style="display:flex;gap:7px"><div style="margin-top:5px;width:5px;height:5px;flex-shrink:0;background:${acc}"></div><div style="font-size:10.5px;font-weight:500;line-height:1.35;color:#26262B">${t}</div></div>`;
+      const row = '<div style="display:flex;gap:6px"><div style="width:58px;border-bottom:1px solid #0B0B0D;height:22px"></div><div style="flex:1 1 0;border-bottom:1px solid #0B0B0D;height:22px"></div><div style="width:112px;border-bottom:1px solid #0B0B0D;height:22px"></div></div>';
+      const qrOk = String(STORE_SETTINGS.whatsappNumber || '').replace(/\D/g, '') === CERT_QR_NUMBER; // si cambiaste el WhatsApp, el QR viejo no se imprime
+      const qr = qrOk ? `<div style="flex-shrink:0;text-align:center"><div style="padding:6px;background:#fff;border:1px solid #0B0B0D"><svg viewBox="0 0 45 45" width="96" height="96" shape-rendering="crispEdges" role="img" aria-label="Código QR para escribir por WhatsApp"><path d="${CERT_QR_PATH}" fill="#0B0B0D"/></svg></div><div style="margin-top:4px;${lab};letter-spacing:.1em">ESCANEÁ Y ESCRIBINOS</div></div>` : '';
+      const back = frame(`<div><div style="font-family:'Playfair Display',Georgia,serif;font-size:17px;font-weight:700;letter-spacing:.03em">Cómo reclamar tu garantía</div><div style="margin-top:6px;width:64px;height:2px;background:${acc}"></div></div>
+        <div style="display:flex;gap:16px;align-items:center"><div style="flex:1 1 0;display:flex;flex-direction:column;gap:7px">${step(1, 'Escribinos por WhatsApp con tu <b>n° de pedido</b>.')}${step(2, 'Contanos la falla, con <b>fotos o video</b>.')}${step(3, 'Te decimos cómo traer o enviar el producto.')}<div style="font-size:11px;font-weight:800;margin-top:2px">WhatsApp ${E(wa)}</div></div>${qr}</div>
+        <div style="height:1px;background:#CFC8B8"></div>
+        <div><div style="font-family:'Playfair Display',Georgia,serif;font-size:14px;font-weight:700;letter-spacing:.03em">Cuidados del producto</div><div style="margin-top:7px;display:flex;flex-direction:column;gap:4px">${dot('Usá el cargador y el cable originales, o certificados y compatibles con tu equipo.')}${dot('Evitá la humedad, los líquidos y los golpes. Un equipo mojado no está cubierto.')}${dot('No lo dejes al sol ni en un auto cerrado: el calor fuerte daña la batería.')}${dot('Si vas a guardarlo mucho tiempo, no lo dejes totalmente descargado.')}${dot('Guardá la caja, los accesorios y este certificado: los vas a necesitar para reclamar.')}</div></div>
+        <div style="height:1px;background:#CFC8B8"></div>
+        <div><div style="font-family:'Playfair Display',Georgia,serif;font-size:14px;font-weight:700;letter-spacing:.03em">Registro de reclamos</div><div style="margin-top:4px;font-size:9px;font-weight:500;color:#4F4F56">Se completa cada vez que el producto entra por garantía.</div><div style="margin-top:4px"><div style="display:flex;gap:6px"><div style="width:58px;${lab}">FECHA</div><div style="flex:1 1 0;${lab}">FALLA</div><div style="width:112px;${lab}">SOLUCIÓN</div></div>${row}${row}${row}</div></div>
+        ${foot}`);
+      return front + back;
+    }
+    // Devuelve la página completa (con barra de acciones que no se imprime). Una hoja de frente y dorso por producto.
+    function certDocHtml(o) {
+      const lines = Array.isArray(o.lines) ? o.lines : [];
+      const ok = lines.filter(l => certInfo(l)), miss = lines.filter(l => !certInfo(l));
+      const pages = ok.map(l => certPagesHtml(o, l)).join('');
+      const E = escapeHtml;
+      const text = `Hola ${String(o.customer || '').split(' ')[0] || ''}! Te mando el certificado de garantía de tu pedido #${o.id}. Guardalo junto con la caja: lo vas a necesitar si tenés que reclamar. ¡Gracias por tu compra en PLUGSHOP!`;
+      const waHref = waLink(o.phone, text);
+      return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="robots" content="noindex,nofollow"><title>Certificado de garantía · pedido ${E(o.id)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Inter+Tight:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+@page{size:A5;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{margin:0;background:#d9d6cf;font-family:'Inter Tight',system-ui,sans-serif;color:#0B0B0D}
+.bar{position:sticky;top:0;z-index:5;background:#0B0B0D;color:#fff;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.bar button,.bar a{background:#FF8A00;color:#000;border:0;border-radius:10px;padding:9px 14px;font-weight:800;font-size:13px;text-decoration:none;cursor:pointer}
+.bar a{background:#25D366}
+.bar .warn{flex-basis:100%;color:#fbbf24;font-size:12px}
+.page{position:relative;width:420px;height:595px;background:#FBF8F1;overflow:hidden;margin:16px auto;box-shadow:0 2px 12px rgba(0,0,0,.25);page-break-after:always;break-after:page}
+@media print{.bar{display:none}body{background:#fff}.page{zoom:1.3333;margin:0;box-shadow:none}.page:last-of-type{page-break-after:auto;break-after:auto}}
+</style></head><body>
+<div class="bar"><button type="button" onclick="window.print()">🖨️ Guardar como PDF / Imprimir</button><a href="${E(waHref)}" target="_blank" rel="noopener noreferrer">💬 Abrir WhatsApp del cliente</a><span>1) Guardá el PDF · 2) Abrí WhatsApp y adjuntalo.</span>${miss.length ? `<div class="warn">⚠️ No pude armar el certificado de: ${miss.map(l => E(l.name)).join(', ')} (ese producto ya no está en el catálogo, no sé cuántos meses de garantía tenía).</div>` : ''}</div>
+${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay productos para armar el certificado.</p>'}
+</bo` + `dy></ht` + `ml>`;
+    }
+    function openWarrantyCert(orderId) {
+      const o = ppFindOrder(orderId); if (!o) return;
+      if (o.status !== 'Entregado') { alert('El certificado se arma cuando el pedido está entregado: la garantía corre desde la fecha de entrega.'); return; }
+      if (!Array.isArray(o.lines) || !o.lines.length) { alert('Este pedido es antiguo y no tiene el detalle de productos. Cargá el certificado a mano.'); return; }
+      const w = window.open('', '_blank');
+      if (!w) { alert('Tu navegador bloqueó la ventana. Permití ventanas emergentes para este sitio y probá de nuevo.'); return; }
+      w.document.open(); w.document.write(certDocHtml(o)); w.document.close();
+    }
+
     // ---------- Línea de tiempo ----------
     function orderTimeline(o) {
       if (Array.isArray(o.events) && o.events.length) return o.events.map(e => ({ at: ppMs(e.at), by: e.by, text: e.text })).sort((a, b) => a.at - b.at);
@@ -7035,6 +7350,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (o.status === 'En preparación' && canScan && !ordPickupPending(o)) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `openScanModal('dispatch', '${o.id}')`, '📷 Registrar salida');
       if (o.status === 'Despachado' && canScan) btn('bg-emerald-500 hover:bg-emerald-400 text-black', `openScanModal('handover', '${o.id}')`, '📲 Entregar (QR del cliente)');
       if (o.status !== 'Cancelado' && canManage) btn('bg-zinc-800 hover:bg-zinc-700 text-zinc-100', `openPackageLabel('${o.id}')`, '🏷️ Etiqueta');
+      if (o.status === 'Entregado' && canManage && Array.isArray(o.lines) && o.lines.length) btn('bg-zinc-800 hover:bg-zinc-700 text-zinc-100', `openWarrantyCert('${o.id}')`, '🛡️ Certificado de garantía');
       btn('bg-zinc-800 hover:bg-zinc-700 text-amber-200', `addOrderNote('${o.id}')`, '📝 Nota');
       if (!closed && canManage) btn('bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800', `updateOrderStatus('${o.id}', 'Cancelado')`, 'Cancelar pedido');
 
@@ -7629,9 +7945,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const noPhoto = active.filter(p => !(p.photos && p.photos.length)).length;
       return [
         { id: 'legal', auto: true, ok: legalOk, label: 'Datos legales completos (razón social, CUIT, domicilio, email)', hint: 'Todavía tienen [COMPLETAR] en los textos legales de la tienda.' },
-        { id: 'bank', auto: true, ok: aliasOk && cbuOk, label: 'Alias y CBU son los de tu cuenta', hint: 'Están los datos de ejemplo. Cargá los tuyos en Ajustes → Datos de cobro.' },
+        { id: 'bank', auto: true, ok: aliasOk && cbuOk, label: 'Alias y CBU son los de tu cuenta', hint: 'Están los datos de ejemplo. Cargá los tuyos en Logística y finanzas → Cobros.' },
         { id: 'products', auto: true, ok: active.length >= 1 && noPhoto === 0, label: 'Productos reales cargados, todos con foto', hint: active.length ? `${noPhoto} producto(s) activos sin foto.` : 'No hay productos activos.' },
-        { id: 'pin', ok: !!man.pin, label: 'Cambié el PIN del administrador', hint: 'En Ajustes & Zonas → "Cambiar el PIN de administrador". Usá uno que nadie conozca.' },
+        { id: 'pin', ok: !!man.pin, label: 'Cambié el PIN del administrador', hint: 'En Configuración del sistema → Seguridad → "Cambiar el PIN de administrador". Usá uno que nadie conozca.' },
         { id: 'test', ok: !!man.test, label: 'Hice un pedido de prueba completo (pedir → pagar → despachar → entregar)', hint: '' },
         { id: 'clean', ok: !!man.clean, label: 'Borré los pedidos, clientes y reclamos de prueba', hint: '' },
         { id: 'lawyer', ok: !!man.lawyer, label: 'Un abogado revisó los textos legales', hint: '' },
@@ -7826,6 +8142,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const brandsInput = document.getElementById('setting-brands');
       const zoneInput = document.getElementById('setting-zone');
       if (zoneInput && document.activeElement !== zoneInput) zoneInput.value = storeZoneName();
+      fillSeasonSettings();
 
       if (brandsInput && document.activeElement !== brandsInput) brandsInput.value = typeof STORE_SETTINGS.featuredBrands === 'string' ? STORE_SETTINGS.featuredBrands : DEFAULT_BRANDS;
       { // Tarjetas de Ofertas: muestran lo que está configurado en Ajustes (antes decían siempre 10% y $150k)
@@ -8243,6 +8560,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     setInterval(() => { if (document.visibilityState === 'visible' && typeof loadNotifications === 'function') loadNotifications(); }, 60000);
     // Al volver a la pestaña o a la app, se buscan avisos nuevos enseguida (sin esperar al minuto).
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && walletToken) loadNotifications(); });
+    // "Otras memorias de este modelo": un toque abre la ficha de esa memoria.
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-iph-other]') : null;
+      if (b && typeof openProductGallery === 'function') openProductGallery(Number(b.getAttribute('data-iph-other')));
+    });
     window.addEventListener('focus', () => { if (walletToken) loadNotifications(); });
 
     // ==========================================
@@ -9095,6 +9417,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (iphData && iphData.onDemand) {
         const dmin = parseInt(document.getElementById('new-prod-delay-min').value, 10), dmax = parseInt(document.getElementById('new-prod-delay-max').value, 10);
         if (!(dmin >= 1) || !(dmax >= dmin)) { alert('En un iPhone por pedido poné los días que tarda en llegar (ej. de 3 a 6 días): el cliente lo ve en la ficha.'); return; }
+        const priceNow = parseFloat(document.getElementById('new-prod-price').value);
+        if (!(iphData.onDemandDeposit >= 1)) { alert('En un iPhone por pedido poné la SEÑA en pesos: es lo que el cliente transfiere para fijar el equipo (el resto lo paga al recibirlo).'); return; }
+        if (priceNow > 0 && iphData.onDemandDeposit >= priceNow) { alert('La seña tiene que ser menor que el precio del iPhone: lo que falta lo paga al recibirlo.'); return; }
       }
       if (iphData && !iphData.imei && !iphData.onDemand) { if (!confirm('No cargaste el IMEI/serie. Lo necesitás para la constancia de entrega. ¿Guardar igual?')) return; }
       const price = parseFloat(document.getElementById('new-prod-price').value);
@@ -10002,8 +10327,41 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (!(await bankSave())) { BANK_ACTIVE = prev; renderBankAccounts(); }
     }
     function openBankAccounts() {
-      switchAdminTab('settings');
+      openTabSection('settings', 'cobros');
       setTimeout(() => { const b = document.getElementById('bank-accounts-box'); if (b && b.scrollIntoView) b.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 150);
+    }
+
+    // ---- Decoración de temporada (el panel solo guarda la preferencia; la capa vive en la tienda) ----
+    const SEASON_EVENTS = [
+      ['sanvalentin', '💘', 'San Valentín', '7 al 14 de febrero'],
+      ['hotsale', '🏷️', 'Hot Sale', '2.º lunes de mayo, 3 días'],
+      ['padre', '👔', 'Día del Padre', '9 días antes del 3.er domingo de junio'],
+      ['enamorados', '💕', 'Día de los Enamorados', '6 al 13 de julio'],
+      ['nino', '🎈', 'Día del Niño', '9 días antes del 3.er domingo de agosto'],
+      ['madre', '🌸', 'Día de la Madre', '9 días antes del 3.er domingo de octubre'],
+      ['halloween', '🎃', 'Halloween', '22 de octubre al 1 de noviembre'],
+      ['cyber', '⚡', 'Cyber (solo dibujos de enchufes y rayos)', '1.er lunes de noviembre, 3 días'],
+      ['blackfriday', '🏷️', 'Black Friday (solo dibujos)', 'semana del 4.º viernes de noviembre'],
+      ['navidad', '🎄', 'Navidad', '1 al 26 de diciembre'],
+      ['anionuevo', '🎉', 'Año Nuevo y Reyes', '27 de diciembre al 6 de enero']
+    ];
+    function fillSeasonSettings() {
+      const sel = document.getElementById('setting-season-mode');
+      const box = document.getElementById('setting-season-list');
+      if (!sel || !box) return;
+      const editing = document.activeElement && (document.activeElement === sel || box.contains(document.activeElement));
+      if (editing) return; // no pisar lo que el Jefe está tocando
+      sel.value = STORE_SETTINGS.seasonMode === 'off' ? 'off' : 'auto';
+      const skip = Array.isArray(STORE_SETTINGS.seasonSkip) ? STORE_SETTINGS.seasonSkip : [];
+      box.innerHTML = SEASON_EVENTS.map(([id, ico, name, when]) =>
+        `<label class="flex items-start gap-2 bg-zinc-950 border border-zinc-800 rounded-lg px-2.5 py-2 cursor-pointer"><input type="checkbox" data-season-id="${id}" class="mt-0.5 accent-orange-500"${skip.includes(id) ? '' : ' checked'}><span class="text-xs text-zinc-200">${ico} ${name}<span class="block text-[10px] text-zinc-500">${when}</span></span></label>`
+      ).join('');
+    }
+    function seasonPayload() {
+      const sel = document.getElementById('setting-season-mode');
+      const boxes = Array.from(document.querySelectorAll('#setting-season-list input[data-season-id]'));
+      if (!sel || !boxes.length) return {}; // el panel todavía no los dibujó: no se manda nada
+      return { seasonMode: sel.value === 'off' ? 'off' : 'auto', seasonSkip: boxes.filter(b => !b.checked).map(b => b.getAttribute('data-season-id')) };
     }
 
     async function saveStoreSettings() {
@@ -10021,15 +10379,17 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         featuredBrands: val('setting-brands'),
         storeZone: val('setting-zone')
       };
-      const indicator = document.getElementById('settings-saved-indicator');
+      const indicators = Array.from(document.querySelectorAll('.settings-saved-ind'));
       const showMsg = (text, ok) => {
-        indicator.textContent = text;
-        indicator.classList.toggle('text-red-400', !ok);
-        indicator.classList.remove('hidden');
-        setTimeout(() => indicator.classList.add('hidden'), ok ? 2500 : 6000);
+        indicators.forEach(indicator => {
+          indicator.textContent = text;
+          indicator.classList.toggle('text-red-400', !ok);
+          indicator.classList.remove('hidden');
+          setTimeout(() => indicator.classList.add('hidden'), ok ? 2500 : 6000);
+        });
       };
       if (bankPart.error) { showMsg(bankPart.error, false); return; }
-      Object.assign(body, bankPart);
+      Object.assign(body, bankPart, seasonPayload());
       if (Object.values(body).some(v => typeof v === 'number' && isNaN(v))) {
         showMsg('Revisá los números: hay un campo vacío o inválido.', false);
         return;

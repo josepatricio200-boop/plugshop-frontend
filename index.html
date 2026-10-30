@@ -628,7 +628,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
-  <link rel="stylesheet" href="/tw.css?v=0f3d8ff6" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
+  <link rel="stylesheet" href="/tw.css?v=422f6634" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
 </head>
 <body class="selection:bg-brand-orange selection:text-black">
   <div id="ps-loader" role="status" aria-live="polite" aria-label="Cargando PLUGSHOP">
@@ -883,6 +883,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       <!-- Sección iPhone: solo aparece si el administrador la encendió y se eligió la categoría iPhone -->
       <div id="iphone-banner" class="hidden mt-3 mb-4 sm:mb-5 rounded-2xl border border-sky-500/25 bg-sky-500/[0.06] p-3 sm:p-4 text-[12px] sm:text-sm text-zinc-300"></div>
+      <!-- Filtros del iPhone: memoria, tipo de SIM y "por pedido" (solo en la categoría iPhone) -->
+      <div id="iphone-filters" class="hidden mb-4 space-y-3" role="group" aria-label="Filtros de iPhone"></div>
 
       <!-- Original vs Selección: explicación corta que además filtra -->
       <div id="origin-box" class="mt-3 mb-4 sm:mb-5 rounded-2xl border border-white/[0.06] bg-zinc-900/40 p-2.5 sm:p-4">
@@ -902,6 +904,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       <!-- Products Grid -->
       <div id="products-grid" class="grid grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 gap-3 sm:gap-5 lg:gap-6 pt-6"></div>
+      <!-- Cómo se compra un iPhone por pedido (solo en la categoría iPhone, si hay alguno) -->
+      <div id="iphone-howto" class="hidden mt-6"></div>
 
     </div>
   </section>
@@ -1066,11 +1070,13 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       </div>
 
-      <div class="mt-10 pt-6 border-t border-zinc-900 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-zinc-400">
+      <div class="mt-10 pt-6 border-t border-zinc-900">
+        <button type="button" data-arrepentimiento-btn onclick="openLegal('arrepentimiento')" class="flex flex-col items-start text-left min-h-[44px] px-5 py-2.5 rounded-xl border-2 border-brand-orange text-brand-amber font-bold text-sm hover:bg-brand-orange/10 transition-colors"><span>↩️ Botón de arrepentimiento</span><span class="text-xs font-semibold text-zinc-400">Tenés 10 días para arrepentirte de tu compra</span></button>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-zinc-400">
         <button type="button" onclick="openLegal('terminos')" class="hover:text-white transition-colors">Términos y Condiciones</button>
         <button type="button" onclick="openLegal('privacidad')" class="hover:text-white transition-colors">Privacidad</button>
         <button type="button" onclick="openLegal('envios')" class="hover:text-white transition-colors">Envíos y Cambios</button>
-        <button type="button" onclick="openLegal('arrepentimiento')" class="hover:text-brand-amber transition-colors font-semibold">Botón de Arrepentimiento</button>
         <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors">Defensa del Consumidor</a>
       </div>
     </div>
@@ -1327,7 +1333,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <p class="text-[10px] text-brand-amber mt-0.5">🔑 Guardá este número de pedido: con tu WhatsApp entrás a Mi Cuenta.</p>
             <a id="track-wa-send" href="#" target="_blank" rel="noopener" class="hidden mt-2 w-full sm:w-auto items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-sm font-extrabold">📲 Enviar mi pedido por WhatsApp</a>
             <p id="track-wa-hint" class="hidden text-[11px] text-zinc-400 mt-1">Si WhatsApp no se abrió solo, tocá el botón verde: es el paso que confirma tu compra con nosotros.</p>
-            <p id="track-ondemand-note" class="hidden mt-2 text-[11px] font-semibold rounded-lg px-3 py-2 border border-sky-700 bg-sky-950 text-sky-200">📦 Tu pedido incluye un iPhone por pedido. <b>Todavía no transfieras:</b> te escribimos por WhatsApp para confirmarte que lo conseguimos, el precio y cuándo llega. Si no lo conseguimos, no pagás nada.</p>
+            <p id="track-ondemand-note" class="hidden mt-2 text-[11px] font-semibold rounded-lg px-3 py-2 border border-sky-700 bg-sky-950 text-sky-200"></p>
           </div>
         </div>
         <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
@@ -1690,6 +1696,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <span id="chk-savings-badge" class="block text-[10px] text-emerald-400 font-bold font-code">¡Estás ahorrando $0!</span>
             </div>
           </div>
+          <!-- iPhone por pedido: se fija con una seña por transferencia, el resto se paga al recibirlo -->
+          <div id="chk-deposit-box" class="hidden mt-2 p-3 rounded-lg border border-sky-700 bg-sky-950 text-sky-100 font-sans text-xs space-y-1.5">
+            <div class="flex justify-between gap-3 font-bold text-sm"><span>💸 Seña a transferir ahora</span><span id="chk-deposit-now" class="font-code text-white"></span></div>
+            <div class="flex justify-between gap-3"><span>Saldo que pagás al recibir el iPhone</span><span id="chk-deposit-balance" class="font-code text-white"></span></div>
+            <p class="text-[11px] text-sky-200 leading-snug">La seña fija tu equipo: con ella lo pedimos a Buenos Aires. <b>Si no lo conseguimos, te devolvemos la seña completa.</b> Este equipo se paga solo por transferencia.</p>
+          </div>
         </div>
 
       </div>
@@ -1862,6 +1874,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold', 'shippingCostAuto', 'shippingCostAutoSmt', 'freeShippingThresholdAuto'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       if (typeof res.shippingAutoSet === 'boolean') STORE_SETTINGS.shippingAutoSet = res.shippingAutoSet;
+      // Decoración de temporada (la capa vive solo en la tienda): enciende o apaga según lo que dejó el panel.
+      if (res.seasonMode === 'auto' || res.seasonMode === 'off') STORE_SETTINGS.seasonMode = res.seasonMode;
+      if (Array.isArray(res.seasonSkip)) STORE_SETTINGS.seasonSkip = res.seasonSkip;
+      try { if (window.__psSeason && typeof window.__psSeason.sync === 'function') window.__psSeason.sync({ mode: STORE_SETTINGS.seasonMode, skip: STORE_SETTINGS.seasonSkip }); } catch (e) { /* la decoración nunca rompe la tienda */ }
       saveStorage(STORAGE_KEYS.SETTINGS, STORE_SETTINGS);
       applyStoreWhatsappLinks();
       applyBankDisplay();
@@ -1890,6 +1906,21 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     // El servidor lo valida igual (hasta 2 por pedido). Los usados nunca son "por pedido".
     const ON_DEMAND_MAX = 2;
     const isOnDemand = p => !!p && p.onDemand === true && isIphoneProd(p) && !isUsedIphone(p);
+    // Seña del iPhone por pedido: lo que el cliente transfiere para fijar el equipo (el resto se paga al recibirlo).
+    const iphDeposit = p => isOnDemand(p) && Number.isInteger(Number(p.onDemandDeposit)) && Number(p.onDemandDeposit) >= 1 ? Number(p.onDemandDeposit) : 0;
+    // Misma cuenta que hace el servidor (que es quien manda): seña total del carrito y saldo. null si no hay iPhone por pedido.
+    function depositSplit(items, total, discountPct) {
+      let gross = 0, dep = 0, any = false;
+      (items || []).forEach(i => {
+        const pr = PRODUCTS.find(x => x.id === i.id);
+        if (!isOnDemand(pr)) return;
+        any = true; gross += Number(pr.price) * i.qty; dep += Math.min(iphDeposit(pr) || 0, Number(pr.price)) * i.qty;
+      });
+      if (!any) return null;
+      const net = gross - Math.round(gross * ((discountPct || 0) / 100));
+      const balance = Math.max(0, Math.min(net - dep, total - 1));
+      return { amount: total - balance, balance };
+    }
     const iphStorageText = gb => (Number(gb) >= 1024 ? (Number(gb) / 1024) + ' TB' : Number(gb) + ' GB');
     const iphHasSpec = p => !!p && IPH_STORAGES.includes(Number(p.storage)) && IPH_SIMS.includes(p.sim);
     // "256 GB · Solo eSIM" (vacío si el equipo no tiene los datos)
@@ -1938,6 +1969,55 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         <div class="mt-2.5 flex flex-wrap gap-1.5">${chip('🛡️', 'Garantía PlugShop')}${chip('↩️', '10 días para arrepentirte')}${chip('🔖', 'Reserva por ' + (cfg.reserveHours || 24) + ' h')}</div>
         <button type="button" ${preview ? 'tabindex="-1"' : 'onclick="iphoneOpenLegal(false)"'} class="mt-2.5 text-[11px] sm:text-xs text-brand-orange hover:underline font-semibold">Ver condiciones completas de iPhone</button>`;
     }
+    // Seguimiento del iPhone por pedido, como lo ve el cliente: Seña recibida → En proceso → En camino → Por llegar → Llegó.
+    const IPH_STAGE_STEPS = ['Seña recibida', 'En proceso', 'En camino', 'Por llegar', 'Llegó'];
+    const IPH_STAGE_INDEX = { pedido: 1, camino: 2, cerca: 3, llego: 4 };
+    function iphStageHtml(order) {
+      const idx = order && order.supplierOrdered ? (IPH_STAGE_INDEX[order.supplierStage] || 1) : 0;
+      const msg = [
+        '📦 Seña recibida. Estamos por pedir tu iPhone.',
+        '📦 Tu iPhone está pedido y en proceso.',
+        '🚚 Tu iPhone está en camino.',
+        '📍 Tu iPhone está por llegar. Te escribimos para coordinar la entrega.',
+        '✅ Tu iPhone ya llegó. Te escribimos para coordinar la entrega y el saldo.'
+      ][idx];
+      const steps = IPH_STAGE_STEPS.map((t, i) => `<span data-iph-step="${i < idx ? 'done' : i === idx ? 'now' : 'next'}" class="px-2 py-0.5 rounded-md text-[10px] font-bold ${i < idx ? 'bg-emerald-950 text-emerald-300' : i === idx ? 'bg-sky-900 text-sky-100 ring-1 ring-sky-400' : 'bg-zinc-800 text-zinc-500'}">${i < idx ? '✓ ' : ''}${t}</span>`).join('');
+      return `<div class="flex flex-wrap gap-1 mb-1.5" data-iph-stages>${steps}</div>${msg}`;
+    }
+    // "Otras memorias de este modelo": mismo modelo (nombre sin memoria ni SIM) y mismo estado (sellado/usado), otra memoria.
+    // No inventa nada: solo muestra productos que ya están publicados, con su precio real.
+    function iphModelKey(p) {
+      return String(p && p.name || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/\b\d{2,4}\s?(gb|tb)\b|\b[12]\s?tb\b/g, ' ').replace(/\b(e-?sim|sim fisica|dual sim|sim)\b/g, ' ')
+        .replace(/\b(sellado|usado|nuevo|por pedido)\b/g, ' ')
+        // "iPhone 16 256" (sin GB): si el número es la memoria del propio equipo, tampoco cuenta como parte del modelo
+        .replace(new RegExp('\\b(' + (Number(p && p.storage) || 0) + '|' + (Number(p && p.storage) >= 1024 ? Number(p.storage) / 1024 + ' ?tb' : 'x') + ')\\b', 'g'), ' ')
+        .replace(/[^a-z0-9]+/g, ' ').trim();
+    }
+    function iphOtherStorages(prod) {
+      if (!iphHasSpec(prod)) return [];
+      const key = iphModelKey(prod), used = isUsedIphone(prod);
+      const seen = {};
+      return PRODUCTS.filter(p => p.id !== prod.id && isIphoneProd(p) && iphHasSpec(p) && p.active !== false && isUsedIphone(p) === used
+        && Number(p.storage) !== Number(prod.storage) && iphModelKey(p) === key)
+        .sort((a, b) => Number(a.storage) - Number(b.storage) || Number(a.price) - Number(b.price))
+        .filter(p => { const k = Number(p.storage); if (seen[k]) return false; seen[k] = 1; return true; }); // una por memoria (la más barata)
+    }
+    function iphOtherStoragesHtml(prod) {
+      const list = iphOtherStorages(prod);
+      if (!list.length) return '';
+      const pct = STORE_SETTINGS.transferDiscountPct || 10;
+      const tp = x => Math.round(Number(x.price) * (1 - pct / 100));
+      const here = tp(prod);
+      const chip = p => {
+        const diff = tp(p) - here;
+        const diffTxt = diff === 0 ? 'Mismo precio' : (diff > 0 ? '+ ' : '− ') + formatARS(Math.abs(diff)) + (diff > 0 ? ' más' : ' menos');
+        const od = isOnDemand(p), out = !od && Number(p.stock) === 0;
+        const status = od ? '📦 Por pedido' : out ? 'Sin stock' : p.reserved ? '🔖 Reservado' : 'Disponible';
+        return `<button type="button" data-iph-other="${p.id}" class="text-left rounded-xl border border-zinc-700/70 bg-zinc-900/60 hover:border-brand-orange/60 px-3 py-2 min-h-[44px]"><span class="block text-base font-extrabold text-white leading-tight">${escapeHtml(iphStorageText(p.storage))}</span><span class="block text-xs font-bold text-white">${formatARS(tp(p))}</span><span class="block text-[11px] ${diff > 0 ? 'text-amber-300' : diff < 0 ? 'text-emerald-400' : 'text-zinc-400'} font-semibold">${escapeHtml(diffTxt)}</span><span class="block text-[11px] text-zinc-400">${escapeHtml(status)}</span></button>`;
+      };
+      return `<div data-iph-others><div class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">Otras memorias de este modelo</div><div class="mt-1.5 grid grid-cols-2 gap-2">${list.map(chip).join('')}</div><div class="mt-1 text-[11px] text-zinc-500 leading-snug">Precios por transferencia, comparados con el ${escapeHtml(iphStorageText(prod.storage))} que estás viendo. Cada memoria tiene su propio precio.</div></div>`;
+    }
     // Datos propios del iPhone en la ficha del producto (estado, batería, controles, accesorios).
     function renderGalleryIphone(prod, boxEl, cfg, preview) {
       const box = boxEl || document.getElementById('gallery-iphone');
@@ -1949,13 +2029,19 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       let h = '';
       // Almacenamiento y SIM: primero y bien grande (es lo que más pregunta la gente).
       if (iphHasSpec(prod)) {
-        h += `<div class="rounded-lg border border-sky-800/70 bg-sky-950/40 p-2.5 space-y-1.5" data-iph-spec-box>
-          <div class="flex items-center justify-between gap-3 text-sm"><span class="text-zinc-300 font-semibold">Almacenamiento</span><span class="text-white font-extrabold">${escapeHtml(iphStorageText(prod.storage))}</span></div>
-          <div class="flex items-center justify-between gap-3 text-sm"><span class="text-zinc-300 font-semibold">Tipo de SIM</span><span class="text-white font-extrabold text-right">${escapeHtml(IPH_SIM_TEXT[prod.sim])}</span></div>
-          <div class="text-[11px] text-sky-200 leading-snug">${escapeHtml(IPH_SIM_NOTE[prod.sim])}</div>
-        </div>`;
+        // Cuatro fichas: las dos primeras (memoria y SIM) con una franja de color y en grande.
+        const tile = (label, value, bar) => `<div class="rounded-xl border border-zinc-700/70 bg-zinc-900/60 overflow-hidden">${bar ? `<div style="height:5px;background:${bar}"></div>` : ''}<div class="px-3 ${bar ? 'pt-2 pb-2.5' : 'py-2.5'}"><div class="text-[11px] font-semibold text-zinc-400">${label}</div><div class="mt-0.5 ${bar ? 'text-xl font-extrabold' : 'text-sm font-bold'} text-white leading-tight">${value}</div></div></div>`;
+        const wm = warrantyMonths(prod.warranty);
+        h += `<div class="grid grid-cols-2 gap-2" data-iph-spec-box>
+          ${tile('Almacenamiento', escapeHtml(iphStorageText(prod.storage)), '#F97316')}
+          ${tile('Tipo de SIM', escapeHtml(IPH_SIM_TEXT[prod.sim]), '#0EA5E9')}
+          ${tile('Condición', used ? 'Usado, revisado' : 'Nuevo, sellado')}
+          ${tile('Garantía PlugShop', escapeHtml(wm || '—'))}
+        </div>
+        <div class="rounded-lg px-3 py-2 text-[11px] leading-snug" style="background:#E0F2FE;color:#075985">${escapeHtml(IPH_SIM_NOTE[prod.sim])}</div>${preview ? '' : iphOtherStoragesHtml(prod)}`;
+      } else {
+        h += row('Condición', used ? '♻️ Usado, revisado' : '📦 Nuevo, sellado');
       }
-      h += row('Condición', used ? '♻️ Usado, revisado' : '📦 Nuevo, sellado');
       if (used && g) h += row('Estado', escapeHtml(`${g.name}`)) + (g.desc ? `<div class="text-[11px] text-zinc-400 leading-snug">${escapeHtml(g.desc)}</div>` : '');
       if (used && prod.battery) h += row('Batería', '🔋 ' + escapeHtml(String(prod.battery)) + '%');
       if (prod.accessories) h += row(used ? 'Incluye' : 'Trae', escapeHtml(prod.accessories));
@@ -2082,6 +2168,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
         accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
         onDemand: p.onDemand === true,
+        onDemandDeposit: Number.isInteger(Number(p.onDemandDeposit)) && Number(p.onDemandDeposit) >= 1 ? Number(p.onDemandDeposit) : null,
         storage: [128, 256, 512, 1024].includes(Number(p.storage)) ? Number(p.storage) : null, sim: ['esim', 'fisica', 'ambas'].includes(p.sim) ? p.sim : '',
         warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
         stockByColor: (p.stockByColor && typeof p.stockByColor === 'object' && !Array.isArray(p.stockByColor))
@@ -2251,7 +2338,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       transferDiscountPct: 10,
       advisorBias: 'equilibrado',
       featuredBrands: DEFAULT_BRANDS,
-      storeZone: 'Tucumán'
+      storeZone: 'Tucumán',
+      seasonMode: 'auto',
+      seasonSkip: []
     };
 
     const DEFAULT_ORDERS = []; // sin pedidos de ejemplo: los pedidos reales vienen del servidor
@@ -2376,8 +2465,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       sb.classList.toggle('flex', !!subs.length);
       renderIphoneBanner();
     }
-    function selectCategory(id) { currentCategory = id; currentSubcategory = 'all'; renderCategoryPills(); renderProducts(); }
-    function selectSubcategory(id) { currentSubcategory = id; renderCategoryPills(); renderProducts(); }
+    function selectCategory(id) { currentCategory = id; currentSubcategory = 'all'; resetIphFilters(); renderCategoryPills(); renderProducts(); }
+    function selectSubcategory(id) { currentSubcategory = id; resetIphFilters(); renderCategoryPills(); renderProducts(); }
 
     // Porcentaje de rebaja REAL: el "precio anterior" frente al precio más bajo que paga el cliente
     // (el de transferencia, que es el que se muestra grande). 0 si no hay oferta.
@@ -2415,14 +2504,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           </div>
           <div class="text-xs text-zinc-400 uppercase tracking-wider font-semibold">${escapeHtml(chosen.brand)} · ${chosen.type === 'original' ? 'Original' : 'PlugShop Selección'}</div>
           <h2 class="text-lg sm:text-xl font-bold text-white mt-0.5">${escapeHtml(chosen.name)}</h2>
+          ${isIphoneProd(chosen) && iphHasSpec(chosen) ? `<div class="mt-2" data-iph-spec>${iphSpecChips(chosen)}</div>` : ''}
           ${colors.length ? `<div class="flex flex-wrap items-center gap-1.5 mt-2"><span class="text-[11px] text-zinc-400">Colores:</span>${colors.map(c => `<span class="text-[11px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 font-medium">${escapeHtml(c)}</span>`).join('')}</div>` : ''}
           <div class="flex items-end justify-between gap-3 pt-3 sm:pt-4">
             <div>
               <div class="flex items-baseline gap-2">
                 <span class="ps-price ps-price-big">${formatARS(eff)}</span>
-                <span class="text-xs text-zinc-500 font-semibold font-code">Efectivo ${formatARS(chosen.price)}</span>
+                ${isOnDemand(chosen) ? '' : `<span class="text-xs text-zinc-500 font-semibold font-code">Efectivo ${formatARS(chosen.price)}</span>`}
               </div>
-              <span class="block text-[11px] text-emerald-400 font-medium">Con ${escapeHtml(String(disc))}% OFF por transferencia</span>
+              <span class="block text-[11px] text-emerald-400 font-medium">${isOnDemand(chosen) ? 'Pago por transferencia · ya con ' + escapeHtml(String(disc)) + '% OFF' : 'Con ' + escapeHtml(String(disc)) + '% OFF por transferencia'}</span>
             </div>
             <button onclick="openProductGallery(${Number(chosen.id)})" class="ps-btn px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs flex items-center gap-2 transition-all active:scale-95 shadow-md shrink-0"><span>Elegir color</span></button>
           </div>
@@ -2515,15 +2605,113 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       ['#categorias > div', '#promos-section > div', '#products-grid > article', '#como-comprar .step-item', '#beneficios .grid > div'].forEach(q => fxReveal(document.querySelectorAll(q)));
     }
 
+    // ---- Vista iPhone: filas con foto, memoria y SIM bien grandes, filtros y "cómo comprar por pedido" ----
+    let iphFStorage = 0, iphFSim = '', iphFOnDemand = false;
+    const iphInView = () => IPHONE_CFG.enabled === true && currentCategory === IPHONE_CAT;
+    function resetIphFilters() { iphFStorage = 0; iphFSim = ''; iphFOnDemand = false; }
+    function setIphFilter(kind, value) {
+      if (kind === 'storage') iphFStorage = iphFStorage === Number(value) ? 0 : Number(value);
+      else if (kind === 'sim') iphFSim = iphFSim === value ? '' : (IPH_SIMS.includes(value) ? value : '');
+      else if (kind === 'ondemand') iphFOnDemand = !iphFOnDemand;
+      else resetIphFilters();
+      renderProducts();
+    }
+    // Solo se ofrecen las memorias y SIM que realmente hay en la vista actual (así un filtro nunca deja la lista vacía).
+    function renderIphoneFilters() {
+      const box = document.getElementById('iphone-filters');
+      if (!box) return;
+      if (!iphInView()) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const pool = PRODUCTS.filter(p => p.active !== false && isIphoneProd(p) && (currentSubcategory === 'all' || p.subcategory === currentSubcategory));
+      const storages = IPH_STORAGES.filter(s => pool.some(p => Number(p.storage) === s));
+      const sims = IPH_SIMS.filter(s => pool.some(p => p.sim === s));
+      const anyOnDemand = pool.some(isOnDemand);
+      if (!pool.length || (storages.length < 2 && sims.length < 2 && !anyOnDemand && !iphFStorage && !iphFSim && !iphFOnDemand)) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const chip = (on, label, onclick) => `<button type="button" aria-pressed="${on}" onclick="${onclick}" class="shrink-0 whitespace-nowrap min-h-[44px] px-4 rounded-xl text-sm font-bold border transition-colors ${on ? 'border-brand-orange text-black' : 'border-zinc-700 bg-zinc-900/60 text-zinc-100 hover:border-brand-orange/60'}" ${on ? 'style="background:#F97316"' : ''}>${label}</button>`;
+      // Cada grupo es UNA fila que se desliza hacia el costado: en el celular ocupa poco alto y los botones miden 44 px.
+      const group = (title, chips) => chips ? `<div class="flex items-center gap-2 overflow-x-auto no-scrollbar"><span class="shrink-0 w-[68px] text-[11px] font-bold uppercase tracking-wider text-zinc-400">${title}</span>${chips}</div>` : '';
+      const anyOn = iphFStorage || iphFSim || iphFOnDemand;
+      box.innerHTML =
+        group('Memoria', storages.length > 1 || iphFStorage ? storages.map(s => chip(iphFStorage === s, escapeHtml(iphStorageText(s)), `setIphFilter('storage',${s})`)).join('') : '') +
+        group('SIM', sims.length > 1 || iphFSim ? sims.map(s => chip(iphFSim === s, escapeHtml(IPH_SIM_TEXT[s]), `setIphFilter('sim','${s}')`)).join('') : '') +
+        (anyOnDemand || iphFOnDemand ? group('Pedido', chip(iphFOnDemand, '📦 Solo por pedido', `setIphFilter('ondemand')`)) : '') +
+        (anyOn ? `<button type="button" onclick="setIphFilter('clear')" class="min-h-[44px] px-1 text-sm font-semibold text-brand-orange hover:underline">Quitar filtros</button>` : '');
+      box.classList.remove('hidden');
+    }
+    // Pasos para comprar un iPhone por pedido (solo si hay alguno a la vista).
+    function renderIphoneHowto(list) {
+      const box = document.getElementById('iphone-howto');
+      if (!box) return;
+      if (!iphInView() || !(list || []).some(isOnDemand)) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+      const step = (n, html) => `<div class="flex items-start gap-3 text-sm leading-snug text-zinc-300"><span class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center font-extrabold text-sm" style="background:#F97316;color:#111">${n}</span><span>${html}</span></div>`;
+      box.innerHTML = `
+        <div class="rounded-2xl border border-white/[0.08] bg-zinc-900/60 p-4 sm:p-5" data-iph-howto>
+          <div class="font-bold text-white text-base">Cómo comprar un iPhone por pedido</div>
+          <div class="mt-3 space-y-3">
+            ${step(1, '<b class="text-white">Lo fijás con una seña</b> por transferencia. Con eso lo pedimos a Buenos Aires.')}
+            ${step(2, '<b class="text-white">Te avisamos por WhatsApp</b> cuando llega. El plazo está en cada equipo.')}
+            ${step(3, '<b class="text-white">Pagás el saldo al recibirlo,</b> con constancia de entrega. <b class="text-white">Si no lo conseguimos, te devolvemos la seña completa.</b>')}
+          </div>
+        </div>`;
+      box.classList.remove('hidden');
+    }
+    // Una fila por equipo: foto a la izquierda; a la derecha tipo, nombre, memoria + SIM, color y garantía, y el precio.
+    function iphoneRowCard(product) {
+      const discountPct = STORE_SETTINGS.transferDiscountPct || 10;
+      const transferPrice = Math.round(product.price * (1 - (discountPct / 100)));
+      const primaryVisual = (product.photos && product.photos[0]) ? product.photos[0] : '📱';
+      const photoTile = isImageUrl(primaryVisual);
+      const used = isUsedIphone(product), od = isOnDemand(product), di = delayInfo(product), dep = iphDeposit(product);
+      const gr = used ? iphoneGrade(product.grade) : null;
+      let tag, tagStyle, tagAttr = '';
+      if (od) { tag = 'POR PEDIDO' + (di ? ' · ' + di.text.toUpperCase() : ''); tagStyle = 'background:#E0F2FE;color:#075985'; tagAttr = ' data-on-demand'; }
+      else if (used) { tag = 'USADO' + (gr ? ' · ' + gr.name.toUpperCase() : ''); tagStyle = 'background:#F4F4F6;color:#3F3F46'; }
+      else if (Number(product.stock) === 0) { tag = 'SIN STOCK'; tagStyle = 'background:#FEE2E2;color:#991B1B'; }
+      else if (product.reserved) { tag = 'RESERVADO'; tagStyle = 'background:#FEF3C7;color:#92400E'; }
+      else { tag = 'SELLADO'; tagStyle = 'background:#F4F4F6;color:#3F3F46'; }
+      const months = warrantyMonths(product.warranty);
+      const colors = (product.colors || []).filter(c => c && c !== 'Único').slice(0, 2);
+      const meta = [colors.join(' / '), months].filter(Boolean).join(' · ');
+      const open = `openProductGallery(${product.id})`;
+      return `
+        <article class="ps-card group relative flex gap-3.5 p-3.5 bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-brand-orange/50 rounded-2xl cursor-pointer transition-all pcard" data-iph-row role="link" tabindex="0" aria-label="${escapeHtml(product.name)}: ver equipo" onclick="${open}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${open}}">
+          <div class="relative shrink-0 w-[108px] h-[150px] rounded-xl overflow-hidden flex items-center justify-center ${photoTile ? '' : 'bg-gradient-to-b from-zinc-800/40 to-black/40'}" ${photoTile ? 'style="background:#fff"' : ''}>
+            ${renderVisualElement(primaryVisual, photoTile ? 'w-full h-full object-contain p-1.5' : 'w-full h-full object-cover', 'text-5xl', product.name)}
+          </div>
+          <div class="flex-1 min-w-0 flex flex-col">
+            <span class="self-start px-2 py-0.5 rounded-md text-[11px] font-bold" style="${tagStyle}"${tagAttr}>${escapeHtml(tag)}</span>
+            <h3 class="mt-1.5 text-[17px] font-bold text-white leading-tight group-hover:text-brand-amber transition-colors">${escapeHtml(product.name)}</h3>
+            ${iphHasSpec(product) ? `<div class="mt-2" data-iph-spec>${iphSpecChips(product)}</div>` : ''}
+            ${used && product.battery ? `<div class="mt-2 flex items-center gap-2 text-xs text-zinc-400"><span>Batería ${product.battery}%</span><span class="flex-1 h-1.5 rounded-full bg-zinc-700/60"><span class="block h-1.5 rounded-full" style="width:${product.battery}%;background:#059669"></span></span></div>` : ''}
+            ${meta ? `<div class="mt-2 text-xs text-zinc-400">${escapeHtml(meta)}</div>` : ''}
+            ${(product.reserved && tag !== 'RESERVADO' && !od && Number(product.stock) > 0) ? `<div class="mt-1.5 text-[11px] font-bold text-amber-300">🔖 Reservado por otra persona</div>` : ''}
+            <div class="mt-auto pt-2">
+              <div class="ps-price${formatARS(transferPrice).length > 9 ? ' ps-price-long' : ''}">${formatARS(transferPrice)}</div>
+              <div class="text-xs font-semibold text-emerald-400">${od ? 'Pago por transferencia · ya con ' + discountPct + '% OFF' : discountPct + '% OFF por transferencia'}</div>
+              ${od ? '' : `<div class="text-[11px] text-zinc-500">Efectivo ${formatARS(product.price)}${offPct(product) ? ` · <span class="text-rose-300 font-semibold">antes <span class="line-through">${formatARS(product.compareAtPrice)}</span></span>` : ''}</div>`}
+              ${od && dep ? `<div class="mt-1.5 inline-block px-2 py-0.5 rounded-md text-[11px] font-bold" style="background:#E0F2FE;color:#075985">Lo fijás con ${formatARS(dep)} de seña</div>` : ''}
+            </div>
+          </div>
+        </article>`;
+    }
+
     function renderProducts() {
       PRODUCTS = PRODUCTS.map(sanitizeProduct);
       renderHeroFeatured();
       renderBrandStrip();
       renderCategoryTiles();
+      renderIphoneFilters();
       const grid = document.getElementById('products-grid');
-      
+      const iphoneMode = iphInView();
+      // Vista iPhone: una columna en el celular y varias en pantalla grande; el resto del catálogo no cambia.
+      grid.style.gridTemplateColumns = iphoneMode ? 'repeat(auto-fill,minmax(min(100%,340px),1fr))' : '';
+
       let filtered = PRODUCTS.filter(p => {
         const matchesCategory = (currentCategory === 'all' || p.category === currentCategory) && (currentSubcategory === 'all' || p.subcategory === currentSubcategory) && p.active !== false;
+        if (matchesCategory && iphoneMode && isIphoneProd(p)) {
+          if (iphFStorage && Number(p.storage) !== iphFStorage) return false;
+          if (iphFSim && p.sim !== iphFSim) return false;
+          if (iphFOnDemand && !isOnDemand(p)) return false;
+        }
         const matchesType = currentType === 'all' || p.type === currentType;
         const matchesSearch = `${p.name} ${p.brand} ${categoryLabel(p.category)} ${categoryLabel(p.subcategory)} ${p.specs} ${p.warranty} ${(p.colors || []).join(' ')}`.toLowerCase().includes(searchQuery.toLowerCase().trim());
         return matchesCategory && matchesType && matchesSearch;
@@ -2534,6 +2722,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       // Sin orden por precio, los destacados van primero.
       if (currentSort !== 'price-low' && currentSort !== 'price-high') filtered.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
 
+      renderIphoneHowto(filtered);
       if (filtered.length === 0) {
         grid.innerHTML = `
           <div class="col-span-full py-16 text-center text-zinc-500 font-code text-xs">
@@ -2545,6 +2734,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       }
 
       grid.innerHTML = filtered.map(product => {
+        if (iphoneMode && isIphoneProd(product)) return iphoneRowCard(product);
         const isOriginal = product.type === 'original';
         const primaryVisual = (product.photos && product.photos[0]) ? product.photos[0] : '📦';
         const colorsList = product.colors || [];
@@ -2604,8 +2794,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <div class="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
                 <span class="ps-price${formatARS(transferPrice).length > 9 ? ' ps-price-long' : ''}">${formatARS(transferPrice)}</span>
               </div>
-              <div class="mt-1 text-[11px] sm:text-[12px] text-emerald-400 font-medium">${discountPct}% OFF <span class="hidden sm:inline">por </span>transferencia</div>
-              <div class="mt-0.5 text-[11px] sm:text-[12px] text-zinc-500">Efectivo ${formatARS(product.price)}${offPct(product) ? ` · <span class="text-rose-300 font-semibold whitespace-nowrap">antes <span class="line-through">${formatARS(product.compareAtPrice)}</span></span>` : ''}</div>
+              <div class="mt-1 text-[11px] sm:text-[12px] text-emerald-400 font-medium">${isOnDemand(product) ? 'Pago por transferencia · ya con ' + discountPct + '% OFF' : `${discountPct}% OFF <span class="hidden sm:inline">por </span>transferencia`}</div>
+              ${isOnDemand(product) ? '' : `<div class="mt-0.5 text-[11px] sm:text-[12px] text-zinc-500">Efectivo ${formatARS(product.price)}${offPct(product) ? ` · <span class="text-rose-300 font-semibold whitespace-nowrap">antes <span class="line-through">${formatARS(product.compareAtPrice)}</span></span>` : ''}</div>`}
               <button
                 ${buttonDisabled ? 'disabled' : `onclick="openProductGallery(${product.id})"`}
                 class="${buttonClass} w-full justify-center mt-2 sm:mt-3"
@@ -2668,19 +2858,23 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const transferPrice = Math.round(prod.price * (1 - (discountPct / 100)));
 
       document.getElementById('gallery-price').textContent = formatARS(transferPrice);
-      document.getElementById('gallery-list-price').textContent = 'Efectivo ' + formatARS(prod.price);
+      document.getElementById('gallery-list-price').textContent = isOnDemand(prod) ? '' : 'Efectivo ' + formatARS(prod.price);
       const galCmp = document.getElementById('gallery-compare');
       if (galCmp) {
         galCmp.textContent = offPct(prod) ? `🏷️ Antes ${formatARS(prod.compareAtPrice)} · -${offPct(prod)}% de rebaja pagando por transferencia` : '';
         galCmp.classList.toggle('hidden', !offPct(prod));
       }
       const galDelay = delayInfo(prod);
-      document.getElementById('gallery-installments').textContent = `🔥 ${discountPct}% OFF pagando por Transferencia` + (galDelay ? '' : ' · Entrega en el día');
+      document.getElementById('gallery-installments').textContent = isOnDemand(prod) ? `Pago por transferencia · el precio ya incluye ${discountPct}% OFF` : `🔥 ${discountPct}% OFF pagando por Transferencia` + (galDelay ? '' : ' · Entrega en el día');
       const galDelayBox = document.getElementById('gallery-delay');
       if (galDelayBox) {
         galDelayBox.classList.toggle('hidden', !galDelay);
         if (galDelay) galDelayBox.innerHTML = isOnDemand(prod)
-          ? `📦 <b>Este iPhone se pide por encargo.</b> No lo tenemos en el local: lo pedimos a Buenos Aires y llega en <b>${escapeHtml(galDelay.text)}</b>. <b>Antes de que pagues</b>, te escribimos por WhatsApp para confirmarte que lo conseguimos, el precio y el día de entrega. Si no lo conseguimos, no pagás nada.`
+          ? (() => {
+            const dep = iphDeposit(prod);
+            return `📦 <b>Este iPhone se pide por encargo.</b> No lo tenemos en el local: lo pedimos a Buenos Aires y llega en <b>${escapeHtml(galDelay.text)}</b>.` +
+              (dep ? ` Para fijarlo transferís una <b>seña de ${formatARS(dep)}</b> y el resto lo pagás al recibirlo. <b>Si no lo conseguimos, te devolvemos la seña completa.</b>` : ` Te escribimos por WhatsApp para coordinarlo.`);
+          })()
           : `⏳ <b>Puede demorar ${galDelay.text}.</b> Este producto no lo tenemos en el local o llega de fuera de Tucumán. Te confirmamos el día exacto por WhatsApp antes de enviarlo.`;
       }
 
@@ -2766,7 +2960,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         stockStatusEl.className = 'text-xs font-bold text-sky-300 font-code';
         addBtn.disabled = false;
         addBtn.className = 'w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-extrabold text-xs shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2';
-        addBtn.innerHTML = `<span>Pedir por encargo${isSingleColor(prod) ? '' : ` (Color: <span id="gallery-btn-color-label" class="font-code">${escapeHtml(activeGallerySelectedColor)}</span>)`}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>`;
+        addBtn.innerHTML = `<span>${iphDeposit(prod) ? 'Fijar con seña de ' + formatARS(iphDeposit(prod)) : 'Pedir por encargo'}${isSingleColor(prod) ? '' : ` (Color: <span id="gallery-btn-color-label" class="font-code">${escapeHtml(activeGallerySelectedColor)}</span>)`}</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>`;
         addBtn.onclick = () => { addToCart(prod.id, activeGallerySelectedColor); closeProductGallery(); };
       } else if (prod.reserved && colorStock > 0) {
         stockStatusEl.textContent = 'Reservado por otra persona';
@@ -2914,6 +3108,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       ['nav-search-input', 'nav-search-input-m'].forEach(id => { const x = document.getElementById(id); if (x) x.value = ''; });
       setTypeFilter('all');
       currentSubcategory = 'all';
+      resetIphFilters();
       renderCategoryPills();
       renderProducts();
     }
@@ -2973,8 +3168,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         return legalVendedor() +
           legalSec('Cobertura', '<p>Todos los productos nuevos tienen garantía legal de al menos 6 meses (Ley 24.240). Cada producto indica en su ficha el plazo (6 o 12 meses; los equipos usados pueden tener 3 meses) y quién la da: <strong class="text-zinc-100">Garantía Oficial</strong> (respaldada por la marca) o <strong class="text-zinc-100">Garantía PlugShop</strong> (la gestionamos nosotros). Si la ficha indica un plazo mayor al legal, rige el mayor.</p>') +
           legalSec('Qué cubre', '<p>Fallas de fabricación o de funcionamiento que no se deban al uso. La garantía se cuenta desde la fecha de entrega.</p>') +
-          legalSec('Qué no cubre', '<ul class="list-disc pl-5 space-y-1"><li>Golpes, caídas, aplastamiento o roturas de pantalla.</li><li>Daños por líquidos o humedad.</li><li>Reparaciones o aperturas hechas por terceros no autorizados.</li><li>Uso con cargadores o accesorios no compatibles.</li><li>Desgaste normal (baterías con el uso, cables, fundas).</li></ul>') +
-          legalSec('Cómo hacer un reclamo', '<ol class="list-decimal pl-5 space-y-1"><li>Escribinos por WhatsApp con tu número de pedido y una descripción de la falla (con fotos o video si es posible).</li><li>Evaluamos el caso y te indicamos cómo traer o enviar el producto.</li><li>Si la falla está cubierta, lo reparamos o lo cambiamos sin costo para vos. Si no se puede reparar, corresponde el cambio por otro igual o la devolución del dinero, según lo que la ley disponga.</li></ol><p>Conservá la caja y los accesorios originales. Podés ver el estado de tu garantía en <em>Seguimiento &amp; Mi Cuenta</em>.</p>') +
+          legalSec('Qué no cubre', '<ul class="list-disc pl-5 space-y-1"><li>Golpes, caídas, aplastamiento o roturas de pantalla.</li><li>Daños por líquidos o humedad.</li><li>Reparaciones o aperturas hechas por terceros no autorizados.</li><li>Uso con cargadores o accesorios no compatibles.</li><li>Desgaste normal esperable (cables, fundas y el uso normal de la batería).</li></ul>') +
+          legalSec('Cómo hacer un reclamo', '<ol class="list-decimal pl-5 space-y-1"><li>Escribinos por WhatsApp con tu número de pedido y una descripción de la falla (con fotos o video si es posible).</li><li>Evaluamos el caso y te indicamos cómo traer o enviar el producto.</li><li>Si la falla está cubierta, lo reparamos sin costo para vos.</li></ol><p><strong class="text-zinc-100">Si no se puede reparar, o la reparación no resuelve el problema, elegís vos</strong> una de estas tres opciones (Ley 24.240, art. 17):</p><ul class="list-disc pl-5 space-y-1"><li>El <strong class="text-zinc-100">cambio</strong> por otro producto igual (nuevo).</li><li>La <strong class="text-zinc-100">devolución del dinero</strong> que pagaste.</li><li>Una <strong class="text-zinc-100">quita proporcional del precio</strong> y te quedás con el producto.</li></ul><p class="mt-2">Si la garantía es <strong class="text-zinc-100">Oficial</strong> (de la marca), rigen también las condiciones de la marca, sin limitar estos derechos.</p><p class="mt-2">Conservá la caja y los accesorios originales. Podés ver el estado de tu garantía en <em>Seguimiento &amp; Mi Cuenta</em>.</p>') +
           '<p class="mt-5"><a data-legal-wa="1" href="#" target="_blank" rel="noopener noreferrer" class="inline-block px-4 py-2 rounded-lg bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 font-semibold">Iniciar reclamo por WhatsApp</a></p>' +
           legalDefensa();
       }
@@ -2982,7 +3177,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         return legalVendedor() +
           legalSec('Zonas y plazos', '<p>Entregamos en San Miguel de Tucumán y Yerba Buena. El costo de envío se muestra en el checkout antes de confirmar el pedido. También podés elegir <strong class="text-zinc-100">Punto de Retiro</strong> y coordinar el horario con nosotros.</p>') +
           legalSec('Entrega segura', '<p>Cada pedido tiene un código de entrega. Dáselo al repartidor solo cuando tengas el producto en la mano. Revisalo al recibirlo y avisanos enseguida si hay algún problema.</p>') +
-          legalSec('Cambios por falla', '<p>Si el producto llega con una falla o no es el que pediste, lo cambiamos sin costo. Avisanos dentro de los 7 días de recibirlo, con tu número de pedido.</p>') +
+          legalSec('Cambios por falla', '<p>Si el producto llega con una falla o no es el que pediste y nos avisás dentro de los primeros 7 días de recibirlo, te lo cambiamos directamente y sin costo. Pasados los 7 días no perdés ningún derecho: sigue tu garantía (ver la sección Garantía) y lo arreglamos o cambiamos según corresponda. En todos los casos avisanos con tu número de pedido.</p>') +
           legalSec('Cambios por gusto', '<p>Si el producto está sin uso, en su caja original y con todos sus accesorios, lo podés cambiar por otro dentro de los 10 días de recibido. Escribinos por WhatsApp para coordinarlo.</p>') +
           legalSec('Devoluciones', '<p>Para devolver una compra hecha en este sitio, ver la sección Arrepentimiento: tenés 10 días corridos y los costos de devolución corren por nuestra cuenta.</p>') +
           legalDefensa();
@@ -3175,7 +3370,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         const pv = await apiRequest('ORDERS', {}, '/' + encodeURIComponent(orderId));
         if (!pv) { alert('No pudimos conectar con el servidor para buscar el pedido. Probá de nuevo en un momento.'); return; }
         if (pv.success === false || !pv.id) { alert('No encontramos ese pedido. Revisá el número (ej. PS-AB12CD34).'); return; }
-        order = { id: pv.id, customer: pv.customer, address: '', items: pv.items, deliveryType: pv.deliveryType, paymentMethod: pv.paymentMethod, total: pv.total, status: pv.status };
+        order = { id: pv.id, customer: pv.customer, address: '', items: pv.items, deliveryType: pv.deliveryType, paymentMethod: pv.paymentMethod, total: pv.total, status: pv.status, deposit: pv.deposit || null, supplierOrdered: pv.supplierOrdered === true, supplierStage: typeof pv.supplierStage === 'string' ? pv.supplierStage : null };
       }
 
       if (!order) {
@@ -3212,8 +3407,20 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       driverBtn.href = `https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(driverMsg)}`;
 
       applyTrackingStages(order.status);
-      { const odn = document.getElementById('track-ondemand-note');
-        if (odn) odn.classList.toggle('hidden', !(/POR PEDIDO/.test(String(order.items || '')) && String(order.status || '').toLowerCase().includes('pago pendiente'))); }
+      { // iPhone por pedido: qué falta pagar y qué pasa si no se consigue
+        const odn = document.getElementById('track-ondemand-note');
+        if (odn) {
+          const dep = order.deposit, st = String(order.status || '').toLowerCase();
+          let html = '';
+          if (dep && /POR PEDIDO/.test(String(order.items || '')) && !['cancelado', 'entregado'].includes(st)) {
+            const saldo = dep.balancePaid || !dep.balance ? '' : ` El saldo de <b>${formatARS(dep.balance)}</b> lo pagás al recibirlo.`;
+            if (st.includes('pago pendiente') || st.includes('rechazado')) html = `📦 Tu pedido incluye un iPhone por pedido. <b>Transferí la seña de ${formatARS(dep.amount)}</b> para fijarlo y subí el comprobante.${saldo} <b>Si no lo conseguimos, te devolvemos la seña completa.</b>`;
+            else if (st.includes('comprobante enviado')) html = `🧾 Recibimos tu comprobante. Cuando confirmemos la seña de ${formatARS(dep.amount)}, pedimos tu iPhone a Buenos Aires.${saldo}`;
+            else html = `${iphStageHtml(order)}${saldo} Si no lo conseguimos, te devolvemos la seña completa.`;
+          }
+          odn.innerHTML = html;
+          odn.classList.toggle('hidden', !html);
+        } }
 
       const modal = document.getElementById('order-tracking-modal');
       modal.classList.remove('hidden');
@@ -3661,6 +3868,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <div class="text-right shrink-0">
                 <div class="text-base font-black text-brand-amber">${formatARS(order.total)}</div>
                 <div class="text-[11px] text-zinc-500">${escapeHtml(order.paymentMethod || 'Efectivo / Transferencia')}</div>
+                ${order.deposit && !cancelled ? `<div class="mt-1 text-[11px] font-semibold text-sky-300">Seña ${formatARS(order.deposit.amount)}${order.deposit.balancePaid || !order.deposit.balance ? ' · saldo pagado ✓' : ' · saldo al recibirlo ' + formatARS(order.deposit.balance)}</div>` : ''}
               </div>
             </div>
 
@@ -3821,7 +4029,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 <span class="text-xs text-brand-orange font-bold">${formatARS(item.price * item.qty)}</span>
               </div>
               ${isAtMaxStock ? `<span class="text-[9px] text-amber-400 font-semibold block mt-0.5 font-code">${isOnDemand(prod) ? 'Máximo ' + ON_DEMAND_MAX + ' por pedido' : 'Tope de stock disponible'}</span>` : ''}
-              ${isOnDemand(prod) ? `<span class="text-[10px] font-semibold block mt-0.5" style="color:#7DD3FC" data-on-demand>📦 Por pedido${delayInfo(prod) ? ' · llega en ' + escapeHtml(delayInfo(prod).text) : ''}. Antes de que pagues te confirmamos por WhatsApp que lo conseguimos.</span>` : (delayInfo(prod) ? `<span class="text-[10px] text-amber-300 font-semibold block mt-0.5">⏳ Demora ${delayInfo(prod).text}</span>` : '')}
+              ${isOnDemand(prod) ? `<span class="text-[10px] font-semibold block mt-0.5" style="color:#7DD3FC" data-on-demand>📦 Por pedido${delayInfo(prod) ? ' · llega en ' + escapeHtml(delayInfo(prod).text) : ''}. ${iphDeposit(prod) ? 'Lo fijás con una seña de ' + formatARS(iphDeposit(prod) * item.qty) + '; el resto lo pagás al recibirlo.' : 'Te escribimos por WhatsApp para coordinarlo.'}</span>` : (delayInfo(prod) ? `<span class="text-[10px] text-amber-300 font-semibold block mt-0.5">⏳ Demora ${delayInfo(prod).text}</span>` : '')}
             </div>
             <div class="flex items-center gap-0.5 bg-black border border-zinc-800 rounded-lg p-0.5 text-xs font-code shrink-0">
               <button onclick="changeQty(${idx}, -1)" class="w-8 h-8 text-base flex items-center justify-center rounded-md text-zinc-400 hover:text-white transition-colors" title="Restar">-</button>
@@ -3859,7 +4067,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       updateCheckoutTotalPreview();
     }
 
+    const cartHasOnDemand = () => cart.some(i => isOnDemand(PRODUCTS.find(x => x.id === i.id)));
     function selectPaymentMethod(method) {
+      // Un iPhone por pedido se fija con una seña por transferencia: no hay forma de fijarlo con efectivo contra entrega.
+      if (method === 'efectivo' && cartHasOnDemand()) method = 'transferencia';
       const radio = document.querySelector(`input[name="chk-payment"][value="${method}"]`);
       if (radio) radio.checked = true;
 
@@ -3983,6 +4194,16 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       const finalTotal = Math.max(0, subtotal - discountAmount - couponAmount + shippingCost);
       chkTotalPreview.textContent = formatARS(finalTotal);
+      // iPhone por pedido: cuánto se transfiere ahora (seña) y cuánto queda para el día de la entrega.
+      const dep = isTransfer ? depositSplit(cart, finalTotal, discountPct) : null;
+      const depBox = document.getElementById('chk-deposit-box');
+      if (depBox) {
+        depBox.classList.toggle('hidden', !dep);
+        if (dep) {
+          document.getElementById('chk-deposit-now').textContent = formatARS(dep.amount);
+          document.getElementById('chk-deposit-balance').textContent = formatARS(dep.balance);
+        }
+      }
     }
 
     // ---- Tipo de envío (moto / auto) y costo según la zona ----
@@ -4191,11 +4412,19 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const couponCode = appliedCoupon ? appliedCoupon.code : '';
       let grandTotal = Math.max(0, subtotal - discountAmount - couponAmount + shippingCost);
 
+      // iPhone por pedido: solo se fija con una seña por transferencia (el servidor también lo exige).
+      if (!isTransfer && cartHasOnDemand()) {
+        alert('Un iPhone por pedido se fija con una seña por transferencia. Elegí "Transferencia" como forma de pago.');
+        selectPaymentMethod('transferencia');
+        return;
+      }
       if (Date.now() - lastCheckoutAt < 5000) return; // doble toque
       lastCheckoutAt = Date.now();
       let orderNumber = generateOrderId();
       const itemsList = cart.map(i => { const pr = PRODUCTS.find(x => x.id === i.id); const sp = pr && isIphoneProd(pr) ? iphSpecText(pr) : ''; return `${i.qty}x ${i.name}${sp ? ' · ' + sp : ''}${i.selectedColor && i.selectedColor !== 'Único' ? ` (Color: ${i.selectedColor})` : ''}${isOnDemand(pr) ? ' · POR PEDIDO' : ''}`; }).join(', ');
       const cartOnDemand = cart.some(i => isOnDemand(PRODUCTS.find(x => x.id === i.id)));
+      // Seña y saldo: con backend manda el servidor (se pisa más abajo con lo que devuelve).
+      let depositInfo = isTransfer ? depositSplit(cart, grandTotal, discountPct) : null;
 
       const zoneNameMap = {
         'yb': 'Yerba Buena Express',
@@ -4236,6 +4465,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         grandTotal = serverOrder.total;
         discountAmount = serverOrder.discountApplied;
         couponAmount = serverOrder.couponAmount || 0;
+        depositInfo = serverOrder.deposit || null;
       }
 
       const todayStr = new Date().toISOString().split('T')[0];
@@ -4270,6 +4500,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         shippingCost,
         vehicle,
         total: grandTotal,
+        ...(depositInfo ? { deposit: { amount: depositInfo.amount, balance: depositInfo.balance, balancePaid: !!depositInfo.balancePaid || depositInfo.balance === 0 } } : {}),
         status: 'Pago pendiente',
         paid: false,
         createdAt: Date.now(),
@@ -4312,9 +4543,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         `💳 *Método de Pago:* ${payLabel}\n` +
         `${isTransfer ? `🔥 *Ahorro Transferencia:* -${formatARS(discountAmount)}\n` : ''}` +
         `${couponAmount > 0 ? `🎟️ *Cupón ${couponCode}:* -${formatARS(couponAmount)}\n` : ''}` +
-        `${isTransfer && !cartOnDemand ? `🏦 *Alias:* ${STORE_SETTINGS.bankAlias || 'PlugShop.store.ar'}\n` : ''}` +
-        `${isTransfer && !cartOnDemand && STORE_SETTINGS.bankCbu ? `🔢 *CVU/CBU:* ${STORE_SETTINGS.bankCbu}\n` : ''}` +
-        `${cartOnDemand ? `📦 *IPHONE POR PEDIDO:* confirmame que lo conseguís, el precio y el plazo ANTES de que yo pague. Todavía no voy a transferir.\n` : ''}` +
+        `${isTransfer ? `🏦 *Alias:* ${STORE_SETTINGS.bankAlias || 'PlugShop.store.ar'}\n` : ''}` +
+        `${isTransfer && STORE_SETTINGS.bankCbu ? `🔢 *CVU/CBU:* ${STORE_SETTINGS.bankCbu}\n` : ''}` +
+        `${cartOnDemand && depositInfo ? `📦 *IPHONE POR PEDIDO:* transfiero la SEÑA de ${formatARS(depositInfo.amount)} para fijarlo. El saldo de ${formatARS(depositInfo.balance)} lo pago al recibirlo. Si no lo consiguen, me devuelven la seña completa.\n` : ''}` +
         `${VEHICLE_INFO[vehicle].icon} *Logística${vehicle === 'moto' ? '' : ' (envío en ' + VEHICLE_INFO[vehicle].label.toLowerCase() + ')'}:* ${isRetiro ? 'Retiro sin cargo' : (shippingCost > 0 ? `+${formatARS(shippingCost)}` : 'Envío Gratis')}\n` +
         `${waDelay ? `⏳ *Demora estimada:* ${waDelay.text} (${waDelay.items.map(x => x.name).join(', ')}) - ya me avisaron\n` : ''}\n` +
         `*PRODUCTOS & COLORES SELECCIONADOS:*\n${itemsText}\n\n` +
@@ -4683,6 +4914,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     setInterval(() => { if (document.visibilityState === 'visible' && typeof loadNotifications === 'function') loadNotifications(); }, 60000);
     // Al volver a la pestaña o a la app, se buscan avisos nuevos enseguida (sin esperar al minuto).
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && walletToken) loadNotifications(); });
+    // "Otras memorias de este modelo": un toque abre la ficha de esa memoria.
+    document.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-iph-other]') : null;
+      if (b && typeof openProductGallery === 'function') openProductGallery(Number(b.getAttribute('data-iph-other')));
+    });
     window.addEventListener('focus', () => { if (walletToken) loadNotifications(); });
 
     // ==========================================
@@ -4939,8 +5175,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       }
       if (unpaidStates.includes(order.status)) {
         html += `<button onclick="cancelOrderByCustomer('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-400 text-xs font-semibold">✕ Cancelar pedido</button>`;
+      } else if (order.status === 'En preparación' && order.deposit && order.supplierOrdered) {
+        // iPhone por pedido que ya se pidió a Buenos Aires: se coordina por WhatsApp con el dueño.
+        html += `<span class="text-[11px] text-sky-300 basis-full">📦 Ya pedimos tu iPhone a Buenos Aires. Si ya no lo querés, escribinos y lo coordinamos.</span><button onclick="requestCancelWhatsApp('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold">💬 Escribir por WhatsApp</button>`;
       } else if (order.status === 'En preparación') {
-        html += `<button onclick="cancelOrderByCustomer('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-400 text-xs font-semibold">✕ Cancelar pedido (te devolvemos todo)</button>`;
+        html += `<button onclick="cancelOrderByCustomer('${id}')" class="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-rose-950 text-zinc-300 hover:text-rose-400 text-xs font-semibold">✕ Cancelar pedido (te devolvemos ${order.deposit && !order.deposit.balancePaid ? 'la seña' : 'todo'})</button>`;
       }
       return html ? `<div class="flex flex-wrap items-center gap-2">${html}</div>` : '';
     }
@@ -4983,7 +5222,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         const cur = myOrders.find(o => o.id === orderId);
         const paid = cur && cur.status === 'En preparación';
         const msg = paid
-          ? `¿Cancelar el pedido #${orderId}? Como ya pagaste, te devolvemos ${formatARS(cur.total)} (todo, con el envío) por transferencia a la misma cuenta, dentro de las 48 hs hábiles.`
+          ? `¿Cancelar el pedido #${orderId}? Como ya pagaste, te devolvemos ${formatARS(cur.deposit && !cur.deposit.balancePaid ? cur.deposit.amount : cur.total)} (${cur.deposit && !cur.deposit.balancePaid ? 'la seña completa' : 'todo, con el envío'}) por transferencia a la misma cuenta, dentro de las 48 hs hábiles.`
           : `¿Cancelar el pedido #${orderId}? Los productos vuelven al stock.`;
         if (!confirm(msg)) return;
         const res = await apiRequest('ORDERS', { method: 'POST', headers: walletHeaders(), body: '{}' }, '/' + orderId + '/cancel');
@@ -5000,6 +5239,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       order.status = 'Cancelado';
       saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
       lookupCustomerOrders();
+    }
+
+    function requestCancelWhatsApp(orderId) {
+      const msg = `Hola PLUGSHOP! Quiero cancelar mi pedido *#${orderId}*. Ya está en preparación, ¿cómo lo coordinamos?`;
+      window.open(`https://wa.me/${STORE_SETTINGS.whatsappNumber}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
     // Achica la foto del comprobante antes de guardarla, para no llenar
@@ -5929,16 +6173,59 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           return true;
         }
 
-        function iniciar() {
+        // 4) INTERRUPTOR DESDE EL PANEL (ACT 71). El panel guarda en el servidor { mode: 'auto' | 'off', skip: [ids] }:
+        //    'off' apaga toda la decoración y 'skip' son los eventos que NO se quieren decorar.
+        //    Se recuerda en este navegador para que la decoración no parpadee al abrir la tienda.
+        var CLAVE_CFG = 'ps_season_cfg';
+        function limpiarCfg(c) {
+          var mode = 'auto', skip = [];
+          if (c && typeof c === 'object') {
+            if (c.mode === 'off') mode = 'off';
+            if (Array.isArray(c.skip)) c.skip.forEach(function (s) { if (typeof s === 'string' && TEMAS[s] && skip.indexOf(s) < 0) skip.push(s); });
+          }
+          return { mode: mode, skip: skip };
+        }
+        function leerCfg() { try { return limpiarCfg(JSON.parse(window.localStorage.getItem(CLAVE_CFG))); } catch (e) { return limpiarCfg(null); } }
+        function guardarCfg(c) { try { window.localStorage.setItem(CLAVE_CFG, JSON.stringify(c)); } catch (e) { /* sin almacenamiento: no pasa nada */ } }
+        function forzada() { try { var q = new URLSearchParams(window.location.search).get('temporada'); return q ? q.toLowerCase() : null; } catch (e) { return null; } }
+
+        function iniciar(cfg) {
           if (!TEMPORADAS_ACTIVAS) return null;
-          var forz = null;
-          try { var q = new URLSearchParams(window.location.search).get('temporada'); forz = q ? q.toLowerCase() : null; } catch (e) { forz = null; }
+          cfg = limpiarCfg(cfg);
+          var forz = forzada();
           if (forz === 'ninguna') return null;
-          var id = (forz && TEMAS[forz]) ? forz : (function () { var h = hoy(); return pick(h[0], h[1], h[2]); })();
+          var id;
+          if (forz && TEMAS[forz]) id = forz; // vista previa por link: ignora el interruptor del panel
+          else {
+            if (cfg.mode === 'off') return null;
+            var h = hoy(); id = pick(h[0], h[1], h[2]);
+            if (id && cfg.skip.indexOf(id) >= 0) return null;
+          }
           return id && activar(id) ? id : null;
         }
+        function quitar() {
+          document.documentElement.removeAttribute('data-season');
+          ['.ps-garland', '#ps-season-fx', '.ps-defs'].forEach(function (q) {
+            var l = document.querySelectorAll(q);
+            for (var i = l.length - 1; i >= 0; i--) if (l[i].parentNode) l[i].parentNode.removeChild(l[i]);
+          });
+        }
+        var cfgAplicada = JSON.stringify(leerCfg());
+        // Lo llama la tienda cuando llegan los ajustes del servidor: enciende o apaga solo si cambió algo.
+        function sync(cfg) {
+          try {
+            cfg = limpiarCfg(cfg);
+            guardarCfg(cfg);
+            var s = JSON.stringify(cfg);
+            if (s === cfgAplicada) return;
+            cfgAplicada = s;
+            if (forzada()) return; // vista previa por link: no se toca
+            quitar();
+            if (window.__psSeason) window.__psSeason.activa = iniciar(cfg);
+          } catch (e) { /* una decoración jamás debe romper la tienda */ }
+        }
 
-        window.__psSeason = { pick: pick, ids: Object.keys(TEMAS), eventos: EVENTOS.map(function (e) { return e.id; }), rango: function (id, y) { for (var i = 0; i < EVENTOS.length; i++) if (EVENTOS[i].id === id) { var r = rangoDe(EVENTOS[i], y); return [new Date(r[0]).toISOString().slice(0, 10), new Date(r[1]).toISOString().slice(0, 10)]; } return null; }, simbolos: Object.keys(SYM), temas: TEMAS, activa: iniciar() };
+        window.__psSeason = { sync: sync, pick: pick, ids: Object.keys(TEMAS), eventos: EVENTOS.map(function (e) { return e.id; }), rango: function (id, y) { for (var i = 0; i < EVENTOS.length; i++) if (EVENTOS[i].id === id) { var r = rangoDe(EVENTOS[i], y); return [new Date(r[0]).toISOString().slice(0, 10), new Date(r[1]).toISOString().slice(0, 10)]; } return null; }, simbolos: Object.keys(SYM), temas: TEMAS, activa: iniciar(leerCfg()) };
       } catch (err) { /* una decoración jamás debe romper la tienda */ }
     })();
 
