@@ -7353,6 +7353,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       if (o.status === 'Entregado' && canManage && Array.isArray(o.lines) && o.lines.length) btn('bg-zinc-800 hover:bg-zinc-700 text-zinc-100', `openWarrantyCert('${o.id}')`, '🛡️ Certificado de garantía');
       btn('bg-zinc-800 hover:bg-zinc-700 text-amber-200', `addOrderNote('${o.id}')`, '📝 Nota');
       if (!closed && canManage) btn('bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800', `updateOrderStatus('${o.id}', 'Cancelado')`, 'Cancelar pedido');
+      if (isAdmin && ppLive()) btn('bg-zinc-900 hover:bg-rose-950 text-rose-300 border border-rose-900', `deleteOrder('${o.id}')`, '🗑️ Borrar pedido');
 
       const tl = orderTimeline(o);
       const keys = waMenuKeys(o), tpl = waTemplates(o);
@@ -9140,6 +9141,24 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       if (newStatus === 'En preparación') { order.paid = true; }
       order.status = newStatus;
       saveStorage(STORAGE_KEYS.ORDERS, ADMIN_ORDERS);
+      refreshAdminUI();
+    }
+
+    // Borrar un pedido PARA SIEMPRE: solo administrador (el servidor también lo exige). Doble confirmación: hay que escribir BORRAR.
+    async function deleteOrder(orderId) {
+      const o = ADMIN_ORDERS.find(x => x.id === orderId); if (!o) return;
+      if (currentStaffSession.role !== 'admin') { alert('Solo el administrador puede borrar pedidos.'); return; }
+      const stock = !['Entregado', 'Cancelado'].includes(o.status) ? 'El stock de los productos vuelve al inventario.'
+        : o.status === 'Entregado' ? 'OJO: como ya estaba entregado, el stock NO vuelve (si era una prueba con un producto real, corregí el stock a mano).'
+        : 'El stock ya había vuelto cuando se canceló.';
+      const txt = prompt(`¿Borrar PARA SIEMPRE el pedido #${o.id} de ${o.customer} (${o.status}, ${formatARS(o.total || 0)})?\n\nDesaparece de pedidos, caja y reportes. No se puede deshacer. ${stock}\n\nSi estás seguro, escribí BORRAR:`, '');
+      if (txt === null) return;
+      if (String(txt).trim().toUpperCase() !== 'BORRAR') { alert('No se borró nada: tenías que escribir BORRAR.'); return; }
+      const res = await apiRequest('ORDERS', { method: 'DELETE', headers: { Authorization: 'Bearer ' + currentStaffSession.token } }, '/' + encodeURIComponent(orderId));
+      if (!res || res.success === false) { alert((res && res.error) || 'No se pudo borrar el pedido.'); return; }
+      ADMIN_ORDERS = ADMIN_ORDERS.filter(x => x.id !== orderId);
+      closeOrderFicha();
+      try { await syncAdminDataFromServer(); } catch (e) { /* si falla, queda lo que ya se ve */ }
       refreshAdminUI();
     }
 
