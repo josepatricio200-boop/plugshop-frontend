@@ -5500,7 +5500,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     async function iphNewUnit(kind) {
       if (!CATEGORIES.some(c => c.id === IPHONE_CAT)) await loadIphoneAdmin();
       if (!CATEGORIES.some(c => c.id === IPHONE_CAT)) { alert('No se pudo preparar la categoría iPhone. Revisá la conexión con el servidor.'); return; }
-      switchAdminTab('inventory');
+      openTabSection('inventory', 'new'); // el formulario vive en "Cargar producto", no en "Inventario activo"
       cancelEditProduct();
       gEl('new-prod-category').value = IPHONE_CAT;
       onProdCategoryChange();
