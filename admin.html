@@ -5517,9 +5517,18 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         <div id="iph-prev-detail" class="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-1.5"></div>`;
       renderGalleryIphone(p, gEl('iph-prev-detail'), cfg, true);
     }
+    // La lista de categorías del formulario puede estar armada sin "iPhone" (se arma antes de que el servidor la cree o la traiga).
+    // Antes de abrir el formulario de iPhone se asegura de que la categoría, sus dos subcategorías y la opción de la lista existan.
+    async function iphEnsureCategories() {
+      const has = () => [IPHONE_CAT, IPHONE_SEALED, IPHONE_USED].every(id => CATEGORIES.some(c => c.id === id));
+      if (!has()) await loadIphoneAdmin(true);
+      if (!has()) return false;
+      fillCategorySelects(); // vuelve a armar la lista con lo que ya hay cargado
+      const sel = gEl('new-prod-category');
+      return !!sel && Array.from(sel.options).some(o => o.value === IPHONE_CAT);
+    }
     async function iphNewUnit(kind) {
-      if (!CATEGORIES.some(c => c.id === IPHONE_CAT)) await loadIphoneAdmin();
-      if (!CATEGORIES.some(c => c.id === IPHONE_CAT)) { alert('No se pudo preparar la categoría iPhone. Revisá la conexión con el servidor.'); return; }
+      if (!(await iphEnsureCategories())) { alert('No se pudo preparar la categoría iPhone. Revisá la conexión con el servidor y probá de nuevo.'); return; }
       cancelEditProduct();
       gEl('new-prod-category').value = IPHONE_CAT;
       onProdCategoryChange();
@@ -9447,6 +9456,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       if (!p) return;
       editingProductId = id;
       const set = (el, v) => { document.getElementById(el).value = v; };
+      { const cs = document.getElementById('new-prod-category'); if (cs && p.category && !Array.from(cs.options).some(o => o.value === p.category) && CATEGORIES.some(c => c.id === p.category)) fillCategorySelects(); } // la lista puede estar desactualizada
       set('new-prod-name', p.name || '');
       set('new-prod-brand', p.brand || '');
       set('new-prod-category', p.category || 'audio');
