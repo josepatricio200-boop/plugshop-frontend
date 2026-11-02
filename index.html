@@ -2446,15 +2446,63 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     // ==========================================
     // 3. CATALOG RENDERING & COLOR GALERY
     // ==========================================
+    // ---- Íconos propios de categoría (dibujos de PlugShop, un color por categoría). Si no hay dibujo para la categoría, se usa el emoji de siempre. ----
+    function catIconKey(c) {
+      if (!c) return '';
+      const s = (String(c.id || '') + ' ' + String(c.name || '')).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+      if (/iphone/.test(s)) return 'iphone';
+      if (/celular|telefon|movil|smartphone/.test(s)) return 'phone';
+      if (/audio|auricular|parlante|sonido|headphone/.test(s)) return 'audio';
+      if (/wearable|watch|reloj/.test(s)) return 'watch';
+      if (/gaming|gamer|juego/.test(s)) return 'kbd';
+      if (/home|hogar|casa|domotica/.test(s)) return 'home';
+      if (/accesor|cable|funda|cargador/.test(s)) return 'plug';
+      return '';
+    }
+    function catIconSvg(key, px, color, fillAlpha) {
+      const P = {
+        all: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/>',
+        audio: '<path d="M4.5 15v-3a7.5 7.5 0 0 1 15 0v3"/><rect x="3" y="14" width="4.5" height="7" rx="1.8"/><rect x="16.5" y="14" width="4.5" height="7" rx="1.8"/>',
+        watch: '<rect x="7" y="6.5" width="10" height="11" rx="3"/><path d="M9 6.5l.7-3.5h4.6l.7 3.5M9 17.5l.7 3.5h4.6l.7-3.5M12 10v2.5l1.6 1"/>',
+        kbd: '<rect x="2.5" y="6.5" width="19" height="11" rx="2.2"/><path d="M6.5 10.5h.01M10 10.5h.01M13.5 10.5h.01M17 10.5h.01M7.5 14h9"/>',
+        home: '<path d="M3.5 11.5 12 4l8.5 7.5"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5v-5h4v5"/>',
+        phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M11 18.5h2"/>',
+        iphone: '<rect x="6.5" y="2.5" width="11" height="19" rx="3"/><path d="M10 5.6h4"/>',
+        plug: '<path d="M9 3v5M15 3v5"/><path d="M7 8h10v3a5 5 0 0 1-10 0z"/><path d="M12 16v5"/>'
+      };
+      if (!P[key]) return '';
+      const rgba = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; };
+      const fillAttr = color === 'currentColor' ? `fill="currentColor" fill-opacity="${fillAlpha}"` : `fill="${rgba(color, fillAlpha)}"`;
+      return `<svg viewBox="0 0 24 24" width="${px}" height="${px}" aria-hidden="true" focusable="false" style="flex:none" ${fillAttr} stroke="${color}" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">${P[key]}</svg>`;
+    }
+    function catIconColor(key) {
+      return ({ all: '#ff6200', audio: '#8b5cf6', watch: '#3b82f6', kbd: '#22c55e', home: '#eab308', phone: '#06b6d4', iphone: '#38bdf8', plug: '#ec4899' })[key] || '#ff6200';
+    }
+    // Para los botones de categoría: dibujo + nombre (si no hay dibujo propio, el emoji de la categoría).
+    function catPillLabel(c, on) {
+      const key = c === 'all' ? 'all' : catIconKey(c);
+      const name = c === 'all' ? 'Todos' : c.name;
+      if (!key) return escapeHtml((c !== 'all' && c.icon ? c.icon + ' ' : '') + name);
+      const col = on ? 'currentColor' : catIconColor(key);
+      return `<span style="display:inline-flex;align-items:center;gap:6px">${catIconSvg(key, 18, col, on ? 0.15 : 0.3)}<span>${escapeHtml(name)}</span></span>`;
+    }
+    // Para las tarjetas grandes del inicio: círculo de color suave con el dibujo adentro.
+    function catTileIcon(c) {
+      const key = catIconKey(c);
+      if (!key) return `<div class="text-4xl sm:text-5xl leading-none mb-3 transition-transform group-hover:scale-110 origin-left">${escapeHtml(c.icon || '📦')}</div>`;
+      const col = catIconColor(key);
+      const n = parseInt(col.slice(1), 16), rgb = `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`;
+      return `<div class="mb-3 transition-transform group-hover:scale-110 origin-left" style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(${rgb},.18);border:1.5px solid rgba(${rgb},.55)">${catIconSvg(key, 30, col, 0.32)}</div>`;
+    }
     // ---- Filtros de categoría de la tienda ----
     function renderCategoryPills() {
       renderAdvisorChips();
       const box = document.getElementById('category-filters');
       if (!box) return;
       if (currentCategory !== 'all' && !topCats().some(c => c.id === currentCategory)) { currentCategory = 'all'; currentSubcategory = 'all'; }
-      const pill = (on, attr, label) => `<button ${attr} class="cat-pill px-3.5 py-2.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${on ? 'active bg-white text-black' : 'bg-zinc-900/70 text-zinc-400 hover:text-white border border-zinc-800'}">${escapeHtml(label)}</button>`;
-      box.innerHTML = pill(currentCategory === 'all', 'data-cat="all"', 'Todos') +
-        topCats().map(c => pill(currentCategory === c.id, `data-cat="${escapeHtml(c.id)}"`, (c.icon ? c.icon + ' ' : '') + c.name)).join('');
+      const pill = (on, attr, labelHtml) => `<button ${attr} style="border-radius:9999px" class="cat-pill px-3.5 py-2.5 rounded-lg text-[11px] font-semibold whitespace-nowrap transition-all ${on ? 'active bg-white text-black' : 'bg-zinc-900/70 text-zinc-400 hover:text-white border border-zinc-800'}">${labelHtml}</button>`;
+      box.innerHTML = pill(currentCategory === 'all', 'data-cat="all"', catPillLabel('all', currentCategory === 'all')) +
+        topCats().map(c => pill(currentCategory === c.id, `data-cat="${escapeHtml(c.id)}"`, catPillLabel(c, currentCategory === c.id))).join('');
       const sb = document.getElementById('subcategory-filters');
       if (!sb) return;
       const subs = currentCategory === 'all' ? [] : subCatsOf(currentCategory);
@@ -2556,7 +2604,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (!tiles.length) { sec.classList.add('hidden'); box.innerHTML = ''; return; }
       box.innerHTML = tiles.map(({ c, n }) => `
         <button type="button" data-tile="${escapeHtml(c.id)}" onclick="pickCategoryTile(this.dataset.tile)" class="cat-tile group text-left rounded-2xl bg-zinc-900/60 hover:bg-zinc-900 border border-white/[0.06] hover:border-brand-orange/60 p-4 sm:p-5 transition-all hover:-translate-y-0.5 active:scale-[0.98]">
-          <div class="text-4xl sm:text-5xl leading-none mb-3 transition-transform group-hover:scale-110 origin-left">${escapeHtml(c.icon || '📦')}</div>
+          ${catTileIcon(c)}
           <div class="font-bold text-white text-sm sm:text-base leading-tight">${escapeHtml(c.name)}</div>
           <div class="text-[11px] text-zinc-500 mt-0.5">${n} ${n === 1 ? 'producto' : 'productos'}</div>
         </button>`).join('');
