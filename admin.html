@@ -1057,29 +1057,30 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             </div>
 </div>
 <div data-sec-pane="inventory:new" class="space-y-6">
-<div class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-5">
+<div id="prod-form-card" class="p-5 rounded-2xl bg-zinc-900 border border-white/[0.08] space-y-5">
               <div class="flex items-center justify-between flex-wrap gap-2">
                 <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2" id="sec-newprod" style="scroll-margin-top:72px">
                   <span class="w-2 h-2 rounded-full bg-brand-orange"></span>
-                  Cargar Nuevo Producto con Colores y Análisis de Ganancia
+                  <span id="prod-form-title">Cargar Nuevo Producto con Colores y Análisis de Ganancia</span>
                 </h4>
                 <span class="text-[11px] text-zinc-400 font-code">Fotos mínimas: 2 + Colores a elección</span>
               </div>
 
-              <form id="admin-new-product-form" onsubmit="handleCreateProductWithPhotos(event)" onreset="setTimeout(syncSingleColorUI, 0)" class="space-y-5 text-xs">
+              <form id="admin-new-product-form" onsubmit="handleCreateProductWithPhotos(event)" onreset="setTimeout(syncSingleColorUI, 0); iphResetFlags()" oninput="iphFormInput(event)" onchange="iphFormInput(event)" class="space-y-5 text-xs">
                 <div id="edit-mode-banner" class="hidden p-3 rounded-lg bg-brand-orange/10 border border-brand-orange/40 text-brand-amber font-semibold"></div>
                 
                 <!-- Basic Info Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div>
-                    <label class="block mb-1 text-zinc-400">Nombre del Producto *</label>
+                    <label id="lbl-prod-name" class="block mb-1 text-zinc-400">Nombre del Producto *</label>
                     <input required type="text" id="new-prod-name" placeholder="Ej. Parlante Clip Go 4" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                    <p id="iph-name-hint" class="hidden mt-1 text-[10px] text-zinc-500 leading-snug">Poné solo el modelo (ej. iPhone 15 Pro). La memoria se agrega sola al nombre cuando guardás.</p>
                   </div>
-                  <div>
+                  <div data-iph-hide="1">
                     <label class="block mb-1 text-zinc-400">Marca / Fabricante *</label>
                     <input required type="text" id="new-prod-brand" placeholder="Ej. JBL, Sony, Apple" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
                   </div>
-                  <div>
+                  <div data-iph-hide-hosted="1">
                     <label class="block mb-1 text-zinc-400">Categoría *</label>
                     <select id="new-prod-category" onchange="onProdCategoryUserChange()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange">
                       <option value="audio">🎧 Audio</option>
@@ -1088,13 +1089,13 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                       <option value="home">💡 Smart Home & Carga</option>
                     </select>
                   </div>
-                  <div>
+                  <div data-iph-hide-hosted="1">
                     <label class="block mb-1 text-zinc-400">Subcategoría</label>
                     <select id="new-prod-subcategory" onchange="onProdSubcategoryUserChange()" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange">
                       <option value="">— Sin subcategoría —</option>
                     </select>
                   </div>
-                  <div>
+                  <div data-iph-hide="1">
                     <label class="block mb-1 text-zinc-400">Línea de Calidad *</label>
                     <select id="new-prod-type" onchange="autoFillWarrantyDefault(this.value)" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange">
                       <option value="original">🏅 Original</option>
@@ -1106,13 +1107,16 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 <!-- Datos propios de iPhone (solo aparecen si la categoría es iPhone) -->
                 <div id="iphone-fields" class="hidden p-4 rounded-xl bg-sky-500/[0.06] border border-sky-500/30 space-y-3">
                   <div class="text-[11px] font-bold text-sky-300 uppercase tracking-wider">📱 Datos del iPhone</div>
+                  <div id="iph-kind-row"><label class="block mb-1 text-sky-200 font-bold">Estado del equipo</label><div id="iph-kind-btns" class="flex flex-wrap gap-2"></div></div>
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg border border-orange-500/40 bg-orange-500/[0.07]" id="iph-f-spec-box">
                     <div><label class="block mb-1 text-orange-200 font-bold">Almacenamiento <span class="text-rose-300">(obligatorio)</span></label>
-                      <select id="new-prod-storage" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white">
+                      <div id="iph-storage-btns" class="flex flex-wrap gap-2"></div>
+                      <select id="new-prod-storage" class="hidden w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white">
                         <option value="">— Elegir —</option><option value="128">128 GB</option><option value="256">256 GB</option><option value="512">512 GB</option><option value="1024">1 TB</option>
                       </select></div>
                     <div><label class="block mb-1 text-orange-200 font-bold">Tipo de SIM <span class="text-rose-300">(obligatorio)</span></label>
-                      <select id="new-prod-sim" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white">
+                      <div id="iph-sim-btns" class="flex flex-wrap gap-2"></div>
+                      <select id="new-prod-sim" class="hidden w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white">
                         <option value="">— Elegir —</option><option value="esim">Solo eSIM (sin ranura para chip)</option><option value="fisica">SIM física (con chip)</option><option value="ambas">SIM física + eSIM</option>
                       </select></div>
                     <div id="iph-f-ondemand-box" class="sm:col-span-2 p-3 rounded-lg border border-sky-500/40 bg-sky-500/[0.07]">
@@ -1147,14 +1151,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                   </div>
                   <div>
                     <label class="block mb-1 text-zinc-400">Descripción del producto *</label>
-                    <textarea required id="new-prod-specs" rows="11" maxlength="3000" oninput="updateSpecsCount()" placeholder="Pegá acá la descripción del proveedor, o escribila.&#10;&#10;Ej:&#10;Auriculares Bluetooth 5.3 con estuche de carga.&#10;&#10;Características:&#10;- Batería 12 horas&#10;- Resistentes al agua IP67&#10;- Micrófono con cancelación de ruido" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange leading-relaxed"></textarea>
+                    <textarea required id="new-prod-specs" rows="11" maxlength="3000" oninput="updateSpecsCount(); iphSpecsTyped()" placeholder="Pegá acá la descripción del proveedor, o escribila.&#10;&#10;Ej:&#10;Auriculares Bluetooth 5.3 con estuche de carga.&#10;&#10;Características:&#10;- Batería 12 horas&#10;- Resistentes al agua IP67&#10;- Micrófono con cancelación de ruido" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange leading-relaxed"></textarea>
                     <div class="mt-1.5 flex flex-wrap gap-2 font-sans">
+                      <button type="button" id="iph-specs-btn" onclick="iphBuildSpecs(true)" class="hidden px-3 py-2 rounded-lg bg-sky-500/20 hover:bg-sky-500/30 border border-sky-500/50 text-sky-200 text-[11px] font-bold">✨ Armar descripción con los datos del iPhone</button>
                       <button type="button" id="specs-tpl-btn" onclick="specsTemplate()" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] font-bold">📋 Usar plantilla (Descripción + Especificaciones)</button>
                       <button type="button" id="specs-bullets-btn" onclick="specsBullets()" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 text-[11px] font-bold">• Poner puntitos</button>
                     </div>
                     <div class="mt-1 flex items-start justify-between gap-3 text-[10px] text-zinc-500 font-sans"><span>Se respetan los saltos de línea. Las líneas que empiezan con - o • salen como lista. Una línea que termina en ":" sale como subtítulo.</span><span id="new-prod-specs-count" class="shrink-0 font-code">0 / 3000</span></div>
                   </div>
-                  <div>
+                  <div data-iph-hide="1">
                     <label class="block mb-1 text-zinc-400">Palabras clave para el asesor <span class="text-zinc-500">(opcional)</span></label>
                     <input type="text" id="new-prod-keywords" maxlength="200" placeholder="Ej. correr, gym, estudiar, regalo, llamadas" class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
                     <p class="mt-1 text-[10px] text-zinc-500">Cómo lo buscaría un cliente. Ayuda a que el asesor lo encuentre.</p>
@@ -1227,7 +1232,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                       <input type="hidden" id="new-prod-warranty" value="Garantía Oficial 12 meses" />
                       <p id="warranty-hint" class="text-[10px] text-zinc-500 mt-1 font-sans leading-snug"></p>
                     </div>
-                    <div>
+                    <div data-iph-hide="1">
                       <label class="block mb-1 text-zinc-400 font-sans">Tipo de envío *</label>
                       <select id="new-prod-delivery" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-sans">
                         <option value="moto">🛵 Moto (chico o mediano)</option>
@@ -1538,6 +1543,18 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <div>
               <h3 class="text-lg font-bold text-white">📱 Sección iPhone</h3>
               <p class="text-xs text-zinc-400">Sellados y usados. Mientras la sección esté apagada, tus clientes no ven nada y nadie puede comprar estos equipos. Preparala tranquilo y prendela cuando quieras.</p>
+            </div>
+
+            <style>
+              /* Formulario de iPhone: se esconden los campos que no hacen falta (siguen guardando su valor) */
+              #prod-form-card.iph-mode [data-iph-hide]{display:none!important}
+              #prod-form-card.iph-hosted [data-iph-hide-hosted]{display:none!important}
+              #admin-tab-iphone.iph-form-open > :not(#iph-form-host){display:none!important}
+            </style>
+            <!-- Formulario para cargar / editar un iPhone: es el mismo formulario de productos, que se muda acá mientras se usa -->
+            <div id="iph-form-host" class="hidden space-y-3">
+              <button type="button" onclick="iphCloseForm()" class="text-xs font-semibold text-zinc-400 hover:text-white">← Volver a la lista de iPhone</button>
+              <div id="iph-form-slot"></div>
             </div>
 
             <div id="iph-offline" class="hidden p-4 rounded-2xl bg-amber-500/10 border border-amber-500/40 text-amber-200 text-xs">Para manejar esta sección tenés que estar conectado al servidor.</div>
@@ -3054,6 +3071,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
     function setTabSection(tab, key) {
       const cfg = TAB_SECS[tab]; if (!cfg) return;
+      if (tab === 'inventory' && key === 'new' && iphHosted()) iphPlaceForm(false); // "Cargar producto" siempre muestra su formulario
       if (!cfg.items.some(i => i[0] === key) || (cfg.items.find(i => i[0] === key)[4] && currentStaffSession.role !== 'admin')) key = cfg.def;
       SEC_NOW[tab] = key;
       document.querySelectorAll(`[data-sec-pane^="${tab}:"]`).forEach(p => p.classList.toggle('hidden', p.dataset.secPane !== tab + ':' + key));
@@ -5261,6 +5279,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const box = gEl('iphone-fields');
       if (!box) return;
       const iph = isIphForm();
+      iphApplyMode(iph);
       box.classList.toggle('hidden', !iph);
       if (!iph) { const o = gEl('new-prod-ondemand'), dl = document.getElementById('new-prod-delay'); if (o) o.checked = false; if (dl) dl.disabled = false; return; }
       const used = gEl('new-prod-subcategory').value === IPHONE_USED;
@@ -5288,6 +5307,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         gEl('new-prod-deposit').value = p.onDemandDeposit || '';
       }
       syncOnDemand();
+      iphSyncSpecBtns();
     }
     // "Por pedido" obliga a avisar la demora al cliente: se tilda solo y no se puede destildar mientras esté activo.
     function syncOnDemand() {
@@ -5500,19 +5520,130 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     async function iphNewUnit(kind) {
       if (!CATEGORIES.some(c => c.id === IPHONE_CAT)) await loadIphoneAdmin();
       if (!CATEGORIES.some(c => c.id === IPHONE_CAT)) { alert('No se pudo preparar la categoría iPhone. Revisá la conexión con el servidor.'); return; }
-      openTabSection('inventory', 'new'); // el formulario vive en "Cargar producto", no en "Inventario activo"
       cancelEditProduct();
       gEl('new-prod-category').value = IPHONE_CAT;
       onProdCategoryChange();
       gEl('new-prod-subcategory').value = kind === 'used' ? IPHONE_USED : IPHONE_SEALED;
       gEl('new-prod-type').value = 'original';
       if (!gEl('new-prod-brand').value) gEl('new-prod-brand').value = 'Apple';
+      gEl('new-prod-colors').value = ''; // un iPhone no es "Negro, Azul, Rojo, Camuflado": los colores se cargan a mano
+      renderColorStockInputs({});
       updateIphoneFormFields();
       applyCategoryDefaultWarranty();
-      gEl('admin-new-product-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      gEl('new-prod-name').focus();
+      iphOpenForm();
     }
-    function iphEdit(id) { switchAdminTab('inventory'); startEditProduct(id); }
+    function iphEdit(id) { switchAdminTab('inventory'); startEditProduct(id); iphOpenForm(); }
+
+    // ---- Formulario propio de iPhone ----
+    // Es el mismo formulario de productos (mismas validaciones y mismo guardado), pero en modo iPhone: esconde lo que no hace falta,
+    // elige memoria y SIM con botones, arma la descripción solo y se muda a la Sección iPhone mientras se usa.
+    function iphHosted() { const c = gEl('prod-form-card'); return !!c && !!c.closest('#iph-form-host'); }
+    function iphIsEditing() { try { return editingProductId !== null; } catch (e) { return false; } }
+    function iphApplyMode(iph) {
+      const card = gEl('prod-form-card'); if (!card) return;
+      card.classList.toggle('iph-mode', !!iph);
+      card.classList.toggle('iph-hosted', !!iph && iphHosted());
+      const set = (id, fn) => { const el = gEl(id); if (el) fn(el); };
+      set('lbl-prod-name', el => { el.textContent = iph ? 'Modelo *' : 'Nombre del Producto *'; });
+      set('new-prod-name', el => { el.placeholder = iph ? 'Ej. iPhone 15 Pro' : 'Ej. Parlante Clip Go 4'; });
+      set('iph-name-hint', el => el.classList.toggle('hidden', !iph));
+      set('new-prod-colors', el => { el.placeholder = iph ? 'Ej. Titanio natural, Negro, Azul' : 'Ej. Negro, Blanco, Azul, Rojo'; });
+      set('iph-specs-btn', el => el.classList.toggle('hidden', !iph));
+      set('iph-kind-row', el => el.classList.toggle('hidden', iphIsEditing()));
+      set('prod-form-title', el => {
+        const used = gEl('new-prod-subcategory') && gEl('new-prod-subcategory').value === IPHONE_USED;
+        el.textContent = iph ? (iphIsEditing() ? '📱 Editar iPhone' : used ? '📱 Cargar iPhone usado' : '📱 Cargar iPhone sellado') : 'Cargar Nuevo Producto con Colores y Análisis de Ganancia';
+      });
+      if (iph) set('new-prod-brand', el => { if (!el.value) el.value = 'Apple'; });
+    }
+    function iphPlaceForm(host) {
+      const card = gEl('prod-form-card'), hostEl = gEl('iph-form-host'), slot = gEl('iph-form-slot'), tab = gEl('admin-tab-iphone');
+      if (!card || !hostEl || !slot) return;
+      if (host) { if (card.parentNode !== slot) slot.appendChild(card); }
+      else { const pane = document.querySelector('[data-sec-pane="inventory:new"]'); if (pane && card.parentNode !== pane) pane.insertBefore(card, pane.firstChild); }
+      hostEl.classList.toggle('hidden', !host);
+      if (tab) tab.classList.toggle('iph-form-open', !!host);
+      iphApplyMode(isIphForm());
+    }
+    function iphOpenForm() {
+      iphPlaceForm(true);
+      switchAdminTab('iphone');
+      iphSyncSpecBtns();
+      const c = gEl('prod-form-card'); if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const nm = gEl('new-prod-name'); if (nm && nm.focus) nm.focus();
+    }
+    function iphCloseForm() {
+      cancelEditProduct();
+      iphPlaceForm(false);
+      renderIphoneAdmin();
+      const lst = gEl('iph-units'); if (lst && lst.scrollIntoView) lst.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function iphResetFlags() { const sp = gEl('new-prod-specs'); if (sp) sp.dataset.auto = '1'; }
+    // Memoria y SIM se eligen tocando botones; los selectores originales quedan escondidos y siguen siendo la fuente que se guarda.
+    function iphSyncSpecBtns() {
+      const sBox = gEl('iph-storage-btns'), mBox = gEl('iph-sim-btns'), kBox = gEl('iph-kind-btns');
+      if (!sBox || !mBox) return;
+      const st = String(gEl('new-prod-storage').value), sim = gEl('new-prod-sim').value, sub = gEl('new-prod-subcategory').value;
+      const on = 'bg-brand-orange text-black border-brand-orange', off = 'bg-zinc-950 text-zinc-200 border-zinc-700 hover:bg-zinc-800';
+      const btn = (kind, val, label, active) => `<button type="button" data-iph-pick="${kind}:${val}" aria-pressed="${active}" onclick="iphPickSpec('${kind}','${val}')" class="px-3 py-2 rounded-lg border text-xs font-bold ${active ? on : off}">${label}</button>`;
+      sBox.innerHTML = IPH_STORAGES.map(v => btn('storage', v, iphStorageText(v), st === String(v))).join('');
+      mBox.innerHTML = IPH_SIMS.map(v => btn('sim', v, IPH_SIM_TEXT[v], sim === v)).join('');
+      if (kBox) kBox.innerHTML = btn('kind', IPHONE_SEALED, '📦 Sellado', sub === IPHONE_SEALED) + btn('kind', IPHONE_USED, '♻️ Usado', sub === IPHONE_USED);
+    }
+    function iphPickSpec(kind, val) {
+      if (kind === 'storage') gEl('new-prod-storage').value = val;
+      else if (kind === 'sim') gEl('new-prod-sim').value = val;
+      else if (kind === 'kind') { gEl('new-prod-subcategory').value = val; onProdSubcategoryUserChange(); }
+      iphSyncSpecBtns();
+      iphAutoSpecs();
+    }
+    // Nombre = modelo + memoria (ej. "iPhone 15 Pro 256GB"). Así dos memorias del mismo modelo no se confunden en pedidos y listas.
+    function iphModelFromName(n) { return String(n || '').replace(/\b\d{2,4}\s?(gb|tb)\b|\b[12]\s?tb\b/gi, ' ').replace(/\s+/g, ' ').trim(); }
+    function iphComposeName() {
+      if (!isIphForm()) return;
+      const el = gEl('new-prod-name'), st = Number(gEl('new-prod-storage').value), model = iphModelFromName(el.value);
+      if (!model || !IPH_STORAGES.includes(st)) return;
+      el.value = model + ' ' + (st >= 1024 ? (st / 1024) + 'TB' : st + 'GB');
+    }
+    function iphSpecsTyped() { const sp = gEl('new-prod-specs'); if (sp) sp.dataset.auto = '0'; } // lo escribió una persona: no se pisa solo
+    function iphFormInput(e) {
+      const t = e && e.target; if (!t) return;
+      if (!['new-prod-name', 'new-prod-colors', 'new-prod-storage', 'new-prod-sim', 'new-prod-grade', 'new-prod-battery', 'new-prod-accessories', 'new-prod-ondemand', 'new-prod-delay-min', 'new-prod-delay-max'].includes(t.id)) return;
+      if (isIphForm()) iphAutoSpecs();
+    }
+    function iphAutoSpecs() {
+      const sp = gEl('new-prod-specs'); if (!sp || !isIphForm()) return;
+      if (sp.dataset.auto !== '1' && sp.value.trim()) return; // escrita a mano: no se toca
+      iphBuildSpecs(false);
+    }
+    function iphBuildSpecs(force) {
+      const sp = gEl('new-prod-specs'); if (!sp || !isIphForm()) return;
+      if (force && sp.dataset.auto !== '1' && sp.value.trim() && !confirm('Esto reemplaza la descripción que escribiste por una armada con los datos del iPhone. ¿Seguir?')) return;
+      const used = gEl('new-prod-subcategory').value === IPHONE_USED;
+      const model = iphModelFromName(gEl('new-prod-name').value), st = Number(gEl('new-prod-storage').value), sim = gEl('new-prod-sim').value;
+      if (!model && !st && !sim && !force) return;
+      const colors = gEl('new-prod-colors').value.split(',').map(c => c.trim()).filter(Boolean);
+      const cfg = IPH_ADMIN && IPH_ADMIN.config;
+      const L = [(model || 'iPhone') + (used ? ' usado.' : ' sellado, nuevo en su caja.'), '', 'Características:'];
+      if (IPH_STORAGES.includes(st)) L.push('- Almacenamiento: ' + iphStorageText(st));
+      if (IPH_SIMS.includes(sim)) L.push('- SIM: ' + IPH_SIM_TEXT[sim]);
+      if (colors.length) L.push('- ' + (colors.length > 1 ? 'Colores' : 'Color') + ': ' + colors.join(', '));
+      if (used) {
+        const g = cfg && (cfg.grades || []).find(x => x.key === gEl('new-prod-grade').value);
+        if (g) L.push('- Estado: ' + g.name);
+        const bat = parseInt(gEl('new-prod-battery').value, 10);
+        if (bat > 0) L.push('- Batería: ' + bat + '%');
+      }
+      const acc = gEl('new-prod-accessories').value.trim();
+      if (acc) L.push('- Incluye: ' + acc);
+      if (!used && gEl('new-prod-ondemand').checked) {
+        const a = parseInt(gEl('new-prod-delay-min').value, 10), b = parseInt(gEl('new-prod-delay-max').value, 10);
+        L.push(a >= 1 && b >= a ? `- Se pide por encargo: llega en ${a} a ${b} días` : '- Se pide por encargo');
+      }
+      sp.value = L.join('\n');
+      sp.dataset.auto = '1';
+      updateSpecsCount();
+    }
     async function iphReserve(e) {
       e.preventDefault();
       const id = Number(gEl('iph-res-unit').value);
@@ -9323,6 +9454,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       set('new-prod-subcategory', p.subcategory || '');
       set('new-prod-type', p.type || 'original');
       updateIphoneFormFields(p);
+      if (isIphForm() && IPH_STORAGES.includes(Number(p.storage))) set('new-prod-name', iphModelFromName(p.name) || p.name); // el campo es el MODELO: la memoria se vuelve a sumar al guardar
       gEl('new-prod-warranty-by').value = p.warrantyBy || (p.type === 'original' ? 'marca' : 'tienda');
       refreshWarrantyControls(Number(p.warrantyMonths) || legacyWarrantyMonths(p.warranty) || (p.type === 'original' ? 12 : 6));
       set('new-prod-price', p.price || 0);
@@ -9333,6 +9465,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       { const dk = document.getElementById('new-prod-delay'); if (dk) { dk.checked = p.delayNotice === true; set('new-prod-delay-min', p.delayDaysMin || 1); set('new-prod-delay-max', p.delayDaysMax || 4); syncDelayBox(); } }
       fillProductSupplierSelect(p.supplierId, p.pickupAtSupplier === true);
       set('new-prod-specs', p.specs || ''); updateSpecsCount();
+      { const sp = gEl('new-prod-specs'); if (sp) sp.dataset.auto = p.specs ? '0' : '1'; } // una descripción que ya existe no se pisa sola
       set('new-prod-keywords', p.keywords || '');
       set('new-prod-colors', (p.colors || []).join(', '));
       toggleSingleColor(isSingleColor(p));
@@ -9406,12 +9539,14 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       document.getElementById('btn-save-prod').textContent = 'Guardar y Publicar en Tienda';
       document.getElementById('btn-cancel-edit').classList.add('hidden');
       updateLiveProfitCalculator();
-      if (goBack === true && wasEditing) openTabSection('inventory', 'inv'); // al cancelar vuelve a la lista
+      if (goBack === true && wasEditing) { // al cancelar o guardar vuelve a la lista (la de iPhone, si se editó desde ahí)
+        if (iphHosted()) { iphPlaceForm(false); renderIphoneAdmin(); } else openTabSection('inventory', 'inv');
+      }
     }
 
     function handleCreateProductWithPhotos(e) {
       e.preventDefault();
-      
+      iphComposeName(); // iPhone: el nombre guardado es modelo + memoria
       const photos = readPhotoSlots();
 
       if (photos.length < 2) {
@@ -9492,6 +9627,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
           renderProducts();
           updateCartUI();
           refreshAdminUI();
+          if (iphHosted()) { iphPlaceForm(false); renderIphoneAdmin(); } // desde la Sección iPhone: vuelve a la lista de iPhone
           alert(`¡Producto "${name}" ${isEdit ? 'actualizado' : 'publicado'}!`);
         });
         return;
