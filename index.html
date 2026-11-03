@@ -633,7 +633,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
-  <link rel="stylesheet" href="/tw.css?v=422f6634" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
+  <link rel="stylesheet" href="/tw.css?v=fdf364fd" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
 </head>
 <body class="selection:bg-brand-orange selection:text-black">
   <div id="ps-loader" role="status" aria-live="polite" aria-label="Cargando PLUGSHOP">
@@ -1156,6 +1156,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                 <span>Agregar al Carrito</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
               </button>
+              <div id="gallery-bundles" class="hidden space-y-2"></div>
             </div>
           </div>
 
@@ -2173,6 +2174,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
         accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
         onDemand: p.onDemand === true,
+        bundles: (Array.isArray(p.bundles) ? p.bundles : []).slice(0, 4).map(b => ({ id: Number(b && b.id), price: Number(b && b.price) })).filter(b => Number.isInteger(b.id) && b.id > 0 && Number.isInteger(b.price) && b.price >= 1),
         onDemandDeposit: Number.isInteger(Number(p.onDemandDeposit)) && Number(p.onDemandDeposit) >= 1 ? Number(p.onDemandDeposit) : null,
         storage: [128, 256, 512, 1024].includes(Number(p.storage)) ? Number(p.storage) : null, sim: ['esim', 'fisica', 'ambas'].includes(p.sim) ? p.sim : '',
         warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
@@ -2945,6 +2947,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (colorsBox) colorsBox.classList.toggle('hidden', isSingleColor(prod));
 
       updateGalleryStock();
+      renderGalleryBundles(prod);
 
       renderGalleryActivePhoto();
       document.getElementById('product-detail-modal').classList.remove('hidden');
@@ -3959,6 +3962,85 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     // ==========================================
     // 5. CART WITH COLOR VARIANTS
     // ==========================================
+    // ---- Complementos con descuento (cabezal + cable) ----
+    // Mismo reparto que hace el servidor al confirmar: cada unidad de un producto "principal" da derecho a UN
+    // complemento con precio combo. El precio final siempre lo recalcula el servidor.
+    const bundleOffersOf = p => (p && !isOnDemand(p) && Array.isArray(p.bundles)) ? p.bundles.filter(b => b && b.price >= 1) : [];
+    function bundleTarget(offer) {
+      const t = PRODUCTS.find(x => x.id === offer.id);
+      return t && !bundleOffersOf(t).length && Number(offer.price) < Number(t.price) ? t : null;
+    }
+    function cartBundles() {
+      const map = new Map(), slots = [];
+      cart.forEach(it => {
+        const offers = bundleOffersOf(PRODUCTS.find(p => p.id === it.id));
+        for (let i = 0; i < it.qty && offers.length; i++) slots.push({ offers, used: false });
+      });
+      if (!slots.length) return { map, slots };
+      const cand = [];
+      cart.forEach((it, idx) => {
+        const pr = PRODUCTS.find(p => p.id === it.id);
+        if (!pr || isOnDemand(pr) || (Array.isArray(pr.bundles) && pr.bundles.length)) return;
+        let best = null;
+        slots.forEach(sl => { const o = sl.offers.find(x => x.id === pr.id); if (o && (best === null || o.price < best)) best = o.price; });
+        const saving = best === null ? 0 : Number(pr.price) - best;
+        if (saving > 0) cand.push({ idx, pr, saving, qty: it.qty });
+      });
+      cand.sort((a, b) => b.saving - a.saving);
+      cand.forEach(c => {
+        const offs = [];
+        slots.forEach(sl => { if (sl.used) return; const o = sl.offers.find(x => x.id === c.pr.id); if (o && o.price >= 1 && o.price < Number(c.pr.price)) offs.push({ sl, price: o.price }); });
+        offs.sort((a, b) => a.price - b.price);
+        let n = 0, total = 0;
+        for (const o of offs) { if (n >= c.qty) break; o.sl.used = true; n++; total += o.price; }
+        if (n > 0) map.set(c.idx, { qty: n, total });
+      });
+      return { map, slots };
+    }
+    function cartLineAmounts() {
+      const bm = cartBundles().map;
+      return cart.map((it, i) => { const b = bm.get(i); return b ? it.price * (it.qty - b.qty) + b.total : it.price * it.qty; });
+    }
+    const cartSubtotal = () => cartLineAmounts().reduce((a, x) => a + x, 0);
+    const firstColorOf = t => (t.colors && t.colors[0]) || 'Único';
+    // Cables que todavía se pueden sumar con descuento (cabezales del carrito sin su complemento).
+    function bundleSuggestions() {
+      const { slots } = cartBundles(), out = [], seen = new Set();
+      slots.forEach(sl => {
+        if (sl.used) return;
+        sl.offers.forEach(o => {
+          const t = bundleTarget(o);
+          if (!t || seen.has(t.id) || t.reserved || stockOf(t, firstColorOf(t)) <= cartUnits(t, firstColorOf(t))) return;
+          seen.add(t.id); out.push({ prod: t, price: o.price });
+        });
+      });
+      return out.slice(0, 2);
+    }
+    function bundleCardHtml(t, price, label, onclick) {
+      return `<div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 flex items-center gap-3" data-bundle-offer>
+        <div class="flex-1 min-w-0">
+          <div class="text-[11px] font-bold text-emerald-300">🔌 Llevalo junto y ahorrá</div>
+          <div class="text-xs text-white font-semibold truncate">${escapeHtml(t.name)}</div>
+          <div class="text-xs font-code"><span class="text-zinc-500 line-through">${formatARS(t.price)}</span> <span class="text-emerald-300 font-bold">${formatARS(price)}</span> <span class="text-[10px] text-zinc-400">llevándolo con tu pedido</span></div>
+        </div>
+        <button type="button" onclick="${onclick}" class="shrink-0 px-3 py-2 rounded-lg bg-emerald-500 text-black text-[11px] font-extrabold hover:opacity-90">${label}</button>
+      </div>`;
+    }
+    function renderGalleryBundles(prod) {
+      const box = document.getElementById('gallery-bundles'); if (!box) return;
+      const offers = prod && prod.stock > 0 ? bundleOffersOf(prod).map(o => ({ o, t: bundleTarget(o) })).filter(x => x.t && !x.t.reserved && stockOf(x.t, firstColorOf(x.t)) > 0) : [];
+      box.innerHTML = offers.map(x => bundleCardHtml(x.t, x.o.price, 'Agregar los dos', `addBundlePair(${prod.id}, ${x.t.id})`)).join('');
+      box.classList.toggle('hidden', !offers.length);
+    }
+    // Agrega el producto de la ficha (con el color elegido) y el complemento. Cada uno respeta su stock.
+    function addBundlePair(headId, cableId) {
+      const color = activeGalleryProduct && activeGalleryProduct.id === headId ? activeGallerySelectedColor : undefined;
+      addToCart(headId, color);
+      addToCart(cableId);
+      closeProductGallery();
+    }
+    function addBundleCable(cableId) { addToCart(cableId); }
+
     function addToCart(productId, selectedColor) {
       const prod = PRODUCTS.find(p => p.id === productId);
       if (!prod) return;
@@ -4018,7 +4100,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const totalEl = document.getElementById('cart-total-amount');
 
       const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
-      const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+      const subtotal = cartSubtotal();
 
       badge.textContent = totalItems;
       // Saltito del carrito y del número cuando se suma algo (no al cargar la página).
@@ -4070,8 +4152,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         `;
       } else {
         const seenBefore = cartSeenKeys; cartSeenKeys = new Set();
+        const bundleMap = cartBundles().map;
         itemsList.innerHTML = cart.map((item, idx) => {
           const prod = PRODUCTS.find(p => p.id === item.id);
+          const bun = bundleMap.get(idx);
           const fxKey = item.id + '|' + (item.selectedColor || ''); cartSeenKeys.add(fxKey);
           const fxNew = seenBefore.size >= 0 && cartLastCount >= 0 && !seenBefore.has(fxKey);
           const maxStock = prod ? stockOf(prod, item.selectedColor || 'Único') : 99;
@@ -4088,8 +4172,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               ${prod && isIphoneProd(prod) && iphHasSpec(prod) ? `<div class="mt-1" data-iph-spec>${iphSpecChips(prod)}</div>` : ''}
               <div class="flex items-center gap-1.5 mt-0.5 font-code">
                 ${(item.selectedColor && item.selectedColor !== 'Único') ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-zinc-800 text-brand-amber font-semibold">🎨 ${escapeHtml(item.selectedColor)}</span>` : ''}
-                <span class="text-xs text-brand-orange font-bold">${formatARS(item.price * item.qty)}</span>
+                <span class="text-xs text-brand-orange font-bold">${formatARS(bun ? item.price * (item.qty - bun.qty) + bun.total : item.price * item.qty)}</span>
               </div>
+              ${bun ? `<span class="text-[10px] text-emerald-300 font-semibold block mt-0.5" data-bundle-applied>🔌 Precio combo en ${bun.qty === 1 ? '1 unidad' : bun.qty + ' unidades'}: ahorrás ${formatARS(item.price * bun.qty - bun.total)}</span>` : ''}
               ${isAtMaxStock ? `<span class="text-[9px] text-amber-400 font-semibold block mt-0.5 font-code">${isOnDemand(prod) ? 'Máximo ' + ON_DEMAND_MAX + ' por pedido' : 'Tope de stock disponible'}</span>` : ''}
               ${isOnDemand(prod) ? `<span class="text-[10px] font-semibold block mt-0.5" style="color:#7DD3FC" data-on-demand>📦 Por pedido${delayInfo(prod) ? ' · llega en ' + escapeHtml(delayInfo(prod).text) : ''}. ${iphDeposit(prod) ? 'Lo fijás con una seña de ' + formatARS(iphDeposit(prod) * item.qty) + '; el resto lo pagás al recibirlo.' : 'Te escribimos por WhatsApp para coordinarlo.'}</span>` : (delayInfo(prod) ? `<span class="text-[10px] text-amber-300 font-semibold block mt-0.5">⏳ Demora ${delayInfo(prod).text}</span>` : '')}
             </div>
@@ -4104,7 +4189,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               >+</button>
             </div>
           </div>
-        `}).join('');
+        `}).join('') + bundleSuggestions().map(sg => bundleCardHtml(sg.prod, sg.price, 'Agregar', `addBundleCable(${sg.prod.id})`)).join('');
       }
       renderDelayNotes();
     }
@@ -4181,7 +4266,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       if (!chkTotalPreview) return;
 
-      const subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+      const subtotal = cartSubtotal();
       const vehicle = cartVehicle();
       const isFreeShipping = shipIsFree(subtotal, vehicle);
       const vNote = document.getElementById('chk-vehicle-note');
@@ -4342,7 +4427,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       el.classList.toggle('text-red-400', !ok);
     }
     function currentCouponBase() {
-      const subtotal = cart.reduce((acc, i) => acc + i.price * i.qty, 0);
+      const subtotal = cartSubtotal();
       const payEl = document.querySelector('input[name="chk-payment"]:checked');
       const isTransfer = payEl ? payEl.value === 'transferencia' : true;
       const pct = isTransfer ? (STORE_SETTINGS.transferDiscountPct || 10) : 0;
@@ -4461,7 +4546,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         }
       }
 
-      const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+      const subtotal = cartSubtotal();
       const vehicle = cartVehicle();
       const isFreeShipping = shipIsFree(subtotal, vehicle);
       const isRetiro = selectedZone === 'retiro';
@@ -4595,7 +4680,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
       const trackingUrl = window.location.origin + window.location.pathname + '#track=' + orderNumber;
       const waDelay = cartDelay();
-      const itemsText = cart.map(i => `• ${i.qty}x ${i.name}\n  ↳ ${i.selectedColor && i.selectedColor !== 'Único' ? 'Color: ' + i.selectedColor + ' ' : ''}(${formatARS(i.price * i.qty)})`).join('\n');
+      const lineAmts = cartLineAmounts(), comboMap = cartBundles().map;
+      const itemsText = cart.map((i, k) => `• ${i.qty}x ${i.name}\n  ↳ ${i.selectedColor && i.selectedColor !== 'Único' ? 'Color: ' + i.selectedColor + ' ' : ''}(${formatARS(lineAmts[k])})${comboMap.get(k) ? ' · precio combo en ' + comboMap.get(k).qty : ''}`).join('\n');
 
       const messageRaw = `*NUEVA ORDEN ${orderNumber} EN PLUGSHOP*\n` +
         `--------------------------------\n` +

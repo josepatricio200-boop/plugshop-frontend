@@ -1251,6 +1251,12 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
                         <span class="text-zinc-400">días</span>
                       </div>
                     </div>
+                    <div id="new-prod-bundles-box" class="sm:col-span-2 rounded-xl border border-zinc-700 bg-zinc-900/60 p-3">
+                      <div class="text-xs text-white font-sans font-bold">🔌 Complementos con descuento <span class="text-zinc-500 font-normal">(opcional)</span></div>
+                      <p class="text-[11px] text-zinc-400 font-sans leading-snug mt-1">Ejemplo: en un cabezal sugerí un cable a precio especial. Solo sale ese precio si el cliente se lleva los dos juntos. Por cada cabezal, un cable con descuento. El 10% por transferencia se descuenta igual sobre ese precio.</p>
+                      <div id="new-prod-bundles-list" class="mt-2 space-y-2"><div class="text-[11px] text-zinc-500 font-sans">Sin complementos: este producto se vende solo.</div></div>
+                      <button type="button" id="new-prod-bundles-add" onclick="bundleAdd()" class="mt-2 text-xs font-sans font-bold px-3 py-2 rounded-lg border border-zinc-600 text-zinc-200 hover:border-brand-orange hover:text-brand-orange">+ Agregar complemento</button>
+                    </div>
                     <div id="new-prod-supplier-box">
                       <label class="block mb-1 text-zinc-400 font-sans">Proveedor</label>
                       <select id="new-prod-supplier" onchange="syncPickupCheck()" class="w-full bg-zinc-900 border border-zinc-700 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange font-sans">
@@ -2773,7 +2779,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       fisica: 'Usa chip (SIM física) en la ranura del equipo.',
       ambas: 'Podés usar chip (SIM física), eSIM, o las dos a la vez.'
     };
-    // iPhone SELLADO "por pedido": el dueño lo pide a Buenos Aires, así que se puede comprar aunque haya 0 en stock.
+    // iPhone SELLADO "por pedido": se puede comprar aunque haya 0 en stock.
     // El servidor lo valida igual (hasta 2 por pedido). Los usados nunca son "por pedido".
     const ON_DEMAND_MAX = 2;
     const isOnDemand = p => !!p && p.onDemand === true && isIphoneProd(p) && !isUsedIphone(p);
@@ -2794,7 +2800,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       return `
         <div class="font-bold text-white text-sm sm:text-base">📱 iPhone</div>
         ${t.intro ? `<p class="mt-1 leading-snug">${textBlock(t.intro)}</p>` : ''}
-        ${detail ? `<p class="mt-2 text-zinc-400 leading-snug text-[11px] sm:text-xs">${textBlock(detail)}</p>` : ''}
+        ${detail ? `<details class="mt-2 group"><summary class="cursor-pointer select-none text-[11px] sm:text-xs text-brand-orange hover:underline font-semibold">Más información</summary><p class="mt-1.5 text-zinc-400 leading-snug text-[11px] sm:text-xs">${textBlock(detail)}</p></details>` : ''}
         <div class="mt-2.5 flex flex-wrap gap-1.5">${chip('🛡️', 'Garantía PlugShop')}${chip('↩️', '10 días para arrepentirte')}${chip('🔖', 'Reserva por ' + (cfg.reserveHours || 24) + ' h')}</div>
         <button type="button" ${preview ? 'tabindex="-1"' : 'onclick="iphoneOpenLegal(false)"'} class="mt-2.5 text-[11px] sm:text-xs text-brand-orange hover:underline font-semibold">Ver condiciones completas de iPhone</button>`;
     }
@@ -3271,6 +3277,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         grade: /^[A-E]$/.test(String(p.grade || '')) ? p.grade : '', battery: Number.isInteger(Number(p.battery)) && Number(p.battery) > 0 && Number(p.battery) <= 100 ? Number(p.battery) : null,
         accessories: cleanText(p.accessories, 140), checks: (Array.isArray(p.checks) ? p.checks : []).slice(0, 12).map(c => cleanText(c, 40)).filter(Boolean),
         onDemand: p.onDemand === true,
+        bundles: (Array.isArray(p.bundles) ? p.bundles : []).slice(0, 4).map(b => ({ id: Number(b && b.id), price: Number(b && b.price) })).filter(b => Number.isInteger(b.id) && b.id > 0 && Number.isInteger(b.price) && b.price >= 1),
         onDemandDeposit: Number.isInteger(Number(p.onDemandDeposit)) && Number(p.onDemandDeposit) >= 1 ? Number(p.onDemandDeposit) : null,
         storage: [128, 256, 512, 1024].includes(Number(p.storage)) ? Number(p.storage) : null, sim: ['esim', 'fisica', 'ambas'].includes(p.sim) ? p.sim : '',
         warrantyBy: p.warrantyBy === 'marca' || p.warrantyBy === 'tienda' ? p.warrantyBy : '', reserved: p.reserved === true,
@@ -3483,6 +3490,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     let isAdminAuthenticated = false;
 
     const formatARS = (amount) => '$' + Math.round(amount).toLocaleString('es-AR');
+    // Importe de una línea de pedido: si parte de las unidades salió a precio combo (cabezal + cable), cuenta ese precio.
+    const lineAmount = (l) => {
+      const q = Number(l && l.qty) || 0, u = Number(l && l.unitPrice) || 0, bq = Number(l && l.bundleQty) || 0;
+      return bq > 0 ? u * Math.max(0, q - bq) + (Number(l.bundleTotal) || 0) : u * q;
+    };
 
     // ==========================================
     // 2. SMART IMAGE / EMOJI RENDERER & COMPRESSION
@@ -3917,7 +3929,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           if (dep && /POR PEDIDO/.test(String(order.items || '')) && !['cancelado', 'entregado'].includes(st)) {
             const saldo = dep.balancePaid || !dep.balance ? '' : ` El saldo de <b>${formatARS(dep.balance)}</b> lo pagás al recibirlo.`;
             if (st.includes('pago pendiente') || st.includes('rechazado')) html = `📦 Tu pedido incluye un iPhone por pedido. <b>Transferí la seña de ${formatARS(dep.amount)}</b> para fijarlo y subí el comprobante.${saldo} <b>Si no lo conseguimos, te devolvemos la seña completa.</b>`;
-            else if (st.includes('comprobante enviado')) html = `🧾 Recibimos tu comprobante. Cuando confirmemos la seña de ${formatARS(dep.amount)}, pedimos tu iPhone a Buenos Aires.${saldo}`;
+            else if (st.includes('comprobante enviado')) html = `🧾 Recibimos tu comprobante. Cuando confirmemos la seña de ${formatARS(dep.amount)}, pedimos tu iPhone.${saldo}`;
             else html = `${iphStageHtml(order)}${saldo} Si no lo conseguimos, te devolvemos la seña completa.`;
           }
           odn.innerHTML = html;
@@ -4614,6 +4626,58 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           pv.textContent = 'Sin aviso: el cliente no ve ninguna demora en este producto.';
         }
       }
+    }
+    // ---- Complementos con descuento (cabezal + cable) ----
+    let bundleDraft = [];
+    function bundleOptions(selId) {
+      return PRODUCTS.filter(x => x.id !== editingProductId && x.active !== false && !isIphoneProd(x) && !(Array.isArray(x.bundles) && x.bundles.length)
+        && (x.id === selId || !bundleDraft.some(b => b.id === x.id)));
+    }
+    function renderBundleBox() {
+      const box = document.getElementById('new-prod-bundles-list'); if (!box) return;
+      box.innerHTML = bundleDraft.map((b, i) => {
+        const t = PRODUCTS.find(x => x.id === b.id);
+        const normal = t ? Number(t.price) : 0, pr = Number(b.price) || 0;
+        const hint = !t ? 'Elegí el producto que se ofrece con descuento.'
+          : !(pr >= 1) ? 'Poné a cuánto sale llevándolo junto (precio normal: ' + formatARS(normal) + ').'
+          : pr >= normal ? '⚠️ El precio combo tiene que ser menor que el normal (' + formatARS(normal) + ').'
+          : 'Normal ' + formatARS(normal) + ' → combo ' + formatARS(pr) + ' (el cliente ahorra ' + formatARS(normal - pr) + ').';
+        const opts = '<option value="">Elegí un producto…</option>' + bundleOptions(b.id).map(x => '<option value="' + escapeHtml(x.id) + '"' + (x.id === b.id ? ' selected' : '') + '>' + escapeHtml(x.name) + ' — ' + formatARS(x.price) + '</option>').join('');
+        return '<div class="rounded-lg border border-zinc-700 bg-zinc-900 p-2">'
+          + '<div class="flex flex-wrap items-center gap-2">'
+          + '<select aria-label="Producto complemento" onchange="bundleSet(' + i + ', \'id\', this.value)" class="flex-1 min-w-[10rem] bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-xs font-sans">' + opts + '</select>'
+          + '<span class="text-zinc-400 text-xs font-sans">sale</span>'
+          + '<input type="number" min="1" step="1" inputmode="numeric" aria-label="Precio combo" value="' + (pr || '') + '" oninput="bundleSet(' + i + ', \'price\', this.value)" class="w-28 bg-zinc-900 border border-zinc-700 rounded-lg p-2 text-white text-xs text-center font-sans" placeholder="$ combo">'
+          + '<button type="button" onclick="bundleRemove(' + i + ')" class="text-xs font-sans px-2 py-2 text-red-400 hover:text-red-300">Quitar</button>'
+          + '</div><div id="bundle-hint-' + i + '" class="text-[11px] text-zinc-400 font-sans mt-1">' + hint + '</div></div>';
+      }).join('') || '<div class="text-[11px] text-zinc-500 font-sans">Sin complementos: este producto se vende solo.</div>';
+      const add = document.getElementById('new-prod-bundles-add'); if (add) add.classList.toggle('hidden', bundleDraft.length >= 4);
+    }
+    function bundleAdd() { if (bundleDraft.length >= 4) return; bundleDraft.push({ id: null, price: '' }); renderBundleBox(); }
+    function bundleRemove(i) { bundleDraft.splice(i, 1); renderBundleBox(); }
+    function bundleSet(i, field, v) {
+      if (!bundleDraft[i]) return;
+      if (field === 'id') { bundleDraft[i].id = v === '' ? null : Number(v); renderBundleBox(); return; }
+      bundleDraft[i].price = v; // se escribe sin redibujar para no perder el foco
+      const t = PRODUCTS.find(x => x.id === bundleDraft[i].id), h = document.getElementById('bundle-hint-' + i), pr = Number(v) || 0;
+      if (h && t) h.textContent = !(pr >= 1) ? 'Poné a cuánto sale llevándolo junto (precio normal: ' + formatARS(Number(t.price)) + ').' : pr >= Number(t.price) ? '⚠️ El precio combo tiene que ser menor que el normal (' + formatARS(Number(t.price)) + ').' : 'Normal ' + formatARS(Number(t.price)) + ' → combo ' + formatARS(pr) + ' (el cliente ahorra ' + formatARS(Number(t.price) - pr) + ').';
+    }
+    function bundleLoad(list) {
+      bundleDraft = (Array.isArray(list) ? list : []).map(b => ({ id: Number(b.id), price: Number(b.price) }));
+      renderBundleBox();
+    }
+    // Devuelve { bundles } o { error }. Siempre manda la lista (vacía = sin complementos).
+    function bundleFieldPayload() {
+      if (!document.getElementById('new-prod-bundles-list')) return {};
+      const out = [];
+      for (const b of bundleDraft) {
+        if (b.id === null || b.id === undefined || b.id === '') { if (Number(b.price) > 0) return { error: 'En "Complementos con descuento" elegí el producto o quitá la fila vacía.' }; continue; }
+        const t = PRODUCTS.find(x => x.id === b.id), pr = Number(b.price);
+        if (!Number.isInteger(pr) || pr < 1) return { error: 'En "Complementos con descuento" poné el precio combo de "' + (t ? t.name : 'cada producto') + '" (en pesos, sin decimales).' };
+        if (t && pr >= Number(t.price)) return { error: 'El precio combo de "' + t.name + '" tiene que ser menor que su precio normal (' + formatARS(Number(t.price)) + ').' };
+        out.push({ id: b.id, price: pr });
+      }
+      return { bundles: out };
     }
     function delayFieldPayload() {
       const ck = document.getElementById('new-prod-delay');
@@ -5607,7 +5671,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       iphAutoSpecs();
     }
     // Nombre = modelo + memoria (ej. "iPhone 15 Pro 256GB"). Así dos memorias del mismo modelo no se confunden en pedidos y listas.
-    function iphModelFromName(n) { return String(n || '').replace(/\b\d{2,4}\s?(gb|tb)\b|\b[12]\s?tb\b/gi, ' ').replace(/\s+/g, ' ').trim(); }
+    function iphModelFromName(n) { return String(n || '').replace(/\b\d{2,4}\s?(gb|tb)\b|\b[12]\s?tb\b/gi, ' ').replace(/\s+/g, ' ').trim().replace(/^iphone\b/i, 'iPhone'); } // el teclado del celular suele poner "IPhone": se corrige solo
     function iphComposeName() {
       if (!isIphForm()) return;
       const el = gEl('new-prod-name'), st = Number(gEl('new-prod-storage').value), model = iphModelFromName(el.value);
@@ -6750,10 +6814,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           cost += (Number(l.unitCost) || 0) * q;
           const key = l.name || ('#' + l.id);
           const pr = r.products[key] || (r.products[key] = { name: key, qty: 0, revenue: 0 });
-          pr.qty += q; pr.revenue += (Number(l.unitPrice) || 0) * q;
+          pr.qty += q; pr.revenue += lineAmount(l);
           const cat = categoryLabel(l.category) || 'Sin categoría';
           const ct = r.categories[cat] || (r.categories[cat] = { name: cat, qty: 0, revenue: 0 });
-          ct.qty += q; ct.revenue += (Number(l.unitPrice) || 0) * q;
+          ct.qty += q; ct.revenue += lineAmount(l);
         });
         const pay = (o.isBancarizado || /transferencia/i.test(o.paymentMethod || '')) ? 'Transferencia' : 'Efectivo';
         const py = r.payments[pay] || (r.payments[pay] = { name: pay, qty: 0, revenue: 0 });
@@ -7469,11 +7533,11 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       const canManage = can('orders.manage'), canScan = can('orders.dispatch') || canManage;
       const closed = ['Entregado', 'Cancelado'].includes(o.status);
       const lines = Array.isArray(o.lines) && o.lines.length ? o.lines : null;
-      const subtotal = lines ? lines.reduce((a, l) => a + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0) : null;
+      const subtotal = lines ? lines.reduce((a, l) => a + lineAmount(l), 0) : null;
       const ship = Number(o.shippingCost) || 0;
       const isAdmin = currentStaffSession.role === 'admin';
       let profit = null;
-      if (isAdmin && lines) profit = lines.reduce((a, l) => a + (Number(l.qty) || 0) * ((Number(l.unitPrice) || 0) - (Number(l.unitCost) || 0)), 0) - (o.discountApplied || 0) - (o.couponAmount || 0) - (o.manualDiscount || 0);
+      if (isAdmin && lines) profit = lines.reduce((a, l) => a + lineAmount(l) - (Number(l.qty) || 0) * (Number(l.unitCost) || 0), 0) - (o.discountApplied || 0) - (o.couponAmount || 0) - (o.manualDiscount || 0);
       const hasProof = !!(o.proof || o.hasProof);
       const transfer = ppIsTransfer(o);
       const payLine = o.status === 'Cancelado' ? 'Pedido cancelado'
@@ -7499,7 +7563,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       const keys = waMenuKeys(o), tpl = waTemplates(o);
       const custKnown = typeof CUSTOMERS !== 'undefined' && CUSTOMERS.some(c => samePhone(c.phone, o.phone));
       const productsHtml = lines
-        ? `<div class="divide-y divide-zinc-800">${lines.map(l => `<div class="flex items-start justify-between gap-3 py-1.5 text-xs"><div><div class="text-white font-semibold">${escapeHtml(l.qty)}× ${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">${l.color && l.color !== 'Único' ? 'Color: ' + escapeHtml(l.color) + ' · ' : ''}${formatARS(l.unitPrice)} c/u</div>${ficPickupHtml(o, l, lines.indexOf(l))}</div><div class="text-zinc-100 font-bold">${formatARS((l.qty || 0) * (l.unitPrice || 0))}</div></div>`).join('')}</div>`
+        ? `<div class="divide-y divide-zinc-800">${lines.map(l => `<div class="flex items-start justify-between gap-3 py-1.5 text-xs"><div><div class="text-white font-semibold">${escapeHtml(l.qty)}× ${escapeHtml(l.name)}</div><div class="text-[11px] text-zinc-400">${l.color && l.color !== 'Único' ? 'Color: ' + escapeHtml(l.color) + ' · ' : ''}${formatARS(l.unitPrice)} c/u${l.bundleQty ? ` · <span class="text-emerald-400">${escapeHtml(l.bundleQty)} a precio combo</span>` : ''}</div>${ficPickupHtml(o, l, lines.indexOf(l))}</div><div class="text-zinc-100 font-bold">${formatARS(lineAmount(l))}</div></div>`).join('')}</div>`
         : `<div class="text-xs text-zinc-200">${escapeHtml(o.items || '')}</div>`;
       const money = [];
       if (subtotal !== null) money.push(ppRow('Productos', formatARS(subtotal)));
@@ -8789,14 +8853,14 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
     function printReceiptInner(o, cfg) {
       const e = escapeHtml, money = n => e(formatARS(Number(n) || 0)), rc = cfg.rc || RC_DEFAULT;
       const lines = Array.isArray(o.lines) ? o.lines : [];
-      const sub = lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.unitPrice) || 0), 0);
+      const sub = lines.reduce((s, l) => s + lineAmount(l), 0);
       const row = (a, b) => `<tr><td>${a}</td><td class="r">${b}</td></tr>`;
       const kv = (a, b) => `<tr><td class="k">${a}</td><td class="v">${b}</td></tr>`;
       const name = l => `${e(l.qty)} x ${e(l.name)}${l.color && l.color !== 'Único' ? ' (' + e(l.color) + ')' : ''}`;
       const items = lines.length
         ? lines.map(l => rc.unit
-          ? `<tr><td colspan="2">${name(l)}</td></tr>` + row('<span class="muted">&nbsp;&nbsp;' + money(l.unitPrice) + ' c/u</span>', money((Number(l.qty) || 0) * (Number(l.unitPrice) || 0)))
-          : row(name(l), money((Number(l.qty) || 0) * (Number(l.unitPrice) || 0)))).join('')
+          ? `<tr><td colspan="2">${name(l)}</td></tr>` + row('<span class="muted">&nbsp;&nbsp;' + money(l.unitPrice) + ' c/u' + (l.bundleQty ? ' · ' + e(l.bundleQty) + ' a precio combo' : '') + '</span>', money(lineAmount(l)))
+          : row(name(l), money(lineAmount(l)))).join('')
         : `<tr><td colspan="2">${e(o.items || '')}</td></tr>`;
       const extra = [];
       if (rc.discounts) {
@@ -9474,6 +9538,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       set('new-prod-delivery', vehicleOfProduct(p));
       { const dk = document.getElementById('new-prod-delay'); if (dk) { dk.checked = p.delayNotice === true; set('new-prod-delay-min', p.delayDaysMin || 1); set('new-prod-delay-max', p.delayDaysMax || 4); syncDelayBox(); } }
       fillProductSupplierSelect(p.supplierId, p.pickupAtSupplier === true);
+      bundleLoad(p.bundles);
       set('new-prod-specs', p.specs || ''); updateSpecsCount();
       { const sp = gEl('new-prod-specs'); if (sp) sp.dataset.auto = p.specs ? '0' : '1'; } // una descripción que ya existe no se pisa sola
       set('new-prod-keywords', p.keywords || '');
@@ -9538,6 +9603,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       fillProductSupplierSelect('', false);
       const form = document.getElementById('admin-new-product-form');
       form.reset();
+      bundleLoad([]);
       syncOnDemand();
       syncDelayBox();
       onProdCategoryChange();
@@ -9602,11 +9668,14 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       const rawColors = document.getElementById('new-prod-colors').value.trim();
       const colors = rawColors.split(',').map(c => c.trim()).filter(c => c.length > 0);
 
+      const bf = bundleFieldPayload();
+      if (bf.error) { alert(bf.error); return; }
       const payload = {
         name, brand, category, subcategory, type, warranty, warrantyMonths: warrantyMonthsVal, warrantyBy, stock, stockByColor, specs, keywords, featured,
         deliveryClass: (document.getElementById('new-prod-delivery') || { value: 'moto' }).value,
         ...(supplierFieldPayload()),
         ...(delayFieldPayload()),
+        ...bf,
         ...(iphData || {}),
         colors: colors.length > 0 ? colors : ['Único'], photos, colorPhotos: readColorPhotos(),
         badge: type === 'original' ? '100% ORIGINAL' : 'PLUG SELECCIÓN'
