@@ -1490,7 +1490,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     </div>
 
     <div id="cart-items-list" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
-    <div id="cart-delay-note" class="hidden mx-4 mb-3 text-[11px] leading-snug text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2"></div>
+    <div id="cart-delay-note" class="hidden mx-4 mb-3 text-[11px] leading-snug text-zinc-400"></div>
 
     <div class="p-5 border-t border-zinc-800 bg-black/90 space-y-4">
       <div class="space-y-1.5 text-xs">
@@ -2878,7 +2878,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
               <span class="truncate">${escapeHtml(kind)}${months ? ' · ' + escapeHtml(months) + '<span class="hidden sm:inline"> de garantía</span>' : ''}${colorsTxt}</span>
             </div>
             ${stockLabel ? `<div class="mt-1">${stockLabel}</div>` : ''}
-            ${delayInfo(product) && !isOnDemand(product) ? `<div data-delay-badge class="mt-1 text-[11px] sm:text-[12px] text-amber-300 font-semibold">⏳ Puede demorar ${delayInfo(product).text}</div>` : ''}
+            ${delayInfo(product) && !isOnDemand(product) ? `<div data-delay-badge class="mt-1 text-[11px] sm:text-[12px] text-zinc-400 font-medium">🚚 Llega en ${delayInfo(product).text}</div>` : ''}
             ${vehicleOfProduct(product) !== 'moto' ? `<div class="mt-1 text-[11px] sm:text-[12px] text-zinc-400">${VEHICLE_INFO[vehicleOfProduct(product)].icon} Se entrega en ${VEHICLE_INFO[vehicleOfProduct(product)].label.toLowerCase()}</div>` : ''}
 
             <div class="mt-auto pt-2.5 sm:pt-4">
@@ -2972,7 +2972,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             return `📦 <b>Este iPhone se pide por encargo.</b> No lo tenemos en el local: lo pedimos y llega en <b>${escapeHtml(galDelay.text)}</b>.` +
               (dep ? ` Para fijarlo transferís una <b>seña de ${formatARS(dep)}</b> y el resto lo pagás al recibirlo. <b>Si no lo conseguimos, te devolvemos la seña completa.</b>` : ` Te escribimos por WhatsApp para coordinarlo.`);
           })()
-          : `⏳ <b>Puede demorar ${galDelay.text}.</b> Este producto no lo tenemos en el local o llega de fuera de Tucumán. Te confirmamos el día exacto por WhatsApp antes de enviarlo.`;
+          : `🚚 <b class="text-zinc-200">Llega en ${galDelay.text}.</b> Te confirmamos el día exacto por WhatsApp.`;
+        // Producto con demora normal: línea discreta (como en un marketplace). El iPhone por pedido sigue con su caja destacada: lleva seña y condiciones.
+        if (galDelay) galDelayBox.className = isOnDemand(prod) ? 'mt-2 text-[11px] leading-snug text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2' : 'mt-2 text-xs leading-snug text-zinc-400';
       }
 
       renderGalleryColorPills(colors);
@@ -3082,7 +3084,8 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         addBtn.className = 'w-full py-3.5 rounded-xl bg-zinc-800 text-zinc-500 font-bold text-xs cursor-not-allowed flex items-center justify-center gap-2';
         addBtn.innerHTML = '<span>Sin Stock Disponible</span>';
       } else {
-        stockStatusEl.textContent = `${colorStock} unidades en stock real`;
+        // Con demora cargada, "stock real" chocaría con "Llega en X": se dice solo "Disponible".
+        stockStatusEl.textContent = delayInfo(prod) ? 'Disponible' : `${colorStock} unidades en stock real`;
         stockStatusEl.className = 'text-xs font-bold text-emerald-400 font-code';
         addBtn.disabled = false;
         addBtn.className = 'w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-amber to-brand-orange text-black font-extrabold text-xs shadow-lg hover:opacity-95 transition-all flex items-center justify-center gap-2';
@@ -4424,7 +4427,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const cartBox = document.getElementById('cart-delay-note');
       if (cartBox) {
         cartBox.classList.toggle('hidden', !d);
-        if (d) cartBox.innerHTML = `⏳ <b>Puede demorar ${d.text}.</b> ${d.items.length === 1 ? 'Este producto no está en el local' : 'Estos productos no están en el local'} (o llega${d.items.length === 1 ? '' : 'n'} de fuera de Tucumán): ${names}. Te confirmamos el día por WhatsApp.`;
+        if (d) cartBox.innerHTML = `🚚 <b>Llega en ${d.text}.</b> ${names}. Te confirmamos el día por WhatsApp.`;
       }
       const chk = document.getElementById('chk-delay-note');
       if (chk) {
