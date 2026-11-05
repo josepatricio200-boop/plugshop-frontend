@@ -2317,6 +2317,28 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             </div>
 </div>
 <div data-sec-pane="settings:tienda" class="space-y-6">
+<div id="maint-box" class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-3">
+              <div>
+                <h4 class="text-sm font-bold text-white">🛠️ Pausar compras por mantenimiento</h4>
+                <p class="text-xs text-zinc-400">Para cuando vas a actualizar la tienda. Los clientes pueden mirar el catálogo pero NO comprar, y ven un cartel con tu mensaje. Vos y tu equipo siguen usando el panel y cargando pedidos manuales. Los pedidos ya hechos no se tocan.</p>
+              </div>
+              <div id="maint-status" class="text-xs rounded-lg px-3 py-2 border border-emerald-500/30 bg-emerald-500/10 text-emerald-300">✅ La tienda está abierta: los clientes pueden comprar.</div>
+              <div class="text-xs space-y-3">
+                <div>
+                  <label class="block mb-1 text-zinc-300 font-semibold" for="maint-msg">Mensaje para el cliente <span class="text-zinc-500 font-normal">(opcional)</span></label>
+                  <input type="text" id="maint-msg" maxlength="200" placeholder="Estamos actualizando la tienda. Volvemos en un rato." class="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                </div>
+                <div>
+                  <label class="block mb-1 text-zinc-300 font-semibold" for="maint-until">Hora de vuelta <span class="text-zinc-500 font-normal">(opcional, hora de Argentina)</span></label>
+                  <input type="time" id="maint-until" class="w-40 bg-zinc-950 border border-zinc-800 rounded-lg p-2.5 text-white focus:outline-none focus:border-brand-orange" />
+                  <span class="block text-[10px] text-zinc-500 mt-1">Solo se muestra al cliente ("Volvemos aprox. a las 18:30"). NO reabre la tienda sola: cuando termines, tocá "Reanudar las compras".</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                  <button type="button" id="maint-btn" onclick="toggleMaintenance()" class="px-5 py-2.5 rounded-xl bg-amber-400 text-black font-bold text-xs hover:opacity-90 transition-all">Pausar las compras ahora</button>
+                  <span id="maint-msg-out" class="text-xs hidden"></span>
+                </div>
+              </div>
+            </div>
 <div class="max-w-2xl bg-zinc-900/80 border border-white/[0.08] rounded-2xl p-6 space-y-5">
               <div>
                 <h4 class="text-sm font-bold text-white" id="sec-tienda" style="scroll-margin-top:72px">🏪 Mi tienda</h4>
@@ -2751,6 +2773,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold', 'shippingCostAuto', 'shippingCostAutoSmt', 'freeShippingThresholdAuto'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       if (typeof res.shippingAutoSet === 'boolean') STORE_SETTINGS.shippingAutoSet = res.shippingAutoSet;
+      maintLoad(res); applyMaintenance();
       // Decoración de temporada (la capa vive solo en la tienda): enciende o apaga según lo que dejó el panel.
       if (res.seasonMode === 'auto' || res.seasonMode === 'off') STORE_SETTINGS.seasonMode = res.seasonMode;
       if (Array.isArray(res.seasonSkip)) STORE_SETTINGS.seasonSkip = res.seasonSkip;
@@ -3455,6 +3478,22 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     let PRODUCTS = loadStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
     if (Array.isArray(PRODUCTS)) PRODUCTS = PRODUCTS.map(sanitizeProduct); else PRODUCTS = [...DEFAULT_PRODUCTS];
     let STORE_SETTINGS = loadStorage(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
+    // Modo mantenimiento: NUNCA se guarda en el navegador (si no, un "pausado" viejo podría quedar pegado). Siempre viene del servidor.
+    let MAINT = { on: false, text: '', msg: '', until: '' };
+    const MAINT_DEFAULT_TEXT = 'Estamos actualizando la tienda. Volvemos en un rato.';
+    function maintLoad(res) {
+      if (!res || typeof res !== 'object') return false;
+      const next = { on: res.maintenanceOn === true, text: typeof res.maintenanceText === 'string' ? res.maintenanceText : '', msg: typeof res.maintenanceMsg === 'string' ? res.maintenanceMsg : '', until: typeof res.maintenanceUntil === 'string' ? res.maintenanceUntil : '' };
+      const changed = JSON.stringify(next) !== JSON.stringify(MAINT);
+      MAINT = next;
+      return changed;
+    }
+    function applyMaintenance() {
+      const ban = document.getElementById('maint-banner');
+      if (ban) { ban.textContent = MAINT.on ? '🛠️ ' + (MAINT.text || MAINT_DEFAULT_TEXT) + ' Podés mirar el catálogo; las compras están en pausa.' : ''; ban.classList.toggle('hidden', !MAINT.on); }
+      const btn = document.getElementById('checkout-trigger-btn');
+      if (btn) { btn.disabled = MAINT.on; btn.classList.toggle('opacity-50', MAINT.on); btn.classList.toggle('cursor-not-allowed', MAINT.on); btn.textContent = MAINT.on ? 'Compras en pausa por mantenimiento' : 'Continuar al Checkout'; }
+    }
     if (!STORE_SETTINGS.transferDiscountPct) STORE_SETTINGS.transferDiscountPct = 10;
     if (!STORE_SETTINGS.bankCbu) STORE_SETTINGS.bankCbu = '3840200500000011487511';
     let ADMIN_ORDERS = loadStorage(STORAGE_KEYS.ORDERS, DEFAULT_ORDERS);
@@ -8348,6 +8387,7 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       const zoneInput = document.getElementById('setting-zone');
       if (zoneInput && document.activeElement !== zoneInput) zoneInput.value = storeZoneName();
       fillSeasonSettings();
+      fillMaintenance();
 
       if (brandsInput && document.activeElement !== brandsInput) brandsInput.value = typeof STORE_SETTINGS.featuredBrands === 'string' ? STORE_SETTINGS.featuredBrands : DEFAULT_BRANDS;
       { // Tarjetas de Ofertas: muestran lo que está configurado en Ajustes (antes decían siempre 10% y $150k)
@@ -10579,6 +10619,34 @@ ${pages || '<p style="text-align:center;padding:40px;font-weight:700">No hay pro
       ['navidad', '🎄', 'Navidad', '1 al 26 de diciembre'],
       ['anionuevo', '🎉', 'Año Nuevo y Reyes', '27 de diciembre al 6 de enero']
     ];
+    function fillMaintenance() {
+      const st = document.getElementById('maint-status'), btn = document.getElementById('maint-btn');
+      if (!st || !btn) return;
+      const editing = document.activeElement && (document.activeElement.id === 'maint-msg' || document.activeElement.id === 'maint-until');
+      if (!editing) {
+        const m = document.getElementById('maint-msg'), u = document.getElementById('maint-until');
+        if (m) m.value = MAINT.msg || '';
+        if (u) u.value = MAINT.until || '';
+      }
+      st.className = 'text-xs rounded-lg px-3 py-2 border ' + (MAINT.on ? 'border-amber-400/50 bg-amber-400/10 text-amber-200' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300');
+      st.textContent = MAINT.on ? '⏸️ COMPRAS EN PAUSA: los clientes ven: "' + (MAINT.text || MAINT_DEFAULT_TEXT) + '" No olvides reanudarlas cuando termines.' : '✅ La tienda está abierta: los clientes pueden comprar.';
+      btn.textContent = MAINT.on ? 'Reanudar las compras' : 'Pausar las compras ahora';
+      btn.className = 'px-5 py-2.5 rounded-xl font-bold text-xs hover:opacity-90 transition-all ' + (MAINT.on ? 'bg-emerald-500 text-black' : 'bg-amber-400 text-black');
+    }
+    async function toggleMaintenance() {
+      const out = document.getElementById('maint-msg-out'), btn = document.getElementById('maint-btn');
+      const say = (t, ok) => { if (!out) return; out.textContent = t; out.className = 'text-xs ' + (ok ? 'text-emerald-400' : 'text-red-400'); setTimeout(() => out.classList.add('hidden'), ok ? 3000 : 7000); };
+      const turnOn = !MAINT.on;
+      const body = { maintenanceOn: turnOn, maintenanceMsg: (document.getElementById('maint-msg').value || '').trim(), maintenanceUntil: document.getElementById('maint-until').value || '' };
+      if (turnOn && !confirm('¿Pausar las compras? Los clientes no van a poder comprar hasta que vos las reanudes.')) return;
+      if (btn) btn.disabled = true;
+      const res = await apiRequest('SETTINGS', { method: 'PUT', headers: { Authorization: 'Bearer ' + currentStaffSession.token }, body: JSON.stringify(body) });
+      if (btn) btn.disabled = false;
+      if (!res || !res.success || !res.settings) { say((res && res.error) || 'No se pudo guardar. Probá de nuevo.', false); return; }
+      maintLoad(res.settings);
+      fillMaintenance();
+      say(turnOn ? '✓ Compras en pausa' : '✓ Compras reanudadas', true);
+    }
     function fillSeasonSettings() {
       const sel = document.getElementById('setting-season-mode');
       const box = document.getElementById('setting-season-list');

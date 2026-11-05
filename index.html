@@ -633,7 +633,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
   </style>
   <script>try{if(localStorage.getItem('PLUGSHOP_THEME')!=='dark')document.documentElement.setAttribute('data-theme','light');}catch(e){document.documentElement.setAttribute('data-theme','light');}</script>
-  <link rel="stylesheet" href="/tw.css?v=fdf364fd" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
+  <link rel="stylesheet" href="/tw.css?v=61871228" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.tailwindcss.com';s.onload=function(){try{tailwind.config={&quot;theme&quot;:{&quot;extend&quot;:{&quot;colors&quot;:{&quot;brand&quot;:{&quot;orange&quot;:&quot;#ff6200&quot;,&quot;amber&quot;:&quot;#ffb703&quot;,&quot;dark&quot;:&quot;#08080a&quot;,&quot;card&quot;:&quot;#111115&quot;,&quot;surface&quot;:&quot;#18181f&quot;,&quot;border&quot;:&quot;#24242e&quot;}},&quot;fontFamily&quot;:{&quot;sans&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;],&quot;mono&quot;:[&quot;Inter&quot;,&quot;system-ui&quot;,&quot;-apple-system&quot;,&quot;sans-serif&quot;]}}}}}catch(e){}};document.head.appendChild(s)})()">
 </head>
 <body class="selection:bg-brand-orange selection:text-black">
   <div id="ps-loader" role="status" aria-live="polite" aria-label="Cargando PLUGSHOP">
@@ -679,6 +679,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     <script>(function(){var t0=Date.now(),el=document.getElementById('ps-loader'),done=false;if(!el)return;try{if(sessionStorage.getItem('psl_seen')){if(el.parentNode)el.parentNode.removeChild(el);return;}sessionStorage.setItem('psl_seen','1');}catch(e){}function hide(){if(done)return;done=true;setTimeout(function(){el.classList.add('ps-out');setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},700);},Math.max(0,2000-(Date.now()-t0)));}if(document.readyState==='complete')hide();else window.addEventListener('load',hide);setTimeout(hide,5000);})();</script>
   </div>
 
+
+  <!-- Modo mantenimiento: cartel para el cliente (se muestra solo si el administrador pausó las compras) -->
+  <div id="maint-banner" role="alert" class="hidden sticky top-0 z-[95] bg-amber-400 text-black text-xs sm:text-sm font-bold text-center px-4 py-2.5 shadow-lg"></div>
 
   <!-- Top Announcement Bar -->
   <aside class="ps-promo bg-gradient-to-r from-zinc-950 via-zinc-900 to-zinc-950 border-b border-white/[0.06] text-xs py-2 px-4 text-center text-zinc-300">
@@ -1090,16 +1093,9 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
   <!-- Quick View, Photo Gallery & Color Variant Selector Modal -->
   <div id="product-detail-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4">
     <div class="relative w-full max-w-2xl lg:max-w-6xl bg-zinc-950 border border-white/[0.12] rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col">
-      <div class="p-4 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/90">
-        <div class="flex items-center gap-1.5 flex-wrap min-w-0 pr-2">
-          <span id="detail-modal-type-badge" class="inline-flex"></span>
-          <span id="detail-modal-brand" class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-extrabold bg-brand-orange/15 text-brand-orange border border-brand-orange/40"></span>
-          <span id="detail-modal-cat" class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-semibold bg-zinc-800 text-zinc-200 border border-zinc-700"></span>
-        </div>
-        <button onclick="closeProductGallery()" aria-label="Cerrar galería" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">✕</button>
-      </div>
+      <button onclick="closeProductGallery()" aria-label="Cerrar galería" class="absolute top-3 right-3 z-10 w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">✕</button>
 
-      <div class="p-6 overflow-y-auto space-y-6">
+      <div class="p-6 pt-14 lg:pt-6 overflow-y-auto space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr] gap-6 items-start">
           
           <!-- Photos Column -->
@@ -1111,6 +1107,11 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
           <!-- Product Details & Color Selector Column -->
           <div class="space-y-4">
             <div>
+              <div class="flex items-center gap-1.5 flex-wrap mb-1.5">
+                <span id="detail-modal-type-badge" class="inline-flex"></span>
+                <span id="detail-modal-brand" class="inline-flex items-center px-2 h-6 rounded-md text-[11px] font-bold bg-zinc-800/70 text-zinc-300 border border-zinc-700/70"></span>
+              </div>
+              <p class="text-[11px] text-zinc-500 leading-snug mb-2"><span id="detail-modal-note"></span><span id="detail-modal-sep" class="hidden"> · </span><span id="detail-modal-cat"></span></p>
               <h3 id="gallery-title" class="text-xl font-extrabold text-white leading-tight"></h3>
               <div id="gallery-iph-spec" class="hidden mt-2"></div>
               <div id="gallery-specs" class="text-xs text-zinc-400 mt-1.5 leading-relaxed"></div>
@@ -1880,6 +1881,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (typeof res.featuredBrands === 'string') STORE_SETTINGS.featuredBrands = res.featuredBrands; // vacío = usar las marcas de los productos
       ['transferDiscountPct', 'shippingCost', 'shippingCostSmt', 'freeShippingThreshold', 'shippingCostAuto', 'shippingCostAutoSmt', 'freeShippingThresholdAuto'].forEach(k => { if (typeof res[k] === 'number') STORE_SETTINGS[k] = res[k]; });
       if (typeof res.shippingAutoSet === 'boolean') STORE_SETTINGS.shippingAutoSet = res.shippingAutoSet;
+      maintLoad(res); applyMaintenance();
       // Decoración de temporada (la capa vive solo en la tienda): enciende o apaga según lo que dejó el panel.
       if (res.seasonMode === 'auto' || res.seasonMode === 'off') STORE_SETTINGS.seasonMode = res.seasonMode;
       if (Array.isArray(res.seasonSkip)) STORE_SETTINGS.seasonSkip = res.seasonSkip;
@@ -2357,6 +2359,30 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     let PRODUCTS = loadStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
     if (Array.isArray(PRODUCTS)) PRODUCTS = PRODUCTS.map(sanitizeProduct); else PRODUCTS = [...DEFAULT_PRODUCTS];
     let STORE_SETTINGS = loadStorage(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
+    // Modo mantenimiento: NUNCA se guarda en el navegador (si no, un "pausado" viejo podría quedar pegado). Siempre viene del servidor.
+    let MAINT = { on: false, text: '', msg: '', until: '' };
+    const MAINT_DEFAULT_TEXT = 'Estamos actualizando la tienda. Volvemos en un rato.';
+    function maintLoad(res) {
+      if (!res || typeof res !== 'object') return false;
+      const next = { on: res.maintenanceOn === true, text: typeof res.maintenanceText === 'string' ? res.maintenanceText : '', msg: typeof res.maintenanceMsg === 'string' ? res.maintenanceMsg : '', until: typeof res.maintenanceUntil === 'string' ? res.maintenanceUntil : '' };
+      const changed = JSON.stringify(next) !== JSON.stringify(MAINT);
+      MAINT = next;
+      return changed;
+    }
+    function applyMaintenance() {
+      const ban = document.getElementById('maint-banner');
+      if (ban) { ban.textContent = MAINT.on ? '🛠️ ' + (MAINT.text || MAINT_DEFAULT_TEXT) + ' Podés mirar el catálogo; las compras están en pausa.' : ''; ban.classList.toggle('hidden', !MAINT.on); }
+      const btn = document.getElementById('checkout-trigger-btn');
+      if (btn) { btn.disabled = MAINT.on; btn.classList.toggle('opacity-50', MAINT.on); btn.classList.toggle('cursor-not-allowed', MAINT.on); btn.textContent = MAINT.on ? 'Compras en pausa por mantenimiento' : 'Continuar al Checkout'; }
+    }
+    // Cada minuto se fija si el administrador prendió o apagó el modo mantenimiento (sin recargar toda la tienda).
+    async function pollMaintenance() {
+      if (document.hidden || !isBackendConnected()) return;
+      const res = await apiRequest('SETTINGS');
+      if (!res || res.error || !maintLoad(res)) return;
+      applyMaintenance(); renderProducts(); updateCartUI();
+      try { if (activeGalleryProduct) updateGalleryStock(); } catch (e) {}
+    }
     if (!STORE_SETTINGS.transferDiscountPct) STORE_SETTINGS.transferDiscountPct = 10;
     if (!STORE_SETTINGS.bankCbu) STORE_SETTINGS.bankCbu = '3840200500000011487511';
     let ADMIN_ORDERS = loadStorage(STORAGE_KEYS.ORDERS, DEFAULT_ORDERS);
@@ -2605,6 +2631,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     // Qué hace el botón de la tarjeta: 'add' = suma directo al carrito (un solo color y sin nada que leer antes),
     // 'pick' = abre la ficha para elegir color, 'open' = abre la ficha (iPhone, por pedido, con demora o reservado: el cliente tiene que leer las condiciones).
     function cardAction(p) {
+      if (MAINT.on) return { mode: 'open', label: 'Ver', short: 'Ver' };
       const multi = !!p && Array.isArray(p.colors) && p.colors.length > 1;
       if (multi) return { mode: 'pick', label: 'Elegir color', short: 'Elegir' };
       const leer = !!p && (isIphoneProd(p) || isOnDemand(p) || !!delayInfo(p) || !!p.reserved);
@@ -2897,14 +2924,20 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       const isOrig = prod.type === 'original';
       const typeBadge = document.getElementById('detail-modal-type-badge');
       typeBadge.innerHTML = isIphoneProd(prod)
-        ? `<span class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-bold bg-sky-950 text-sky-300 border border-sky-800">📱 ${isUsedIphone(prod) ? 'iPhone usado' : 'iPhone sellado'}</span>`
+        ? `<span class="inline-flex items-center px-2 h-6 rounded-md text-[11px] font-bold bg-sky-500/10 text-sky-300 border border-sky-500/30">📱 ${isUsedIphone(prod) ? 'iPhone usado' : 'iPhone sellado'}</span>`
         : isOrig
-        ? `<span class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-bold bg-cyan-950 text-cyan-400 border border-cyan-800">🏅 Original</span>`
-        : `<span class="inline-flex items-center px-2.5 h-7 rounded-md text-xs font-bold bg-amber-950 text-amber-400 border border-amber-800">⚡ PlugShop Selección</span>`;
+        ? `<span class="inline-flex items-center px-2 h-6 rounded-md text-[11px] font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/30">🏅 Original</span>`
+        : `<span class="inline-flex items-center px-2 h-6 rounded-md text-[11px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30">⚡ PlugShop Selección</span>`;
 
       document.getElementById('detail-modal-brand').textContent = prod.brand;
-      { const catTxt = [categoryLabel(prod.category), prod.subcategory ? categoryLabel(prod.subcategory) : ''].filter(Boolean).join(' › ');
-        const ce = document.getElementById('detail-modal-cat'); ce.textContent = catTxt; ce.classList.toggle('hidden', !catTxt); }
+      document.getElementById('detail-modal-brand').classList.toggle('hidden', !prod.brand);
+      // Línea chica: qué significa la etiqueta + dónde está en la tienda (la categoría real del producto).
+      { const noteTxt = isIphoneProd(prod) ? (isUsedIphone(prod) ? 'Equipo usado, revisado antes de entregarlo' : 'Equipo nuevo y sellado') : isOrig ? 'Producto original de la marca' : 'Seleccionado por PlugShop';
+        const plainCat = id => { const c = CATEGORIES.find(x => x.id === id); return c ? c.name : (id || ''); }; // sin ícono: es una línea discreta
+        const catTxt = [plainCat(prod.category), prod.subcategory ? plainCat(prod.subcategory) : ''].filter(Boolean).join(' › ');
+        document.getElementById('detail-modal-note').textContent = noteTxt;
+        document.getElementById('detail-modal-cat').textContent = catTxt;
+        document.getElementById('detail-modal-sep').classList.toggle('hidden', !catTxt); }
       document.getElementById('gallery-title').textContent = prod.name;
       { const sb = document.getElementById('gallery-iph-spec');
         if (sb) { const on = isIphoneProd(prod) && iphHasSpec(prod); sb.innerHTML = on ? iphSpecChips(prod, 'lg') : ''; sb.classList.toggle('hidden', !on); } }
@@ -3017,6 +3050,15 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       if (!prod) return;
       const stockStatusEl = document.getElementById('gallery-stock-status');
       const addBtn = document.getElementById('gallery-add-btn');
+      if (MAINT.on) {
+        stockStatusEl.textContent = 'Compras en pausa por mantenimiento';
+        stockStatusEl.className = 'text-xs font-bold text-amber-300 font-code';
+        addBtn.disabled = true;
+        addBtn.className = 'w-full py-3.5 rounded-xl bg-zinc-800 text-zinc-400 font-bold text-xs cursor-not-allowed flex items-center justify-center gap-2';
+        addBtn.innerHTML = '<span>🛠️ Compras en pausa</span>';
+        addBtn.onclick = null;
+        return;
+      }
 
       const colorStock = stockOf(prod, activeGallerySelectedColor);
       if (isOnDemand(prod)) {
@@ -4042,6 +4084,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     function addBundleCable(cableId) { addToCart(cableId); }
 
     function addToCart(productId, selectedColor) {
+      if (MAINT.on) { alert(MAINT.text || MAINT_DEFAULT_TEXT); return; }
       const prod = PRODUCTS.find(p => p.id === productId);
       if (!prod) return;
 
@@ -4487,6 +4530,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     }
 
     function openCheckoutModal() {
+      if (MAINT.on) { alert(MAINT.text || MAINT_DEFAULT_TEXT); return; }
       if (cart.length === 0) return;
       closeCartDrawer();
       updateCheckoutTotalPreview();
@@ -4506,6 +4550,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     let lastCheckoutAt = 0;
 
     async function sendOrderViaWhatsApp() {
+      if (MAINT.on) { alert(MAINT.text || MAINT_DEFAULT_TEXT); return; }
       const name = document.getElementById('chk-name').value.trim();
       const phone = document.getElementById('chk-phone').value.trim();
       const zoneEl = document.querySelector('input[name="chk-zone"]:checked');
@@ -4601,6 +4646,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         if (!res || res.success === false || !res.order) {
           lastCheckoutAt = 0;
           alert((res && res.error) || 'No pudimos registrar tu pedido. Revisá tu conexión e intentá de nuevo.');
+          try { pollMaintenance(); } catch (e) {}
           return;
         }
         serverOrder = res.order;
@@ -6070,6 +6116,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       applyBankDisplay();
       loadSettingsFromServer();
       loadIphoneConfig();
+      setInterval(pollMaintenance, 60000);
 
       function checkTrackingHash() {
         const hash = window.location.hash;
