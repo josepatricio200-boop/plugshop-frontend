@@ -45,6 +45,16 @@
       overflow-x: hidden;
     }
     .font-code { font-family: 'Inter', sans-serif; font-variant-numeric: tabular-nums; }
+    /* ACT 85 · esqueleto de carga, foco visible con teclado y mejor contraste de los grises chicos */
+    @keyframes ps-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+    .ps-skel { background-color: rgba(255,255,255,.06); background-image: linear-gradient(90deg, rgba(255,255,255,0) 25%, rgba(255,255,255,.09) 50%, rgba(255,255,255,0) 75%); background-size: 200% 100%; animation: ps-shimmer 1.6s infinite linear; border-radius: .6rem; }
+    .ps-skel-card { border: 1px solid rgba(255,255,255,.08); border-radius: 1rem; padding: .75rem; background: rgba(255,255,255,.02); }
+    html[data-theme="light"] .ps-skel { background-color: rgba(0,0,0,.06); background-image: linear-gradient(90deg, rgba(255,255,255,0) 25%, rgba(255,255,255,.65) 50%, rgba(255,255,255,0) 75%); }
+    html[data-theme="light"] .ps-skel-card { border-color: rgba(0,0,0,.08); background: #fff; }
+    @media (prefers-reduced-motion: reduce) { .ps-skel { animation: none; } }
+    a:focus-visible, button:focus-visible, [role="button"]:focus-visible, summary:focus-visible, select:focus-visible { outline: 2px solid #ff8a1f !important; outline-offset: 2px; }
+    html[data-theme="light"] :is(a, button, [role="button"], summary, select):focus-visible { outline-color: #c2410c !important; }
+    html:not([data-theme="light"]) .text-zinc-500 { color: #8e8e99; }
     /* Casillas de tildar sin tamaño propio: un poco más grandes para tocarlas con el dedo */
     :where(input[type=checkbox]:not([class*="w-"])) { width: 1.125rem; height: 1.125rem; accent-color: #ff6200; }
     ::-webkit-scrollbar {
@@ -1343,7 +1353,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             <p id="track-ondemand-note" class="hidden mt-2 text-[11px] font-semibold rounded-lg px-3 py-2 border border-sky-700 bg-sky-950 text-sky-200"></p>
           </div>
         </div>
-        <button onclick="closeOrderTrackingModal()" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
+        <button onclick="closeOrderTrackingModal()" aria-label="Cerrar seguimiento" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
           ✕
         </button>
       </div>
@@ -1473,7 +1483,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
         <h3 class="text-base font-bold text-white">Tu Carrito</h3>
         <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-zinc-800 text-zinc-300 font-code" id="drawer-item-count">0</span>
       </div>
-      <button id="close-cart-btn" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
+      <button id="close-cart-btn" aria-label="Cerrar carrito" class="w-8 h-8 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 flex items-center justify-center transition-colors">
         ✕
       </button>
     </div>
@@ -2092,12 +2102,42 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
     async function loadCatalogFromServer() {
       if (!isBackendConnected()) return;
       const res = await apiRequest('PRODUCTS');
-      if (Array.isArray(res) && res.length) {
+      if (Array.isArray(res)) {
         PRODUCTS = res.map(sanitizeProduct);
+        CATALOG_STATE = PRODUCTS.length ? 'ready' : 'empty';
+        CATALOG_TRIES = 0;
         renderProducts();
         updateCartUI();
         if (PROMOS.length) renderPromos();
+        return;
       }
+      // No respondió. Si ya había catálogo real en pantalla, se sigue mostrando. Si no, se reintenta solo 3 veces
+      // (el servidor gratuito tarda en despertar) y después aparece el botón "Reintentar".
+      if (PRODUCTS.length) return;
+      CATALOG_TRIES++;
+      if (CATALOG_TRIES < 4) setTimeout(loadCatalogFromServer, 6000);
+      else { CATALOG_STATE = 'error'; renderProducts(); }
+    }
+    function retryCatalog() {
+      CATALOG_TRIES = 0; CATALOG_STATE = 'loading';
+      renderProducts();
+      loadCatalogFromServer();
+    }
+    // Lo que se ve en lugar de las tarjetas mientras no hay catálogo real.
+    function catalogPlaceholderHtml() {
+      if (CATALOG_STATE === 'error') return `
+        <div class="col-span-full py-16 text-center" role="alert" data-catalog-error>
+          <p class="text-base font-medium">No pudimos cargar los productos.</p>
+          <p class="text-xs text-zinc-400 mt-1">Revisá tu conexión e intentá de nuevo.</p>
+          <button type="button" onclick="retryCatalog()" class="ps-btn mt-3 rounded-xl bg-white hover:bg-brand-orange text-black font-bold text-xs" style="padding:.6rem 1.25rem">Reintentar</button>
+        </div>`;
+      if (CATALOG_STATE === 'empty') return `
+        <div class="col-span-full py-16 text-center" data-catalog-empty>
+          <p class="text-base font-medium">Estamos cargando los productos.</p>
+          <p class="text-xs text-zinc-400 mt-1">Volvé en un rato, o escribinos por WhatsApp y te ayudamos.</p>
+        </div>`;
+      const card = `<div class="ps-skel-card" aria-hidden="true" data-skeleton><div class="ps-skel" style="aspect-ratio:1/1"></div><div class="ps-skel" style="height:10px;width:35%;margin-top:12px"></div><div class="ps-skel" style="height:14px;width:90%;margin-top:8px"></div><div class="ps-skel" style="height:14px;width:60%;margin-top:6px"></div><div class="ps-skel" style="height:20px;width:45%;margin-top:14px"></div></div>`;
+      return `<div class="col-span-full text-center text-xs text-zinc-400" role="status" aria-live="polite" style="padding-bottom:.25rem" data-catalog-loading>Cargando productos… la primera vez puede tardar unos segundos.</div>` + card.repeat(8);
     }
 
     // Sesión del staff logueado (en memoria, no en localStorage: se pierde
@@ -2358,6 +2398,10 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
 
     let PRODUCTS = loadStorage(STORAGE_KEYS.PRODUCTS, DEFAULT_PRODUCTS);
     if (Array.isArray(PRODUCTS)) PRODUCTS = PRODUCTS.map(sanitizeProduct); else PRODUCTS = [...DEFAULT_PRODUCTS];
+    // Con el servidor conectado, el catálogo de demostración NUNCA se le muestra al cliente: se espera el catálogo real.
+    // Estados: 'loading' (esqueleto), 'ready', 'empty' (el servidor no tiene productos) y 'error' (no respondió: botón Reintentar).
+    let CATALOG_STATE = 'ready', CATALOG_TRIES = 0;
+    if (isBackendConnected()) { PRODUCTS = []; CATALOG_STATE = 'loading'; }
     let STORE_SETTINGS = loadStorage(STORAGE_KEYS.SETTINGS, DEFAULT_SETTINGS);
     // Modo mantenimiento: NUNCA se guarda en el navegador (si no, un "pausado" viejo podría quedar pegado). Siempre viene del servidor.
     let MAINT = { on: false, text: '', msg: '', until: '' };
@@ -2792,6 +2836,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       renderCategoryTiles();
       renderIphoneFilters();
       const grid = document.getElementById('products-grid');
+      if (CATALOG_STATE !== 'ready' && PRODUCTS.length === 0) { grid.style.gridTemplateColumns = ''; grid.innerHTML = catalogPlaceholderHtml(); return; }
       const iphoneMode = iphInView();
       // Vista iPhone: una columna en el celular y varias en pantalla grande; el resto del catálogo no cambia.
       grid.style.gridTemplateColumns = iphoneMode ? 'repeat(auto-fill,minmax(min(100%,340px),1fr))' : '';
@@ -2879,7 +2924,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
             </div>
             ${stockLabel ? `<div class="mt-1">${stockLabel}</div>` : ''}
             ${delayInfo(product) && !isOnDemand(product) ? `<div data-delay-badge class="mt-1 text-[11px] sm:text-[12px] text-zinc-400 font-medium">🚚 Llega en ${delayInfo(product).text}</div>` : ''}
-            ${vehicleOfProduct(product) !== 'moto' ? `<div class="mt-1 text-[11px] sm:text-[12px] text-zinc-400">${VEHICLE_INFO[vehicleOfProduct(product)].icon} Se entrega en ${VEHICLE_INFO[vehicleOfProduct(product)].label.toLowerCase()}</div>` : ''}
+            <!-- El tipo de envío (moto/auto) ya no se muestra en la tarjeta: se cobra en el carrito según el pedido. -->
 
             <div class="mt-auto pt-2.5 sm:pt-4">
               <div class="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
@@ -2932,7 +2977,7 @@ html[data-theme="light"] :is(.text-brand-amber,.text-amber-200,.text-amber-300,.
       document.getElementById('detail-modal-brand').textContent = prod.brand;
       document.getElementById('detail-modal-brand').classList.toggle('hidden', !prod.brand);
       // Línea chica: qué significa la etiqueta + dónde está en la tienda (la categoría real del producto).
-      { const noteTxt = isIphoneProd(prod) ? (isUsedIphone(prod) ? 'Equipo usado, revisado antes de entregarlo' : 'Equipo nuevo y sellado') : isOrig ? 'Producto original de la marca' : 'Seleccionado por PlugShop';
+      { const noteTxt = isIphoneProd(prod) ? (isUsedIphone(prod) ? 'Equipo usado, revisado antes de entregarlo' : 'Equipo nuevo y sellado') : isOrig ? ('Producto original · ' + ((prod.warrantyBy || 'marca') === 'marca' ? 'Garantía oficial de la marca' : 'Garantía directa de PlugShop')) : 'Seleccionado por PlugShop';
         const plainCat = id => { const c = CATEGORIES.find(x => x.id === id); return c ? c.name : (id || ''); }; // sin ícono: es una línea discreta
         const catTxt = [plainCat(prod.category), prod.subcategory ? plainCat(prod.subcategory) : ''].filter(Boolean).join(' › ');
         document.getElementById('detail-modal-note').textContent = noteTxt;
